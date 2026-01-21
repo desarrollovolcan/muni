@@ -1,4 +1,50 @@
-<?php include('partials/html.php'); ?>
+<?php
+
+declare(strict_types=1);
+
+require __DIR__ . '/app/bootstrap.php';
+require __DIR__ . '/app/models/User.php';
+
+if (isset($_SESSION['user'])) {
+    redirect('index.php');
+}
+
+$errors = [];
+$rut = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $rut = trim((string) ($_POST['rut'] ?? ''));
+    $password = (string) ($_POST['password'] ?? '');
+
+    if (!verify_csrf($_POST['csrf_token'] ?? null)) {
+        $errors[] = 'Tu sesión expiró. Vuelve a intentar.';
+    }
+
+    if ($rut === '' || $password === '') {
+        $errors[] = 'Debes ingresar RUT y contraseña.';
+    }
+
+    if (!$errors) {
+        $user = User::findByRut(db(), $rut);
+        if (!$user || !password_verify($password, $user['password_hash'])) {
+            $errors[] = 'Credenciales inválidas.';
+        } else {
+            session_regenerate_id(true);
+            $_SESSION['user'] = [
+                'id' => $user['id'],
+                'nombre' => $user['nombre'],
+                'apellido' => $user['apellido'],
+                'rut' => $user['rut'],
+                'cargo' => $user['cargo'],
+                'rol' => $user['rol'],
+            ];
+            redirect('index.php');
+        }
+    }
+}
+
+include('partials/html.php');
+?>
 
 <head>
     <?php $title = "Sign In"; include('partials/title-meta.php'); ?>
@@ -23,38 +69,50 @@
                             <a href="index.php" class="logo-light">
                                 <img src="assets/images/logo.png" alt="logo" height="28">
                             </a>
-                            <p class="text-muted w-lg-75 mt-3 mx-auto">Let’s get you signed in. Enter your email and password to continue.</p>
+                            <p class="text-muted w-lg-75 mt-3 mx-auto">Ingresa con tu RUT y contraseña para continuar.</p>
                         </div>
-                        <form action="index.php">
+
+                        <?php if ($errors) { ?>
+                            <div class="alert alert-danger" role="alert">
+                                <ul class="mb-0">
+                                    <?php foreach ($errors as $error) { ?>
+                                        <li><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></li>
+                                    <?php } ?>
+                                </ul>
+                            </div>
+                        <?php } ?>
+
+                        <form action="auth-sign-in.php" method="post">
+                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
                             <div class="mb-3">
-                                <label for="userEmail" class="form-label">Email address <span class="text-danger">*</span></label>
+                                <label for="userRut" class="form-label">RUT <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <input type="email" class="form-control" id="userEmail" placeholder="you@example.com" required>
+                                    <input type="text" class="form-control" id="userRut" name="rut" placeholder="12.345.678-9" value="<?php echo htmlspecialchars($rut, ENT_QUOTES, 'UTF-8'); ?>" required>
                                 </div>
                             </div>
     
                             <div class="mb-3">
-                                <label for="userPassword" class="form-label">Password <span class="text-danger">*</span></label>
+                                <label for="userPassword" class="form-label">Contraseña <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <input type="password" class="form-control" id="userPassword" placeholder="••••••••" required>
+                                    <input type="password" class="form-control" id="userPassword" name="password" placeholder="••••••••" required>
                                 </div>
                             </div>
     
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <div class="form-check">
                                     <input class="form-check-input form-check-input-light fs-14" type="checkbox" checked id="rememberMe">
-                                    <label class="form-check-label" for="rememberMe">Keep me signed in</label>
+                                    <label class="form-check-label" for="rememberMe">Mantener sesión</label>
                                 </div>
                                 <a href="auth-reset-pass.php" class="text-decoration-underline link-offset-3 text-muted">Forgot Password?</a>
                             </div>
     
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-primary fw-semibold py-2">Sign In</button>
+                                <button type="submit" class="btn btn-primary fw-semibold py-2">Ingresar</button>
                             </div>
                         </form>
     
                         <p class="text-muted text-center mt-4 mb-0">
-                            New here? <a href="auth-sign-up.php" class="text-decoration-underline link-offset-3 fw-semibold">Create an account</a>
+                            ¿Nuevo usuario? <a href="auth-sign-up.php" class="text-decoration-underline link-offset-3 fw-semibold">Crear cuenta</a>
                         </p>
                     </div>
     
