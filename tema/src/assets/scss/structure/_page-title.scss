@@ -1,0 +1,17 @@
+// 
+// page-title.scss
+//
+
+.page-title-box {
+    padding: 16px 24px;
+    margin: 0 -24px 24px -24px;
+}
+
+html[data-layout="topnav"] {
+    .page-title-box {
+        padding: 24px 0;
+        background: transparent;
+        box-shadow: none;
+        margin: 0 !important;
+    }
+}

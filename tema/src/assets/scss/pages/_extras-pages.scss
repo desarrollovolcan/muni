@@ -1,0 +1,143 @@
+//  Members list
+
+.member-card {
+  .member-thumb {
+    position: relative;
+  }
+  .member-star {
+    position: absolute;
+    top: 6px;
+    right: 3px;
+    font-size: 16px;
+    background-color: $card-bg;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    line-height: 20px;
+    text-align: center;
+  }
+}
+
+.member-card-alt {
+  .member-thumb {
+    position: relative;
+  }
+
+  .member-card-alt-info {
+    margin-left: 140px;
+  }
+  .member-star {
+    position: absolute;
+    top: 12px;
+    right: 10px;
+    font-size: 16px;
+    background-color: $white;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    line-height: 20px;
+    text-align: center;
+  }
+}
+
+.social-links li a {
+  border-radius: 50%;
+  color: rgba(var(--#{$prefix}body-color-rgb),0.8);
+  display: inline-block;
+  height: 30px;
+  line-height: 27px;
+  border: 2px solid rgba(var(--#{$prefix}body-color-rgb),0.5);
+  text-align: center;
+  width: 30px;
+
+  &:hover {
+    color: var(--#{$prefix}body-color);
+    border: 2px solid var(--#{$prefix}body-color);
+  }
+}
+
+// pricing
+
+
+.pricing-column{
+  .ribbon-pricing {
+    width: 160px;
+    margin: -15px auto -10px;
+    padding-bottom: 2px;
+    line-height: 22px;
+    text-align: center;
+    z-index: 1;
+    position: relative;
+  }
+  .plan-title {
+    // font-family: $font-family-secondary;
+    letter-spacing: 1px;
+  }
+  .plan-price {
+    font-size: 48px;
+    // font-family: $font-family-secondary;
+  }
+  .plan-duration {
+    font-size: 15px;
+    color: rgba($white,0.7);
+  }
+
+  .plan-stats {
+    padding: 30px 20px 15px;
+    li {
+      margin-bottom: 15px;
+      line-height: 24px;
+    }
+  }
+}
+
+//  Search result
+
+
+.search-result-box {
+  .tab-content {
+    padding: 30px 30px 10px 30px;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    -moz-box-shadow: none;
+  }
+  .search-item {
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--#{$prefix}light);
+    margin-bottom: 20px;
+  }
+}
+
+// coming soon
+
+
+.svg-rocket {
+  height: 180px;
+}
+.rocket-clouds__bubble,.rocket-clouds__cloud,.rocket-rocket,.rocket-inner__rocket-and-lines {
+  fill: $white;
+}
+
+// coomin-soon
+
+.counter-number {
+  font-size: 48px;
+  // font-family: $font-family-secondary;
+  font-weight: $font-weight-bold;
+  color: $white;
+  span {
+      font-size: 16px;
+      font-weight: $font-weight-normal;
+      display: block;
+      text-transform: uppercase;
+      padding-top: 10px;
+      color: $white;
+  }
+}
+
+.coming-box {
+  float: left;
+  width: 25%;
+}
+
+

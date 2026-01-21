@@ -1,0 +1,31 @@
+//
+// dropzone.scss
+//
+
+@font-face {
+    font-family: 'dropify';
+    src: url("../fonts/dropify.eot");
+    src: url("../fonts/dropify.eot#iefix") format("embedded-opentype"), url("../fonts/dropify.woff") format("woff"), url("../fonts/dropify.ttf") format("truetype"), url("../fonts/dropify.svg#dropify") format("svg");
+    font-weight: normal;
+    font-style: normal;
+}
+
+.dropify-wrapper {
+    border: 2px dashed var(--#{$prefix}border-color);
+    background-color: transparent;
+    border-radius: 6px;
+    color: var(--#{$prefix}dark-bg-subtle);
+    &:hover{
+        background-image: linear-gradient(-45deg, var(--#{$prefix}light) 25%,transparent 25%,transparent 50%,var(--#{$prefix}light) 50%, var(--#{$prefix}light) 75%,transparent 75%,transparent);
+    }
+
+    .dropify-preview{
+        background-color: var(--#{$prefix}light);
+    }
+}
+
+.dropify-message{
+    p{
+        font-size: 15px !important;
+    }
+}

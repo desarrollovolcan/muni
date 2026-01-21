@@ -1,0 +1,218 @@
+//
+// topbar.scss
+//
+
+/* ==================
+Topbar CSS
+===================== */
+
+.app-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: $topbar-bg;
+    min-height: $topbar-height;
+    margin-left: $sidenav-width;
+    transition: $transition-base;
+    border-bottom: 1px solid var(--#{$prefix}border-color);
+    // padding: 0 calc($grid-gutter-width * 0.5);
+
+    .topbar-menu {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+
+        .topbar-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: $topbar-height;
+            padding: 0 6px;
+
+            .topbar-link {
+                z-index: 1;
+                border: none;
+                background-color: transparent;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                color: $topbar-item-color;
+
+                &:hover,
+                &:active,
+                &:focus {
+                    color: $topbar-item-hover-color;
+                }
+            }
+        }
+    }
+
+    ul {
+        list-style-type: none;
+        margin-bottom: 0;
+    }
+
+    .logo {
+        display: none;
+    }
+
+
+    /* Search */
+    .app-search {
+        overflow: hidden;
+        height: $topbar-height;
+        display: table;
+        max-width: 180px;
+        margin-right: 20px;
+
+        .app-search-box {
+            display: table-cell;
+            vertical-align: middle;
+
+            input::-webkit-input-placeholder {
+                font-size: 0.8125rem;
+                color: $topbar-item-color;
+            }
+        }
+
+        .form-control {
+            border: none;
+            height: 36px;
+            padding-left: 20px;
+            padding-right: 0;
+            color: $topbar-item-color;
+            background-color: $topbar-search-bg;
+            box-shadow: none;
+            border-radius: 30px 0 0 30px;
+        }
+
+        .input-group-append {
+            margin-left: 0 !important;
+            z-index: 4;
+        }
+
+        .btn {
+            background-color: $topbar-search-bg;
+            color: $topbar-item-color;
+            border-color: transparent;
+            border-radius: 0 30px 30px 0;
+            box-shadow: none !important;
+            position: relative;
+        }
+    }
+}
+
+
+
+.sidenav-toggle-button {
+    display: flex;
+    position: relative;
+    cursor: pointer;
+    background-color: transparent;
+    border: none;
+    color: $topbar-item-color;
+}
+
+#light-dark-mode {
+    .light-mode {
+        display: flex;
+    }
+
+    .dark-mode {
+        display: none;
+    }
+}
+
+// Topbar light/Dark Mode icon 
+html[data-bs-theme="dark"] {
+    #light-dark-mode {
+        .light-mode {
+            display: none;
+        }
+
+        .dark-mode {
+            display: flex;
+        }
+    }
+}
+
+.nav-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: $topbar-height;
+    transition: none;
+}
+
+
+// Topbar Search
+.topbar-search {
+    width: 230px;
+    padding: calc($input-padding-y * 1.25) $input-padding-x;
+    line-height: $input-line-height;
+    background-color: $topbar-search-bg;
+    @include border-radius($input-border-radius, 0);
+}
+
+// Notification
+.notification-item {
+    background-color: var(--#{$prefix}secondary-bg);
+    position: relative;
+    cursor: pointer;
+
+    .notification-item-close {
+        position: absolute;
+        right: 0;
+        display: none;
+        top: 0;
+        bottom: 0;
+        padding: 15px;
+        background-color: #{$dropdown-link-hover-bg};
+    }
+
+    .notification-badge {
+        height: 22px;
+        width: 22px;
+        text-align: center;
+        color: $white;
+        top: -12px;
+        right: -8px;
+        border: 2px solid $card-bg;
+        line-height: 18px;
+        font-size: 11px;
+    }
+
+    &:hover {
+        .notification-item-close {
+            display: block;
+        }
+    }
+}
+
+@include media-breakpoint-down(md) {
+    .app-topbar {
+        padding: 0 $spacer * 0.5;
+    }
+
+    .logo-topbar {
+        display: block;
+
+        span.logo-lg {
+            display: none;
+        }
+
+        span.logo-sm {
+            display: block;
+        }
+    }
+}
+
+
+.noti-icon-badge {
+    position: absolute;
+    top: -8px;
+    right: 5px;
+    display: inline-block;
+}

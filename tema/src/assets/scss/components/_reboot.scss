@@ -1,0 +1,162 @@
+//
+// reboot.scss
+//
+
+html {
+    position: relative;
+    min-height: 100%;
+    // direction: ltr;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+::selection {
+    color: $primary;
+    background: rgba($primary, 0.15);
+}
+
+button,
+a {
+    outline: none !important;
+}
+
+// Lucide Icon 
+
+[data-lucide] {
+    height: 1em;
+    width: 1em;
+}
+
+// Forms
+
+label {
+    font-weight: $font-weight-medium;
+}
+
+b,
+strong {
+    font-weight: $font-weight-semibold;
+}
+
+// border style
+.border-dashed {
+    --#{$prefix}border-style: dashed;
+}
+
+// Page Head
+@include media-breakpoint-up(md) {
+    .page-title-head {
+        height: 70px;
+    }
+}
+
+@include media-breakpoint-down(md) {
+    .page-title-head {
+        padding: $spacer 0;
+    }
+}
+
+// Custom Link
+.link-reset {
+    color: inherit;
+    transition: $transition-base;
+
+    &:hover {
+        color: var(--#{$prefix}primary);
+    }
+}
+
+
+.page-container {
+    @extend .container-fluid;
+}
+
+// .page-container {
+//     @extend .container;  
+// }
+
+// .page-container {
+//     max-width: 90%;
+// }
+
+.shadow-text {
+    text-shadow: rgba(255, 255, 255, .3) 5px 1px, rgba(255, 255, 255, .2) 12px 3px, rgba(255, 255, 255, .1) 6px 4px !important;
+}
+
+
+.card-pricing {
+    box-shadow: $box-shadow-sm;
+
+    .card-pricing-features {
+        li {
+            padding: 15px;
+        }
+    }
+
+    .card-price {
+        font-size: 48px;
+        font-weight: 300;
+    }
+
+    &.active {
+        margin: 0 -24px;
+        box-shadow: $box-shadow;
+    }
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+
+.widget-box-three .bg-icon {
+    border: 1px dashed var(--#{$prefix}border-color);
+    background-color: var(--#{$prefix}light);
+    line-height: 68px;
+    text-align: center;
+}
+
+.user-position {
+    position: absolute;
+    top: 0;
+    border-left: 1px solid var(--#{$prefix}border-color);
+    bottom: 0;
+    width: 44px;
+    font-size: 16px;
+    text-align: center;
+    right: 0;
+    left: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row
+}
+
+.user-position span {
+    -webkit-transform: rotate(90deg);
+    transform: rotate(90deg)
+}
+
+
+
+.width-xs {
+    min-width: 80px
+}
+
+.width-sm {
+    min-width: 95px
+}
+
+.width-md {
+    min-width: 110px
+}
+
+.width-lg {
+    min-width: 140px
+}
+
+.width-xl {
+    min-width: 160px
+}

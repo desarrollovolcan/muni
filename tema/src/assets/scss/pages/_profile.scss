@@ -1,0 +1,108 @@
+/* =============
+   Profile
+============= */
+
+.profile-bg-picture {
+  position: relative;
+  min-height: 300px;
+  margin: 0px -20px 0px -20px;
+  background-position: center;
+  background-size: cover;
+}
+
+.profile-bg-picture>.picture-bg-overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgeG1sbnM9Imh0dâ€¦0iMSIgaGVpZ2h0PSIxIiBmaWxsPSJ1cmwoI2xlc3NoYXQtZ2VuZXJhdGVkKSIgLz48L3N2Zz4=);
+  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0, rgba(0, 0, 0, .4) 100%);
+}
+
+.profile-user-box {
+  background-color: $card-bg;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: $box-shadow;
+  margin-top: -65px;
+  position: relative;
+  border-radius: 5px;
+}
+
+.widget-box-four {
+  .widget-box-four-chart {
+    position: absolute;
+    right: 20px;
+    bottom: 25px;
+  }
+}
+
+
+.inbox-widget .inbox-item {
+  border-bottom: 1px solid rgba(226, 226, 226, .9);
+  overflow: hidden;
+  padding: 10px 0;
+  position: relative
+}
+
+.inbox-widget .inbox-item .inbox-item-img {
+  display: block;
+  float: left;
+  margin-right: 15px;
+  width: 40px
+}
+
+.inbox-widget .inbox-item img {
+  width: 40px
+}
+
+.inbox-widget .inbox-item .inbox-item-author {
+  color: #313a46;
+  display: block;
+  margin: 0;
+  font-family: Montserrat, sans-serif
+}
+
+.inbox-widget .inbox-item .inbox-item-text {
+  display: block;
+  font-size: 12px;
+  margin: 0;
+  color: #8c9396
+}
+
+.inbox-widget .inbox-item .inbox-item-date {
+  font-size: 11px;
+  position: absolute;
+  right: 7px;
+  top: 2px
+}
+
+
+.ribbon-box {}
+
+.ribbon-box {
+  position: relative;
+
+  .ribbon {
+    position: relative;
+    float: left;
+    clear: both;
+    padding: 5px 12px 5px 12px;
+    margin-left: -30px;
+    margin-bottom: 15px;
+    font-family: Montserrat, sans-serif;
+    -webkit-box-shadow: 2px 5px 10px rgba(0, 0, 0, .12);
+    box-shadow: 2px 5px 10px rgba(0, 0, 0, .12);
+    color: #fff;
+    font-size: 13px
+  }
+}
+
+.ribbon-box {
+  .ribbon-primary {
+    &::before {
+      border-color: #43b39c transparent transparent
+    }
+  }
+}

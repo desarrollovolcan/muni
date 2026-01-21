@@ -1,0 +1,19 @@
+//
+// lightbox.scss
+//
+
+.lb-data .lb-close {
+    background: url("../images/plugins/close.png");
+}
+
+.lb-nav a.lb-next {
+    background: url("../images/plugins/next.png") right 48% no-repeat;
+}
+
+.lb-nav a.lb-prev {
+    background: url("../images/plugins/prev.png") left 48% no-repeat;
+}
+
+.lb-cancel {
+    background: url("../images/plugins/loading.gif"); 
+  }

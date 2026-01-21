@@ -1,0 +1,82 @@
+//
+// footables.scss
+//
+
+@font-face {
+    font-family: 'footable';
+    src: url('../fonts/footable.eot');
+    src: url('../fonts/footable.eot?#iefix') format('embedded-opentype'), url('../fonts/footable.woff') format('woff'), url('../fonts/footable.ttf') format('truetype'), url('../fonts/footable.svg#footable') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+    @font-face {
+        font-family: 'footable';
+        src: url('../fonts/footable.svg#footable') format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+}
+
+.footable-odd {
+    background-color: transparent;
+}
+
+.footable-detail-show {
+    background-color: var(--#{$prefix}light);
+    
+}
+
+.footable-row-detail {
+    background-color: $card-bg;
+}
+
+.footable-row-detail-name{
+    font-weight: $font-weight-semibold;
+}
+
+.footable-pagination {
+    li {
+        margin-left: 5px;
+        float: left;
+        a {
+            position: relative;
+            display: block;
+            padding: .5rem .75rem;
+            margin-left: -1px;
+            line-height: 1.25;
+            color: var(--#{$prefix}dark);
+            background-color: $card-bg;
+            border: 1px solid $pagination-border-color;
+            border-radius: 2px;
+        }
+    }
+    li.active {
+        a {
+            color: $white;
+            background-color: $primary;
+            border-color: $primary;
+        }
+    }
+}
+
+.footable{
+    >thead{
+        >tr>th>span{
+            &.footable-sort-indicator {
+                float: right;
+            }
+        }
+    }
+    .breakpoint{
+        >tbody{
+            >tr>td>span{
+                &.footable-toggle{
+                    padding-right: 14px;
+                    color: $body-color;
+                }
+            }
+        }
+    }
+}

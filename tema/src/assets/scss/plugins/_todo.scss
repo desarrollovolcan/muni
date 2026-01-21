@@ -1,0 +1,15 @@
+/* =================
+   Todoapp
+==================== */
+
+.todo-list {
+  .checkbox input[type="checkbox"]:checked + label {
+    text-decoration: line-through;
+  }
+  li {
+    padding: 0;
+    border: none;
+    margin-top: 10px;
+    border-bottom: 1px solid transparent;
+  }
+}

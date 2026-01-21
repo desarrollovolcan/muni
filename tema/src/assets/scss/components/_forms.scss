@@ -1,0 +1,297 @@
+//
+// forms.scss
+//
+
+// Form elements (Color and Range)
+
+input.form-control[type="color"],
+input.form-control[type="range"] {
+    min-height: 39px;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+
+
+
+// Custom select
+
+.custom-select.is-invalid,
+.form-control.is-invalid,
+.custom-select:invalid,
+.form-control:invalid,
+.custom-select.is-valid,
+.form-control.is-valid,
+.custom-select:valid,
+.form-control:valid {
+    &:focus {
+        box-shadow: none !important;
+    }
+}
+
+select.form-control {
+    &:not([size]):not([multiple]) {
+        height: $input-height;
+    }
+}
+
+select.form-control-sm {
+    &:not([size]):not([multiple]) {
+        height: $input-height-sm;
+    }
+}
+
+// Show/Hide Password
+.password-eye {
+    cursor: pointer;
+
+    &:before {
+        font-family: tabler-icons;
+        content: "\ea9a";
+        font-style: normal;
+        font-weight: 400;
+        font-variant: normal;
+        vertical-align: middle;
+        line-height: 1.2;
+        font-size: 16px;
+    }
+}
+
+.show-password {
+    .password-eye {
+        &:before {
+            content: "\F06D1";
+        }
+    }
+}
+
+//
+// custom-forms.scss
+//
+
+@each $state in map-keys($theme-colors) {
+
+    .form-checkbox-#{$state},
+    .form-radio-#{$state} {
+        .form-check-input {
+            &:checked {
+                background-color: var(--#{$prefix}#{$state});
+                border-color: var(--#{$prefix}#{$state});
+            }
+        }
+    }
+}
+
+
+// card radio
+.card-radio {
+    padding: 0;
+
+    .form-check-label {
+        background-color: $card-bg;
+        border: 1px solid var(--#{$prefix}border-color);
+        border-radius: $border-radius;
+        padding: 1rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: block;
+        position: relative;
+        padding-right: 32px;
+
+        &:hover {
+            cursor: pointer;
+        }
+    }
+
+    .form-check-input {
+        display: none;
+
+        &:checked+.form-check-label {
+            &:before {
+                content: "\f704";
+                font-family: tabler-icons;
+                position: absolute;
+                bottom: 2px;
+                right: 6px;
+                font-size: 16px;
+                color: var(--#{$prefix}primary);
+            }
+        }
+    }
+
+    &.dark {
+        .form-check-input {
+            &:checked+.form-check-label {
+                &:before {
+                    color: $white;
+                }
+            }
+        }
+    }
+}
+
+
+.label-info {
+    background-color: $primary !important;
+    display: inline-block;
+    font-size: 11px;
+    margin: 3px 1px;
+    padding: 0 5px;
+    border-radius: 3px;
+    font-weight: 500;
+}
+
+
+
+
+//
+// multi-select.scss
+//
+
+.ms-container {
+    background: transparent url('/src/assets/images/plugins/multiple-arrow.png') no-repeat 50% 50%;
+    width: auto;
+    max-width: 370px;
+
+    .ms-list {
+        box-shadow: none;
+        border: $input-border-width solid $input-border-color;
+
+        &.ms-focus {
+            box-shadow: none;
+            border: $input-border-width solid $input-focus-border-color;
+        }
+    }
+
+    .ms-selectable {
+        background-color: $input-bg;
+
+        li {
+            &.ms-elem-selectable {
+                border: none;
+                padding: 5px 10px !important;
+                color: var(--#{$prefix}light-text-emphasis);
+            }
+
+            &.ms-hover {
+                background-color: $primary;
+                color: $white;
+            }
+        }
+    }
+
+    .ms-selection {
+        background-color: $input-bg;
+
+        li {
+            &.ms-elem-selection {
+                border: none;
+                padding: 5px 10px;
+                color: var(--#{$prefix}light-text-emphasis);
+            }
+
+            &.ms-hover {
+                background-color: $primary;
+                color: $white;
+            }
+        }
+
+    }
+}
+
+.search-input {
+    margin-bottom: 10px;
+}
+
+.ms-selectable {
+    box-shadow: none;
+    outline: none !important;
+}
+
+.ms-optgroup-label {
+    font-weight: $font-weight-medium;
+    // font-family: $font-family-secondary;
+    color: var(--#{$prefix}dark) !important;
+    font-size: 13px;
+}
+
+
+
+
+
+//
+// autocomplete.scss
+//
+
+.autocomplete-suggestions {
+    border: 1px solid var(--#{$prefix}light);
+    background: var(--#{$prefix}light);
+    cursor: default;
+    overflow: auto;
+    max-height: 200px !important;
+    box-shadow: $box-shadow;
+
+    strong {
+        font-weight: $font-weight-semibold;
+        color: var(--#{$prefix}dark);
+    }
+}
+
+.autocomplete-suggestion {
+    padding: 5px 10px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.autocomplete-no-suggestion {
+    padding: 5px;
+}
+
+.autocomplete-selected {
+    background: var(--#{$prefix}light);
+    cursor: pointer;
+}
+
+
+.autocomplete-group {
+    padding: 5px;
+    font-weight: $font-weight-medium;
+
+    //   font-family: $font-family-secondary;
+    strong {
+        font-weight: $font-weight-semibold;
+        font-size: 16px;
+        color: var(--#{$prefix}dark);
+        display: block;
+    }
+}
+
+
+/* =============
+   Form validation
+============= */
+
+.parsley-error {
+    border-color: $danger !important;
+}
+
+.parsley-errors-list {
+    margin: 0;
+    padding: 0;
+
+    >li {
+        font-size: 12px;
+        list-style: none;
+        color: $danger;
+        margin-top: 5px;
+    }
+}
+
+.bootstrap-select:not([class*=col-]):not([class*=form-control]):not(.input-group-btn) {
+    width: 100% !important;
+}

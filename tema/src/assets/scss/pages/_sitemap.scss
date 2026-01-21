@@ -1,0 +1,71 @@
+/* =============
+   Sitemaps
+============= */
+
+.sitemap>li>ul {
+    margin-top: 1rem;
+    padding-left: 0;
+}
+
+ul.sitemap {
+    list-style: none;
+    padding-left: 0;
+
+    li {
+        line-height: 1.5rem;
+        vertical-align: top;
+        list-style: none;
+        position: relative;
+
+        a {
+            text-decoration: none;
+            color: var(--#{$prefix}light-text-emphasis);
+            display: inline-block;
+
+            &:hover {
+                color: $primary;
+            }
+        }
+    }
+
+
+    ul {
+        margin-left: 1rem;
+        margin-bottom: 1rem;
+        padding-top: 10px;
+        padding-left: 20px;
+
+        li {
+            position: relative;
+
+            &::before {
+                content: "";
+                display: inline-block;
+                width: 1rem;
+                height: 100%;
+                border-left: 1px solid var(--#{$prefix}dark-bg-subtle);
+                position: absolute;
+            }
+
+            &::before {
+                content: "";
+                display: inline-block;
+                width: 1rem;
+                height: 1.5rem;
+                border-bottom: 1px solid var(--#{$prefix}dark-bg-subtle);
+                position: absolute;
+                top: -0.75rem;
+            }
+
+            a {
+                margin-left: 1.5rem;
+            }
+        }
+    }
+}
+
+ul.sitemap-icon {
+    ul li a {
+        margin-left: 1.5rem;
+    }
+}
