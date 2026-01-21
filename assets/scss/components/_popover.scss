@@ -1,7 +1,8 @@
 //
-// popover.scss
+// _popover.scss
 //
 
+// Theme Colors
 @each $color,
 $value in $theme-colors {
     .popover-#{$color} {

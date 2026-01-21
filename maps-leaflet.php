@@ -1,152 +1,140 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php include('partials/html.php'); ?>
 
 <head>
-    <?php
-    $title = "Vector Maps";
-    include "partials/title-meta.php" ?>
+    <?php $title = "Leaflet Maps"; include('partials/title-meta.php'); ?>
 
-    <!-- leaflet Css -->
-    <link href="assets/vendor/leaflet/leaflet.css" rel="stylesheet" type="text/css"/>
+    <!-- leaflet CSS -->
+    <link href="assets/plugins/leaflet/leaflet.css" rel="stylesheet" type="text/css">
 
-    <?php include 'partials/head-css.php' ?>
+    <?php include('partials/head-css.php'); ?>
 </head>
 
 <body>
-<!-- Begin page -->
-<div class="wrapper">
+    <!-- Begin page -->
+    <div class="wrapper">
 
-    <?php include 'partials/sidenav.php' ?>
+        <?php include('partials/menu.php'); ?>
 
-    <?php include 'partials/topbar.php' ?>
+        <!-- ============================================================== -->
+        <!-- Start Main Content -->
+        <!-- ============================================================== -->
 
-    <!-- ============================================================== -->
-    <!-- Start Page Content here -->
-    <!-- ============================================================== -->
+        <div class="content-page">
 
-    <div class="page-content">
+            <div class="container-fluid">
 
-        <div class="page-container">
+                <?php $subtitle = "Maps"; $title = "Leaflet"; include('partials/page-title.php'); ?>
 
-            <?php
-            $subtitle = "Maps";
-            $title = "Vector Maps";
-            include "partials/page-title.php" ?>
-
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header border-bottom border-dashed d-flex align-items-center">
-                            <h4 class="header-title">Basic Map</h4>
+                <div class="row">
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header d-block">
+                                <h5 class="mb-1 card-title">Basic Map</h5>
+                                <p class="text-muted mb-0">A simple Leaflet map centered with default tile layer and controls.</p>
+                            </div>
+                            <div class="card-body">
+                                <div id="basicMap" style="height: 300px"></div>
+                            </div>
                         </div>
+                    </div>
 
-                        <div class="card-body">
-                            <div class="leaflet-map" id="basicMap"></div>
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header d-block">
+                                <h5 class="mb-1 card-title">Marker, Circle & Polygon</h5>
+                                <p class="text-muted mb-0">Shows how to add interactive markers, circles, and polygons on the map.</p>
+                            </div>
+                            <div class="card-body">
+                                <div id="shapeMap" style="height: 300px"></div>
+                            </div>
                         </div>
-                    </div> <!-- end card-->
+                    </div>
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header d-block">
+                                <h5 class="mb-1 card-title">Draggable Marker with Popup</h5>
+                                <p class="text-muted mb-0">Allows dragging a marker with a popup that displays dynamic content.</p>
+                            </div>
+                            <div class="card-body">
+                                <div id="dragMap" style="height: 300px"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header d-block">
+                                <h5 class="mb-1 card-title">User Location</h5>
+                                <p class="text-muted mb-0">Uses the browser's geolocation API to show the user's current location.</p>
+                            </div>
+                            <div class="card-body">
+                                <div id="userLocation" style="height: 300px"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header d-block">
+                                <h5 class="mb-1 card-title">Custom Icons</h5>
+                                <p class="text-muted mb-0">Demonstrates using custom image icons for Leaflet map markers.</p>
+                            </div>
+                            <div class="card-body">
+                                <div id="customIcons" style="height: 300px"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header d-block">
+                                <h5 class="mb-1 card-title">Layer Control</h5>
+                                <p class="text-muted mb-0">Toggles between multiple map layers or overlays using Leaflet’s layer control.</p>
+                            </div>
+                            <div class="card-body">
+                                <div id="layerControl" style="height: 300px"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header d-block">
+                                <h5 class="mb-1 card-title">Interactive Choropleth Map</h5>
+                                <p class="text-muted mb-0">Displays region-based data using GeoJSON and interactive color scales.</p>
+                            </div>
+                            <div class="card-body">
+                                <div id="geoJson" style="height: 300px"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header border-bottom border-dashed d-flex align-items-center">
-                            <h4 class="header-title">Marker Circle & Polygon</h4>
-                        </div>
-
-                        <div class="card-body">
-                            <div class="leaflet-map" id="shapeMap"></div>
-                        </div>
-                    </div> <!-- end card-->
-                </div>
-
-
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header border-bottom border-dashed d-flex align-items-center">
-                            <h4 class="header-title">Draggable Marker With Popup</h4>
-                        </div>
-
-                        <div class="card-body">
-                            <div class="leaflet-map" id="dragMap"></div>
-                        </div>
-                    </div> <!-- end card-->
-                </div>
-
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header border-bottom border-dashed d-flex align-items-center">
-                            <h4 class="header-title">User Location</h4>
-                        </div>
-
-                        <div class="card-body">
-                            <div class="leaflet-map" id="userLocation"></div>
-                        </div>
-                    </div> <!-- end card-->
-                </div>
-
-
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header border-bottom border-dashed d-flex align-items-center">
-                            <h4 class="header-title">Custom Icons</h4>
-                        </div>
-
-                        <div class="card-body">
-                            <div class="leaflet-map" id="customIcons"></div>
-                        </div>
-                    </div> <!-- end card-->
-                </div>
-
-
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header border-bottom border-dashed d-flex align-items-center">
-                            <h4 class="header-title">Layer Control</h4>
-                        </div>
-
-                        <div class="card-body">
-                            <div class="leaflet-map" id="layerControl"></div>
-                        </div>
-                    </div> <!-- end card-->
-                </div>
-
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header border-bottom border-dashed d-flex align-items-center">
-                            <h4 class="header-title">Interactive Choropleth Map</h4>
-                        </div>
-
-                        <div class="card-body">
-                            <div class="leaflet-map" id="geoJson"></div>
-                        </div>
-                    </div> <!-- end card-->
-                </div>
-
-
+                <!-- end row -->
             </div>
-        </div> <!-- container -->
 
+            <?php include('partials/footer.php'); ?>
 
-        <?php include 'partials/footer.php' ?>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- End of Main Content -->
+        <!-- ============================================================== -->
 
     </div>
+    <!-- END wrapper -->
 
-    <!-- ============================================================== -->
-    <!-- End Page content -->
-    <!-- ============================================================== -->
+    <?php include('partials/customizer.php'); ?>
 
-</div>
-<!-- END wrapper -->
+    <?php include('partials/footer-scripts.php'); ?>
 
-<?php include 'partials/customizer.php' ?>
+    <!-- leaflet plugin -->
+    <script src="assets/plugins/leaflet/leaflet.js"></script>
 
-<?php include 'partials/footer-scripts.php' ?>
-
-<!-- leaflet plugin -->
-<script src="assets/vendor/leaflet/leaflet.js"></script>
-
-<!-- leaflet map -->
-<script src="assets/js/maps/leaflet-data.js"></script>
-<script src="assets/js/pages/maps-leaflet.js"></script>
+    <!-- leaflet map -->
+    <script src="assets/js/maps/leaflet-data.js"></script>
+    <script src="assets/js/pages/maps-leaflet.js"></script>
 
 </body>
 

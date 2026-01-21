@@ -1,237 +1,218 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php include('partials/html.php'); ?>
 
 <head>
-    <?php
-    $title = "Range Slider";
-    include "partials/title-meta.php" ?>
+    <?php $title = "Range Slider"; include('partials/title-meta.php'); ?>
 
-    <!-- nouisliderribute css -->
-    <link rel="stylesheet" href="assets/vendor/nouislider/nouislider.min.css">
+    <!-- noUiSlider Plugin CSS -->
+    <link rel="stylesheet" href="assets/plugins/nouislider/nouislider.min.css">
 
-    <?php include 'partials/head-css.php' ?>
+    <?php include('partials/head-css.php'); ?>
 </head>
 
 <body>
-<!-- Begin page -->
-<div class="wrapper">
+    <!-- Begin page -->
+    <div class="wrapper">
 
-    <?php include 'partials/sidenav.php' ?>
+        <?php include('partials/menu.php'); ?>
 
-    <?php include 'partials/topbar.php' ?>
+        <!-- ============================================================== -->
+        <!-- Start Main Content -->
+        <!-- ============================================================== -->
 
-    <!-- ============================================================== -->
-    <!-- Start Page Content here -->
-    <!-- ============================================================== -->
+        <div class="content-page">
 
-    <div class="page-content">
+            <div class="container-fluid">
+                <?php $subtitle = "Forms"; $title = "Range Slider"; include('partials/page-title.php'); ?>
+                
 
-        <div class="page-container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-block">
+                                <h4 class="card-title mb-1">Examples</h4>
+                                <p class="text-muted mb-0">
+                                    noUiSlider is a lightweight, ARIA-accessible JavaScript range slider with multi-touch and keyboard support. It is fully GPU animated: no reflows, so it is fast; even on older devices. It also fits wonderfully in responsive designs and has no dependencies
+                                </p>
+                            </div>
 
-            <?php
-            $subtitle = "Extended UI";
-            $title = "Range Slider";
-            include "partials/page-title.php" ?>
-
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="card">
-                        <div class="card-header border-bottom border-dashed d-flex align-items-center">
-                            <h4 class="header-title">Basic Range Slider</h4>
-                        </div>
-                        <div class="card-body">
-                            <div id="rangeslider_basic"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-12">
-                    <div class="card">
-                        <div class="card-header border-bottom border-dashed d-flex align-items-center">
-                            <h4 class="header-title">Multi Elements Range</h4>
-                        </div>
-                        <div class="card-body">
-                            <div id="rangeslider_multielement"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-12">
-                    <div class="card">
-                        <div class="card-header border-bottom border-dashed d-flex align-items-center">
-                            <h4 class="header-title">Value Range Slider</h4>
-                        </div>
-                        <div class="card-body">
-                            <div>
-                                <div id="nonlinear"></div>
-                                <div class="d-flex justify-content-between">
-                                    <div class="example-val" id="lower-value"></div>
-                                    <div class="example-val" id="upper-value"></div>
+                            <div class="card-body">
+                                <!-- Basic Range Slider -->
+                                <div class="row g-3">
+                                    <div class="col-lg-4">
+                                        <h5 class="mb-1">Basic Range Slider</h5>
+                                        <p class="text-muted mb-0">A simple single-value slider.</p>
+                                    </div>
+                                    <div class="col-lg-8">
+                                        <div data-slider="default" data-value="150"></div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="col-lg-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 class="header-title mb-0">Color Scheme</h4>
-                        </div><!-- end card header -->
-                        <div class="card-body">
+                                <div class="my-4 border-top border-dashed"></div>
 
-                            <div>
-                                <h5 class="font-14">Primary</h5>
-                                <div id="slider-primary" data-slider-color="primary"></div>
-                            </div>
+                                <!-- Sizes Range Slider -->
+                                <div class="row g-3">
+                                    <div class="col-lg-4">
+                                        <h5 class="mb-1">Sizes</h5>
+                                        <p class="text-muted mb-0">Adjust element size using different slider sizes.</p>
+                                    </div>
+                                    <div class="col-lg-8">
+                                        <div data-slider="default" data-slider-size="sm" data-value="180"></div>
+                                        <div data-slider="default" data-slider-size="lg" data-value="90" class="mt-4"></div>
+                                    </div>
+                                </div>
 
-                            <div class="mt-3">
-                                <h5 class="font-14">Secondary</h5>
-                                <div id="slider-secondary" data-slider-color="secondary"></div>
-                            </div>
+                                <div class="my-4 border-top border-dashed"></div>
 
-                            <div class="mt-3">
-                                <h5 class="font-14">Success</h5>
-                                <div id="slider-success" data-slider-color="success"></div>
-                            </div>
+                                <!-- Style Range Slider -->
+                                <div class="row g-3">
+                                    <div class="col-lg-4">
+                                        <h5 class="mb-1">Line Style</h5>
+                                        <p class="text-muted mb-0">Customize line handle style using sliders.</p>
+                                    </div>
+                                    <div class="col-lg-8">
+                                        <div data-slider="default" data-slider-style="line"></div>
+                                        <div data-slider="default" data-slider-style="line" data-slider-size="sm" data-value="180" class="mt-3"></div>
+                                        <div data-slider="default" data-slider-style="line" data-slider-size="lg" data-value="90" class="mt-4"></div>
+                                    </div>
+                                </div>
 
-                            <div class="mt-3">
-                                <h5 class="font-14">Info</h5>
-                                <div id="slider-info" data-slider-color="info"></div>
-                            </div>
+                                <div class="my-4 border-top border-dashed"></div>
 
-                            <div class="mt-3">
-                                <h5 class="font-14">Warning</h5>
-                                <div id="slider-warning" data-slider-color="warning"></div>
-                            </div>
+                                <!-- Color Scheme Sliders -->
+                                <div class="row g-3">
+                                    <div class="col-lg-4">
+                                        <h5 class="mb-1">Color Scheme Sliders</h5>
+                                        <p class="text-muted mb-0">Sliders styled with theme colors.</p>
+                                    </div>
+                                    <div class="col-lg-8">
+                                        <div data-slider="default" data-slider-color="primary" data-value="240" class="mb-4"></div>
+                                        <div data-slider="default" data-slider-color="secondary" data-value="185" class="mb-4"></div>
+                                        <div data-slider="default" data-slider-color="success" data-value="90" class="mb-4"></div>
+                                        <div data-slider="default" data-slider-color="info" data-slider-style="line" data-value="125" class="mb-4"></div>
+                                        <div data-slider="default" data-slider-color="warning" data-value="155" class="mb-4"></div>
+                                        <div data-slider="default" data-slider-color="danger" data-value="70" class="mb-4"></div>
+                                        <div data-slider="default" data-slider-color="purple" data-value="180" class="mb-4"></div>
+                                        <div data-slider="default" data-slider-color="dark" data-value="77"></div>
+                                    </div>
+                                </div>
 
-                            <div class="mt-3">
-                                <h5 class="font-14">Danger</h5>
-                                <div id="slider-danger" data-slider-color="danger"></div>
-                            </div>
-                        </div>
-                        <!-- end card body -->
-                    </div>
-                    <!-- end card -->
-                </div>
+                                <div class="my-4 border-top border-dashed"></div>
 
-                <div class="col-lg-12">
-                    <div class="card">
-                        <div class="card-header border-bottom border-dashed d-flex align-items-center">
-                            <h4 class="header-title">Locking Sliders Together</h4>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <div class="slider" id="slider1"></div>
-                                <span class="example-val mt-2" id="slider1-span"></span>
+                                <!-- Multi Elements Range -->
+                                <div class="row g-3">
+                                    <div class="col-lg-4">
+                                        <h5 class="mb-1">Multi Elements Range</h5>
+                                        <p class="text-muted mb-0">Dual-handle slider for selecting a range.</p>
+                                    </div>
+                                    <div class="col-lg-8">
+                                        <div id="rangeslider_multielement"></div>
+                                    </div>
+                                </div>
 
-                                <div class="slider" id="slider2"></div>
-                                <span class="example-val mt-2" id="slider2-span"></span>
+                                <div class="my-4 border-top border-dashed"></div>
 
-                                <button id="lockbutton" class="btn btn-primary">Lock</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                                <!-- Value Range Slider -->
+                                <div class="row g-3">
+                                    <div class="col-lg-4">
+                                        <h5 class="mb-1">Value Range Slider (nonlinear)</h5>
+                                        <p class="text-muted mb-0">Shows selected value range below the slider.</p>
+                                    </div>
+                                    <div class="col-lg-8">
+                                        <div id="nonlinear"></div>
+                                        <div class="d-flex justify-content-between mt-2">
+                                            <div class="py-1 fw-semibold" id="lower-value"></div>
+                                            <div class="py-1 fw-semibold" id="upper-value"></div>
+                                        </div>
+                                    </div>
+                                </div>
 
-                <div class="col-lg-12">
-                    <div class="card">
-                        <div class="card-header border-bottom border-dashed d-flex align-items-center">
-                            <h4 class="header-title">Tooltip</h4>
-                        </div>
-                        <div class="card-body">
-                            <div class="slider" id="slider-merging-tooltips"></div>
-                        </div>
-                    </div>
-                </div>
+                                <div class="my-4 border-top border-dashed"></div>
 
-                <div class="col-lg-12">
-                    <div class="card">
-                        <div class="card-header border-bottom border-dashed d-flex align-items-center">
-                            <h4 class="header-title">Soft Limits</h4>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3 pb-5">
-                                <div class="slider" id="soft"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                                <!-- Locking Sliders Together -->
+                                <div class="row g-3">
+                                    <div class="col-lg-4">
+                                        <h5 class="mb-1">Locking Sliders Together</h5>
+                                        <p class="text-muted mb-0">Synchronize two sliders with a toggle lock.</p>
+                                    </div>
+                                    <div class="col-lg-8">
+                                        <div id="slider1" class="slider mb-2"></div>
+                                        <span class="example-val d-block mb-2" id="slider1-span"></span>
+                                        <div id="slider2" class="slider mb-2"></div>
+                                        <span class="example-val d-block mb-2" id="slider2-span"></span>
+                                        <button id="lockbutton" class="btn btn-sm btn-primary"><i class="ti ti-lock me-1"></i> Lock</button>
+                                    </div>
+                                </div>
 
-                <div class="col-lg-4">
-                    <div class="card">
-                        <div class="card-header border-bottom border-dashed d-flex align-items-center">
-                            <h4 class="header-title">Color Picker</h4>
-                        </div>
-                        <div class="card-body">
-                            <div>
-                                <div class="sliders" id="red"></div>
-                                <div class="sliders" id="green"></div>
-                                <div class="sliders" id="blue"></div>
+                                <div class="my-4 border-top border-dashed"></div>
 
-                                <div id="result"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                                <!-- Tooltip Slider -->
+                                <div class="row g-3">
+                                    <div class="col-lg-4">
+                                        <h5 class="mb-1">Tooltip Slider</h5>
+                                        <p class="text-muted mb-0">Displays tooltips with merged slider values.</p>
+                                    </div>
+                                    <div class="col-lg-8">
+                                        <div class="slider mt-4" id="slider-merging-tooltips"></div>
+                                    </div>
+                                </div>
 
-                <div class="col-lg-4">
-                    <div class="card">
-                        <div class="card-header border-bottom border-dashed d-flex align-items-center">
-                            <h4 class="header-title">Vertical Range Slider</h4>
-                        </div>
-                        <div class="card-body">
-                            <div id="slider-vertical" class="mx-auto"></div>
-                        </div>
-                    </div>
-                </div>
+                                <div class="my-4 border-top border-dashed"></div>
 
-                <div class="col-lg-4">
-                    <div class="card">
-                        <div class="card-header border-bottom border-dashed d-flex align-items-center">
-                            <h4 class="header-title">Vertical Range Slider</h4>
-                        </div>
-                        <div class="card-body">
-                            <div id="slider-connect-upper" class="mx-auto"></div>
-                        </div>
-                    </div>
-                </div>
+                                <!-- Soft Limits Slider -->
+                                <div class="row g-3">
+                                    <div class="col-lg-4">
+                                        <h5 class="mb-1">Soft Limits Slider</h5>
+                                        <p class="text-muted mb-0">Allows overflow beyond defined min/max.</p>
+                                    </div>
+                                    <div class="col-lg-8">
+                                        <div class="slider mb-4" id="soft"></div>
+                                    </div>
+                                </div>
 
-                <div class="col-lg-4">
-                    <div class="card">
-                        <div class="card-header border-bottom border-dashed d-flex align-items-center">
-                            <h4 class="header-title">Vertical Range Slider</h4>
-                        </div>
-                        <div class="card-body">
-                            <div id="slider-vertical-tooltip" class="mx-auto"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                                <div class="my-4 border-top border-dashed"></div>
 
-        </div> <!-- container -->
+                                <!-- Vertical Sliders -->
+                                <div class="row g-3">
+                                    <div class="col-lg-4">
+                                        <h5 class="mb-1">Vertical Sliders</h5>
+                                        <p class="text-muted mb-0">Sliders arranged vertically.</p>
+                                    </div>
+                                    <div class="col-lg-8">
+                                        <div class="d-flex gap-5 overflow-hidden p-3">
+                                            <div id="slider-vertical"></div>
+                                            <div id="slider-connect-upper" data-slider-color="warning" class="me-3"></div>
+                                            <div id="slider-vertical-tooltip"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> <!-- end crad body-->
 
-        <?php include 'partials/footer.php' ?>
+                        </div> <!-- end card-->
+                    </div> <!-- end col-->
+                </div> <!-- end row-->
+            </div> <!-- container -->
+
+            <?php include('partials/footer.php'); ?>
+
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- End of Main Content -->
+        <!-- ============================================================== -->
 
     </div>
+    <!-- END wrapper -->
 
-    <!-- ============================================================== -->
-    <!-- End Page content -->
-    <!-- ============================================================== -->
+    <?php include('partials/customizer.php'); ?>
 
-</div>
-<!-- END wrapper -->
+    <?php include('partials/footer-scripts.php'); ?>
 
-<?php include 'partials/customizer.php' ?>
+    <!-- noUiSlider Plugin Js -->
+    <script src="assets/plugins/nouislider/nouislider.min.js"></script>
+    <script src="assets/plugins/wnumb/wNumb.min.js"></script>
 
-<?php include 'partials/footer-scripts.php' ?>
-
-<!-- noUiSlider js -->
-<script src="assets/vendor/nouislider/nouislider.min.js"></script>
-<script src="assets/vendor/wnumb/wNumb.min.js"></script>
-
-<!-- Plugins only -->
-<script src="assets/js/pages/extended-range-slider.js"></script>
+    <!-- noUiSlider Demo Js -->
+    <script src="assets/js/pages/form-range-slider.js"></script>
 
 </body>
 

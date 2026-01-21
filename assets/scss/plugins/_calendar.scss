@@ -2,8 +2,6 @@
 // calendar.scss
 //
 
-
-
 :root {
     --fc-border-color: var(--#{$prefix}border-color);
     --fc-page-bg-color: var(--#{$prefix}secondary-bg);
@@ -78,15 +76,9 @@
             background-color: rgba($primary, 0.1);
 
             .fc-daygrid-day-number {
-                background-color: $primary;
+                background-color: var(--#{$prefix}primary);
                 color: $white;
             }
-        }
-    }
-
-    .fc-daygrid-day {
-        &.fc-day-today {
-            background-color: rgba($primary, 0.1);
         }
     }
 
@@ -140,7 +132,7 @@
 
 .fc {
     th.fc-widget-header {
-        background: var(--#{$prefix}border-color);
+        background: var(--#{$prefix}gray-300);
         line-height: 20px;
         padding: 10px 0;
         text-transform: uppercase;
@@ -160,18 +152,18 @@
     td,
     th,
     thead {
-        border-color: var(--#{$prefix}border-color);
+        border-color: $gray-300;
     }
 
     td.fc-today {
-        background: var(--#{$prefix}light);
+        background: lighten($gray-200, 2%);
     }
 }
 
 .fc-button {
     background: var(--#{$prefix}secondary-bg);
     border-color: var(--#{$prefix}border-color);
-    color: var(--#{$prefix}body-color);
+    color: $gray-700;
     text-transform: capitalize;
     box-shadow: none;
     padding: 6px 12px !important;
@@ -179,18 +171,17 @@
 }
 
 .fc .fc-multimonth-multicol .fc-daygrid-more-link {
-    border: 1px solid $primary;
+    border: 1px solid var(--#{$prefix}primary);
     display: block;
     float: none;
     padding: 1px;
     font-weight: $font-weight-medium;
-    // font-family: $font-family-primary;
 }
 
 .fc-state-down,
 .fc-state-active,
 .fc-state-disabled {
-    background-color: $primary;
+    background-color: var(--#{$prefix}primary);
     color: $white;
     text-shadow: none;
 }
@@ -214,13 +205,10 @@
 }
 
 .fc-event,
-.fc-event-dot {
-    background-color: $primary;
-}
-
+.fc-event-dot,
 .fc-daygrid-dot-event.fc-event-mirror,
 .fc-daygrid-dot-event:hover {
-    background-color: $primary;
+    background-color: var(--#{$prefix}primary);
 }
 
 .fc-event-title,
@@ -251,10 +239,9 @@
     }
 }
 
-
 .fc-day-grid-event.fc-h-event.fc-event.fc-start.fc-end.bg-dark {
     .fc-content {
-        color: var(--#{$prefix}light);
+        color: $light;
     }
 }
 
@@ -267,25 +254,25 @@
 
 .fc-toolbar-chunk {
     .fc-button-group {
-        // box-shadow: $element-shadow;
 
         .fc-button {
-            color: $secondary;
+            color: var(--#{$prefix}secondary);
             background-color: rgba($secondary, 0.15);
             border: none;
-            box-shadow: none;
+            box-shadow: none !important;
 
             &:hover,
             &.active {
                 color: $white;
-                background-color: $secondary;
+                background-color: var(--#{$prefix}secondary);
             }
         }
     }
 
     .fc-today-button {
-        background-color: $secondary !important;
-        border: $secondary;
+        background-color: var(--#{$prefix}secondary) !important;
+        border: var(--#{$prefix}secondary);
+        box-shadow: none !important;
     }
 }
 
@@ -293,8 +280,8 @@
 
     .fc-button-primary:not(:disabled).fc-button-active,
     .fc-button-primary:not(:disabled):active {
-        background-color: $secondary !important;
-        border-color: $secondary !important;
+        background-color: var(--#{$prefix}secondary) !important;
+        border-color: var(--#{$prefix}secondary) !important;
         color: $white !important;
     }
 

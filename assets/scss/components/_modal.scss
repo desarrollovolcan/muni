@@ -1,62 +1,62 @@
-// 
-// modal.scss
 //
-
+// _modal.scss
+//
 
 // Title text within header
 .modal-title {
-    margin-top: 0;
+    color: inherit;
 }
 
-// Full modal
-.modal-full {
-    width: 92%;
+// Modal full width
+.modal-full-width {
+    width: 95%;
     max-width: none;
 }
 
-// Custom animation modal
-.modal-demo {
-    background-color: $card-bg;
-    width: 600px !important;
-    border-radius: 4px;
-    display: none;
-    position: relative;
-    .close {
-        position: absolute;
-        top: 15px;
-        right: 25px;
-        color: var(--#{$prefix}light);
+// Modal Positions
+.modal-top {
+    margin: 0 auto;
+}
+
+.modal-bottom {
+    display: flex;
+    flex-flow: column nowrap;
+    -ms-flex-pack: end;
+    justify-content: flex-end;
+    height: 100%;
+    margin: 0 auto;
+    align-content: center;
+}
+
+// Modal Backdrop
+.modal-backdrop {
+    backdrop-filter: blur(6px);
+}
+
+
+// Modal Animation
+.modal {
+    .modal-dialog {
+        transition: none;
+        transform: scale(0.85);
+        opacity: 0;
+    }
+
+    &.show {
+        .modal-dialog {
+            animation: zoomInModal 0.1s ease-out forwards;
+        }
     }
 }
 
-@media (max-width: 768px) {
-    .modal-demo {
-        width: 96% !important;
+@keyframes zoomInModal {
+    from {
+        transform: scale(0.85);
+        opacity: 0;
     }
-}
 
-.custom-modal-title {
-    padding: 15px 25px 15px 25px;
-    line-height: 22px;
-    font-size: 18px;
-    background-color: $primary;
-    color: $white;
-    text-align: left;
-    margin: 0;
-}
-
-.custom-modal-text {
-    padding: 20px;
-}
-
-.custombox-modal-wrapper {
-    text-align: left;
-}
-
-.custombox-modal-flash,
-.custombox-modal-rotatedown {
-    .close {
-        top: 20px;
-        z-index: 9999;
+    to {
+        transform: scale(1);
+        opacity: 1;
     }
 }

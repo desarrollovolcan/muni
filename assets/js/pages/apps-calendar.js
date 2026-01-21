@@ -1,18 +1,17 @@
 /**
- * Theme: Adminox - Responsive Bootstrap 5 Admin Dashboard
- * Author: Coderthemes
- * Component: Full-Calendar
+ * Template Name: UBold - Admin & Dashboard Template
+ * By (Author): Coderthemes
+ * Module/App (File Name): Apps Calendar
  */
-
 
 class CalendarSchedule {
 
     constructor() {
         this.body = document.body;
-        this.modal = new bootstrap.Modal(document.getElementById('event-modal'), { backdrop: 'static' });
+        this.modal = new bootstrap.Modal(document.getElementById('event-modal'), {backdrop: 'static'});
         this.calendar = document.getElementById('calendar');
         this.formEvent = document.getElementById('forms-event');
-        this.btnNewEvent = document.getElementById('btn-new-event');
+        this.btnNewEvent = document.querySelectorAll('.btn-new-event');
         this.btnDeleteEvent = document.getElementById('btn-delete-event');
         this.btnSaveEvent = document.getElementById('btn-save-event');
         this.modalTitle = document.getElementById('modal-title');
@@ -30,7 +29,11 @@ class CalendarSchedule {
         this.modal.show();
         this.selectedEvent = info.event;
         document.getElementById('event-title').value = this.selectedEvent.title;
-        document.getElementById('event-category').value = (this.selectedEvent.classNames[0]);
+        const categoryInput = document.getElementById('event-category');
+        if (categoryInput) {
+            const {classNames} = this.selectedEvent;
+            categoryInput.value = Array.isArray(classNames) ? classNames.join(' ') : classNames || '';
+        }
     }
 
     onSelect(info) {
@@ -60,53 +63,50 @@ class CalendarSchedule {
             }
         });
 
-        const defaultEvents = [{
-            title: 'Interview - Backend Engineer',
-            start: today,
-            end: today,
-            className: 'bg-primary'
-        },
-        {
-            title: 'Meeting with CT Team',
-            start: new Date(Date.now() + 13000000),
-            end: today,
-            className: 'bg-warning'
-        },
-        {
-            title: 'Meeting with Mr. Reback',
-            start: new Date(Date.now() + 308000000),
-            end: new Date(Date.now() + 338000000),
-            className: 'bg-info'
-        },
-        {
-            title: 'Interview - Frontend Engineer',
-            start: new Date(Date.now() + 60570000),
-            end: new Date(Date.now() + 153000000),
-            className: 'bg-secondary'
-        },
-        {
-            title: 'Phone Screen - Frontend Engineer',
-            start: new Date(Date.now() + 168000000),
-            className: 'bg-success'
-        },
-        {
-            title: 'Buy Design Assets',
-            start: new Date(Date.now() + 330000000),
-            end: new Date(Date.now() + 330800000),
-            className: 'bg-primary',
-        },
-        {
-            title: 'Setup Github Repository',
-            start: new Date(Date.now() + 1008000000),
-            end: new Date(Date.now() + 1108000000),
-            className: 'bg-danger'
-        },
-        {
-            title: 'Meeting with Mr. Shreyu',
-            start: new Date(Date.now() + 2508000000),
-            end: new Date(Date.now() + 2508000000),
-            className: 'bg-dark'
-        }];
+        const defaultEvents = [
+            {
+                title: 'Design Review',
+                start: today,
+                end: today,
+                className: 'bg-primary-subtle text-primary'
+            },
+            {
+                title: 'Marketing Strategy',
+                start: new Date(Date.now() + 16000000),
+                end: new Date(Date.now() + 20000000),
+                className: 'bg-secondary-subtle text-secondary'
+            },
+            {
+                title: 'Sales Demo',
+                start: new Date(Date.now() + 40000000),
+                end: new Date(Date.now() + 80000000),
+                className: 'bg-success-subtle text-success'
+            },
+            {
+                title: 'Deadline Submission',
+                start: new Date(Date.now() + 120000000),
+                end: new Date(Date.now() + 180000000),
+                className: 'bg-danger-subtle text-danger'
+            },
+            {
+                title: 'Training Session',
+                start: new Date(Date.now() + 250000000),
+                end: new Date(Date.now() + 290000000),
+                className: 'bg-info-subtle text-info'
+            },
+            {
+                title: 'Budget Review',
+                start: new Date(Date.now() + 400000000),
+                end: new Date(Date.now() + 450000000),
+                className: 'bg-warning-subtle text-warning'
+            },
+            {
+                title: 'Board Meeting',
+                start: new Date(Date.now() + 600000000),
+                end: new Date(Date.now() + 620000000),
+                className: 'bg-dark-subtle text-dark'
+            }
+        ];
 
         // cal - init
         self.calendarObj = new FullCalendar.Calendar(self.calendar, {
@@ -128,7 +128,7 @@ class CalendarSchedule {
             },
             initialView: 'dayGridMonth',
             handleWindowResize: true,
-            height: window.innerHeight - 200,
+            height: window.innerHeight - 240,
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
@@ -150,10 +150,12 @@ class CalendarSchedule {
         self.calendarObj.render();
 
         // on new event button click
-        self.btnNewEvent.addEventListener('click', function (e) {
-            self.onSelect({
-                date: new Date(),
-                allDay: true
+        self.btnNewEvent.forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                self.onSelect({
+                    date: new Date(),
+                    allDay: true
+                });
             });
         });
 
@@ -195,6 +197,7 @@ class CalendarSchedule {
     }
 
 }
+
 document.addEventListener('DOMContentLoaded', function (e) {
     new CalendarSchedule().init();
 });

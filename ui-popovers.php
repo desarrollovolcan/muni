@@ -1,231 +1,195 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php include('partials/html.php'); ?>
 
 <head>
-    <?php
-    $title = "Popovers";
-    include "partials/title-meta.php" ?>
+    <?php $title = "Popovers"; include('partials/title-meta.php'); ?>
 
-    <?php include 'partials/head-css.php' ?>
+    <?php include('partials/head-css.php'); ?>
 </head>
 
 <body>
-<!-- Begin page -->
-<div class="wrapper">
+    <!-- Begin page -->
+    <div class="wrapper">
 
-    <?php include 'partials/sidenav.php' ?>
+        <?php include('partials/menu.php'); ?>
 
-    <?php include 'partials/topbar.php' ?>
+        <!-- ============================================================== -->
+        <!-- Start Main Content -->
+        <!-- ============================================================== -->
 
-    <!-- ============================================================== -->
-    <!-- Start Page Content here -->
-    <!-- ============================================================== -->
+        <div class="content-page">
 
-    <div class="page-content">
+            <div class="container-fluid">
+                <?php $subtitle = "UI"; $title = "Popovers"; include('partials/page-title.php'); ?> 
 
-        <div class="page-container">
-
-            <?php
-            $subtitle = "Base UI";
-            $title = "Popovers";
-            include "partials/page-title.php" ?>
-
-            <div class="row">
-                <div class="col-xl-6">
-                    <div class="card">
-                        <div class="card-header border-bottom border-dashed d-flex align-items-center">
-                            <h4 class="header-title">Simple Popover</h4>
-                        </div>
-
-                        <div class="card-body">
-                            <p class="text-muted">
-                                Popover is a component which displays a box with a content after a click on an
-                                element - similar to the tooltip but can contain more content.
-                            </p>
-                            <button type="button" class="btn btn-danger" data-bs-toggle="popover"
-                                    data-bs-title="Popover title"
-                                    data-bs-content="And here's some amazing content. It's very engaging. Right?">Click
-                                to toggle popover
-                            </button>
-
-                        </div> <!-- end card-body -->
-                    </div> <!-- end card-->
-
-                    <div class="card">
-                        <div class="card-header border-bottom border-dashed d-flex align-items-center">
-                            <h4 class="header-title">Dismiss on Next Click</h4>
-                        </div>
-
-                        <div class="card-body">
-                            <p class="text-muted">Use the <code>focus</code> trigger to dismiss popovers
-                                on the user’s next click of a different element than the toggle element.</p>
-
-                            <a tabindex="0" class="btn btn-success" role="button" data-bs-toggle="popover"
-                               data-bs-trigger="focus" data-bs-title="Dismissible popover"
-                               data-bs-content="And here's some amazing content. It's very engaging. Right?">Dismissible
-                                popover</a>
-
-                        </div> <!-- end card-body -->
-                    </div> <!-- end card-->
-
-                    <div class="card">
-                        <div class="card-header border-bottom border-dashed d-flex align-items-center">
-                            <h4 class="header-title">Hover</h4>
-                        </div>
-
-                        <div class="card-body">
-                            <p class="text-muted">Use the attribute <code>data-bs-trigger="hover"</code>
-                                to show the popover on hovering the element.</p>
-                            <button type="button" tabindex="0" class="btn btn-dark" data-bs-toggle="popover"
-                                    data-bs-trigger="hover"
-                                    data-bs-content="And here's some amazing content. It's very engaging. Right?"
-                                    title="Ohh Wow !">
-                                Please Hover Me
-                            </button>
-
-                        </div> <!-- end card-body -->
-                    </div> <!-- end card-->
-                </div> <!-- end col -->
-
-                <div class="col-xl-6">
-                    <div class="card">
-                        <div class="card-header border-bottom border-dashed d-flex align-items-center">
-                            <h4 class="header-title">Four Directions</h4>
-                        </div>
-
-                        <div class="card-body">
-                            <p class="text-muted">Four options are available: top, right, bottom, and
-                                left aligned.</p>
-
-                            <div class="d-flex flex-wrap gap-2">
-                                <button type="button" class="btn btn-primary" data-bs-toggle="popover"
-                                        data-bs-container="body" data-bs-placement="top"
-                                        data-bs-content="Vivamus sagittis lacus vel augue laoreet rutrum faucibus.">
-                                    Popover on top
-                                </button>
-
-                                <button type="button" class="btn btn-primary" data-bs-toggle="popover"
-                                        data-bs-container="body" data-bs-placement="bottom"
-                                        data-bs-content="Vivamus sagittis lacus vel augue laoreet rutrum faucibus.">
-                                    Popover on bottom
-                                </button>
-
-                                <button type="button" class="btn btn-primary" data-bs-toggle="popover"
-                                        data-bs-container="body" data-bs-placement="right"
-                                        data-bs-content="Vivamus sagittis lacus vel augue laoreet rutrum faucibus.">
-                                    Popover on right
-                                </button>
-
-                                <button type="button" class="btn btn-primary" data-bs-toggle="popover"
-                                        data-bs-container="body" data-bs-placement="left"
-                                        data-bs-content="Vivamus sagittis lacus vel augue laoreet rutrum faucibus."
-                                        title="Popover title">
-                                    Popover on left
-                                </button>
+                <div class="row">
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">Simple Popover</h4>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
                             </div>
 
-                        </div> <!-- end card-body -->
-                    </div> <!-- end card-->
-
-                    <div class="card">
-                        <div class="card-header border-bottom border-dashed d-flex align-items-center">
-                            <h4 class="header-title">Custom Popovers </h4>
-                        </div>
-
-                        <div class="card-body">
-                            <p class="text-muted">You can customize the appearance of popovers using CSS variables. We
-                                set a custom class with
-                                <code>data-bs-custom-class="popover-primary"</code> to scope our custom appearance and
-                                use it to override some of the
-                                local CSS variables.
-                            </p>
-                            <div class="d-flex flex-wrap gap-2">
-                                <button type="button" class="btn btn-primary" data-bs-toggle="popover"
-                                        data-bs-placement="right" data-bs-custom-class="popover-primary"
-                                        data-bs-title="Primary popover"
-                                        data-bs-content="This popover is themed via CSS variables.">
-                                    Primary popover
+                            <div class="card-body">
+                                <button type="button" class="btn btn-info" data-bs-toggle="popover" title="Need Help?" data-bs-content="Click here to get support from our team. We're here 24/7 to assist you.">
+                                    Get Support Info
                                 </button>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+                    </div>
 
-                                <button type="button" class="btn btn-success" data-bs-toggle="popover"
-                                        data-bs-placement="right" data-bs-custom-class="popover-success"
-                                        data-bs-title="Success popover"
-                                        data-bs-content="This popover is themed via CSS variables.">
-                                    Success popover
-                                </button>
-
-                                <button type="button" class="btn btn-danger" data-bs-toggle="popover"
-                                        data-bs-placement="right" data-bs-custom-class="popover-danger"
-                                        data-bs-title="Danger popover"
-                                        data-bs-content="This popover is themed via CSS variables.">
-                                    Danger popover
-                                </button>
-
-                                <button type="button" class="btn btn-info" data-bs-toggle="popover"
-                                        data-bs-placement="right" data-bs-custom-class="popover-info"
-                                        data-bs-title="Info popover"
-                                        data-bs-content="This popover is themed via CSS variables.">
-                                    Info popover
-                                </button>
-
-                                <button type="button" class="btn btn-dark" data-bs-toggle="popover"
-                                        data-bs-placement="right" data-bs-custom-class="popover-dark"
-                                        data-bs-title="Info popover"
-                                        data-bs-content="This popover is themed via CSS variables.">
-                                    Dark popover
-                                </button>
-
-                                <button type="button" class="btn btn-secondary" data-bs-toggle="popover"
-                                        data-bs-placement="right" data-bs-custom-class="popover-secondary"
-                                        data-bs-title="Info popover"
-                                        data-bs-content="This popover is themed via CSS variables.">
-                                    Secondary popover
-                                </button>
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">Dismiss on Next Click</h4>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
                             </div>
 
-                        </div> <!-- end card-body -->
-                    </div> <!-- end card-->
+                            <div class="card-body">
+                                <button type="button" tabindex="0" class="btn btn-primary" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-content="Get quick tips and tricks to improve your workflow instantly." title="Quick Tips">
+                                    Show Tips
+                                </button>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+                    </div>
 
-                    <div class="card">
-                        <div class="card-header border-bottom border-dashed d-flex align-items-center">
-                            <h4 class="header-title">Disabled Elements</h4>
-                        </div>
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">Hover</h4>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
+                            </div>
 
-                        <div class="card-body">
-                            <p class="text-muted">Elements with the <code>disabled</code> attribute
-                                aren’t interactive, meaning users cannot hover or click them to trigger a
-                                popover (or tooltip). As a workaround, you’ll want to trigger the popover from a
-                                wrapper <code>&lt;div&gt;</code> or <code>&lt;span&gt;</code> and override the
-                                <code>pointer-events</code> on the disabled element.
-                            </p>
-                            <span class="d-inline-block" data-bs-toggle="popover" data-bs-content="Disabled popover"
-                                  data-bs-container="#disabled-popover-preview">
-                                    <button class="btn btn-primary" style="pointer-events: none;" type="button"
-                                            disabled>Disabled button</button>
+                            <div class="card-body">
+                                <button type="button" tabindex="0" class="btn btn-dark" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-content="Discover features you didn’t know existed. Hover to explore more!" title="Exciting Features!">
+                                    Please Hover Me
+                                </button>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+                    </div> <!-- end col -->
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">Four Directions</h4>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <div class="d-flex flex-wrap gap-2">
+                                    <!-- Popover on top -->
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="popover" data-bs-placement="top" title="Top Popover" data-bs-content="This popover appears above the button. Great for tips or info.">
+                                        Popover on top
+                                    </button>
+
+                                    <!-- Popover on bottom -->
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="popover" data-bs-placement="bottom" title="Bottom Popover" data-bs-content="This popover shows below. Perfect for additional details.">
+                                        Popover on bottom
+                                    </button>
+
+                                    <!-- Popover on right -->
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="popover" data-bs-placement="right" title="Right Popover" data-bs-content="Slide in from the right to provide quick insights.">
+                                        Popover on right
+                                    </button>
+
+                                    <!-- Popover on left -->
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="popover" data-bs-placement="left" title="Left Popover" data-bs-content="Appears on the left side. Great for tooltips or notes.">
+                                        Popover on left
+                                    </button>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+                    </div>
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">Custom Popovers </h4>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <div class="d-flex flex-wrap gap-2">
+                                    <!-- Primary Popover -->
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="popover" data-bs-placement="right" data-bs-custom-class="popover-primary" data-bs-title="Primary Popover" data-bs-content="This is a primary-themed popover styled using CSS variables.">
+                                        Primary Popover
+                                    </button>
+
+                                    <!-- Success Popover -->
+                                    <button type="button" class="btn btn-success" data-bs-toggle="popover" data-bs-placement="right" data-bs-custom-class="popover-success" data-bs-title="Success Popover" data-bs-content="This is a success-themed popover styled using CSS variables.">
+                                        Success Popover
+                                    </button>
+
+                                    <!-- Danger Popover -->
+                                    <button type="button" class="btn btn-danger" data-bs-toggle="popover" data-bs-placement="right" data-bs-custom-class="popover-danger" data-bs-title="Danger Popover" data-bs-content="This is a danger-themed popover styled using CSS variables.">
+                                        Danger Popover
+                                    </button>
+
+                                    <!-- Info Popover -->
+                                    <button type="button" class="btn btn-info" data-bs-toggle="popover" data-bs-placement="right" data-bs-custom-class="popover-info" data-bs-title="Info Popover" data-bs-content="This is an info-themed popover styled using CSS variables.">
+                                        Info Popover
+                                    </button>
+
+                                    <!-- Dark Popover -->
+                                    <button type="button" class="btn btn-dark" data-bs-toggle="popover" data-bs-placement="right" data-bs-custom-class="popover-dark" data-bs-title="Dark Popover" data-bs-content="This is a dark-themed popover styled using CSS variables.">
+                                        Dark Popover
+                                    </button>
+
+                                    <!-- Secondary Popover -->
+                                    <button type="button" class="btn btn-secondary" data-bs-toggle="popover" data-bs-placement="right" data-bs-custom-class="popover-secondary" data-bs-title="Secondary Popover" data-bs-content="This is a secondary-themed popover styled using CSS variables.">
+                                        Secondary Popover
+                                    </button>
+                                </div>
+
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+                    </div>
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">Disabled Elements</h4>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <span class="d-inline-block" data-bs-toggle="popover" data-bs-placement="top" data-bs-content="This button is disabled, but the popover still works.">
+                                    <button class="btn btn-primary" type="button" disabled style="pointer-events: none;">
+                                        Disabled Button
+                                    </button>
                                 </span>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+                    </div> <!-- end col -->
+                </div> <!-- end row -->
 
-                        </div> <!-- end card-body -->
-                    </div> <!-- end card-->
-                </div> <!-- end col -->
-            </div>
-            <!-- end row -->
+            </div> <!-- container -->
 
-        </div> <!-- container -->
+            <?php include('partials/footer.php'); ?>
 
-        <?php include 'partials/footer.php' ?>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- End of Main Content -->
+        <!-- ============================================================== -->
 
     </div>
+    <!-- END wrapper -->
 
-    <!-- ============================================================== -->
-    <!-- End Page content -->
-    <!-- ============================================================== -->
+    <?php include('partials/customizer.php'); ?>
 
-</div>
-<!-- END wrapper -->
-
-<?php include 'partials/customizer.php' ?>
-
-<?php include 'partials/footer-scripts.php' ?>
+    <?php include('partials/footer-scripts.php'); ?>
 
 </body>
 

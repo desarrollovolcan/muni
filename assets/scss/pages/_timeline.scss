@@ -2,248 +2,83 @@
 // timeline.scss
 //
 
-.timeline {
-    border-collapse: collapse;
-    border-spacing: 0;
-    display: table;
-    margin-bottom: 50px;
-    position: relative;
-    table-layout: fixed;
-    width: 100%;
-
-    .time-show {
-        margin-bottom: 30px;
-        margin-right: -75px;
-        margin-top: 30px;
-        position: relative;
-        text-align: right;
-
-        a {
-            color: $white;
-        }
-    }
-
-    &:before {
-        background-color: var(--#{$prefix}border-color);
-        bottom: 0px;
-        content: "";
-        left: 50%;
-        position: absolute;
-        top: 30px;
-        width: 2px;
-        z-index: 0;
-    }
-
-    .timeline-icon {
-        background: var(--#{$prefix}light-text-emphasis);
-        border-radius: 50%;
-        color: $white;
-        display: block;
-        height: 21px;
-        left: -54px;
-        margin-top: -11px;
-        position: absolute;
-        text-align: center;
-        top: 50%;
-        width: 21px;
-
-        i {
-            color: var(--#{$prefix}light);
-        }
-    }
-
-    .time-icon {
-        &:before {
-            font-size: 16px;
-            margin-top: 5px;
-        }
-    }
-
-}
-
-h3 {
-    &.timeline-title {
-        color: var(--#{$prefix}light-text-emphasis);
-        font-size: 20px;
-        font-weight: 400;
-        margin: 0 0 5px;
-        text-transform: uppercase;
-    }
-}
-
 .timeline-item {
-    display: table-row;
+    position: relative;
+    align-items: flex-start;
 
-    &:before {
-        content: "";
-        display: block;
-        width: 50%;
-    }
-
-    .timeline-desk {
-        .arrow {
-            border-bottom: 8px solid transparent;
-            border-right: 8px solid $body-bg !important;
-            border-top: 8px solid transparent;
-            display: block;
-            height: 0;
-            left: -7px;
-            margin-top: -10px;
-            position: absolute;
-            top: 50%;
-            width: 0;
-        }
-    }
-}
-
-.timeline-item.alt {
-    &:after {
-        content: "";
-        display: block;
-        width: 50%;
-    }
-
-    .timeline-desk {
-        .arrow-alt {
-            border-bottom: 8px solid transparent;
-            border-left: 8px solid $body-bg !important;
-            border-top: 8px solid transparent;
-            display: block;
-            height: 0;
-            left: auto;
-            margin-top: -10px;
-            position: absolute;
-            right: -7px;
-            top: 50%;
-            width: 0;
-        }
-
-        .album {
-            float: right;
-            margin-top: 20px;
-
-            a {
-                float: right;
-                margin-left: 5px;
+    &:not(:last-of-type) {
+        .timeline-content {
+            &::before {
+                content: "";
+                position: absolute;
+                top: 5px;
+                bottom: 0;
+                left: -7px;
+                width: 1px;
+                border-left: 1px dashed var(--#{$prefix}border-color);
             }
         }
     }
-
-    .timeline-icon {
-        left: auto;
-        right: -58px;
-    }
-
-    &:before {
-        display: none;
-    }
-
-    .panel {
-        margin-left: 0;
-        margin-right: 45px;
-
-        .panel-body p+p {
-            margin-top: 10px !important;
-        }
-    }
-
-    h4 {
-        text-align: right;
-    }
-
-    p {
-        text-align: right;
-    }
-
-    .timeline-date {
-        text-align: right;
-    }
 }
 
-.timeline-desk {
-    display: table-cell;
-    vertical-align: top;
-    width: 50%;
-
-    h4 {
-        font-size: 16px;
-        font-weight: 300;
-        margin: 0;
-    }
-
-    .panel {
-        background: $body-bg;
-        display: block;
-        margin-bottom: 5px;
-        margin-left: 45px;
-        position: relative;
-        text-align: left;
-        padding: 20px;
-        border-radius: 7px;
-        box-shadow: $box-shadow-sm;
-    }
-
-    h5 {
-        span {
-            color: var(--#{$prefix}light);
-            display: block;
-            font-size: 12px;
-            margin-bottom: 4px;
-        }
-    }
-
-    p {
-        color: var(--#{$prefix}light-text-emphasis);
-        font-size: 14px;
-        margin-bottom: 0;
-    }
-
-    .album {
-        margin-top: 12px;
-
-        a {
-            float: left;
-            margin-right: 5px;
-        }
-
-        img {
-            height: 36px;
-            width: auto;
-            border-radius: 3px;
-        }
-    }
-
-    .notification {
-        background: none repeat scroll 0 0 $white;
-        margin-top: 20px;
-        padding: 8px;
-    }
+.timeline-dot {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
 }
 
-.width-lg {
-    min-width: 140px;
+.timeline-time {
+    width: 120px;
+    text-align: right;
 }
 
+.timeline-content {
+    flex: 1;
+    position: relative;
+}
 
-.timeline-left {
-    margin-left: 20px;
-    width: auto;
-    display: block;
-
-    &:before {
-        left: 0 !important;
+.timeline-icon-based,
+.timeline-icon-bordered,
+.timeline-users {
+    .timeline-dot {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .timeline-item {
-        display: block;
+        &:not(:last-of-type) {
+            .timeline-content {
+                &::before {
+                    left: -16px;
+                    border-left: 2px dashed var(--#{$prefix}border-color);
+                }
+            }
+        }
+    }
+}
+
+.timeline-icon-bordered {
+    .timeline-dot {
+        width: 31px;
+        height: 31px;
+        background-color: $card-bg;
+        border: 1px dashed var(--#{$prefix}border-color);
     }
 
-    .timeline-desk {
-        display: block;
-        width: 100%;
-    }
-
-    .panel {
-        margin-bottom: 20px;
+    .timeline-item {
+        &:not(:last-of-type) {
+            .timeline-content {
+                &::before {
+                    left: -16px;
+                    border-left: 1px dashed var(--#{$prefix}border-color);
+                }
+            }
+        }
     }
 }

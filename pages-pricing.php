@@ -1,158 +1,157 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php include('partials/html.php'); ?>
 
 <head>
-    <?php
-    $title = "Pricing";
-    include "partials/title-meta.php" ?>
+    <?php $title = "Pricing"; include('partials/title-meta.php'); ?>
 
-    <?php include 'partials/head-css.php' ?>
+    <?php include('partials/head-css.php'); ?>
 </head>
 
 <body>
-<!-- Begin page -->
-<div class="wrapper">
+    <!-- Begin page -->
+    <div class="wrapper">
 
-    <?php include 'partials/sidenav.php' ?>
+        <?php include('partials/menu.php'); ?>
 
-    <?php include 'partials/topbar.php' ?>
+        <!-- ============================================================== -->
+        <!-- Start Main Content -->
+        <!-- ============================================================== -->
 
-    <!-- ============================================================== -->
-    <!-- Start Page Content here -->
-    <!-- ============================================================== -->
+        <div class="content-page">
 
-    <div class="page-content">
+            <div class="container-fluid">
+                
+                <?php $subtitle = "Pages"; $title = "Pricing"; include('partials/page-title.php'); ?>
 
-        <div class="page-container">
+            
+                <div class="row mb-4">
+                    <!-- Starter Plan -->
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card h-100 my-4 my-lg-0">
+                            <div class="card-body p-lg-4 pb-0 text-center">
+                                <h3 class="fw-bold mb-1">Starter Plan</h3>
+                                <p class="text-muted mb-0">Best for freelancers and personal use</p>
 
-            <?php
-            $subtitle = "Pages";
-            $title = "Pricing";
-            include "partials/page-title.php" ?>
+                                <div class="my-4">
+                                    <h1 class="display-6 fw-bold mb-0">$9</h1>
+                                    <small class="d-block text-muted fs-base">Billed monthly</small>
+                                    <small class="d-block text-muted">1 project included</small>
+                                </div>
 
-            <div class="row justify-content-center">
-                <div class="col-lg-9 center-page">
-                    <div class="text-center">
-                        <h3 class="mb-3 mt-2">Choose your perfect plan</h3>
-                        <p>
-                            Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-                            Lorem Ipsum has <br/> been the industry's standard dummy text ever since the
-                            1500s.
-                        </p>
+                                <ul class="list-unstyled text-start fs-sm mb-0">
+                                    <li class="mb-2"><i class="ti ti-check text-success me-2"></i> 1 active project</li>
+                                    <li class="mb-2"><i class="ti ti-check text-success me-2"></i> Access to all components</li>
+                                    <li class="mb-2"><i class="ti ti-check text-success me-2"></i> Email support</li>
+                                    <li class="mb-2"><i class="ti ti-x text-danger me-2"></i> No team collaboration</li>
+                                    <li class="mb-2"><i class="ti ti-x text-danger me-2"></i> No SaaS rights</li>
+                                </ul>
+                            </div>
+                            <div class="card-footer bg-transparent px-5 pb-4">
+                                <a href="#!" class="btn btn-outline-primary w-100 py-2 fw-semibold rounded-pill">Choose Starter</a>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="row mt-4 pt-3">
+                    <!-- Professional Plan -->
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card text-bg-primary h-100 my-4 my-lg-0">
+                            <div class="card-body p-lg-4 pb-0 text-center">
+                                <h3 class="fw-bold mb-1">Professional</h3>
+                                <p class="text-white-50 mb-0">Ideal for small teams and startups</p>
 
-                        <!--Pricing Column-->
-                        <article class="pricing-column col-md-4">
-                            <div class="inner-box card">
-                                <div class="card-body">
-                                    <div class="plan-header text-white text-center bg-primary p-3 rounded">
-                                        <h3 class="plan-title text-uppercase my-2 text-white font-16">Starter Pack</h3>
-                                        <h2 class="plan-price fw-semibold text-white">$19</h2>
-                                        <div class="plan-duration">Per Month</div>
-                                    </div>
-                                    <ul class="plan-stats list-unstyled text-center">
-                                        <li><b>10 GB</b> Storege</li>
-                                        <li><b>500 GB</b> Bandwidth</li>
-                                        <li><b>No</b> Domain</li>
-                                        <li><b>1</b> User</li>
-                                        <li><b>Email</b> Support</li>
-                                        <li class="mb-0"><b>24x7</b> Support</li>
-                                    </ul>
-
-                                    <div class="text-center mb-2">
-                                        <a href="#"
-                                           class="btn btn-outline-success btn-bordered width-lg btn-md width-md btn-bordred rounded-pill waves-effect waves-light">Sign
-                                            Up</a>
-                                    </div>
+                                <div class="my-4">
+                                    <h1 class="display-6 fw-bold mb-0">$29</h1>
+                                    <small class="d-block text-white-50 fs-base">Billed monthly</small>
+                                    <small class="d-block text-white-50">Up to 5 projects</small>
                                 </div>
+
+                                <ul class="list-unstyled text-start fs-sm mb-0">
+                                    <li class="mb-2"><i class="ti ti-check text-success me-2"></i> 5 active projects</li>
+                                    <li class="mb-2"><i class="ti ti-check text-success me-2"></i> Component + plugin access</li>
+                                    <li class="mb-2"><i class="ti ti-check text-success me-2"></i> Team collaboration</li>
+                                    <li class="mb-2"><i class="ti ti-check text-success me-2"></i> Priority email support</li>
+                                    <li class="mb-2"><i class="ti ti-x text-danger me-2"></i> No resale rights</li>
+                                </ul>
                             </div>
-                        </article>
-
-
-                        <!--Pricing Column-->
-                        <article class="pricing-column col-md-4">
-                            <div class="inner-box card">
-                                <div class="card-body">
-                                    <div class="ribbon-pricing bg-danger rounded font-13 text-white"><b>POPULAR</b>
-                                    </div>
-                                    <div class="plan-header text-white text-center bg-primary p-3 rounded">
-                                        <h3 class="plan-title text-white text-uppercase my-2 font-16">Professional
-                                            Pack</h3>
-                                        <h2 class="plan-price fw-semibold text-white">$29</h2>
-                                        <div class="plan-duration">Per Month</div>
-                                    </div>
-                                    <ul class="plan-stats list-unstyled text-center">
-                                        <li><b>50 GB</b> Storege</li>
-                                        <li><b>900 GB</b> Bandwidth</li>
-                                        <li><b>1</b> Domain</li>
-                                        <li><b>20</b> User</li>
-                                        <li><b>Email</b> Support</li>
-                                        <li class="mb-0"><b>24x7</b> Support</li>
-                                    </ul>
-
-                                    <div class="text-center mb-2">
-                                        <a href="#"
-                                           class="btn btn-success width-lg btn-md width-md btn-bordred rounded-pill waves-effect waves-light">Sign
-                                            Up</a>
-                                    </div>
-                                </div>
+                            <div class="card-footer bg-transparent px-5 pb-4">
+                                <a href="#!" class="btn btn-light w-100 py-2 fw-semibold rounded-pill">Choose Professional</a>
                             </div>
-                        </article>
-
-
-                        <!--Pricing Column-->
-                        <article class="pricing-column col-md-4">
-                            <div class="inner-box card">
-                                <div class="card-body">
-                                    <div class="plan-header text-white text-center bg-primary p-3 rounded">
-                                        <h3 class="plan-title text-white text-uppercase my-2 font-16">Enterprise
-                                            Pack</h3>
-                                        <h2 class="plan-price fw-semibold text-white">$39</h2>
-                                        <div class="plan-duration">Per Month</div>
-                                    </div>
-                                    <ul class="plan-stats list-unstyled text-center">
-                                        <li><b>100 GB</b> Storege</li>
-                                        <li><b>2000 GB</b> Bandwidth</li>
-                                        <li><b>10</b> Domain</li>
-                                        <li><b>1000</b> User</li>
-                                        <li><b>Email</b> Support</li>
-                                        <li class="mb-0"><b>24x7</b> Support</li>
-                                    </ul>
-
-                                    <div class="text-center mb-2">
-                                        <a href="#"
-                                           class="btn btn-outline-success width-lg btn-md width-md btn-bordred rounded-pill waves-effect waves-light">Sign
-                                            Up</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </article>
-
+                        </div>
                     </div>
-                </div><!-- end col -->
+
+                    <!-- Business Plan -->
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card h-100 my-4 my-lg-0">
+                            <div class="card-body p-lg-4 pb-0 text-center">
+                                <h3 class="fw-bold mb-1">Business</h3>
+                                <p class="text-muted mb-0">For agencies and large teams</p>
+
+                                <div class="my-4">
+                                    <h1 class="display-6 fw-bold mb-0">$79</h1>
+                                    <small class="d-block text-muted fs-base">Billed monthly</small>
+                                    <small class="d-block text-muted">Unlimited projects</small>
+                                </div>
+
+                                <ul class="list-unstyled text-start fs-sm mb-0">
+                                    <li class="mb-2"><i class="ti ti-check text-success me-2"></i> Unlimited projects</li>
+                                    <li class="mb-2"><i class="ti ti-check text-success me-2"></i> SaaS & client projects allowed</li>
+                                    <li class="mb-2"><i class="ti ti-check text-success me-2"></i> All premium components</li>
+                                    <li class="mb-2"><i class="ti ti-check text-success me-2"></i> Priority support</li>
+                                    <li class="mb-2"><i class="ti ti-check text-success me-2"></i> Team management tools</li>
+                                </ul>
+                            </div>
+                            <div class="card-footer bg-transparent px-5 pb-4">
+                                <a href="#!" class="btn btn-dark w-100 py-2 fw-semibold rounded-pill">Choose Business</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Enterprise Plan -->
+                    <div class="col-xl-3 col-md-6">
+                        <div class="card h-100 my-4 my-lg-0">
+                            <div class="card-body p-lg-4 pb-0 text-center">
+                                <h3 class="fw-bold mb-1">Enterprise</h3>
+                                <p class="text-muted mb-0">Custom plan for enterprises & high-scale use</p>
+
+                                <div class="my-4">
+                                    <h1 class="display-6 fw-bold mb-0">Contact Us</h1>
+                                    <small class="d-block text-muted fs-base">Custom monthly billing</small>
+                                    <small class="d-block text-muted">Based on usage & team size</small>
+                                </div>
+
+                                <ul class="list-unstyled text-start fs-sm mb-0">
+                                    <li class="mb-2"><i class="ti ti-check text-success me-2"></i> Unlimited users & usage</li>
+                                    <li class="mb-2"><i class="ti ti-check text-success me-2"></i> White-label license</li>
+                                    <li class="mb-2"><i class="ti ti-check text-success me-2"></i> Custom integrations</li>
+                                    <li class="mb-2"><i class="ti ti-check text-success me-2"></i> SLA + NDA agreements</li>
+                                    <li class="mb-2"><i class="ti ti-check text-success me-2"></i> Dedicated manager & support</li>
+                                </ul>
+                            </div>
+                            <div class="card-footer bg-transparent px-5 pb-4">
+                                <a href="mailto:sales@example.com" class="btn btn-outline-dark w-100 py-2 fw-semibold rounded-pill">Contact Sales</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
             </div>
-            <!-- end row -->
+            <!-- container -->
 
+            <?php include('partials/footer.php'); ?>
 
-        </div> <!-- container -->
+        </div>
 
-        <?php include 'partials/footer.php' ?>
+        <!-- ============================================================== -->
+        <!-- End of Main Content -->
+        <!-- ============================================================== -->
 
     </div>
+    <!-- END wrapper -->
 
-    <!-- ============================================================== -->
-    <!-- End Page content -->
-    <!-- ============================================================== -->
+    <?php include('partials/customizer.php'); ?>
 
-</div>
-<!-- END wrapper -->
-
-<?php include 'partials/customizer.php' ?>
-
-<?php include 'partials/footer-scripts.php' ?>
-
+    <?php include('partials/footer-scripts.php'); ?>
 
 </body>
 

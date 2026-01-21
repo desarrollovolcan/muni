@@ -1,110 +1,179 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php include('partials/html.php'); ?>
 
 <head>
-    <?php
-    $title = "File Uploads";
-    include "partials/title-meta.php" ?>
+    <?php $title = "File Uploads"; include('partials/title-meta.php'); ?>
 
-    <!-- dropify css -->
-    <link rel="stylesheet" href="assets/vendor/dropify/css/dropify.min.css" type="text/css"/>
+    <!-- Dropzone Plugin CSS -->
+    <link rel="stylesheet" href="assets/plugins/dropzone/dropzone.css" type="text/css">
 
-    <?php include 'partials/head-css.php' ?>
+    <!-- Filepond Plugin CSS -->
+    <link rel="stylesheet" href="assets/plugins/filepond/filepond.min.css" type="text/css">
+    <link rel="stylesheet" href="assets/plugins/filepond/filepond-plugin-image-preview.min.css">
+
+    <?php include('partials/head-css.php'); ?>
 </head>
 
 <body>
-<!-- Begin page -->
-<div class="wrapper">
+    <!-- Begin page -->
+    <div class="wrapper">
 
-    <?php include 'partials/sidenav.php' ?>
+        <?php include('partials/menu.php'); ?>
 
-    <?php include 'partials/topbar.php' ?>
+        <!-- ============================================================== -->
+        <!-- Start Main Content -->
+        <!-- ============================================================== -->
 
-    <!-- ============================================================== -->
-    <!-- Start Page Content here -->
-    <!-- ============================================================== -->
+        <div class="content-page">
 
-    <div class="page-content">
+            <div class="container-fluid">
 
-        <div class="page-container">
+                <?php $subtitle = "Forms"; $title = "File Uploads"; include('partials/page-title.php'); ?>
 
-            <?php
-            $subtitle = "Forms";
-            $title = "File Uploads";
-            include "partials/page-title.php" ?>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-block">
+                                <h4 class="card-title mb-1">Dropzone</h4>
+                                <p class="text-muted mb-0">
+                                    DropzoneJS is an open source library that provides drag’n’drop file uploads with image previews.
+                                </p>
+                            </div>
 
-            <div class="row">
-                <div class="col-sm-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="header-title">Default</h5>
-                        </div>
-                        <div class="card-body pt-2">
-                            <input type="file" class="dropify" data-height="300"/>
-                        </div>
-                    </div>
-                </div><!-- end col -->
-            </div>
-            <!-- end row -->
+                            <div class="card-body">
+                                <form action="/" method="post" class="dropzone" id="myAwesomeDropzone" data-plugin="dropzone" data-previews-container="#file-previews" data-upload-preview-template="#uploadPreviewTemplate">
+                                    <div class="fallback">
+                                        <input name="file" type="file">
+                                    </div>
+
+                                    <div class="dz-message needsclick">
+                                        <div class="avatar-lg mx-auto mb-3">
+                                            <span class="avatar-title bg-success-subtle text-success rounded-circle">
+                                                <i class="fs-24 ti ti-cloud-upload"></i>
+                                            </span>
+                                        </div>
+                                        <h4 class="mb-2">Drop files here or click to upload.</h4>
+                                        <p class="text-muted fst-italic mb-3">You can drag images here, or browse files via the button below.</p>
+                                        <button type="button" class="btn btn-sm shadow btn-default">Browse Images</button>
+                                    </div>
+                                </form>
+
+                                <!-- Preview -->
+                                <div class="dropzone-previews mt-3" id="file-previews"></div>
+
+                                <!-- file preview template -->
+                                <div class="d-none" id="uploadPreviewTemplate">
+                                    <div class="card mt-1 mb-0 border-dashed border">
+                                        <div class="p-2">
+                                            <div class="row align-items-center">
+                                                <div class="col-auto">
+                                                    <img data-dz-thumbnail src="#" class="avatar-sm rounded bg-light" alt="">
+                                                </div>
+                                                <div class="col ps-0">
+                                                    <a href="javascript:void(0);" class="fw-semibold" data-dz-name></a>
+                                                    <p class="mb-0 text-muted" data-dz-size></p>
+                                                </div>
+                                                <div class="col-auto">
+                                                    <!-- Button -->
+                                                    <a href="" class="btn btn-link btn-lg text-danger" data-dz-remove>
+                                                        <i class="ti ti-x"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- end file preview template -->
+
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+
+                        <div class="card">
+                            <div class="card-header d-block">
+                                <h4 class="card-title mb-1">Filepond</h4>
+                                <p class="text-muted mb-0">
+                                    A JavaScript library that can upload anything you throw at it, optimizes images for faster uploads, and offers a great, accessible, silky smooth user experience.
+                                </p>
+                            </div>
+
+                            <div class="card-body">
+
+                                <div class="mb-3">
+                                    <h5 class="mb-3">Basic Example</h5>
+                                    <div class="filepond-uploader">
+                                        <input type="file" class="filepond filepond-input-multiple" multiple name="filepond" data-allow-reorder="true" data-max-file-size="3MB" data-max-files="5">
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <h5 class="mb-3">Two Grid Example</h5>
+                                    <div class="filepond-uploader two-grid">
+                                        <input type="file" class="filepond filepond-input-multiple" multiple name="filepond" data-allow-reorder="true" data-max-file-size="3MB" data-max-files="5">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h5 class="mb-3">Three Grid Example</h5>
+                                    <div class="filepond-uploader three-grid">
+                                        <input type="file" class="filepond filepond-input-multiple" multiple name="filepond" data-allow-reorder="true" data-max-file-size="3MB" data-max-files="5">
+                                    </div>
+                                </div>
+                            </div> <!-- end card body -->
+
+                            <div class="border-top border-dashed"></div>
+
+                            <div class="card-body">
+                                <h4 class="card-title mb-2">Profile Picture</h4>
+
+                                <p class="text-muted">FilePond is a JavaScript library with profile picture-shaped file upload variation.</p>
+                                
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="avatar-xxl">
+                                            <input type="file" class="filepond filepond-input-circle" name="filepond" accept="image/png, image/jpeg, image/gif">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="avatar-xxl">
+                                            <input type="file" class="filepond filepond-input-circle rounded" name="filepond" accept="image/png, image/jpeg, image/gif">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- end card body -->
+                        </div> <!-- end card -->
 
 
-            <div class="row">
-                <div class="col-lg-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="header-title">Default File</h5>
-                        </div>
-                        <div class="card-body pt-2">
-                            <input type="file" class="dropify" data-default-file="assets/images/small/img-1.jpg"/>
-                        </div>
-                    </div>
-                </div><!-- end col -->
+                    </div> <!-- end col -->
+                </div> <!-- end row -->
 
-                <div class="col-lg-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="header-title">Disabled the input</h5>
-                        </div>
-                        <div class="card-body pt-2">
-                            <input type="file" class="dropify" disabled="disabled"/>
-                        </div>
-                    </div>
-                </div><!-- end col -->
+            </div> <!-- container -->
 
-                <div class="col-lg-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="header-title">Max File size</h5>
-                        </div>
-                        <div class="card-body pt-2">
-                            <input type="file" class="dropify" data-max-file-size="1M"/>
-                        </div>
-                    </div>
-                </div><!-- end col -->
-            </div>
-            <!-- end row -->
+            <?php include('partials/footer.php'); ?>
+
         </div>
-        <!-- container -->
 
-        <?php include 'partials/footer.php' ?>
-
+        <!-- ============================================================== -->
+        <!-- End of Main Content -->
+        <!-- ============================================================== -->
     </div>
+    <!-- END wrapper -->
 
-    <!-- ============================================================== -->
-    <!-- End Page content -->
-    <!-- ============================================================== -->
-</div>
-<!-- END wrapper -->
+    <?php include('partials/customizer.php'); ?>
 
-<?php include 'partials/customizer.php' ?>
+    <?php include('partials/footer-scripts.php'); ?>
 
-<?php include 'partials/footer-scripts.php' ?>
+    <!-- Dropzone Plugin Js -->
+    <script src="assets/plugins/dropzone/dropzone-min.js"></script>
 
-<!-- dropify File Upload js -->
-<script src="assets/vendor/dropify/js/dropify.min.js"></script>
+    <!-- Filepond Plugin Js -->
+    <script src="assets/plugins/filepond/filepond.min.js"></script>
+    <script src="assets/plugins/filepond/filepond-plugin-image-preview.min.js"></script>
+    <script src="assets/plugins/filepond/filepond-plugin-file-validate-size.min.js"></script>
+    <script src="assets/plugins/filepond/filepond-plugin-image-exif-orientation.min.js"></script>
+    <script src="assets/plugins/filepond/filepond-plugin-file-encode.min.js"></script>
 
-<!-- File Upload Demo js -->
-<script src="assets/js/pages/form-fileupload.js"></script>
+    <!-- File Upload Demo Js -->
+    <script src="assets/js/pages/form-fileupload.js"></script>
 
 </body>
 

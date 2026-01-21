@@ -1,131 +1,186 @@
+/**
+ * Template Name: UBold - Admin & Dashboard Template
+ * By (Author): Coderthemes
+ * Module/App (File Name): Dashboard v.2
+ */
 
-/*
-Template Name: Adminox - Responsive Bootstrap 4 Admin Dashboard
-Author: CoderThemes
-Version: 2.0.0
-Website: https://coderthemes.com/
-Contact: support@coderthemes.com
-File: Dashboard-2 init js
-*/
+function generateRandomData(count, min, max) {
+    return Array.from({length: count}, () =>
+        Math.floor(Math.random() * (max - min + 1)) + min
+    );
+}
 
-$( document ).ready(function() {
+function generateSessionAndPageViewData(count) {
+    const sessions = generateRandomData(count, 250, 450);
+    const pageViews = sessions.map(session =>
+        Math.floor(session * (2 + Math.random() * 0.1)) // Page Views are 2x to 2.5x of Sessions
+    );
+    return {sessions, pageViews};
+}
 
-    var DrawSparkline = function() {
-        $('#dashboard-1').sparkline([20, 40, 30, 10], {
-            type: 'pie',
-            width: '80',
-            height: '80',
-            sliceColors: ['#60befc', '#6248ff','#e3b0db','#dbdbdb']
-        });
-        $('#dashboard-2').sparkline([25, 35, 21], {
-            type: 'pie',
-            width: '80',
-            height: '80',
-            sliceColors: ['#6ad9c3', '#9aa1f2','#ebeff2']
-        });
-        $('#dashboard-3').sparkline([20, 40, 30], {
-            type: 'pie',
-            width: '80',
-            height: '80',
-            sliceColors: ['#c086f3','#65acff', '#7ed321']
-        });
+const {sessions, pageViews} = generateSessionAndPageViewData(19);
+
+new CustomApexChart({
+    selector: '#project-overview-chart',
+    options: () => ({
+        chart: {
+            height: 330,
+            type: 'area',
+            toolbar: {show: false}
+        },
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            width: 2,
+            curve: 'smooth'
+        },
+        colors: [ins('chart-primary'), ins('secondary')],
+        series: [
+            {
+                name: 'Sessions',
+                data: sessions
+            },
+            {
+                name: 'Page Views',
+                data: pageViews
+            }
+        ],
+        legend: {
+            offsetY: 5,
+        },
+        xaxis: {
+            categories: ["", "8 AM", "9 AM", "10 AM", "11 AM", "12 PM", "1 PM",
+                "2 PM", "3 PM", "4 PM", "5 PM", "6 PM", "7 PM", "8 PM",
+                "9 PM", "10 PM", "11 PM", "12 AM", ""],
+            axisBorder: {show: false},
+            axisTicks: {show: false},
+            tickAmount: 6,
+            labels: {
+                style: {
+                    fontSize: "12px"
+                }
+            }
+        },
+        tooltip: {
+            shared: true,
+            y: {
+                formatter: function (val, {seriesIndex}) {
+                    if (seriesIndex === 0) {
+                        return val + " Sessions";
+                    } else if (seriesIndex === 1) {
+                        return val + " Page Views";
+                    }
+                    return val;
+                }
+            }
+        },
+        fill: {
+            type: "gradient",
+            gradient: {
+                shadeIntensity: 1,
+                opacityFrom: 0.4,
+                opacityTo: 0.2,
+                stops: [15, 120, 100]
+            }
+        },
+        grid: {
+            borderColor: [ins('border-color')],
+            padding: {
+                bottom: 0
+            }
+        }
+    })
+})
+
+function generateData(baseval, count, yrange) {
+    let i = 0;
+    const series = [];
+    while (i < count) {
+        const x = Math.floor(Math.random() * (750 - 1 + 1)) + 1;
+        const y = Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min;
+        const z = Math.floor(Math.random() * (75 - 15 + 1)) + 15;
+
+        series.push([x, y, z]);
+        baseval += 86400000;
+        i++;
     }
-  
-    DrawSparkline();
-  
-    var resizeChart;
-  
-    $(window).resize(function(e) {
-      clearTimeout(resizeChart);
-      resizeChart = setTimeout(function() {
-        DrawSparkline();
-      }, 300);
-    });
-  });
-  
-  
-  !function($) {
-      "use strict";
-  
-      var MorrisCharts = function() {};
-  
-          //creates Stacked chart
-          MorrisCharts.prototype.createStackedChart  = function(element, data, xkey, ykeys, labels, lineColors) {
-              Morris.Bar({
-                  element: element,
-                  data: data,
-                  xkey: xkey,
-                  ykeys: ykeys,
-                  stacked: true,
-                  labels: labels,
-                  hideHover: 'auto',
-                  resize: true, //defaulted to true
-                  gridLineColor: 'rgba(104, 115, 142, 0.1)',
-                  barColors: lineColors,
-                  barSizeRatio: 0.5
-              });
-          },
-  
-          //creates line chart
-          MorrisCharts.prototype.createLineChart = function(element, data, xkey, ykeys, labels, opacity, Pfillcolor, Pstockcolor, lineColors) {
-              Morris.Line({
-                  element: element,
-                  data: data,
-                  xkey: xkey,
-                  ykeys: ykeys,
-                  labels: labels,
-                  fillOpacity: opacity,
-                  pointFillColors: Pfillcolor,
-                  pointStrokeColors: Pstockcolor,
-                  behaveLikeLine: true,
-                  gridLineColor: 'rgba(104, 115, 142, 0.1)',
-                  hideHover: 'auto',
-                  lineWidth: '3px',
-                  pointSize: 0,
-                  preUnits: '$',
-                  resize: true, //defaulted to true
-                  lineColors: lineColors
-              });
-          },
-  
-          MorrisCharts.prototype.init = function() {
-  
-              //creating Stacked chart
-              var $stckedData  = [
-                  { y: '2005', a: 45, b: 180, c: 100 },
-                  { y: '2006', a: 75,  b: 65, c: 80 },
-                  { y: '2007', a: 100, b: 90, c: 56 },
-                  { y: '2008', a: 75,  b: 65, c: 89 },
-                  { y: '2009', a: 100, b: 90, c: 120 },
-                  { y: '2010', a: 75,  b: 65, c: 110 },
-                  { y: '2011', a: 50,  b: 40, c: 85 },
-                  { y: '2012', a: 75,  b: 65, c: 52 },
-                  { y: '2013', a: 50,  b: 40, c: 77 },
-                  { y: '2014', a: 75,  b: 65, c: 90 },
-                  { y: '2015', a: 100, b: 90, c: 130 },
-                  { y: '2016', a: 80, b: 65, c: 95 }
-              ];
-              this.createStackedChart('morris-bar-stacked', $stckedData, 'y', ['a', 'b', 'c'], ['Series A', 'Series B','Series C'], ['#6ad9c3', '#9aa1f2','#ebeff2']);
-  
-              //create line chart
-              var $data  = [
-                  { y: '2008', a: 50, b: 0 },
-                  { y: '2009', a: 75, b: 50 },
-                  { y: '2010', a: 30, b: 80 },
-                  { y: '2011', a: 50, b: 50 },
-                  { y: '2012', a: 75, b: 10 },
-                  { y: '2013', a: 50, b: 40 },
-                  { y: '2014', a: 75, b: 50 },
-                  { y: '2015', a: 100, b: 70 }
-              ];
-              this.createLineChart('morris-line-example', $data, 'y', ['a', 'b'], ['Series A', 'Series B'],['0.1'],['#ffffff'],['#999999'], ['#5553ce ', '#f06292']);
-          },
-          //init
-          $.MorrisCharts = new MorrisCharts, $.MorrisCharts.Constructor = MorrisCharts
-  }(window.jQuery),
-  
-  //initializing
-      function($) {
-          "use strict";
-          $.MorrisCharts.init();
-      }(window.jQuery);
+    return series;
+}
+
+new CustomApexChart({
+    selector: '#task-progress-chart',
+    options: () => ({
+        chart: {
+            height: 330, // Increased height for spacing
+            type: 'bubble',
+            toolbar: {
+                show: false
+            }
+        },
+        dataLabels: {
+            enabled: false
+        },
+        series: [{
+            name: 'Bubble 1',
+            data: generateData(new Date('11 Feb 2017 GMT').getTime(), 10, {
+                min: 10,
+                max: 60
+            })
+        },
+            {
+                name: 'Bubble 2',
+                data: generateData(new Date('11 Feb 2017 GMT').getTime(), 10, {
+                    min: 10,
+                    max: 60
+                })
+            },
+            {
+                name: 'Bubble 3',
+                data: generateData(new Date('11 Feb 2017 GMT').getTime(), 10, {
+                    min: 10,
+                    max: 60
+                })
+            }
+        ],
+        fill: {
+            opacity: 0.8,
+            gradient: {
+                enabled: false
+            }
+        },
+        colors: [ins('chart-primary'), ins('secondary'), ins('danger')],
+        xaxis: {
+            tickAmount: 12,
+            type: 'category',
+        },
+        yaxis: {
+            max: 70
+        },
+        grid: {
+            borderColor: [ins('border-color')],
+            padding: {
+                top: -20,
+                right: 0,
+                bottom: -5,
+                left: 10
+            }
+        },
+        legend: {
+            offsetY: 7,
+        }
+    })
+})
+
+document.addEventListener("DOMContentLoaded", function () {
+    const container = document.querySelector('#chat-container');
+    if (container && container.SimpleBar) {
+        container.SimpleBar.getScrollElement().scrollTop = container.SimpleBar.getScrollElement().scrollHeight;
+    } else {
+        // Fallback if not using custom SimpleBar instance
+        const scrollElement = container.querySelector('.simplebar-content-wrapper');
+        if (scrollElement) {
+            scrollElement.scrollTop = scrollElement.scrollHeight;
+        }
+    }
+});

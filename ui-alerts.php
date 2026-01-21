@@ -1,422 +1,352 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php include('partials/html.php'); ?>
 
 <head>
-    <?php
-    $title = "Alerts";
-    include "partials/title-meta.php" ?>
+    <?php $title = "Alerts"; include('partials/title-meta.php'); ?>
 
-    <?php include 'partials/head-css.php' ?>
+    <?php include('partials/head-css.php'); ?>
 </head>
 
 <body>
-<!-- Begin page -->
-<div class="wrapper">
+    <!-- Begin page -->
+    <div class="wrapper">
 
-    <?php include 'partials/sidenav.php' ?>
+        <?php include('partials/menu.php'); ?>
 
-    <?php include 'partials/topbar.php' ?>
+        <!-- ============================================================== -->
+        <!-- Start Main Content -->
+        <!-- ============================================================== -->
 
-    <!-- ============================================================== -->
-    <!-- Start Page Content here -->
-    <!-- ============================================================== -->
+        <div class="content-page">
 
-    <div class="page-content">
+            <div class="container-fluid">
+                <?php $subtitle = "UI"; $title = "Alerts"; include('partials/page-title.php'); ?>
 
-        <div class="page-container">
-
-            <?php
-            $subtitle = "Base UI";
-            $title = "Alerts";
-            include "partials/page-title.php" ?>
-
-            <div class="row">
-                <div class="col-xl-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="header-title">Default Alert</h5>
-                            <p class="card-subtitle">
-                                For proper styling, use one of the eight
-                                <strong>required</strong> contextual classes (e.g.,
-                                <code>.alert-success</code>). For background color use class
-                                <code>.bg-* </code>, <code>.text-white </code>
-                            </p>
-                        </div>
-                        <div class="card-body pt-2">
-                            <div class="alert alert-primary d-flex align-items-center" role="alert">
-                                <iconify-icon icon="solar:bell-bing-bold-duotone" class="font-20 me-1"></iconify-icon>
-                                <div class="lh-1"><strong>Primary - </strong> A simple primary alert — check
-                                    it out!
+                <div class="row">
+                    
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title mb-0">Default Alert</h4>
                                 </div>
-                            </div>
-                            <div class="alert alert-secondary d-flex align-items-center" role="alert">
-                                <iconify-icon icon="solar:bicycling-round-bold-duotone"
-                                              class="font-20 me-1"></iconify-icon>
-                                <div class="lh-1"><strong>Secondary - </strong> A simple secondary alert —
-                                    check it out!
-                                </div>
-                            </div>
-                            <div class="alert alert-success d-flex align-items-center" role="alert">
-                                <iconify-icon icon="solar:check-read-line-duotone" class="font-20 me-1"></iconify-icon>
-                                <div class="lh-1"><strong>Success - </strong> A simple success alert — check
-                                    it out!
-                                </div>
-                            </div>
-                            <div class="alert alert-danger d-flex align-items-center" role="alert">
-                                <iconify-icon icon="solar:danger-triangle-bold-duotone"
-                                              class="font-20 me-1"></iconify-icon>
-                                <div class="lh-1"><strong>Error - </strong> A simple danger alert — check it
-                                    out!
-                                </div>
-                            </div>
-                            <div class="alert alert-warning d-flex align-items-center" role="alert">
-                                <iconify-icon icon="solar:shield-warning-line-duotone"
-                                              class="font-20 me-1"></iconify-icon>
-                                <div class="lh-1"><strong>Warning - </strong> A simple warning alert—check
-                                    it out!
-                                </div>
-                            </div>
-                            <div class="alert alert-info d-flex align-items-center" role="alert">
-                                <iconify-icon icon="solar:info-circle-bold-duotone" class="font-20 me-1"></iconify-icon>
-                                <div class="lh-1"><strong>Info - </strong> A simple info alert—check it out!
-                                </div>
-                            </div>
-                            <div class="alert alert-light d-flex align-items-center" role="alert">
-                                <iconify-icon icon="solar:atom-bold-duotone" class="font-20 me-1"></iconify-icon>
-                                <div class="lh-1"><strong>Light - </strong> A simple light alert—check it
-                                    out!
-                                </div>
-                            </div>
-                            <div class="alert alert-dark d-flex align-items-center mb-0" role="alert">
-                                <iconify-icon icon="solar:balloon-bold-duotone" class="font-20 me-1"></iconify-icon>
-                                <div class="lh-1"><strong>Dark - </strong> A simple dark alert—check it out!
-                                </div>
-                            </div>
-                        </div> <!-- end card-body-->
-                    </div> <!-- end card-->
-                </div> <!-- end col-->
-
-                <div class="col-xl-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="header-title">Dismissing Alert</h5>
-                            <p class="card-subtitle">
-                                Add a dismiss button and the <code>.alert-dismissible</code> class, which adds
-                                extra padding to the right of the alert
-                                and positions the <code>.btn-close</code> button.
-                            </p>
-                        </div>
-                        <div class="card-body pt-2">
-
-                            <div class="alert alert-primary text-bg-primary alert-dismissible d-flex align-items-center"
-                                 role="alert">
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"
-                                        aria-label="Close"></button>
-                                <iconify-icon icon="solar:bell-bing-bold-duotone" class="font-20 me-1"></iconify-icon>
-                                <div class="lh-1"><strong>Primary - </strong> A simple primary alert — check
-                                    it out!
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
                                 </div>
                             </div>
 
-                            <div class="alert alert-secondary text-bg-secondary alert-dismissible d-flex align-items-center"
-                                 role="alert">
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"
-                                        aria-label="Close"></button>
-                                <iconify-icon icon="solar:bicycling-round-bold-duotone"
-                                              class="font-20 me-1"></iconify-icon>
-                                <div class="lh-1"><strong>Secondary - </strong> A simple secondary alert —
-                                    check it out!
+                            <div class="card-body">
+                                <div class="alert alert-primary" role="alert">
+                                    This is a primary alert—something important you should know!
+                                </div>
+
+                                <div class="alert alert-secondary" role="alert">
+                                    This is a secondary alert—some additional context.
+                                </div>
+
+                                <div class="alert alert-success" role="alert">
+                                    Success! Your operation was completed successfully.
+                                </div>
+
+                                <div class="alert alert-danger" role="alert">
+                                    Error! Something went wrong—please try again.
+                                </div>
+
+                                <div class="alert alert-warning" role="alert">
+                                    Warning! Please double-check your inputs.
+                                </div>
+
+                                <div class="alert alert-info" role="alert">
+                                    Info: Here's something you might find useful.
+                                </div>
+
+                                <div class="alert alert-light" role="alert">
+                                    Light alert—just a subtle notification.
+                                </div>
+
+                                <div class="alert alert-dark mb-0" role="alert">
+                                    Dark alert—use for general-purpose messages.
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+                    </div> <!-- end col-->
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Dismissing Alert with Solid Colors</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
                                 </div>
                             </div>
 
-                            <div class="alert alert-success text-bg-success alert-dismissible d-flex align-items-center"
-                                 role="alert">
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"
-                                        aria-label="Close"></button>
-                                <iconify-icon icon="solar:check-read-line-duotone" class="font-20 me-1"></iconify-icon>
-                                <div class="lh-1"><strong>Success - </strong> A simple success alert — check
-                                    it out!
+                            <div class="card-body">
+                                <div class="alert alert-primary text-bg-primary alert-dismissible" role="alert">
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    <div>Heads up! This is a primary alert with important information.</div>
+                                </div>
+
+                                <div class="alert alert-secondary text-bg-secondary alert-dismissible" role="alert">
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    <div>Notice: This is a secondary alert with supporting details.</div>
+                                </div>
+
+                                <div class="alert alert-success text-bg-success alert-dismissible" role="alert">
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    <div>Success! Your action was completed successfully.</div>
+                                </div>
+
+                                <div class="alert alert-danger text-bg-danger alert-dismissible" role="alert">
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    <div>Error! Something went wrong—please try again later.</div>
+                                </div>
+
+                                <div class="alert alert-warning text-bg-warning alert-dismissible" role="alert">
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    <div>Warning! Please review your input before proceeding.</div>
+                                </div>
+
+                                <div class="alert alert-info text-bg-info alert-dismissible" role="alert">
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    <div>Info: Here’s something you might find helpful.</div>
+                                </div>
+
+                                <div class="alert alert-light text-bg-light alert-dismissible" role="alert">
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    <div>Note: This is a light alert with a subtle message.</div>
+                                </div>
+
+                                <div class="alert alert-dark text-bg-dark alert-dismissible mb-0" role="alert">
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    <div>Notice: This dark alert is great for general messages.</div>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+                    </div> <!-- end col-->
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Link Color</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
                                 </div>
                             </div>
 
-                            <div class="alert alert-danger text-bg-danger alert-dismissible d-flex align-items-center"
-                                 role="alert">
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"
-                                        aria-label="Close"></button>
-                                <iconify-icon icon="solar:danger-triangle-bold-duotone"
-                                              class="font-20 me-1"></iconify-icon>
-                                <div class="lh-1"><strong>Error - </strong> A simple danger alert — check it
-                                    out!
+                            <div class="card-body">
+                                <div class="alert alert-primary" role="alert">
+                                    Need more info? Check out <a href="#" class="alert-link">this primary link</a> for important details.
+                                </div>
+
+                                <div class="alert alert-secondary" role="alert">
+                                    Here's a secondary message with <a href="#" class="alert-link">a helpful link</a> for additional context.
+                                </div>
+
+                                <div class="alert alert-success" role="alert">
+                                    Operation successful! View the results <a href="#" class="alert-link">by clicking here</a>.
+                                </div>
+
+                                <div class="alert alert-danger" role="alert">
+                                    Something went wrong. Learn more <a href="#" class="alert-link">through this alert link</a>.
+                                </div>
+
+                                <div class="alert alert-warning" role="alert">
+                                    Heads up! You might want to check <a href="#" class="alert-link">this warning link</a>.
+                                </div>
+
+                                <div class="alert alert-info" role="alert">
+                                    Here’s some information that may help—click <a href="#" class="alert-link">this link</a> to read more.
+                                </div>
+
+                                <div class="alert alert-light" role="alert">
+                                    Just a light reminder with <a href="#" class="alert-link">a gentle link</a> to explore.
+                                </div>
+
+                                <div class="alert alert-dark mb-0" role="alert">
+                                    This is a general dark alert. Find out more <a href="#" class="alert-link">by clicking here</a>.
+                                </div>
+
+                            </div> <!-- end card-body -->
+
+                        </div> <!-- end card-->
+                    </div> <!-- end col-->
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Additional Content</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
                                 </div>
                             </div>
 
-                            <div class="alert alert-warning text-bg-warning alert-dismissible d-flex align-items-center"
-                                 role="alert">
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"
-                                        aria-label="Close"></button>
-                                <iconify-icon icon="solar:shield-warning-line-duotone"
-                                              class="font-20 me-1"></iconify-icon>
-                                <div class="lh-1"><strong>Warning - </strong> A simple warning alert—check
-                                    it out!
+                            <div class="card-body">
+                                <div class="alert alert-success p-3" role="alert">
+                                    <h4 class="alert-heading">Great job!</h4>
+                                    <p>You’ve successfully read this important alert message. The text is intentionally a bit longer to demonstrate how spacing behaves in this kind of layout.</p>
+                                    <hr class="border-success border-opacity-25">
+                                    <p class="mb-0">Use margin utilities to keep your content clean and organized.</p>
+                                </div>
+
+                                <div class="alert alert-secondary p-3 d-flex" role="alert">
+                                    <i class="ti ti-alarm-average fs-1 me-2"></i>
+                                    <div>
+                                        <h4 class="alert-heading">Heads up!</h4>
+                                        <p>This alert message gives additional information with a longer message to show content spacing within an alert.</p>
+                                        <hr class="border-secondary border-opacity-25">
+                                        <p class="mb-0">Apply spacing classes wisely to maintain structure and clarity.</p>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-danger d-flex p-3 mb-0" role="alert">
+                                    <i class="ti ti-phone-ringing fs-1 me-2"></i>
+                                    <div>
+                                        <h4 class="alert-heading">Notice!</h4>
+                                        <p>You’ve just read through a primary alert message. The extra length helps show how well the layout handles content spacing.</p>
+                                        <button type="button" class="btn btn-danger btn-sm">Got it</button>
+                                    </div>
+                                </div>
+                            </div> <!-- end card-body -->
+
+                        </div> <!-- end card-->
+                    </div> <!-- end col-->
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Custom Alerts</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
                                 </div>
                             </div>
 
-                            <div class="alert alert-info text-bg-info alert-dismissible d-flex align-items-center"
-                                 role="alert">
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"
-                                        aria-label="Close"></button>
-                                <iconify-icon icon="solar:info-circle-bold-duotone" class="font-20 me-1"></iconify-icon>
-                                <div class="lh-1"><strong>Info - </strong> A simple info alert—check it out!
+                            <div class="card-body">
+                                <div class="alert alert-primary alert-dismissible border border-primary" role="alert">
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    <div>A primary alert with a full border!</div>
+                                </div>
+
+                                <div class="alert alert-secondary alert-bordered alert-dismissible border-start border-secondary" role="alert">
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    <div>A secondary alert with a left border only!</div>
+                                </div>
+
+                                <div class="alert alert-dark alert-bordered alert-dismissible border-bottom border-dark" role="alert">
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    <div>A dark alert with a bottom border!</div>
+                                </div>
+
+                                <div class="alert alert-success alert-dismissible border-2 border border-dashed border-success" role="alert">
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    <div>A success alert with a dashed border!</div>
+                                </div>
+
+                                <div class="alert alert-danger alert-dismissible border-2  border-danger" role="alert">
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    <div>A danger alert with a thick border!</div>
+                                </div>
+
+                                <div class="alert alert-warning d-flex align-items-center" role="alert">
+                                    <div>A warning alert with a custom close button!</div>
+                                    <button type="button" class="ms-auto btn btn-sm btn-warning btn-icon rounded-circle" data-bs-dismiss="alert" aria-label="Close">
+                                        <i class="ti ti-x fs-lg"></i>
+                                    </button>
+                                </div>
+
+                                <div class="alert alert-info alert-dismissible d-flex align-items-center gap-2" role="alert">
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    <i class="ti ti-alert-octagon fs-xl"></i> An info alert with a custom icon!
+                                </div>
+
+                                <div class="alert alert-light border-2 d-flex align-items-center p-3 mb-0" role="alert">
+                                    <i class="ti ti-phone-ringing text-success fs-2 me-3"></i>
+                                    <div>
+                                        <h4 class="alert-heading">Notice!</h4>
+                                        <p class="m-0">You’ve just read through a primary alert message. The extra length helps show how well the layout handles content spacing.</p>
+                                    </div>
+                                </div>
+
+                            </div> <!-- end card-body -->
+
+                        </div> <!-- end card-->
+                    </div> <!-- end col-->
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Live Alert</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                    <a href="#!" class="card-action-item" data-action="code-collapse"><i class="ti ti-code"></i></a>
+
                                 </div>
                             </div>
 
-                            <div class="alert alert-light text-bg-light alert-dismissible d-flex align-items-center"
-                                 role="alert">
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                        aria-label="Close"></button>
-                                <iconify-icon icon="solar:atom-bold-duotone" class="font-20 me-1"></iconify-icon>
-                                <div class="lh-1"><strong>Light - </strong> A simple light alert—check it
-                                    out!
-                                </div>
-                            </div>
+                            <div class="code-body">
+                                <div class="highlight">
+                                    <pre>
+                                        <code class="language-markup">
+                                            &lt;button type=&quot;button&quot; class=&quot;btn btn-primary&quot; id=&quot;liveAlertBtn&quot;&gt;Show live alert&lt;/button&gt;
+                                        </code>
+                                    </pre> <!-- end pre -->
+                                </div> <!-- end highlight-->
+                            </div> <!--end preview code-->
 
-                            <div class="alert alert-dark text-bg-dark alert-dismissible d-flex align-items-center mb-0"
-                                 role="alert">
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"
-                                        aria-label="Close"></button>
-                                <iconify-icon icon="solar:balloon-bold-duotone" class="font-20 me-1"></iconify-icon>
-                                <div class="lh-1"><strong>Dark - </strong> A simple dark alert—check it out!
-                                </div>
-                            </div>
-                        </div> <!-- end card-body-->
-                    </div> <!-- end card-->
-                </div> <!-- end col-->
-            </div>
-            <!-- end row -->
-
-            <div class="row">
-                <div class="col-xl-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="header-title">Link Color</h5>
-                            <p class="card-subtitle">
-                                Use the <code>.alert-link</code> utility class to quickly provide matching
-                                colored links within any alert.
-                            </p>
-                        </div>
-                        <div class="card-body pt-2">
-
-                            <div class="alert alert-primary" role="alert">
-                                A simple primary alert with <a href="#" class="alert-link">an example
-                                    link</a>. Give it a click if you like.
-                            </div>
-                            <div class="alert alert-secondary" role="alert">
-                                A simple secondary alert with <a href="#" class="alert-link">an example
-                                    link</a>. Give it a click if you like.
-                            </div>
-                            <div class="alert alert-success" role="alert">
-                                A simple success alert with <a href="#" class="alert-link">an example
-                                    link</a>. Give it a click if you like.
-                            </div>
-                            <div class="alert alert-danger" role="alert">
-                                A simple danger alert with <a href="#" class="alert-link">an example
-                                    link</a>. Give it a click if you like.
-                            </div>
-                            <div class="alert alert-warning" role="alert">
-                                A simple warning alert with <a href="#" class="alert-link">an example
-                                    link</a>. Give it a click if you like.
-                            </div>
-                            <div class="alert alert-info" role="alert">
-                                A simple info alert with <a href="#" class="alert-link">an example
-                                    link</a>. Give it a click if you like.
-                            </div>
-                            <div class="alert alert-light" role="alert">
-                                A simple light alert with <a href="#" class="alert-link">an example
-                                    link</a>. Give it a click if you like.
-                            </div>
-                            <div class="alert alert-dark" role="alert">
-                                A simple dark alert with <a href="#" class="alert-link">an example
-                                    link</a>. Give it a click if you like.
-                            </div>
-                        </div> <!-- end card-body-->
-                    </div> <!-- end card-->
-                </div> <!-- end col-->
-
-                <div class="col-xl-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="header-title">Custom Alerts</h5>
-                            <p class="card-subtitle">
-                                Display alert with transparent background and with contextual text color. Use
-                                classes
-                                <code>.bg-white</code>, and <code>.text-*</code>. E.g. <code>bg-white
-                                    text-primary</code>.
-                            </p>
-                        </div>
-                        <div class="card-body pt-2">
-
-                            <div class="alert alert-primary alert-dismissible d-flex align-items-center border-2 border border-primary"
-                                 role="alert">
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                        aria-label="Close"></button>
-                                <iconify-icon icon="solar:bell-bing-bold-duotone" class="font-20 me-1"></iconify-icon>
-                                <div class="lh-1"><strong>Primary - </strong> A simple primary alert — check
-                                    it out!
-                                </div>
-                            </div>
-                            <div class="alert alert-secondary alert-dismissible d-flex align-items-center border-2 border border-secondary"
-                                 role="alert">
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                        aria-label="Close"></button>
-                                <iconify-icon icon="solar:bicycling-round-bold-duotone"
-                                              class="font-20 me-1"></iconify-icon>
-                                <div class="lh-1"><strong>Secondary - </strong> A simple secondary alert —
-                                    check it out!
-                                </div>
-                            </div>
-                            <div class="alert alert-success alert-dismissible d-flex align-items-center border-2 border border-success"
-                                 role="alert">
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                        aria-label="Close"></button>
-                                <iconify-icon icon="solar:check-read-line-duotone" class="font-20 me-1"></iconify-icon>
-                                <div class="lh-1"><strong>Success - </strong> A simple success alert — check
-                                    it out!
-                                </div>
-                            </div>
-                            <div class="alert alert-danger alert-dismissible d-flex align-items-center border-2 border border-danger"
-                                 role="alert">
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                        aria-label="Close"></button>
-                                <iconify-icon icon="solar:danger-triangle-bold-duotone"
-                                              class="font-20 me-1"></iconify-icon>
-                                <div class="lh-1"><strong>Error - </strong> A simple danger alert — check it
-                                    out!
-                                </div>
-                            </div>
-                            <div class="alert alert-warning alert-dismissible d-flex align-items-center border border-warning"
-                                 role="alert">
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                        aria-label="Close"></button>
-                                <iconify-icon icon="solar:shield-warning-line-duotone"
-                                              class="font-20 me-1"></iconify-icon>
-                                <div class="lh-1"><strong>Warning - </strong> A simple warning alert—check
-                                    it out!
-                                </div>
-                            </div>
-                            <div class="alert alert-info alert-dismissible d-flex align-items-center border border-info"
-                                 role="alert">
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                        aria-label="Close"></button>
-                                <iconify-icon icon="solar:info-circle-bold-duotone" class="font-20 me-1"></iconify-icon>
-                                <div class="lh-1"><strong>Info - </strong> A simple info alert—check it out!
-                                </div>
-                            </div>
-                            <div class="alert alert-light alert-dismissible d-flex align-items-center border border-light"
-                                 role="alert">
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                        aria-label="Close"></button>
-                                <iconify-icon icon="solar:atom-bold-duotone" class="font-20 me-1"></iconify-icon>
-                                <div class="lh-1"><strong>Light - </strong> A simple light alert—check it
-                                    out!
-                                </div>
-                            </div>
-                            <div class="alert alert-dark alert-dismissible d-flex align-items-center border border-dark mb-0"
-                                 role="alert">
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                        aria-label="Close"></button>
-                                <iconify-icon icon="solar:balloon-bold-duotone" class="font-20 me-1"></iconify-icon>
-                                <div class="lh-1"><strong>Dark - </strong> A simple dark alert—check it out!
-                                </div>
-                            </div>
-
-                        </div> <!-- end card-body-->
-                    </div> <!-- end card-->
-                </div> <!-- end col-->
-            </div>
-            <!-- end row -->
-
-            <div class="row">
-                <div class="col-xl-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="header-title">Additional Content</h5>
-                            <p class="card-subtitle">
-                                Alerts can also contain additional HTML elements like headings, paragraphs and
-                                dividers.
-                            </p>
-                        </div>
-
-                        <div class="card-body pt-2">
-                            <div class="alert alert-success p-3" role="alert">
-                                <h4 class="alert-heading">Well done!</h4>
-                                <p>Aww yeah, you successfully read this important alert message. This
-                                    example text is going to run a bit longer so that you can see how
-                                    spacing within an alert works with this kind of content.</p>
-                                <hr class="border-success border-opacity-25">
-                                <p class="mb-0">Whenever you need to, be sure to use margin utilities to
-                                    keep things nice and tidy.</p>
-                            </div>
-
-                            <div class="alert alert-secondary p-3 d-flex" role="alert">
-                                <iconify-icon icon="solar:bell-bing-bold-duotone" class="fs-1 me-2"></iconify-icon>
-                                <div>
-                                    <h4 class="alert-heading">Well done!</h4>
-                                    <p>Aww yeah, you successfully read this important alert message. This
-                                        example text is going to run a bit longer so that you can see how
-                                        spacing within an alert works with this kind of content.</p>
-                                    <hr class="border-secondary border-opacity-25">
-                                    <p class="mb-0">Whenever you need to, be sure to use margin utilities to
-                                        keep things nice and tidy.</p>
-                                </div>
-                            </div>
-
-                            <div class="alert alert-primary d-flex p-3 mb-0" role="alert">
-                                <iconify-icon icon="solar:atom-bold-duotone" class="fs-1 me-2"></iconify-icon>
-                                <div>
-                                    <h4 class="alert-heading">Thank you!</h4>
-                                    <p>Aww yeah, you successfully read this important alert message. This
-                                        example text is going to run a bit longer so that you can see how
-                                        spacing within an alert works with this kind of content.</p>
-                                    <button type="button" class="btn btn-primary btn-sm">Close</button>
-                                </div>
-                            </div>
-                        </div> <!-- end card-body-->
-                    </div> <!-- end card-->
-                </div> <!-- end col-->
-
-                <div class="col-xl-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="header-title">Live Alert</h5>
-                            <p class="card-subtitle">Click the button below to show an alert (hidden with inline styles
-                                to start), then dismiss (and destroy) it with the built-in close button.</p>
-                        </div>
-
-                        <div class="card-body pt-2">
-                            <div id="liveAlertPlaceholder"></div>
-                            <button type="button" class="btn btn-primary" id="liveAlertBtn">Show live alert</button>
+                            <div class="card-body">
+                                <div id="liveAlertPlaceholder"></div>
+                                <button type="button" class="btn btn-primary" id="liveAlertBtn">Show live alert</button>
+                            </div> <!--end card body-->
                         </div>
                     </div>
-                </div>
-            </div> <!-- end row-->
+                </div> <!-- end row-->
 
-        </div> <!-- container -->
+            </div> <!-- container -->
 
+            <?php include('partials/footer.php'); ?>
 
-        <?php include 'partials/footer.php' ?>
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- End of Main Content -->
+        <!-- ============================================================== -->
 
     </div>
+    <!-- END wrapper -->
 
-    <!-- ============================================================== -->
-    <!-- End Page content -->
-    <!-- ============================================================== -->
+    <?php include('partials/customizer.php'); ?>
 
-</div>
-<!-- END wrapper -->
+    <?php include('partials/footer-scripts.php'); ?>
 
-<?php include 'partials/customizer.php' ?>
+    <script>
+        const alertPlaceholder = document.getElementById('liveAlertPlaceholder')
+        const appendAlert = (message, type) => {
+            const wrapper = document.createElement('div')
+            wrapper.innerHTML = [
+                `<div class="alert alert-${type} alert-dismissible" role="alert">`,
+                `   <div>${message}</div>`,
+                '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+                '</div>'
+            ].join('')
 
-<?php include 'partials/footer-scripts.php' ?>
+            alertPlaceholder.append(wrapper)
+        }
+
+        const alertTrigger = document.getElementById('liveAlertBtn')
+        if (alertTrigger) {
+            alertTrigger.addEventListener('click', () => {
+                appendAlert('Nice, you triggered this alert message!', 'success')
+            })
+        }
+    </script>
 
 </body>
 

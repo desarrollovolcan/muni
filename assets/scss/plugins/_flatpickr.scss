@@ -1,90 +1,38 @@
 //
-// flatpickr.scss
+// _flatpickr.scss
 //
 
 .flatpickr-calendar {
     background: $dropdown-bg;
     box-shadow: var(--#{$prefix}box-shadow);
     border: 1px solid $dropdown-border-color;
+    font-size: $font-size-base;
 
     &.arrowTop {
-        &:before,
+        &:before {
+            border-bottom-color: $dropdown-bg;
+        }
+
         &:after {
             border-bottom-color: $dropdown-bg;
         }
     }
 
     &.arrowBottom {
+
         &:before,
         &:after {
             border-top-color: $dropdown-bg;
         }
     }
 
-    &.open,
-    &.inline {
-        opacity: 1;
-        max-height: 640px;
-        visibility: visible;
-    }
-
-    &.inline {
-        display: block;
-        position: relative;
-        top: 2px;
-        width: 100%;
-        box-shadow: none;
-        border: none;
-
-        .flatpickr-rContainer {
-            display: block;
-            width: 100%;
-
-            .flatpickr-days {
-                width: 100%;
-                border: none;
-
-
-                .dayContainer {
-                    width: 100%;
-                    min-width: 100%;
-                    max-width: 100%;
-
-                    .flatpickr-day {
-                        max-width: 100%;
-                    }
-                }
-            }
-        }
-
-        .flatpickr-current-month {
-            padding: 0;
-        }
-
-        .flatpickr-months {
-
-            .flatpickr-next-month,
-            .flatpickr-prev-month {
-                padding: 0;
-            }
-        }
-
-        .flatpickr-day.today,
-        .flatpickr-day.selected {
-            background-color: transparent;
-            color: $danger;
-            border: none;
-            font-weight: $font-weight-semibold;
-        }
+    &.open {
+        z-index: 9999;
     }
 }
 
 .flatpickr-current-month {
-    font-size: 110%;
-
-    .numInputWrapper {
-        width: 65px;
-    }
+    font-size: 100%;
 }
 
 .flatpickr-day {
@@ -131,15 +79,15 @@
 
 .flatpickr-months {
     .flatpickr-month {
-        height: 36px;
+        height: 40px;
     }
 
     .flatpickr-prev-month,
     .flatpickr-next-month,
     .flatpickr-month {
-        color: var(--#{$prefix}gray-500);
+        color: var(--#{$prefix}body-color);
         fill: var(--#{$prefix}gray-500);
-        padding: 5px;
+        line-height: 16px;
     }
 }
 
@@ -156,6 +104,11 @@ span.flatpickr-weekday,
 .flatpickr-time .flatpickr-am-pm {
     color: $dropdown-link-color;
     fill: $dropdown-link-color;
+    font-weight: $font-weight-semibold;
+}
+
+.flatpickr-current-month input.cur-year {
+    font-weight: $font-weight-semibold;
 }
 
 .flatpickr-day {
@@ -167,7 +120,7 @@ span.flatpickr-weekday,
     &.notAllowed,
     &.notAllowed.prevMonthDay,
     &.notAllowed.nextMonthDay {
-        color: $dropdown-link-disabled-color;
+        color: var(--#{$prefix}secondary-color);
     }
 
     &.inRange,
@@ -197,15 +150,46 @@ span.flatpickr-weekday,
     color: $dropdown-link-active-color;
 }
 
+.flatpickr-current-month .numInputWrapper {
+    width: 8ch;
+    display: inline-block;
+    margin-left: 10px;
+}
+
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month .numInputWrapper {
+    border: 1px solid var(--#{$prefix}border-color);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-weight: normal;
+}
+
 .flatpickr-day.inRange {
     box-shadow: -5px 0 0 $dropdown-link-hover-bg, 5px 0 0 $dropdown-link-hover-bg;
 }
 
 .flatpickr-day.flatpickr-disabled,
 .flatpickr-day.flatpickr-disabled:hover {
-    color: $dropdown-link-disabled-color;
+    color: var(--#{$prefix}secondary-color);
+    text-decoration: line-through;
+    opacity: 0.5;
 }
 
 .flatpickr-calendar.hasTime .flatpickr-time {
     border-top: var(--#{$prefix}border-color);
+}
+
+.flatpickr-weekwrapper .flatpickr-weeks {
+    box-shadow: none;
+
+}
+
+.flatpickr-weekwrapper span.flatpickr-day,
+.flatpickr-weekwrapper span.flatpickr-day:hover {
+    color: var(--#{$prefix}secondary-color);
+}
+
+[data-inline-date=true],
+[data-time-inline] {
+    display: none
 }

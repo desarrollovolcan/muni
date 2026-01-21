@@ -29,25 +29,24 @@
 }
 
 .swal2-icon {
-    
-    &.swal2-question {
-        border-color: $info;
-        color: $info;
+     &.swal2-question {
+        border-color: var(--#{$prefix}info);
+        color: var(--#{$prefix}info);
     }
 
     &.swal2-success {
         [class^=swal2-success-line] {
-            background-color: $success;
+            background-color: var(--#{$prefix}success);
         }
 
         .swal2-success-ring {
-            border-color: $success;
+            border-color: var(--#{$prefix}success);
         }
     }
 
     &.swal2-warning {
-        border-color: $warning;
-        color: $warning;
+        border-color: var(--#{$prefix}warning);
+        color: var(--#{$prefix}warning);
     }
 }
 
@@ -61,8 +60,8 @@ div:where(.swal2-icon) {
     }
 
     &.swal2-info {
-        border-color: $info;
-        color: $info;
+        border-color: var(--#{$prefix}info);
+        color: var(--#{$prefix}info);
     }
 }
 
@@ -73,7 +72,7 @@ div:where(.swal2-icon) {
 }
 
 .swal2-loader {
-    border-color: $primary transparent $primary transparent;
+    border-color: var(--#{$prefix}primary) transparent var(--#{$prefix}primary) transparent;
 }
 
 .swal2-timer-progress-bar {
@@ -82,10 +81,10 @@ div:where(.swal2-icon) {
 
 .swal2-progress-steps {
     .swal2-progress-step {
-        background: $primary;
+        background: var(--#{$prefix}primary);
 
         &.swal2-active-progress-step {
-            background: $primary;
+            background: var(--#{$prefix}primary);
 
             &~.swal2-progress-step,
             &~.swal2-progress-step-line {
@@ -95,14 +94,14 @@ div:where(.swal2-icon) {
     }
 
     .swal2-progress-step-line {
-        background: $primary;
+        background: var(--#{$prefix}primary);
     }
 }
 
 .swal2-actions.swal2-loading {
     .swal2-styled.swal2-confirm {
-        border-left-color: $primary !important;
-        border-right-color: $primary !important;
+        border-left-color: var(--#{$prefix}primary) !important;
+        border-right-color: var(--#{$prefix}primary) !important;
     }
 }
 
@@ -126,9 +125,11 @@ div:where(.swal2-icon) {
     font-weight: $input-font-weight;
     line-height: $input-line-height;
     color: $input-color;
+    box-shadow: none !important;
+    border-radius: 5px !important;
     background-color: $input-bg;
     background-clip: padding-box;
-    border: $input-border-width solid $input-border-color;
+    border: $input-border-width solid $input-border-color !important;
 }
 
 .swal2-close {
@@ -168,4 +169,9 @@ div:where(.swal2-icon).swal2-success [class^=swal2-success-line][class$=tip] {
     top: 1.85em;
     right: .5em;
     width: 2.25em;
+}
+
+.swal2-backdrop-show {
+    backdrop-filter: blur(2px);
+    background: var(--#{$prefix}emphasis-color);
 }

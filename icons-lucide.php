@@ -1,352 +1,447 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php include('partials/html.php'); ?>
 
 <head>
-    <?php
-    $title = "Lucide Icons";
-    include "partials/title-meta.php" ?>
+    <?php $title = "Lucide Icons"; include('partials/title-meta.php'); ?>
 
-    <?php include 'partials/head-css.php' ?>
+    <?php include('partials/head-css.php'); ?>
 </head>
 
 <body>
-<!-- Begin page -->
-<div class="wrapper">
+    <!-- Begin page -->
+    <div class="wrapper">
 
-    <?php include 'partials/sidenav.php' ?>
+        <?php include('partials/menu.php'); ?>
 
-    <?php include 'partials/topbar.php' ?>
+        <!-- ============================================================== -->
+        <!-- Start Main Content -->
+        <!-- ============================================================== -->
 
-    <!-- ============================================================== -->
-    <!-- Start Page Content here -->
-    <!-- ============================================================== -->
+        <div class="content-page">
 
-    <div class="page-content">
+            <div class="container-fluid">
+                
+                <?php $subtitle = "Icons"; $title = "Lucide"; include('partials/page-title.php'); ?>
 
-        <!-- Start Content-->
-        <div class="page-container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-block">
+                                <h4 class="card-title mb-1 d-flex align-items-center gap-2">
+                                    <i data-lucide="layout-dashboard" class="fs-xl"></i> Overview
+                                </h4>
+                                <p class="mb-0 text-muted">Lucide is an open-source library of clean, scalable SVG icons for web and app development, offering easy integration and customization.</p>
+                            </div>
 
-            <?php
-            $subtitle = "Icons";
-            $title = "Lucide Icons";
-            include "partials/page-title.php" ?>
 
-            <div class="d-flex flex-wrap gap-3 justify-content-center icon-box mb-3">
-                    <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="alert-circle">
-                        <div class="card-body">
-                            <i data-lucide="alert-circle"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="activity">
-                        <div class="card-body">
-                            <i data-lucide="activity"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="alert-triangle">
-                        <div class="card-body">
-                            <i data-lucide="alert-triangle"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="align-center">
-                        <div class="card-body">
-                            <i data-lucide="align-center"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="airplay">
-                        <div class="card-body">
-                            <i data-lucide="airplay"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="align-justify">
-                        <div class="card-body">
-                            <i data-lucide="align-justify"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="align-left">
-                        <div class="card-body">
-                            <i data-lucide="align-left"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="align-right">
-                        <div class="card-body">
-                            <i data-lucide="align-right"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="arrow-down-left">
-                        <div class="card-body">
-                            <i data-lucide="arrow-down-left"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="arrow-down-right">
-                        <div class="card-body">
-                            <i data-lucide="arrow-down-right"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="anchor">
-                        <div class="card-body">
-                            <i data-lucide="anchor"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="aperture">
-                        <div class="card-body">
-                            <i data-lucide="aperture"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="arrow-left">
-                        <div class="card-body">
-                            <i data-lucide="arrow-left"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="arrow-right">
-                        <div class="card-body">
-                            <i data-lucide="arrow-right"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="arrow-down">
-                        <div class="card-body">
-                            <i data-lucide="arrow-down"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="arrow-up-left">
-                        <div class="card-body">
-                            <i data-lucide="arrow-up-left"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="arrow-up-right">
-                        <div class="card-body">
-                            <i data-lucide="arrow-up-right"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="arrow-up">
-                        <div class="card-body">
-                            <i data-lucide="arrow-up"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="award">
-                        <div class="card-body">
-                            <i data-lucide="award"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="bar-chart">
-                        <div class="card-body">
-                            <i data-lucide="bar-chart"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="at-sign">
-                        <div class="card-body">
-                            <i data-lucide="at-sign"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="bar-chart-2">
-                        <div class="card-body">
-                            <i data-lucide="bar-chart-2"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="battery-charging">
-                        <div class="card-body">
-                            <i data-lucide="battery-charging"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="bell-off">
-                        <div class="card-body">
-                            <i data-lucide="bell-off"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="battery">
-                        <div class="card-body">
-                            <i data-lucide="battery"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="bluetooth">
-                        <div class="card-body">
-                            <i data-lucide="bluetooth"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="bell">
-                        <div class="card-body">
-                            <i data-lucide="bell"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="book">
-                        <div class="card-body">
-                            <i data-lucide="book"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="briefcase">
-                        <div class="card-body">
-                            <i data-lucide="briefcase"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="camera-off">
-                        <div class="card-body">
-                            <i data-lucide="camera-off"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="calendar">
-                        <div class="card-body">
-                            <i data-lucide="calendar"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="bookmark">
-                        <div class="card-body">
-                            <i data-lucide="bookmark"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="box">
-                        <div class="card-body">
-                            <i data-lucide="box"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="camera">
-                        <div class="card-body">
-                            <i data-lucide="camera"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="check-circle">
-                        <div class="card-body">
-                            <i data-lucide="check-circle"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="check">
-                        <div class="card-body">
-                            <i data-lucide="check"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="check-square">
-                        <div class="card-body">
-                            <i data-lucide="check-square"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="cast">
-                        <div class="card-body">
-                            <i data-lucide="cast"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="chevron-down">
-                        <div class="card-body">
-                            <i data-lucide="chevron-down"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="chevron-left">
-                        <div class="card-body">
-                            <i data-lucide="chevron-left"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="chevron-right">
-                        <div class="card-body">
-                            <i data-lucide="chevron-right"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="chevron-up">
-                        <div class="card-body">
-                            <i data-lucide="chevron-up"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="chevrons-down">
-                        <div class="card-body">
-                            <i data-lucide="chevrons-down"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="chevrons-right">
-                        <div class="card-body">
-                            <i data-lucide="chevrons-right"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="chevrons-up">
-                        <div class="card-body">
-                            <i data-lucide="chevrons-up"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="chevrons-left">
-                        <div class="card-body">
-                            <i data-lucide="chevrons-left"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="circle">
-                        <div class="card-body">
-                            <i data-lucide="circle"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="clipboard">
-                        <div class="card-body">
-                            <i data-lucide="clipboard"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="chrome">
-                        <div class="card-body">
-                            <i data-lucide="chrome"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="clock">
-                        <div class="card-body">
-                            <i data-lucide="clock"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="cloud-lightning">
-                        <div class="card-body">
-                            <i data-lucide="cloud-lightning"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="cloud-drizzle">
-                        <div class="card-body">
-                            <i data-lucide="cloud-drizzle"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="cloud-rain">
-                        <div class="card-body">
-                            <i data-lucide="cloud-rain"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="cloud-off">
-                        <div class="card-body">
-                            <i data-lucide="cloud-off"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="codepen">
-                        <div class="card-body">
-                            <i data-lucide="codepen"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="cloud-snow">
-                        <div class="card-body">
-                            <i data-lucide="cloud-snow"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="compass">
-                        <div class="card-body">
-                            <i data-lucide="compass"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="copy">
-                        <div class="card-body">
-                            <i data-lucide="copy"></i>
-                        </div>
-                    </span>
-                <span class="card" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="corner-down-right">
-                        <div class="card-body">
-                            <i data-lucide="corner-down-right"></i>
-                        </div>
-                    </span>
+                            <div class="card-body">
+                                <h4 class="mt-0 fs-base mb-1">Usage</h4>
+                                <code>&lt;i data-lucide=&quot;xxx&quot;&gt;&lt;/i&gt;</code>
+
+                                <div class="d-flex align-items-center gap-2 mt-3">
+                                    <i data-lucide="camera" class="fs-3"></i>
+                                    <i data-lucide="heart" class="fs-3"></i>
+                                    <i data-lucide="star" class="fs-3"></i>
+                                    <i data-lucide="check" class="fs-3"></i>
+                                    <i data-lucide="bell" class="fs-3"></i>
+                                    <i data-lucide="cloud" class="fs-3"></i>
+                                    <i data-lucide="user" class="fs-3"></i>
+                                </div>
+
+
+                            </div> <!-- end card-body-->
+                            <div class="card-body border-top border-dashed">
+                                <h4 class="mt-0 fs-base mb-1">Colors</h4>
+                                <code>&lt;i data-lucide=&quot;xxx&quot; class=&quot;text-xx&quot;&gt;&lt;/i&gt;</code>
+
+                                <div class="d-flex align-items-center gap-2 mt-3">
+                                    <i data-lucide="home" class="fs-3 text-primary"></i>
+                                    <i data-lucide="settings" class="fs-3 text-secondary"></i>
+                                    <i data-lucide="calendar" class="fs-3 text-success"></i>
+                                    <i data-lucide="message-circle" class="fs-3 text-info"></i>
+                                    <i data-lucide="flag" class="fs-3 text-warning"></i>
+                                    <i data-lucide="folder" class="fs-3 text-danger"></i>
+                                    <i data-lucide="globe" class="fs-3 text-light"></i>
+                                    <i data-lucide="key" class="fs-3 text-dark"></i>
+                                    <i data-lucide="layers" class="fs-3 text-purple"></i>
+                                </div>
+
+                            </div>
+
+                            <div class="card-body border-top border-dashed">
+                                <h4 class="mt-0 fs-base mb-1">Fill Colors</h4>
+                                <code>&lt;i data-lucide=&quot;xxx&quot; class=&quot;text-xx fill-xx&quot;&gt;&lt;/i&gt;</code>
+
+                                <div class="d-flex align-items-center gap-2 mt-3">
+                                    <i data-lucide="star" class="fs-3 text-primary fill-primary"></i>
+                                    <i data-lucide="user" class="fs-3 text-secondary fill-secondary"></i>
+                                    <i data-lucide="check-circle" class="fs-3 text-success fill-success"></i>
+                                    <i data-lucide="bell" class="fs-3 text-info fill-info"></i>
+                                    <i data-lucide="alert-triangle" class="fs-3 text-warning fill-warning"></i>
+                                    <i data-lucide="file-text" class="fs-3 text-danger fill-danger"></i>
+                                    <i data-lucide="airplay" class="fs-3 text-light fill-light"></i>
+                                    <i data-lucide="lock" class="fs-3 text-dark fill-dark"></i>
+                                    <i data-lucide="database" class="fs-3 text-purple fill-purple"></i>
+                                </div>
+
+                            </div>
+
+                            <div class="card-body border-top border-dashed">
+                                <h4 class="mt-0 fs-base mb-1">Sizes</h4>
+                                <code>&lt;i class=&quot;ti ti-xxxx fs-xx&quot;&gt;&lt;/i&gt;</code>
+
+                                <div class="d-flex align-items-center gap-2 mt-3">
+                                    <i data-lucide="phone" class="fs-1"></i>
+                                    <i data-lucide="badge-dollar-sign" class="fs-2"></i>
+                                    <i data-lucide="monitor" class="fs-3"></i>
+                                    <i data-lucide="tablet" class="fs-4"></i>
+                                    <i data-lucide="gamepad-2" class="fs-5"></i>
+                                    <i data-lucide="watch" class="fs-6"></i>
+                                </div>
+
+
+                                <div class="d-flex align-items-center gap-2 mt-3">
+                                    <i data-lucide="watch"></i>
+                                    <i data-lucide="watch" class="fs-sm"></i>
+                                    <i data-lucide="watch" class="fs-lg"></i>
+                                    <i data-lucide="watch" class="fs-xl"></i>
+                                    <i data-lucide="watch" class="fs-xxl"></i>
+                                    <i data-lucide="watch" class="fs-24"></i>
+                                    <i data-lucide="watch" class="fs-32"></i>
+                                    <i data-lucide="watch" class="fs-36"></i>
+                                    <i data-lucide="watch" class="fs-42"></i>
+                                    <i data-lucide="watch" class="fs-60"></i>
+                                </div>
+
+                            </div> <!-- end card-body-->
+
+                            <div class="card-body border-top border-dashed">
+                                <h4 class="mt-0 mb-3">Icons</h4>
+
+                                <div class="d-flex flex-wrap align-items-center text-center gap-2">
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="phone" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Phone</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="badge-percent" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Ad 2</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="headphones" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Headphones</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="camera" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Camera</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="watch" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Watch</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="mic" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Microphone</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="headset" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Headset</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="tablet" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Tablet</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="gamepad-2" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Gamepad</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="printer" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Printer</span>
+                                        </span>
+                                    </div>
+
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="speaker" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Speaker</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="database" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Database</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="cloud" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Cloud</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="wifi" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Wi-Fi</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="bluetooth" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Bluetooth</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="usb" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">USB</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="folder" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Folder</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="lock" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Lock</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="key" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Key</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="shield" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Shield</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="paperclip" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Paperclip</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="bell" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Bell</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="search" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Search</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="briefcase" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Briefcase</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="shopping-cart" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Cart</span>
+                                        </span>
+                                    </div>
+
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="file" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">File</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="book" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Book</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="mail" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Mail</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="user" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">User</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="user-circle" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">User Circle</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="phone" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Phone Call</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="music" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Music</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="film" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Movie</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="upload" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Upload</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="cloud-upload" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Cloud Upload</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="share" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Share</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="arrow-right" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Arrow Right</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="arrow-left" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Arrow Left</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="arrow-up" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Arrow Up</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="arrow-down" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Arrow Down</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="search" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Search</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="avatar-xxl">
+                                        <span class="avatar-title flex-column gap-1 border border-dashed rounded-3 overflow-hidden text-truncate text-center p-1">
+                                            <i data-lucide="refresh-ccw" class="fs-xxl"></i>
+                                            <span class="fw-semibold d-block w-100 text-truncate">Refresh</span>
+                                        </span>
+                                    </div>
+
+                                
+                                </div> <!-- end display-->
+
+                                <div class="text-center mt-3">
+                                    <a href="https://lucide.dev/icons/" target="_blank" class="btn btn-danger">View All Icons</a>
+                                </div>
+                            </div> <!-- end card-body-->
+                        </div> <!-- end card-->
+                    </div> <!-- end col-->
+                </div> <!-- end row-->
+
             </div>
+            <!-- container -->
 
-            <div class="text-center">
-                <a href="https://lucide.dev/icons/" target="_blank" class="btn btn-danger">View All Icons</a>
-            </div>
+            <?php include('partials/footer.php'); ?>
 
-        </div> <!-- container -->
+        </div>
 
-        <?php include 'partials/footer.php' ?>
+        <!-- ============================================================== -->
+        <!-- End of Main Content -->
+        <!-- ============================================================== -->
 
     </div>
+    <!-- END wrapper -->
 
-    <!-- ============================================================== -->
-    <!-- End Page content -->
-    <!-- ============================================================== -->
+    <?php include('partials/customizer.php'); ?>
 
-</div>
-<!-- END wrapper -->
-
-<?php include 'partials/footer-scripts.php' ?>
+    <?php include('partials/footer-scripts.php'); ?>
 
 </body>
 

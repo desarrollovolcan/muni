@@ -2,7 +2,6 @@
 // Maps Leaflet
 // 
 
-
 // Data Variable
 var statesData = {
     type: 'FeatureCollection',

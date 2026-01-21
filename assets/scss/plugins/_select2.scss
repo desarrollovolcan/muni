@@ -1,5 +1,5 @@
 //
-// Select 2
+// _select2.scss
 //
 
 .select2-container {
@@ -19,13 +19,19 @@
 
         .select2-selection__arrow {
             height: 34px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             width: 34px;
-            /*rtl:ignore*/
             right: 3px;
 
             b {
-                border-color: var(--#{$prefix}gray-500) transparent transparent transparent;
-                border-width: 5px 5px 0 5px;
+                transition: transform 0.2s ease-in-out;
+                background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='%239ba6b7'  xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 16a1 1 0 0 1-.64-.23l-6-5a1 1 0 1 1 1.28-1.54L12 13.71l5.36-4.32a1 1 0 0 1 1.41.15a1 1 0 0 1-.14 1.46l-6 4.83A1 1 0 0 1 12 16'/%3E%3C/svg%3E");
+                border: 0;
+                margin: -10px;
+                height: 20px;
+                width: 20px;
             }
         }
     }
@@ -35,8 +41,7 @@
     .select2-selection--single {
         .select2-selection__arrow {
             b {
-                border-color: transparent transparent var(--#{$prefix}gray-500) transparent !important;
-                border-width: 0 5px 5px 5px !important;
+                transform: rotate(-180deg);
             }
         }
     }
@@ -55,11 +60,36 @@
     z-index: $zindex-modal + 1;
 }
 
-
 .select2-results__options {
-    scrollbar-width: thin;
-}
+    &::-webkit-scrollbar {
+        -webkit-appearance: none;
+    }
 
+    &::-webkit-scrollbar:vertical {
+        width: 5px;
+        margin-right: 5px;
+    }
+
+    &::-webkit-scrollbar:horizontal {
+        height: 5px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: rgba(var(--#{$prefix}dark-rgb), 0.2);
+        border-radius: 10px;
+        margin-right: 5px;
+        border: none;
+    }
+
+    &::-webkit-scrollbar-track {
+        border-radius: 10px;
+        background-color: transparent;
+    }
+
+    &::-webkit-scrollbar-corner {
+        background-color: transparent;
+    }
+}
 
 .select2-container--default {
     .select2-results__option--selected {
@@ -102,9 +132,7 @@
 
     .select2-selection--single {
         .select2-selection__arrow {
-            /*rtl:ignore*/
             right: 1px;
-            /*rtl:ignore*/
             left: auto;
         }
     }
@@ -112,12 +140,14 @@
 
 .select2-container {
     .select2-selection--multiple {
+        display: flex;
         min-height: $input-height;
         border: $input-border-width solid $input-border-color !important;
         background-color: $input-bg;
 
         .select2-selection__rendered {
-            padding: 1px 12px;
+            padding: 1px 4px;
+            margin-bottom: 0;
         }
 
         .select2-search__field {
@@ -140,7 +170,6 @@
             border-color: tint-color($primary, 10%);
             padding: 0 8px;
 
-            // position: relative;
             &:hover {
                 color: $white;
                 background-color: var(--#{$prefix}primary);
@@ -167,4 +196,17 @@
 [dir="rtl"] .select2-container--open .select2-dropdown {
     left: auto;
     right: 0;
+}
+
+[data-bs-theme="dark"] {
+    .select2-container {
+        .select2-selection--single {
+            .select2-selection__arrow {
+
+                b {
+                    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='%238391a2'  xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 16a1 1 0 0 1-.64-.23l-6-5a1 1 0 1 1 1.28-1.54L12 13.71l5.36-4.32a1 1 0 0 1 1.41.15a1 1 0 0 1-.14 1.46l-6 4.83A1 1 0 0 1 12 16'/%3E%3C/svg%3E");
+                }
+            }
+        }
+    }
 }

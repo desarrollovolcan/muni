@@ -1,71 +1,61 @@
-/* =============
-   Sitemaps
-============= */
+//
+// _sitemap.scss
+//
 
-.sitemap>li>ul {
-    margin-top: 1rem;
-    padding-left: 0;
-}
-
-ul.sitemap {
+.sitemap-list {
     list-style: none;
     padding-left: 0;
+    position: relative;
+    margin: 0;
+
+    ul {
+        list-style: none;
+        padding-left: 2rem;
+        position: relative;
+        margin: 0;
+        padding-bottom: 0.75rem;
+
+        ul {
+            padding-bottom: 0;
+        }
+    }
 
     li {
-        line-height: 1.5rem;
-        vertical-align: top;
-        list-style: none;
         position: relative;
 
         a {
-            text-decoration: none;
-            color: var(--#{$prefix}light-text-emphasis);
+            line-height: 1.5rem;
+        }
+
+        &::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0.5rem;
+            bottom: 0;
+            width: 0;
+            border-left: 1px dashed var(--#{$prefix}border-color);
+        }
+
+        &::after {
+            content: "";
+            position: absolute;
+            top: 0.75rem;
+            left: 0.5rem;
+            width: 1rem;
+            border-top: 1px dashed var(--#{$prefix}border-color);
+        }
+
+        &:last-child::before {
+            height: 0.75rem;
+        }
+
+        >span,
+        >a {
             display: inline-block;
-
-            &:hover {
-                color: $primary;
-            }
-        }
-    }
-
-
-    ul {
-        margin-left: 1rem;
-        margin-bottom: 1rem;
-        padding-top: 10px;
-        padding-left: 20px;
-
-        li {
             position: relative;
-
-            &::before {
-                content: "";
-                display: inline-block;
-                width: 1rem;
-                height: 100%;
-                border-left: 1px solid var(--#{$prefix}dark-bg-subtle);
-                position: absolute;
-            }
-
-            &::before {
-                content: "";
-                display: inline-block;
-                width: 1rem;
-                height: 1.5rem;
-                border-bottom: 1px solid var(--#{$prefix}dark-bg-subtle);
-                position: absolute;
-                top: -0.75rem;
-            }
-
-            a {
-                margin-left: 1.5rem;
-            }
+            z-index: 1;
+            padding-left: 2rem;
         }
-    }
-}
-
-ul.sitemap-icon {
-    ul li a {
-        margin-left: 1.5rem;
     }
 }

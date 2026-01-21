@@ -1,217 +1,221 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php include('partials/html.php'); ?>
 
 <head>
-    <?php
-    $title = "Email Compose";
-    include "partials/title-meta.php" ?>
+    <?php $title = "New Email (Compose)"; include('partials/title-meta.php'); ?>
 
-    <!-- Summernote css -->
-    <link href="assets/vendor/summernote/summernote-bs4.min.css" rel="stylesheet"/>
+    <!-- Quill css -->
+    <link href="assets/plugins/quill/quill.core.css" rel="stylesheet" type="text/css">
+    <link href="assets/plugins/quill/quill.snow.css" rel="stylesheet" type="text/css">
 
-    <?php include 'partials/head-css.php' ?>
+    <?php include('partials/head-css.php'); ?>
 </head>
 
 <body>
-<!-- Begin page -->
-<div class="wrapper">
+    <!-- Begin page -->
+    <div class="wrapper">
 
-    <?php include 'partials/sidenav.php' ?>
+        <?php include('partials/menu.php'); ?>
 
-    <?php include 'partials/topbar.php' ?>
+        <!-- ============================================================== -->
+        <!-- Start Main Content -->
+        <!-- ============================================================== -->
 
-    <!-- ============================================================== -->
-    <!-- Start Page Content here -->
-    <!-- ============================================================== -->
-    <div class="page-content">
+        <div class="content-page">
 
-        <div class="page-container">
+            <div class="container-fluid">
 
-            <?php
-            $subtitle = "Email";
-            $title = "Email Compose";
-            include "partials/page-title.php" ?>
+                <?php $subtitle = "Apps"; $title = "Email"; include('partials/page-title.php'); ?>
 
-            <div class="row">
+                <div class="outlook-box gap-1 email-app">
+                    <div class="offcanvas-lg offcanvas-start outlook-left-menu outlook-left-menu-sm" tabindex="-1" id="emailSidebaroffcanvas">
+                        <div class="card h-100 mb-0 rounded-end-0" data-simplebar>
+                            <div class="card-body">
+                                <a href="email-compose.php" class="btn btn-danger fw-medium w-100">Compose</a>
 
-                <!-- Right Sidebar -->
-                <div class="col-lg-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <!-- Left sidebar -->
-                            <div class="inbox-leftbar">
+                                <div class="list-group list-group-flush list-custom mt-3">
+                                    <a href="email.php" class="list-group-item list-group-item-action active">
+                                        <i class="ti ti-inbox me-1 opacity-75 fs-lg align-middle"></i>
+                                        <span class="align-middle">Inbox</span>
+                                        <span class="badge align-middle bg-danger-subtle fs-xxs text-danger float-end">21</span>
+                                    </a>
 
-                                <a href="email-compose.php"
-                                   class="btn btn-danger btn-block waves-effect waves-light w-100">Compose</a>
+                                    <a href="javascript: void(0);" class="list-group-item list-group-item-action">
+                                        <i class="ti ti-send align-middle me-1 opacity-75 fs-lg"></i>
+                                        <span class="align-middle">Sent</span>
+                                    </a>
 
-                                <div class="mail-list mt-3">
-                                    <a href="#" class="list-group-item border-0 text-danger"><i
-                                                class="mdi mdi-inbox font-18 align-middle me-2"></i>Inbox<span
-                                                class="badge bg-danger float-end ms-2 mt-1">8</span></a>
-                                    <a href="#" class="list-group-item border-0"><i
-                                                class="mdi mdi-star font-18 align-middle me-2"></i>Starred</a>
-                                    <a href="#" class="list-group-item border-0"><i
-                                                class="mdi mdi-file-code font-18 align-middle me-2"></i>Draft<span
-                                                class="badge bg-info float-end ms-2 mt-1">32</span></a>
-                                    <a href="#" class="list-group-item border-0"><i
-                                                class="mdi mdi-send font-18 align-middle me-2"></i>Sent Mail</a>
-                                    <a href="#" class="list-group-item border-0"><i
-                                                class="mdi mdi-delete font-18 align-middle me-2"></i>Trash</a>
+                                    <a href="javascript: void(0);" class="list-group-item list-group-item-action">
+                                        <i class="ti ti-star align-middle me-1 opacity-75 fs-lg"></i>
+                                        <span class="align-middle">Starred</span>
+                                    </a>
+
+                                    <a href="javascript: void(0);" class="list-group-item list-group-item-action">
+                                        <i class="ti ti-clock align-middle me-1 opacity-75 fs-lg"></i>
+                                        <span class="align-middle">Scheduled</span>
+                                    </a>
+
+                                    <a href="javascript: void(0);" class="list-group-item list-group-item-action">
+                                        <i class="ti ti-pencil align-middle me-1 opacity-75 fs-lg"></i>
+                                        <span class="align-middle">Drafts</span>
+                                        <span class="badge align-middle bg-secondary-subtle text-secondary fs-xxs float-end">9</span>
+                                    </a>
+
+                                    <a href="javascript: void(0);" class="list-group-item list-group-item-action">
+                                        <i class="ti ti-alert-circle align-middle me-1 opacity-75 fs-lg"></i>
+                                        <span class="align-middle">Important</span>
+                                    </a>
+
+                                    <a href="javascript: void(0);" class="list-group-item list-group-item-action">
+                                        <i class="ti ti-ban me-1 align-middle opacity-75 fs-lg"></i>
+                                        <span class="align-middle">Spam</span>
+                                    </a>
+
+                                    <a href="javascript: void(0);" class="list-group-item list-group-item-action">
+                                        <i class="ti ti-trash me-1 align-middle opacity-75 fs-lg"></i>
+                                        <span class="align-middle">Trash</span>
+                                    </a>
+
+                                    <div class="list-group-item mt-2">
+                                        <span class="align-middle">Labels</span>
+                                    </div>
+
+                                    <a href="javascript: void(0);" class="list-group-item list-group-item-action">
+                                        <i class="ti ti-chart-donut-filled me-1 align-middle fs-sm text-primary"></i>
+                                        <span class="align-middle">Business</span>
+                                    </a>
+
+                                    <a href="javascript: void(0);" class="list-group-item list-group-item-action">
+                                        <i class="ti ti-chart-donut-filled me-1 align-middle fs-sm text-secondary"></i>
+                                        <span class="align-middle">Personal</span>
+                                    </a>
+
+                                    <a href="javascript: void(0);" class="list-group-item list-group-item-action">
+                                        <i class="ti ti-chart-donut-filled me-1 align-middle fs-sm text-info"></i>
+                                        <span class="align-middle">Friends</span>
+                                    </a>
+
+                                    <a href="javascript: void(0);" class="list-group-item list-group-item-action">
+                                        <i class="ti ti-chart-donut-filled me-1 align-middle fs-sm text-warning"></i>
+                                        <span class="align-middle">Family</span>
+                                    </a>
                                 </div>
 
-                                <h5 class="mt-3">Labels</h5>
-
-                                <div class="list-group b-0 mt-3 mail-list">
-                                    <a href="#" class="list-group-item border-0"><span
-                                                class="fa fa-circle text-info me-2"></span>Web App</a>
-                                    <a href="#" class="list-group-item border-0"><span
-                                                class="fa fa-circle text-warning me-2"></span>Recharge</a>
-                                    <a href="#" class="list-group-item border-0"><span
-                                                class="fa fa-circle text-purple me-2"></span>Wallet Balance</a>
-                                    <a href="#" class="list-group-item border-0"><span
-                                                class="fa fa-circle text-pink me-2"></span>Friends</a>
-                                    <a href="#" class="list-group-item border-0"><span
-                                                class="fa fa-circle text-success me-2"></span>Family</a>
-                                </div>
-
-                            </div>
-                            <!-- End Left sidebar -->
-
-                            <div class="inbox-rightbar">
-
-                                <div class="" role="toolbar">
-                                    <div class="btn-group me-1">
-                                        <button type="button" class="btn btn-sm btn-light waves-effect"><i
-                                                    class="mdi mdi-archive font-18 vertical-middle"></i></button>
-                                        <button type="button" class="btn btn-sm btn-light waves-effect"><i
-                                                    class="mdi mdi-alert-octagon font-18 vertical-middle"></i></button>
-                                        <button type="button" class="btn btn-sm btn-light waves-effect"><i
-                                                    class="mdi mdi-delete-variant font-18 vertical-middle"></i></button>
-                                    </div>
-                                    <div class="btn-group me-1">
-                                        <button type="button"
-                                                class="btn btn-sm btn-light dropdown-toggle waves-effect drop-arrow-none"
-                                                data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="mdi mdi-folder font-18 align-middle"></i>
-                                            <i class="mdi mdi-chevron-down"></i>
-                                        </button>
-                                        <div class="dropdown-menu">
-                                            <span class="dropdown-header">Move to</span>
-                                            <a class="dropdown-item" href="javascript: void(0);">Social</a>
-                                            <a class="dropdown-item" href="javascript: void(0);">Promotions</a>
-                                            <a class="dropdown-item" href="javascript: void(0);">Updates</a>
-                                            <a class="dropdown-item" href="javascript: void(0);">Forums</a>
-                                        </div>
-                                    </div>
-                                    <div class="btn-group me-1">
-                                        <button type="button"
-                                                class="btn btn-sm btn-light dropdown-toggle waves-effect drop-arrow-none"
-                                                data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="mdi mdi-label font-18 align-middle"></i>
-                                            <i class="mdi mdi-chevron-down"></i>
-                                        </button>
-                                        <div class="dropdown-menu">
-                                            <span class="dropdown-header">Label as:</span>
-                                            <a class="dropdown-item" href="javascript: void(0);">Updates</a>
-                                            <a class="dropdown-item" href="javascript: void(0);">Social</a>
-                                            <a class="dropdown-item" href="javascript: void(0);">Promotions</a>
-                                            <a class="dropdown-item" href="javascript: void(0);">Forums</a>
-                                        </div>
-                                    </div>
-
-                                    <div class="btn-group me-1">
-                                        <button type="button"
-                                                class="btn btn-sm btn-light dropdown-toggle waves-effect drop-arrow-none"
-                                                data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="mdi mdi-dots-horizontal font-18 align-middle me-1"></i> More <i
-                                                    class="mdi mdi-chevron-down"></i>
-                                        </button>
-                                        <div class="dropdown-menu">
-                                            <span class="dropdown-header">More Option :</span>
-                                            <a class="dropdown-item" href="javascript: void(0);">Mark as Unread</a>
-                                            <a class="dropdown-item" href="javascript: void(0);">Add to Tasks</a>
-                                            <a class="dropdown-item" href="javascript: void(0);">Add Star</a>
-                                            <a class="dropdown-item" href="javascript: void(0);">Mute</a>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mt-4">
-
-                                    <form>
-                                        <div class="form-group">
-                                            <input type="email" class="form-control" placeholder="To">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <input type="text" class="form-control" placeholder="Subject">
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="summernote">
-                                                <h6 class="mt-2 fw-semibold">Hello Summernote</h6>
-                                                <ul>
-                                                    <li>
-                                                        Select a text to reveal the toolbar.
-                                                    </li>
-                                                    <li>
-                                                        Edit rich document on-the-fly, so elastic!
-                                                    </li>
-                                                </ul>
-                                                <p>
-                                                    End of air-mode area
-                                                </p>
-
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group mb-0">
-                                            <div class="text-end">
-                                                <button type="button"
-                                                        class="btn btn-success waves-effect waves-light me-1"><i
-                                                            class="mdi mdi-content-save-outline"></i></button>
-                                                <button type="button"
-                                                        class="btn btn-success waves-effect waves-light me-1"><i
-                                                            class="mdi mdi-delete"></i></button>
-                                                <button class="btn btn-purple waves-effect waves-light">
-                                                    <span>Send</span> <i class="mdi mdi-send ms-1"></i></button>
-                                            </div>
-                                        </div>
-
-                                    </form>
-                                </div> <!-- end card-->
-
-                            </div>
-
-                            <div class="clearfix"></div>
-                        </div>
+                            </div> <!-- end card-body-->
+                        </div> <!-- end card-->
                     </div>
 
-                </div> <!-- end Col -->
+                    <div class="card h-100 mb-0 rounded-start-0 flex-grow-1 border-start-0">
+                        <div class="card-header d-lg-none d-flex gap-2">
+                            <button class="btn btn-default btn-icon" type="button" data-bs-toggle="offcanvas" data-bs-target="#emailSidebaroffcanvas" aria-controls="emailSidebaroffcanvas">
+                                <i class="ti ti-menu-2 fs-lg"></i>
+                            </button>
 
-            </div><!-- End row -->
+                            <div class="app-search">
+                                <input type="text" class="form-control" placeholder="Search mails...">
+                                <i data-lucide="search" class="app-search-icon text-muted"></i>
+                            </div>
+                        </div>
 
-        </div> <!-- container -->
+                        <div class="card-header card-bg justify-content-between">
+                            <h4 class="card-title">Compose Message</h4>
+                        </div>
 
-        <?php include 'partials/footer.php' ?>
+                        <div class="card-body p-0" style="height: calc(100% - 120px);" data-simplebar data-simplebar-md>
+                            <div class="app-search input-group border-bottom border-dashed ps-2 pe-4">
+                                <input type="text" class="form-control py-3 border-0" placeholder="Enter emails..">
+                                <span class="app-search-icon fw-semibold fs-sm">To:</span>
+                                <button class="btn btn-link fs-sm px-2 text-decoration-underline text-reset fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#email-cc" aria-expanded="false" aria-controls="email-cc">Cc</button>
+                                <button class="btn btn-link fs-sm px-2 text-decoration-underline text-reset fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#email-bcc" aria-expanded="false" aria-controls="email-bcc">Bcc</button>
+                            </div>
+
+                            <div class="collapse" id="email-cc">
+                                <div class="app-search input-group border-bottom border-dashed ps-2 pe-4">
+                                    <input type="text" class="form-control py-3 border-0" placeholder="Enter emails..">
+                                    <span class="app-search-icon fw-semibold fs-sm">Cc:</span>
+                                    <button class="btn btn-link px-2 text-muted fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#email-cc" aria-expanded="false" aria-controls="email-cc"><i class="ti ti-x fs-xl"></i></button>
+                                </div>
+                            </div>
+
+                            <div class="collapse" id="email-bcc">
+                                <div class="app-search input-group border-bottom border-dashed ps-2 pe-4">
+                                    <input type="text" class="form-control py-3 border-0" placeholder="Enter emails..">
+                                    <span class="app-search-icon fw-semibold fs-sm">Bcc:</span>
+                                    <button class="btn btn-link px-2 text-muted fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#email-bcc" aria-expanded="false" aria-controls="email-bcc"><i class="ti ti-x fs-xl"></i></button>
+                                </div>
+                            </div>
+
+                            <div class="border-bottom border-dashed ps-2 pe-4">
+                                <input type="text" class="form-control py-3 fs-sm fw-semibold border-0" placeholder="Subject">
+                            </div>
+
+                            <div class="email-editor">
+                                <div id="snow-editor">
+                                    <p>Hi <strong><em>James</em></strong>,</p>
+
+                                    <p>I hope you're doing well.</p>
+                                    <p>I'm reaching out regarding the latest updates on our project. Please find the summary below:</p>
+                                    <ul>
+                                        <li>All UI components have been reviewed and finalized.</li>
+                                        <li>The mobile responsiveness is now optimized across all breakpoints.</li>
+                                        <li>We’re awaiting final client feedback before deployment.</li>
+                                    </ul>
+                                    <p>Let me know if you need anything else or if there's anything you'd like us to adjust.</p>
+                                    <p><br></p>
+                                    <p>Best regards,</p>
+                                    <p><em>Damian</em></p>
+                                </div><!-- end Snow-editor -->
+                            </div>
+                            <div class="bg-light-subtle p-2 border-light border-bottom">
+                                <div class="d-flex gap-1 align-items-center">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-primary">
+                                            <i class="ti ti-send-2 me-2"></i> Send
+                                        </button>
+                                        <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split drop-arrow-none" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="ti ti-chevron-down align-middle"></i>
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="#">Send & Archive</a>
+                                            <a class="dropdown-item" href="#">Schedule Send</a>
+                                            <a class="dropdown-item" href="#">Save as Draft</a>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="#">Discard</a>
+                                        </div>
+                                    </div><!-- /btn-group -->
+
+                                    <button type="button" class="btn btn-sm btn-icon btn-light ms-auto" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Settings"><i class="ti ti-settings"></i></button>
+                                    <button type="button" class="btn btn-sm btn-icon btn-soft-danger" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Delete"><i class="ti ti-trash"></i></button>
+                                </div>
+                            </div>
+
+                        </div> <!-- end card-body -->
+
+                    </div> <!-- end card-->
+                </div> <!-- end row-->
+
+            </div>
+            <!-- container -->
+
+            <?php include('partials/footer.php'); ?>
+
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- End of Main Content -->
+        <!-- ============================================================== -->
 
     </div>
-    <!-- ============================================================== -->
-    <!-- End Page content -->
-    <!-- ============================================================== -->
+    <!-- END wrapper -->
 
-</div>
-<!-- END wrapper -->
+    <?php include('partials/customizer.php'); ?>
 
-<?php include 'partials/customizer.php' ?>
+    <?php include('partials/footer-scripts.php'); ?>
 
-<?php include 'partials/footer-scripts.php' ?>
+    <!-- Quill Editor js -->
+    <script src="assets/plugins/quill/quill.js"></script>
 
-
-<!--Summernote js-->
-<script src="assets/vendor/summernote/summernote-bs4.min.js"></script>
-
-<!-- Init js-->
-<script src="assets/js/pages/email-compose.js"></script>
+    <!-- Email Compose Page js -->
+    <script src="assets/js/pages/email-compose.js"></script>
 
 </body>
 

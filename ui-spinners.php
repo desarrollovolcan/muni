@@ -1,239 +1,247 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php include('partials/html.php'); ?>
 
 <head>
-    <?php
-    $title = "Spinners";
-    include "partials/title-meta.php" ?>
+    <?php $title = "Spinners"; include('partials/title-meta.php'); ?>
 
-    <link href="assets/vendor/spinkit/css/spinkit.css" rel="stylesheet" type="text/css">
-
-
-    <?php include 'partials/head-css.php' ?>
+    <?php include('partials/head-css.php'); ?>
 </head>
 
 <body>
-<!-- Begin page -->
-<div class="wrapper">
+    <!-- Begin page -->
+    <div class="wrapper">
 
-    <?php include 'partials/sidenav.php' ?>
+        <?php include('partials/menu.php'); ?>
 
-    <?php include 'partials/topbar.php' ?>
+        <!-- ============================================================== -->
+        <!-- Start Main Content -->
+        <!-- ============================================================== -->
 
-    <!-- ============================================================== -->
-    <!-- Start Page Content here -->
-    <!-- ============================================================== -->
+        <div class="content-page">
 
-    <div class="page-content">
-
-        <div class="page-container">
-
-            <?php
-            $subtitle = "Base UI";
-            $title = "Spinners";
-            include "partials/page-title.php" ?>
-
-
-            <div class="row">
-                <div class="col-sm-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="header-title">Rotate plane</h4>
-                            <div class="sk-rotating-plane"></div>
-                        </div>
-                    </div>
-                </div><!-- end col -->
-
-                <div class="col-sm-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="header-title">Double bounce</h4>
-                            <div class="sk-double-bounce">
-                                <div class="sk-child sk-double-bounce1"></div>
-                                <div class="sk-child sk-double-bounce2"></div>
+            <div class="container-fluid">
+                <?php $subtitle = "UI"; $title = "Spinners"; include('partials/page-title.php'); ?>
+                
+                <div class="row">
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Border Spinner</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
                             </div>
 
-                        </div>
-                    </div>
-                </div><!-- end col -->
+                            <div class="card-body">
+                                <p class="text-muted">Use border spinners as lightweight loading indicators.</p>
 
-                <div class="col-sm-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="header-title">Wave</h4>
+                                <div class="spinner-border m-2" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
 
-                            <div class="sk-wave">
-                                <div class="sk-rect sk-rect1"></div>
-                                <div class="sk-rect sk-rect2"></div>
-                                <div class="sk-rect sk-rect3"></div>
-                                <div class="sk-rect sk-rect4"></div>
-                                <div class="sk-rect sk-rect5"></div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Colors</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                </div><!-- end col -->
-            </div>
-            <!-- end row -->
 
-            <div class="row">
-                <div class="col-sm-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="header-title">Wandering cubes</h4>
+                            <div class="card-body">
+                                <p class="text-muted">Use text color utilities like <code>.text-primary</code>, <code>.text-success</code>, or <code>.text-danger</code> to style the spinner, which inherits its color from <code>currentColor</code>.</p>
 
-                            <div class="sk-wandering-cubes">
-                                <div class="sk-cube sk-cube1"></div>
-                                <div class="sk-cube sk-cube2"></div>
+                                <div>
+                                    <div class="spinner-border text-primary m-2" role="status"></div>
+                                    <div class="spinner-border text-secondary m-2" role="status"></div>
+                                    <div class="spinner-border text-success m-2" role="status"></div>
+                                    <div class="spinner-border text-danger m-2" role="status"></div>
+                                    <div class="spinner-border text-warning m-2" role="status"></div>
+                                    <div class="spinner-border text-info m-2" role="status"></div>
+                                    <div class="spinner-border text-light m-2" role="status"></div>
+                                    <div class="spinner-border text-dark m-2" role="status"></div>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Alignment</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                </div><!-- end col -->
 
-                <div class="col-sm-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="header-title">Spinner pulse</h4>
+                            <div class="card-body">
+                                <p class="text-muted">Bootstrap spinners use <code>rem</code>, <code>currentColor</code>, and <code>inline-flex</code> for easy sizing and alignment.</p>
 
-                            <div class="sk-spinner sk-spinner-pulse"></div>
-                        </div>
-                    </div>
-                </div><!-- end col -->
+                                <div class="d-flex align-items-center">
+                                    <strong>Loading...</strong>
+                                    <div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>
+                                </div>
 
-                <div class="col-sm-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="header-title">Chasing dots</h4>
+                                <div class="d-flex justify-content-center mt-3">
+                                    <div class="spinner-border" role="status"></div>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
 
-                            <div class="sk-chasing-dots">
-                                <div class="sk-child sk-dot1"></div>
-                                <div class="sk-child sk-dot2"></div>
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">Buttons Spinner</h4>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                </div><!-- end col -->
-            </div>
-            <!-- end row -->
 
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-lg-6">
+                                        <div class="d-flex flex-wrap gap-2">
+                                            <button class="btn btn-primary btn-icon" type="button" disabled>
+                                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="visually-hidden">Loading...</span>
+                                            </button>
+                                            <button class="btn btn-primary btn-icon rounded-circle" type="button" disabled>
+                                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="visually-hidden">Loading...</span>
+                                            </button>
+                                            <button class="btn btn-primary" type="button" disabled>
+                                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span><span class="visually-hidden">Loading...</span>
+                                            </button>
+                                            <button class="btn btn-primary" type="button" disabled>
+                                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                                Loading...
+                                            </button>
+                                        </div>
+                                    </div><!-- end col -->
+                                    <div class="col-lg-6">
+                                        <div class="d-flex flex-wrap gap-2">
+                                            <button class="btn btn-primary btn-icon" type="button" disabled>
+                                                <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span><span class="visually-hidden">Loading...</span>
+                                            </button>
+                                            <button class="btn btn-primary btn-icon rounded-circle" type="button" disabled>
+                                                <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span><span class="visually-hidden">Loading...</span>
+                                            </button>
+                                            <button class="btn btn-primary" type="button" disabled>
+                                                <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span><span class="visually-hidden">Loading...</span>
+                                            </button>
+                                            <button class="btn btn-primary" type="button" disabled>
+                                                <span class="spinner-grow spinner-grow-sm me-2" role="status" aria-hidden="true"></span>
+                                                Loading...
+                                            </button>
+                                        </div>
+                                    </div><!-- end col -->
+                                </div> <!-- end row -->
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+                    </div> <!-- end col -->
 
-            <div class="row">
-                <div class="col-sm-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="header-title">Three bounce</h4>
-                            <div class="sk-three-bounce">
-                                <div class="sk-child sk-bounce1"></div>
-                                <div class="sk-child sk-bounce2"></div>
-                                <div class="sk-child sk-bounce3"></div>
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Growing Spinner</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                </div><!-- end col -->
 
-                <div class="col-sm-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="header-title">Circle</h4>
+                            <div class="card-body">
+                                <p class="text-muted">Bootstrap spinners use <code>rem</code>, <code>currentColor</code>, and <code>inline-flex</code> for easy resizing, coloring, and alignment.</p>
 
-                            <div class="sk-circle">
-                                <div class="sk-circle1 sk-child"></div>
-                                <div class="sk-circle2 sk-child"></div>
-                                <div class="sk-circle3 sk-child"></div>
-                                <div class="sk-circle4 sk-child"></div>
-                                <div class="sk-circle5 sk-child"></div>
-                                <div class="sk-circle6 sk-child"></div>
-                                <div class="sk-circle7 sk-child"></div>
-                                <div class="sk-circle8 sk-child"></div>
-                                <div class="sk-circle9 sk-child"></div>
-                                <div class="sk-circle10 sk-child"></div>
-                                <div class="sk-circle11 sk-child"></div>
-                                <div class="sk-circle12 sk-child"></div>
+                                <div class="spinner-grow m-2" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Color Growing Spinner</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                </div><!-- end col -->
 
-                <div class="col-sm-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="header-title">Cube grid</h4>
+                            <div class="card-body">
+                                <p class="text-muted">The grow spinner also uses <code>currentColor</code>, so apply classes like <code>.text-primary</code>, <code>.text-warning</code>, or <code>.text-info</code> to customize its color.</p>
 
-                            <div class="sk-cube-grid">
-                                <div class="sk-cube sk-cube1"></div>
-                                <div class="sk-cube sk-cube2"></div>
-                                <div class="sk-cube sk-cube3"></div>
-                                <div class="sk-cube sk-cube4"></div>
-                                <div class="sk-cube sk-cube5"></div>
-                                <div class="sk-cube sk-cube6"></div>
-                                <div class="sk-cube sk-cube7"></div>
-                                <div class="sk-cube sk-cube8"></div>
-                                <div class="sk-cube sk-cube9"></div>
+                                <div>
+                                    <div class="spinner-grow text-primary m-2" role="status"></div>
+                                    <div class="spinner-grow text-secondary m-2" role="status"></div>
+                                    <div class="spinner-grow text-success m-2" role="status"></div>
+                                    <div class="spinner-grow text-danger m-2" role="status"></div>
+                                    <div class="spinner-grow text-warning m-2" role="status"></div>
+                                    <div class="spinner-grow text-info m-2" role="status"></div>
+                                    <div class="spinner-grow text-light m-2" role="status"></div>
+                                    <div class="spinner-grow text-dark m-2" role="status"></div>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Size</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
                             </div>
-                        </div>
+
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="spinner-border avatar-lg text-primary m-2" role="status"></div>
+                                        <div class="spinner-grow avatar-lg text-secondary m-2" role="status"></div>
+                                    </div><!-- end col -->
+
+                                    <div class="col-lg-6">
+                                        <div class="spinner-border avatar-md text-primary m-2" role="status"></div>
+                                        <div class="spinner-grow avatar-md text-secondary m-2" role="status"></div>
+                                    </div><!-- end col -->
+
+                                    <div class="col-lg-6">
+                                        <div class="spinner-border avatar-sm text-primary m-2" role="status"></div>
+                                        <div class="spinner-grow avatar-sm text-secondary m-2" role="status"></div>
+                                    </div><!-- end col -->
+
+                                    <div class="col-lg-6">
+                                        <div class="spinner-border spinner-border-sm m-2" role="status"></div>
+                                        <div class="spinner-grow spinner-grow-sm m-2" role="status"></div>
+                                    </div><!-- end col -->
+                                </div><!--end row-->
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
                     </div>
-                </div><!-- end col -->
-            </div>
-            <!-- end row -->
 
+                </div> <!-- end row -->
 
-            <div class="row">
-                <div class="col-sm-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="header-title">Fading circle</h4>
+            </div> <!-- container -->
 
-                            <div class="sk-fading-circle">
-                                <div class="sk-circle1 sk-circle"></div>
-                                <div class="sk-circle2 sk-circle"></div>
-                                <div class="sk-circle3 sk-circle"></div>
-                                <div class="sk-circle4 sk-circle"></div>
-                                <div class="sk-circle5 sk-circle"></div>
-                                <div class="sk-circle6 sk-circle"></div>
-                                <div class="sk-circle7 sk-circle"></div>
-                                <div class="sk-circle8 sk-circle"></div>
-                                <div class="sk-circle9 sk-circle"></div>
-                                <div class="sk-circle10 sk-circle"></div>
-                                <div class="sk-circle11 sk-circle"></div>
-                                <div class="sk-circle12 sk-circle"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div><!-- end col -->
+            <?php include('partials/footer.php'); ?>
 
-                <div class="col-sm-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="header-title">Folding cube</h4>
+        </div>
 
-                            <div class="sk-folding-cube">
-                                <div class="sk-cube1 sk-cube"></div>
-                                <div class="sk-cube2 sk-cube"></div>
-                                <div class="sk-cube4 sk-cube"></div>
-                                <div class="sk-cube3 sk-cube"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div><!-- end col -->
-
-            </div>
-            <!-- end row -->
-
-        </div> <!-- container -->
-
-
-        <?php include 'partials/footer.php' ?>
+        <!-- ============================================================== -->
+        <!-- End of Main Content -->
+        <!-- ============================================================== -->
 
     </div>
+    <!-- END wrapper -->
 
-    <!-- ============================================================== -->
-    <!-- End Page content -->
-    <!-- ============================================================== -->
+    <?php include('partials/customizer.php'); ?>
 
-</div>
-<!-- END wrapper -->
-
-<?php include 'partials/customizer.php' ?>
-
-<?php include 'partials/footer-scripts.php' ?>
+    <?php include('partials/footer-scripts.php'); ?>
 
 </body>
 

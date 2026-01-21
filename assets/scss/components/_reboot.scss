@@ -1,5 +1,5 @@
 //
-// reboot.scss
+// _reboot.scss
 //
 
 html {
@@ -12,50 +12,24 @@ body {
     overflow-x: hidden;
 }
 
-::selection {
-    color: $primary;
-    background: rgba($primary, 0.15);
-}
-
 button,
 a {
     outline: none !important;
 }
 
-// Lucide Icon 
-
-[data-lucide] {
-    height: 1em;
-    width: 1em;
-}
-
 // Forms
-
-label {
-    font-weight: $font-weight-medium;
-}
-
 b,
 strong {
     font-weight: $font-weight-semibold;
 }
 
-// border style
+// Border styles
 .border-dashed {
     --#{$prefix}border-style: dashed;
 }
 
-// Page Head
-@include media-breakpoint-up(md) {
-    .page-title-head {
-        height: 70px;
-    }
-}
-
-@include media-breakpoint-down(md) {
-    .page-title-head {
-        padding: $spacer 0;
-    }
+.border-transparent {
+    --#{$prefix}border-color: transparent;
 }
 
 // Custom Link
@@ -68,95 +42,33 @@ strong {
     }
 }
 
-
-.page-container {
-    @extend .container-fluid;
+// Lucide SVG Icons
+svg.lucide {
+    width: 1em;
+    height: 1em;
 }
 
-// .page-container {
-//     @extend .container;  
-// }
-
-// .page-container {
-//     max-width: 90%;
-// }
-
-.shadow-text {
-    text-shadow: rgba(255, 255, 255, .3) 5px 1px, rgba(255, 255, 255, .2) 12px 3px, rgba(255, 255, 255, .1) 6px 4px !important;
+// Custom Inner Shadow
+.shadow-inner {
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+// Custom hrline
+hr.border-dashed {
+    border-top-style: dashed;
+}
 
-.card-pricing {
-    box-shadow: $box-shadow-sm;
-
-    .card-pricing-features {
-        li {
-            padding: 15px;
-        }
-    }
-
-    .card-price {
-        font-size: 48px;
-        font-weight: 300;
-    }
-
-    &.active {
-        margin: 0 -24px;
-        box-shadow: $box-shadow;
+// Overwrite for Dark Mode
+html[data-bs-theme="dark"] {
+    .text-bg-light {
+        color: var(--#{$prefix}body-color) !important;
     }
 }
 
-.form-group {
-    margin-bottom: 1rem;
+.icon-spin {
+    animation: 2s linear infinite spinner-border;
 }
 
-
-.widget-box-three .bg-icon {
-    border: 1px dashed var(--#{$prefix}border-color);
-    background-color: var(--#{$prefix}light);
-    line-height: 68px;
-    text-align: center;
-}
-
-.user-position {
-    position: absolute;
-    top: 0;
-    border-left: 1px solid var(--#{$prefix}border-color);
-    bottom: 0;
-    width: 44px;
-    font-size: 16px;
-    text-align: center;
-    right: 0;
-    left: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: row
-}
-
-.user-position span {
-    -webkit-transform: rotate(90deg);
-    transform: rotate(90deg)
-}
-
-
-
-.width-xs {
-    min-width: 80px
-}
-
-.width-sm {
-    min-width: 95px
-}
-
-.width-md {
-    min-width: 110px
-}
-
-.width-lg {
-    min-width: 140px
-}
-
-.width-xl {
-    min-width: 160px
+h1,h2,h3,h4,h5,h6 {
+    font-family: $font-family-secondary;
 }

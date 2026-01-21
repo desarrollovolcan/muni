@@ -1,11 +1,12 @@
 //
-// accordions.scss
+// _accordions.scss
 //
 
 .accordion-button {
-    font-weight: $font-weight-medium;
+    font-weight: $font-weight-semibold;
 }
 
+// Bordered Accordions Style
 .accordion-bordered {
     .accordion-item {
         border-top: $accordion-border-width solid $accordion-border-color;
@@ -26,6 +27,7 @@
     }
 }
 
+// Without Arrow Accordions Style
 .accordion-arrow-none {
     .accordion-button {
         &::after {
@@ -34,11 +36,14 @@
     }
 }
 
+// Custom Icons Support Accordions Style
 .accordion-custom-icon {
     .accordion-icon {
         position: absolute;
         right: $accordion-padding-x;
+        font-size: 18px;
     }
+    
     .accordion-icon-off {
         display: none;
     }

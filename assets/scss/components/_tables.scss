@@ -1,16 +1,15 @@
 //
 // tables.scss
 //
-th {
-    font-weight: $font-weight-semibold;
-}
 
+// Custom table Small head
 .thead-sm {
     > * > * {
         padding: $table-cell-padding-y-sm $table-cell-padding-x-sm !important;
     }
 }
 
+// Custom Table
 .table-custom {
     tfoot > tr > th:first-child, 
     thead > tr > th:first-child, 
@@ -29,19 +28,20 @@ th {
 
 // Tables fluid
 .table-nowrap {
-
     th,
     td {
         white-space: nowrap;
     }
 }
 
-
-// dark mode
-[data-bs-theme="dark"] {
-    .table-light {
-        --#{$prefix}table-color: var(--#{$prefix}body-color);
-        --#{$prefix}table-bg: var(--#{$prefix}light);
-        --#{$prefix}table-border-color: var(--#{$prefix}border-color);
+// Table select
+.table-select:has(.form-check-input:checked) {
+    tr:has(.form-check-input:checked) {
+        background-color: rgba(var(--#{$prefix}warning-rgb), 0.1);
     }
+}
+
+// Table with Dropdown
+.table tr>td .dropdown {
+    position: static;
 }

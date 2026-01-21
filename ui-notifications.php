@@ -1,389 +1,351 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php include('partials/html.php'); ?>
 
 <head>
-    <?php
-    $title = "Notifications";
-    include "partials/title-meta.php" ?>
+    <?php $title = "Bootstrap Toasts"; include('partials/title-meta.php'); ?>
 
-    <!-- Jquery Toast css -->
-    <link href="assets/vendor/jquery-toast-plugin/jquery.toast.min.css" rel="stylesheet" type="text/css"/>
-
-    <?php include 'partials/head-css.php' ?>
+    <?php include('partials/head-css.php'); ?>
 </head>
 
 <body>
-<!-- Begin page -->
-<div class="wrapper">
+    <!-- Begin page -->
+    <div class="wrapper">
 
-    <?php include 'partials/sidenav.php' ?>
+        <?php include('partials/menu.php'); ?>
 
-    <?php include 'partials/topbar.php' ?>
+        <!-- ============================================================== -->
+        <!-- Start Main Content -->
+        <!-- ============================================================== -->
 
-    <!-- ============================================================== -->
-    <!-- Start Page Content here -->
-    <!-- ============================================================== -->
+        <div class="content-page">
 
-    <div class="page-content">
+            <div class="container-fluid">
+                <?php $subtitle = "UI"; $title = "Notifications"; include('partials/page-title.php'); ?>
+                
+                <div class="row">
+                    
+                    <div class="col-lg-6">
 
-        <div class="page-container">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Basic</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
+                            </div>
 
-            <?php
-            $subtitle = "Base UI";
-            $title = "Notifications";
-            include "partials/page-title.php" ?>
+                            <div class="card-body">
+                                <p class="text-muted">Toasts are as flexible as you need and
+                                    have very little required markup. At a minimum, we
+                                    require a single element to contain your “toasted” content and
+                                    strongly encourage a dismiss button.</p>
+                                <div class="p-3">
 
-            <div class="row">
-                <div class="col-12">
-                    <div class="">
-
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5 class="header-title">Default Alert</h5>
+                                    <!-- Basic -->
+                                    <div class="toast fade show" role="alert" aria-live="assertive" aria-atomic="true">
+                                        <div class="toast-header">
+                                            <img src="assets/images/logo-sm.png" alt="brand-logo" height="16" class="me-1">
+                                            <strong class="me-auto fw-bold text-body">BRAND</strong>
+                                            <small>11 mins ago</small>
+                                            <button type="button" class="ms-2 btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                                        </div>
+                                        <div class="toast-body">
+                                            Hello, world! This is a toast message.
+                                        </div>
                                     </div>
-                                    <div class="card-body pt-0">
-                                        <div class="alert alert-success text-success alert-dismissible fade show"
-                                             role="alert">
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                                    aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                            <strong>Well done!</strong> You successfully read this important alert
-                                            message.
+                                    <!--end toast-->
+
+                                </div>
+                            </div> <!-- end card body-->
+                        </div> <!-- end card-->
+
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Placement</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <p class="text-muted">Place toasts with custom CSS as you
+                                    need them. The top right is often used for
+                                    notifications, as is the top middle. If you’re only ever going
+                                    to show one toast at a time, put the positioning
+                                    styles right on the <code>.toast</code>.</p>
+                                <div class="p-3">
+                                    <div aria-live="polite" aria-atomic="true" class="d-flex justify-content-center align-items-center" style="min-height: 200px;">
+
+                                        <!-- Then put toasts within -->
+                                        <div class="toast fade show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-toggle="toast">
+                                            <div class="toast-header">
+                                                <img src="assets/images/logo-sm.png" alt="brand-logo" height="16" class="me-1">
+                                                <strong class="me-auto fw-bold text-body">BRAND</strong>
+                                                <small>11 mins ago</small>
+                                                <button type="button" class="ms-2 btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                                            </div>
+                                            <div class="toast-body">
+                                                Hello, world! This is a toast message.
+                                            </div>
                                         </div>
-                                        <div class="alert alert-info text-info alert-dismissible fade show"
-                                             role="alert">
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                                    aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                            <strong>Heads up!</strong> This alert needs your attention, but it's not
-                                            super important.
-                                        </div>
-                                        <div class="alert alert-warning text-warning alert-dismissible fade show"
-                                             role="alert">
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                                    aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                            <strong>Holy guacamole!</strong> You should check in on some of those
-                                            fields below.
-                                        </div>
-                                        <div class="alert alert-danger text-danger alert-dismissible fade show"
-                                             role="alert">
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                                    aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                            <strong>Oh snap!</strong> Change a few things up and try submitting
-                                            again.
+                                        <!--end toast-->
+                                    </div>
+                                </div>
+                            </div> <!-- end card body-->
+                        </div> <!-- end card-->
+
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Placement</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <p class="text-muted">Place toasts with custom CSS as you need them. The top
+                                    right is often used for notifications, as is the top middle. If you’re only ever
+                                    going to show one toast at a time, put the positioning styles right on the
+                                    <code>.toast</code>.
+                                </p>
+
+                                <form>
+                                    <div class="mb-3">
+                                        <label for="selectToastPlacement">Toast placement</label>
+                                        <select class="form-select mt-2" id="selectToastPlacement">
+                                            <option value="" selected>Select a position...</option>
+                                            <option value="top-0 start-0">Top left</option>
+                                            <option value="top-0 start-50 translate-middle-x">Top center
+                                            </option>
+                                            <option value="top-0 end-0">Top right</option>
+                                            <option value="top-50 start-0 translate-middle-y">Middle left
+                                            </option>
+                                            <option value="top-50 start-50 translate-middle">Middle center
+                                            </option>
+                                            <option value="top-50 end-0 translate-middle-y">Middle right
+                                            </option>
+                                            <option value="bottom-0 start-0">Bottom left</option>
+                                            <option value="bottom-0 start-50 translate-middle-x">Bottom
+                                                center</option>
+                                            <option value="bottom-0 end-0">Bottom right</option>
+                                        </select>
+                                    </div>
+                                </form>
+                                <div aria-live="polite" aria-atomic="true" class="bg-light position-relative bd-example-toasts" style="min-height:294px">
+                                    <div class="toast-container position-absolute p-3" id="toastPlacement">
+                                        <div class="toast show">
+                                            <div class="toast-header">
+                                                <img src="assets/images/logo-sm.png" alt="brand-logo" height="16" class="me-1">
+                                                <strong class="me-auto fw-bold text-body">BRAND</strong>
+                                                <small>11 mins ago</small>
+                                            </div>
+                                            <div class="toast-body">
+                                                Hello, world! This is a toast message.
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+                            </div> <!-- end card body -->
+                        </div> <!-- end card-->
+                    </div> <!-- end col-->
+
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Live Toast</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
                             </div>
-                            <!-- end col -->
 
+                            <div class="card-body">
+                                <p class="text-muted">Click the button below to show a toast (positioned with our utilities in the Toop Right corner)
+                                    that has been hidden by default.
+                                </p>
 
-                            <div class="col-lg-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5 class="header-title">Icon Examples</h5>
-                                    </div>
-                                    <div class="card-body pt-0">
-                                        <div class="alert alert-icon alert-success text-success alert-dismissible fade show"
-                                             role="alert">
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                                    aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                            <i class="mdi mdi-check-all me-2"></i>
-                                            <strong>Well done!</strong> You successfully read this important alert
-                                            message.
+                                <button type="button" class="btn btn-primary" id="liveToastBtn">Show live toast</button>
+
+                                <div class="toast-container position-fixed top-0 end-0 p-3">
+                                    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                                        <div class="toast-header">
+                                            <img src="assets/images/logo-sm.png" alt="brand-logo" height="16" class="me-1">
+                                            <strong class="me-auto fw-bold text-body">BRAND</strong>
+                                            <small>11 mins ago</small>
+                                            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
                                         </div>
-                                        <div class="alert alert-icon alert-info text-info alert-dismissible fade show"
-                                             role="alert">
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                                    aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                            <i class="mdi mdi-information me-2"></i>
-                                            <strong>Heads up!</strong> This alert needs your attention, but it's not
-                                            super important.
-                                        </div>
-                                        <div class="alert alert-icon alert-warning text-warning alert-dismissible fade show"
-                                             role="alert">
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                                    aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                            <i class="mdi mdi-alert me-2"></i>
-                                            <strong>Holy guacamole!</strong> You should check in on some of those
-                                            fields below.
-                                        </div>
-                                        <div class="alert alert-icon alert-danger text-danger alert-dismissible fade show"
-                                             role="alert">
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                                    aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                            <i class="mdi mdi-block-helper me-2"></i>
-                                            <strong>Oh snap!</strong> Change a few things up and try submitting
-                                            again.
+                                        <div class="toast-body">
+                                            Hello, world! This is a toast message.
                                         </div>
                                     </div>
                                 </div>
+                            </div> <!-- end card body-->
+                        </div> <!-- end card-->
+
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Translucent</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
                             </div>
-                            <!-- end col -->
 
-                        </div>
-                        <!-- end row -->
+                            <div class="card-body">
+                                <p class="text-muted">Toasts are slightly translucent, too,
+                                    so they blend over whatever they might appear over.
+                                    For browsers that support the backdrop-filter CSS property,
+                                    we’ll also attempt to blur the elements under a toast.</p>
 
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5 class="header-title">Default Alert (White)</h5>
+                                <div class="p-3 bg-light bg-opacity-50">
+                                    <!-- Translucent -->
+                                    <div class="toast fade show" role="alert" aria-live="assertive" aria-atomic="true">
+                                        <div class="toast-header">
+                                            <img src="assets/images/logo-sm.png" alt="brand-logo" height="16" class="me-1">
+                                            <strong class="me-auto fw-bold text-body">BRAND</strong>
+                                            <small>11 mins ago</small>
+                                            <button type="button" class="ms-2 btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                                        </div>
+                                        <div class="toast-body">
+                                            Hello, world! This is a toast message.
+                                        </div>
                                     </div>
-                                    <div class="card-body pt-0">
-                                        <div class="alert alert-success bg-transparent text-success alert-dismissible fade show"
-                                             role="alert">
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                                    aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                            <strong>Well done!</strong> You successfully read this important alert
-                                            message.
-                                        </div>
-                                        <div class="alert alert-info bg-transparent text-info alert-dismissible fade show"
-                                             role="alert">
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                                    aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                            <strong>Heads up!</strong> This alert needs your attention, but it's not
-                                            super important.
-                                        </div>
-                                        <div class="alert alert-warning text-warning bg-transparent alert-dismissible fade show"
-                                             role="alert">
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                                    aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                            <strong>Holy guacamole!</strong> You should check in on some of those
-                                            fields below.
-                                        </div>
-                                        <div class="alert alert-danger bg-transparent text-danger alert-dismissible fade show"
-                                             role="alert">
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                                    aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                            <strong>Oh snap!</strong> Change a few things up and try submitting
-                                            again.
+                                    <!--end toast-->
+                                </div>
+                            </div> <!-- end card body-->
+                        </div> <!-- end card-->
+
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Stacking</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <p class="text-muted">When you have multiple toasts, we
+                                    default to vertiaclly stacking them in a readable manner.</p>
+                                <div class="p-3">
+                                    <div aria-live="polite" aria-atomic="true" style="position: relative; min-height: 200px;">
+                                        <!-- Position it -->
+                                        <div class="toast-container" style="position: absolute; top: 0; right: 0;">
+
+                                            <!-- Then put toasts within -->
+                                            <div class="toast fade show" role="alert" aria-live="assertive" aria-atomic="true">
+                                                <div class="toast-header">
+                                                    <img src="assets/images/logo-sm.png" alt="brand-logo" height="16" class="me-1">
+                                                    <strong class="me-auto fw-bold text-body">BRAND</strong>
+                                                    <small class="text-muted">just now</small>
+                                                    <button type="button" class="ms-2 btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                                                </div>
+                                                <div class="toast-body">
+                                                    See? Just like this.
+                                                </div>
+                                            </div>
+                                            <!--end toast-->
+
+                                            <div class="toast fade show" role="alert" aria-live="assertive" aria-atomic="true">
+                                                <div class="toast-header">
+                                                    <img src="assets/images/logo-sm.png" alt="brand-logo" height="16" class="me-1">
+                                                    <strong class="me-auto fw-bold text-body">BRAND</strong>
+                                                    <small class="text-muted">2 seconds ago</small>
+                                                    <button type="button" class="ms-2 btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                                                </div>
+                                                <div class="toast-body">
+                                                    Heads up, toasts will stack automatically
+                                                </div>
+                                            </div>
+                                            <!--end toast-->
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <!-- end col -->
+                            </div> <!-- end card body-->
+                        </div> <!-- end card-->
 
-                            <div class="col-lg-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5 class="header-title">Icon Examples (White)</h5>
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Custom content</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+
+                                <div class="toast show align-items-center mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+                                    <div class="d-flex">
+                                        <div class="toast-body">
+                                            Hello, world! This is a toast message.
+                                        </div>
+                                        <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                                     </div>
-                                    <div class="card-body pt-0">
-                                        <div class="alert alert-icon bg-transparent text-success alert-success alert-dismissible fade show"
-                                             role="alert">
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                                    aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                            <i class="mdi mdi-check-all me-2"></i>
-                                            <strong>Well done!</strong> You successfully read this important alert
-                                            message.
+                                </div>
+
+                                <div class="toast show align-items-center text-white bg-primary border-0 mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+                                    <div class="d-flex">
+                                        <div class="toast-body">
+                                            Hello, world! This is a toast message.
                                         </div>
-                                        <div class="alert alert-icon bg-transparent text-info alert-info alert-dismissible fade show"
-                                             role="alert">
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                                    aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                            <i class="mdi mdi-information me-2"></i>
-                                            <strong>Heads up!</strong> This alert needs your attention, but it's not
-                                            super important.
-                                        </div>
-                                        <div class="alert alert-icon bg-transparent text-warning alert-warning alert-dismissible fade show"
-                                             role="alert">
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                                    aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                            <i class="mdi mdi-alert me-2"></i>
-                                            <strong>Holy guacamole!</strong> You should check in on some of those
-                                            fields below.
-                                        </div>
-                                        <div class="alert alert-icon bg-transparent text-danger alert-danger alert-dismissible fade show"
-                                             role="alert">
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                                    aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                            <i class="mdi mdi-block-helper me-2"></i>
-                                            <strong>Oh snap!</strong> Change a few things up and try submitting
-                                            again.
+                                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                                    </div>
+                                </div>
+
+                                <div class="toast show mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+                                    <div class="toast-body">
+                                        Hello, world! This is a toast message.
+                                        <div class="mt-2 pt-2 border-top">
+                                            <button type="button" class="btn btn-primary btn-sm">Take
+                                                action</button>
+                                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="toast">Close</button>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <!-- end col -->
+                            </div> <!-- end card body -->
+                        </div> <!-- end card-->
+                    </div> <!-- end col-->
 
-                        </div>
-                        <!-- end row -->
+                </div><!-- end row-->
 
+            </div> <!-- container -->
 
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <table class="table mb-0">
-                                            <thead>
-                                            <tr>
-                                                <th style="min-width:50%;">Jquery Toast</th>
-                                                <th></th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            <tr>
-                                                <td>Info Example</td>
-                                                <td>
-                                                    <button type="button"
-                                                            class="btn btn-info waves-effect waves-light btn-sm"
-                                                            id="toastr-one">Click me
-                                                    </button>
-                                                </td>
-                                            </tr>
+            <?php include('partials/footer.php'); ?>
 
-                                            <tr>
-                                                <td>Warning Example</td>
-                                                <td>
-                                                    <button type="button"
-                                                            class="btn btn-warning waves-effect waves-light btn-sm"
-                                                            id="toastr-two">Click me
-                                                    </button>
-                                                </td>
-                                            </tr>
+        </div>
 
-                                            <tr>
-                                                <td>Success Example</td>
-                                                <td>
-                                                    <button type="button"
-                                                            class="btn btn-success waves-effect waves-light btn-sm"
-                                                            id="toastr-three">Click me
-                                                    </button>
-                                                </td>
-                                            </tr>
-
-                                            <tr>
-                                                <td>Danger Example</td>
-                                                <td>
-                                                    <button type="button"
-                                                            class="btn btn-danger waves-effect waves-light btn-sm"
-                                                            id="toastr-four">Click me
-                                                    </button>
-                                                </td>
-                                            </tr>
-
-                                            <tr>
-                                                <td>The text can be an array</td>
-                                                <td>
-                                                    <button type="button" class="btn btn-secondary waves-effect btn-sm"
-                                                            id="toastr-five">Click me
-                                                    </button>
-                                                </td>
-                                            </tr>
-
-                                            <tr>
-                                                <td>Put some HTML in the text</td>
-                                                <td>
-                                                    <button type="button" class="btn btn-secondary waves-effect btn-sm"
-                                                            id="toastr-six">Click me
-                                                    </button>
-                                                </td>
-                                            </tr>
-
-                                            <tr>
-                                                <td>Making them sticky</td>
-                                                <td>
-                                                    <button type="button" class="btn btn-secondary waves-effect btn-sm"
-                                                            id="toastr-seven">Click me
-                                                    </button>
-                                                </td>
-                                            </tr>
-
-                                            <tr>
-                                                <td>Fade transitions</td>
-                                                <td>
-                                                    <button type="button" class="btn btn-secondary waves-effect btn-sm"
-                                                            id="toastr-eight">Click me
-                                                    </button>
-                                                </td>
-                                            </tr>
-
-                                            <tr>
-                                                <td>Slide up and down transitions</td>
-                                                <td>
-                                                    <button type="button" class="btn btn-secondary waves-effect btn-sm"
-                                                            id="toastr-nine">Click me
-                                                    </button>
-                                                </td>
-                                            </tr>
-
-                                            <tr>
-                                                <td>Simple show from and hide to corner transition</td>
-                                                <td>
-                                                    <button type="button" class="btn btn-secondary waves-effect btn-sm"
-                                                            id="toastr-ten">Click me
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- end row -->
-
-                    </div>
-                </div>
-            </div>
-            <!-- end row -->
-
-
-        </div> <!-- container -->
-
-        <?php include 'partials/footer.php' ?>
+        <!-- ============================================================== -->
+        <!-- End of Main Content -->
+        <!-- ============================================================== -->
 
     </div>
+    <!-- END wrapper -->
 
-    <!-- ============================================================== -->
-    <!-- End Page content -->
-    <!-- ============================================================== -->
+    <?php include('partials/customizer.php'); ?>
 
-</div>
-<!-- END wrapper -->
+    <?php include('partials/footer-scripts.php'); ?>
 
-<?php include 'partials/customizer.php' ?>
+    <script>
+        const toastTrigger = document.getElementById('liveToastBtn')
+        const toastLiveExample = document.getElementById('liveToast')
 
-<?php include 'partials/footer-scripts.php' ?>
-
-<!-- Tost-->
-<script src="assets/vendor/jquery-toast-plugin/jquery.toast.min.js"></script>
-
-<!-- toastr init js-->
-<script src="assets/js/pages/toastr.js"></script>
+        if (toastTrigger) {
+            const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample)
+            toastTrigger.addEventListener('click', () => {
+                toastBootstrap.show()
+            })
+        }
+    </script>
 
 </body>
 

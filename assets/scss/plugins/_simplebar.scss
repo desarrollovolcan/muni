@@ -1,5 +1,5 @@
 //
-// simplebar.scss
+// _simplebar.scss
 //
 
 [data-simplebar] {
@@ -54,14 +54,10 @@
     position: relative;
     display: block;
     height: 100%;
-    /* Required for horizontal native scrollbar to not appear if parent is taller than natural height */
     width: auto;
     overflow: auto;
-    /* Scroll on this element otherwise element can't have a padding applied properly */
     max-width: 100%;
-    /* Not required for horizontal scroll to trigger */
     max-height: 100%;
-    /* Needed for vertical scroll to trigger */
     scrollbar-width: none;
 }
 
@@ -126,19 +122,21 @@
     overflow: hidden;
 }
 
-[data-simplebar].simplebar-dragging .simplebar-content {
-    pointer-events: none;
-    user-select: none;
-}
+[data-simplebar].simplebar-dragging {
+    .simplebar-content {
+        pointer-events: none;
+        user-select: none;
+    }
 
-[data-simplebar].simplebar-dragging .simplebar-track {
-    pointer-events: all;
+    .simplebar-track {
+        pointer-events: all;
+    }
 }
 
 .simplebar-scrollbar {
     position: absolute;
     right: 2px;
-    width: 5px;
+    width: 6px;
     min-height: 10px;
 
     &:before {
@@ -154,7 +152,6 @@
 }
 
 .simplebar-scrollbar.simplebar-visible:before {
-    /* When hovered, remove all transitions from drag handle */
     opacity: 0.5;
     transition: opacity 0s linear;
 }
@@ -217,48 +214,14 @@
     scrollbar-width: none;
 }
 
-// .dt-scrollable,
-.custom-scroll {
-
-    &::-webkit-scrollbar {
-        -webkit-appearance: none;
-    }
-
-    &::-webkit-scrollbar:vertical {
-        width: 5px;
-        margin-right: 5px;
-    }
-
-    &::-webkit-scrollbar:horizontal {
-        height: 5px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-        background-color: rgba(var(--#{$prefix}dark-rgb), 0.2);
-        // background-color: transparent;
-        border-radius: 10px;
-        margin-right: 5px;
-        border: none;
-    }
-
-    // &:hover {
-    //     &::-webkit-scrollbar-thumb {
-    //         background-color: rgba(var(--#{$prefix}dark-rgb), 0.2);
-    //         transition: all 5s ease-in-out;
-    //     }
-    // }
-
-    &::-webkit-scrollbar-track {
-        border-radius: 10px;
-        background-color: transparent;
-    }
-
-    &::-webkit-scrollbar-corner {
-        background-color: transparent;
+// Scroll Size
+[data-simplebar-md] {
+    .simplebar-scrollbar {
+        right: 1px;
+        width: 8px;
     }
 }
 
-// Scroll Size
 [data-simplebar-lg] {
     .simplebar-scrollbar {
         right: 1px;

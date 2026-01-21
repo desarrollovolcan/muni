@@ -1,39 +1,58 @@
-/*
-Template Name: Adminox - Responsive Bootstrap 4 Admin Dashboard
-Author: CoderThemes
-Version: 2.0.0
-Website: https://coderthemes.com/
-Contact: support@coderthemes.com
-File: Coming Soon init js
-*/
+/**
+ * Template Name: UBold - Admin & Dashboard Template
+ * By (Author): Coderthemes
+ * Module/App (File Name): Coming Soon
+ */
 
 class Countdown {
+
     initCountDown() {
-      var m, i;
-      document.getElementById("days") &&
-        ((m = new Date("Jan 17, 2026 12:00:01").getTime()),
-        (i = setInterval(function () {
-          var e = new Date().getTime(),
-            e = m - e,
-            n = Math.floor(e / 864e5),
-            t = Math.floor((e % 864e5) / 36e5),
-            o = Math.floor((e % 36e5) / 6e4),
-            d = Math.floor((e % 6e4) / 1e3);
-          (document.getElementById("days").innerHTML = n),
-            (document.getElementById("hours").innerHTML = t),
-            (document.getElementById("minutes").innerHTML = o),
-            (document.getElementById("seconds").innerHTML = d),
-            e < 0 &&
-              (clearInterval(i),
-              (document.getElementById("days").innerHTML = ""),
-              (document.getElementById("hours").innerHTML = ""),
-              (document.getElementById("minutes").innerHTML = ""),
-              (document.getElementById("seconds").innerHTML = ""),
-              (document.getElementById("end").innerHTML = "00:00:00:00"));
-        }, 1e3)));
+
+        if (document.getElementById("days")) {
+            // The data/time we want to countdown to
+            const eventCountDown = new Date("Dec 17, 2027 12:00:01").getTime();
+
+            // Run myfunc every second
+            const count = setInterval(function () {
+
+                const now = new Date().getTime();
+                const timeleft = eventCountDown - now;
+
+                // Calculating the days, hours, minutes and seconds left
+                const days = Math.floor(timeleft / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeleft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeleft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeleft % (1000 * 60)) / 1000);
+
+                // Result is output to the specific element
+                document.getElementById("days").innerHTML = days
+                document.getElementById("hours").innerHTML = hours
+                document.getElementById("minutes").innerHTML = minutes
+                document.getElementById("seconds").innerHTML = seconds
+
+
+                // Display the message when countdown is over
+                if (timeleft < 0) {
+                    clearInterval(count);
+                    document.getElementById("days").innerHTML = ""
+                    document.getElementById("hours").innerHTML = ""
+                    document.getElementById("minutes").innerHTML = ""
+                    document.getElementById("seconds").innerHTML = ""
+
+                    const end = document.getElementById("end")
+                    if (end) {
+                        end.innerHTML = "00:00:00:00";
+                    }
+                }
+            }, 1000);
+        }
     }
+
     init() {
-      this.initCountDown();
+        this.initCountDown();
     }
-  }
-  new Countdown().init();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    new Countdown().init();
+})

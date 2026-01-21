@@ -1,208 +1,179 @@
-// 
-// Maps Leaflet
-// 
+/**
+ * Template Name: UBold - Admin & Dashboard Template
+ * By (Author): Coderthemes
+ * Module/App (File Name): Map Leaflet
+ */
 
-'use strict';
-
-(function () {
-
-    // Basic
-    // --------------------------------------------------------------------
-    const basicMapVar = document.getElementById('basicMap');
-    if (basicMapVar) {
-        const basicMap = L.map('basicMap').setView([42.35, -71.08], 10);
-        L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+class LeafletMap {
+    constructor() {
+        this.tileLayerUrl = 'https://{s}.tile.osm.org/{z}/{x}/{y}.png';
+        this.tileLayerOptions = {
             attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
             maxZoom: 18
-        }).addTo(basicMap);
+        };
     }
 
-    // Markers
-    // --------------------------------------------------------------------
-    const shapeMapVar = document.getElementById('shapeMap');
-    if (shapeMapVar) {
-        const markerMap = L.map('shapeMap').setView([51.5, -0.09], 12);
-        const marker = L.marker([51.5, -0.09]).addTo(markerMap);
-        const circle = L.circle([51.508, -0.11], {
-            color: 'red',
-            fillColor: '#f03',
-            fillOpacity: 0.5,
-            radius: 500
-        }).addTo(markerMap);
-        const polygon = L.polygon([
-            [51.509, -0.08],
-            [51.503, -0.06],
-            [51.51, -0.047]
-        ]).addTo(markerMap);
-        L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
-            maxZoom: 18
-        }).addTo(markerMap);
+    init() {
+        this.initBasicMap();
+        this.initShapeMap();
+        this.initDraggableMap();
+        this.initUserLocation();
+        this.initCustomIcons();
+        this.initLayerControl();
+        this.initGeoJsonMap();
     }
 
-    // Drag and popup
-    // --------------------------------------------------------------------
-    const dragMapVar = document.getElementById('dragMap');
-    if (dragMapVar) {
-        const draggableMap = L.map('dragMap').setView([48.817152, 2.455], 12);
-        const markerLocation = L.marker([48.817152, 2.455], {
-            draggable: 'true'
-        }).addTo(draggableMap);
-        markerLocation.bindPopup("<b>You're here!</b>").openPopup();
-        L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
-            maxZoom: 18
-        }).addTo(draggableMap);
+    addTileLayer(map) {
+        L.tileLayer(this.tileLayerUrl, this.tileLayerOptions).addTo(map);
     }
 
-    // User location
-    // --------------------------------------------------------------------
-    const userLocationVar = document.getElementById('userLocation');
-    if (userLocationVar) {
-        const userLocation = L.map('userLocation').setView([42.35, -71.08], 10);
-        userLocation.locate({
-            setView: true,
-            maxZoom: 16
-        });
-
-        function onLocationFound(e) {
-            const radius = e.accuracy;
-            L.marker(e.latlng)
-                .addTo(userLocation)
-                .bindPopup('You are somewhere around ' + radius + ' meters from this point')
-                .openPopup();
-            L.circle(e.latlng, radius).addTo(userLocation);
+    initBasicMap() {
+        const element = document.getElementById('basicMap');
+        if (element) {
+            const map = L.map(element).setView([42.35, -71.08], 10);
+            this.addTileLayer(map);
         }
-        userLocation.on('locationfound', onLocationFound);
-        L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
-            maxZoom: 18
-        }).addTo(userLocation);
     }
 
-    // Custom Icons
-    // --------------------------------------------------------------------
-    const customIconsVar = document.getElementById('customIcons');
-    if (customIconsVar) {
-        const customIcons = L.map('customIcons').setView([51.5, -0.09], 10);
-        const greenLeaf = L.icon({
-            iconUrl: 'assets/images/png/leaf-green.png',
-            shadowUrl: 'assets/images/png/leaf-shadow.png',
-            iconSize: [38, 95],
-            shadowSize: [50, 64],
-            iconAnchor: [22, 94],
-            shadowAnchor: [4, 62],
-            popupAnchor: [-3, -76]
-        });
-        const redLeaf = L.icon({
-            iconUrl: 'assets/images/png/leaf-red.png',
-            shadowUrl: 'assets/images/png/leaf-shadow.png',
-            iconSize: [38, 95],
-            shadowSize: [50, 64],
-            iconAnchor: [22, 94],
-            shadowAnchor: [4, 62],
-            popupAnchor: [-3, -76]
-        });
-        const orangeLeaf = L.icon({
-            iconUrl: 'assets/images/png/leaf-orange.png',
-            shadowUrl: 'assets/images/png/leaf-shadow.png',
-            iconSize: [38, 95],
-            shadowSize: [50, 64],
-            iconAnchor: [22, 94],
-            shadowAnchor: [4, 62],
-            popupAnchor: [-3, -76]
-        });
-        L.marker([51.5, -0.09], {
-            icon: redLeaf
-        }).addTo(customIcons);
-        L.marker([51.4, -0.51], {
-            icon: greenLeaf
-        }).addTo(customIcons);
-        L.marker([51.49, -0.45], {
-            icon: orangeLeaf
-        }).addTo(customIcons);
-        L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
-            maxZoom: 18
-        }).addTo(customIcons);
-    }
+        initShapeMap() {
+            const element = document.getElementById('shapeMap');
+            if (element) {
+                const map = L.map(element).setView([51.5, -0.09], 12);
 
-    // Layer Control
-    // --------------------------------------------------------------------
-    const layerControlVar = document.getElementById('layerControl');
-    if (layerControlVar) {
-        const littleton = L.marker([39.61, -105.02]).bindPopup('This is Littleton, CO.'),
-            denver = L.marker([39.74, -104.99]).bindPopup('This is Denver, CO.'),
-            aurora = L.marker([39.73, -104.8]).bindPopup('This is Aurora, CO.'),
-            golden = L.marker([39.77, -105.23]).bindPopup('This is Golden, CO.');
-        const cities = L.layerGroup([littleton, denver, aurora, golden]);
-        const street = L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
-            maxZoom: 18
-        }),
-            watercolor = L.tileLayer('http://tile.stamen.com/watercolor/{z}/{x}/{y}.jpg', {
-                attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
-                maxZoom: 18
+                const customIcon = L.icon({
+                    iconUrl: 'assets/images/leaflet/marker-icon.png',
+                    shadowUrl: 'assets/images/leaflet/marker-shadow.png'
+                });
+
+                L.marker([51.5, -0.09], { icon: customIcon }).addTo(map);
+                L.circle([51.508, -0.11], {
+                    color: 'red', fillColor: '#f03', fillOpacity: 0.5, radius: 500
+                }).addTo(map);
+                L.polygon([
+                    [51.509, -0.08], [51.503, -0.06], [51.51, -0.047]
+                ]).addTo(map);
+
+                this.addTileLayer(map);
+            }
+        }
+
+    initDraggableMap() {
+        const element = document.getElementById('dragMap');
+        if (element) {
+            const map = L.map(element).setView([48.817152, 2.455], 12);
+
+            const customIcon = L.icon({
+                iconUrl: 'assets/images/leaflet/marker-icon.png',
+                shadowUrl: 'assets/images/leaflet/marker-shadow.png'
             });
-        const layerControl = L.map('layerControl', {
-            center: [39.73, -104.99],
-            zoom: 10,
-            layers: [street, cities]
-        });
-        const baseMaps = {
-            Street: street,
-            Watercolor: watercolor
-        };
-        const overlayMaps = {
-            Cities: cities
-        };
-        L.control.layers(baseMaps, overlayMaps).addTo(layerControl);
-        L.tileLayer('https://c.tile.osm.org/{z}/{x}/{y}.png', {
-            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
-            maxZoom: 18
-        }).addTo(layerControl);
+
+            const marker = L.marker([48.817152, 2.455], {draggable: true,icon: customIcon}).addTo(map);
+            marker.bindPopup("<b>You're here!</b>").openPopup();
+
+            this.addTileLayer(map);
+        }
     }
 
-    // Geojson
-    // --------------------------------------------------------------------
-    const geoJsonVar = document.getElementById('geoJson');
-    if (geoJsonVar) {
-        const geoJsonMap = L.map('geoJson').setView([44.2669, -72.576], 3);
-        L.geoJson(statesData).addTo(geoJsonMap);
-        function getColor(d) {
-            return d > 1000
-                ? '#800026'
-                : d > 500
-                    ? '#BD0026'
-                    : d > 200
-                        ? '#E31A1C'
-                        : d > 100
-                            ? '#FC4E2A'
-                            : d > 50
-                                ? '#FD8D3C'
-                                : d > 20
-                                    ? '#FEB24C'
-                                    : d > 10
-                                        ? '#FED976'
-                                        : '#FFEDA0';
-        }
+    initUserLocation() {
+        const element = document.getElementById('userLocation');
+        if (element) {
+            const map = L.map(element).setView([42.35, -71.08], 10);
+            map.locate({setView: true, maxZoom: 16});
 
-        function style(feature) {
-            return {
+            map.on('locationfound', (e) => {
+                L.marker(e.latlng).addTo(map)
+                    .bindPopup(`You are somewhere around ${Math.round(e.accuracy)} meters from this point`)
+                    .openPopup();
+                L.circle(e.latlng, e.accuracy).addTo(map);
+            });
+
+            this.addTileLayer(map);
+        }
+    }
+
+    initCustomIcons() {
+        const element = document.getElementById('customIcons');
+        if (element) {
+            const map = L.map(element).setView([51.5, -0.09], 10);
+
+            const iconConfig = (color) => L.icon({
+                iconUrl: `assets/images/leaflet/leaf-${color}.png`,
+                shadowUrl: 'assets/images/leaflet/leaf-shadow.png',
+                iconSize: [38, 95], shadowSize: [50, 64],
+                iconAnchor: [22, 94], shadowAnchor: [4, 62],
+                popupAnchor: [-3, -76]
+            });
+
+            L.marker([51.5, -0.09], {icon: iconConfig('red')}).addTo(map);
+            L.marker([51.4, -0.51], {icon: iconConfig('green')}).addTo(map);
+            L.marker([51.49, -0.45], {icon: iconConfig('orange')}).addTo(map);
+
+            this.addTileLayer(map);
+        }
+    }
+
+    initLayerControl() {
+        const element = document.getElementById('layerControl');
+        if (element) {
+            const customIcon = L.icon({
+                iconUrl: 'assets/images/leaflet/marker-icon.png',
+                shadowUrl: 'assets/images/leaflet/marker-shadow.png'
+            });
+
+            const littleton = L.marker([39.61, -105.02], { icon: customIcon }).bindPopup('This is Littleton, CO.'),
+                denver = L.marker([39.74, -104.99], { icon: customIcon }).bindPopup('This is Denver, CO.'),
+                aurora = L.marker([39.73, -104.8], { icon: customIcon }).bindPopup('This is Aurora, CO.'),
+                golden = L.marker([39.77, -105.23], { icon: customIcon }).bindPopup('This is Golden, CO.');
+
+            const cities = L.layerGroup([littleton, denver, aurora, golden]);
+            const street = L.tileLayer(this.tileLayerUrl, this.tileLayerOptions);
+            const watercolor = L.tileLayer('http://tile.stamen.com/watercolor/{z}/{x}/{y}.jpg', {
+                attribution: this.tileLayerOptions.attribution, maxZoom: 18
+            });
+
+            const map = L.map(element, {
+                center: [39.73, -104.99],
+                zoom: 10,
+                layers: [street, cities]
+            });
+
+            const baseMaps = {Street: street, Watercolor: watercolor};
+            const overlayMaps = {Cities: cities};
+
+            L.control.layers(baseMaps, overlayMaps).addTo(map);
+        }
+    }
+
+    initGeoJsonMap() {
+        const element = document.getElementById('geoJson');
+        if (element && typeof statesData !== 'undefined') {
+            const map = L.map(element).setView([44.2669, -72.576], 3);
+
+            const getColor = (d) => {
+                return d > 1000 ? '#800026' :
+                    d > 500 ? '#BD0026' :
+                        d > 200 ? '#E31A1C' :
+                            d > 100 ? '#FC4E2A' :
+                                d > 50 ? '#FD8D3C' :
+                                    d > 20 ? '#FEB24C' :
+                                        d > 10 ? '#FED976' : '#FFEDA0';
+            };
+
+            const style = (feature) => ({
                 fillColor: getColor(feature.properties.density),
                 weight: 2,
                 opacity: 1,
                 color: 'white',
                 dashArray: '3',
                 fillOpacity: 0.7
-            };
+            });
+
+            L.geoJson(statesData, {style}).addTo(map);
+            this.addTileLayer(map);
         }
-        L.geoJson(statesData, {
-            style: style
-        }).addTo(geoJsonMap);
-        L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
-            maxZoom: 18
-        }).addTo(geoJsonMap);
     }
-})();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    new LeafletMap().init();
+});

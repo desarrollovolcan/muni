@@ -1,16 +1,44 @@
 //
-// _horizontal-nav.scss
+// _horizontal.scss
 //
 
 html[data-layout="topnav"] {
+
+    .app-topbar {
+        margin: 0;
+        z-index: 1005;
+        box-shadow: none;
+        border-bottom: 0;
+
+        .logo-topbar {
+            display: block;
+            float: none;
+        }
+
+        .sidenav-toggle-button {
+            display: none;
+        }
+
+        .topbar-menu {
+            padding-right: calc(var(--#{$prefix}gutter-x) * .5);
+            padding-left: calc(var(--#{$prefix}gutter-x) * .5);
+        }
+    }
+
+    .content-page {
+        margin-left: 0;
+        min-height: calc(100vh - $topbar-height - 43px);
+    }
+
     .topnav {
         width: 100%;
         z-index: 1000;
         position: sticky;
-        top: calc($topbar-height + 1px);
-        background: $menu-bg;
+        top: $topbar-height;
+        background: $sidenav-bg;
+        padding-left: $grid-gutter-width * 0.5;
+        padding-right: $grid-gutter-width * 0.5;
         box-shadow: var(--#{$prefix}box-shadow);
-        // border-top: 1px solid var(--#{$prefix}border-color);
 
         .navbar {
             margin: 0;
@@ -18,46 +46,62 @@ html[data-layout="topnav"] {
         }
 
         .navbar-nav {
+
+            @include media-breakpoint-up(lg) {
+                .nav-item {
+                    &:first-of-type {
+                        .nav-link {
+                            padding-left: 0;
+                        }
+                    }
+                }
+            }
             .nav-link {
-                display: block;
+                display: flex;
                 align-items: center;
                 position: relative;
-                text-align: center;
-                font-size: $menu-item-font-size;
-                font-weight: $font-weight-medium;
-                padding: 20px 17px;
+                line-height: $sidenav-item-font-size;
+                font-size: $sidenav-item-font-size;
+                font-weight: $sidenav-item-font-weight;
+                padding: calc($sidenav-item-padding-y * 1.5) calc($sidenav-item-padding-x * 1.5);
+
 
                 .menu-icon {
-                    display: block;
-                    line-height: $menu-item-icon-size;
-                    margin-bottom: 5px;
+                    margin-right: calc($sidenav-item-icon-size * 0.5);
 
                     i {
-                        font-size: $menu-item-icon-size;
+                        font-size: $sidenav-item-icon-size;
                     }
 
                     svg {
-                        height: 18px;
-                        width: 18px;
+                        height: $sidenav-item-icon-size;
+                        width: $sidenav-item-icon-size;
                     }
                 }
 
 
                 .menu-arrow {
-                    margin-left: calc($menu-item-icon-size * 0.75);
-                    margin-top: 2px
+                    margin-left: calc($sidenav-item-icon-size * 0.5);
                 }
             }
 
             .dropdown {
                 .dropdown-menu {
-                    @include font-size(calc(#{$dropdown-font-size} - 0.01rem));
+                    font-size: $sidenav-sub-item-font-size;
 
                     .dropdown-item {
                         display: flex;
-                        justify-content: space-between;
+                        gap: 8px;
                         align-items: center;
-                        padding: calc($menu-item-padding-y * 1) calc($menu-item-padding-x * 1);
+                        padding: calc($sidenav-item-padding-y * 0.75) calc($sidenav-item-padding-x * 1.5);
+
+                        i {
+                            font-size: calc($sidenav-sub-item-font-size * 1.25);
+                        }
+                    }
+
+                    .menu-arrow {
+                        transform: rotate(-90deg);
                     }
 
                 }
@@ -68,81 +112,135 @@ html[data-layout="topnav"] {
 
             >a,
             .nav-link {
-                color: $menu-item-color;
+                color: $sidenav-item-color;
 
                 &:hover {
-                    color: $menu-item-hover-color;
+                    color: $sidenav-item-hover-color;
                 }
             }
 
             &.active {
                 >a {
-                    color: $menu-item-hover-color;
+                    color: $sidenav-item-hover-color;
                 }
             }
 
         }
     }
 
-    .app-topbar {
-        margin: 0;
-        padding: 0;
-        z-index: 1005;
-        box-shadow: none;
-
-        .sidenav-toggle-button {
-            display: none;
-        }
-
-        .logo {
-            display: flex;
-            padding-left: 0px !important;
-
-            .logo-light {
-                display: none;
-            }
-
-            .logo-dark {
-                display: block;
-            }
-        }
-    }
-
-    .page-content {
-        padding: 0;
-        margin-left: 0;
-        min-height: calc(100vh - $topbar-height);
-    }
-
-    .page-title-box {
-        margin: 0 !important;
-        margin-bottom: 1.5rem !important;
-    }
-
-    #sidebarSize {
-        display: none;
+    .page-title-head {
+        background-color: transparent;
+        border: 0;
+        min-height: 60px;
+        margin-bottom: 0;
     }
 }
 
 
-// Topnav Logo
-html[data-topbar-color="brand"],
-html[data-topbar-color="dark"],
-html[data-bs-theme="dark"] {
-    .app-topbar {
-        .logo {
-            .logo-light {
-                display: block;
+@include media-breakpoint-up(lg) {
+
+    .topnav {
+        .dropdown {
+            .dropdown-menu {
+                margin-top: 0;
+
+                .dropdown {
+                    .dropdown-menu {
+                        position: absolute;
+                        top: 0;
+                        left: 100%;
+                        display: none;
+                    }
+                }
             }
 
-            .logo-dark {
-                display: none;
+            &:hover {
+                .nav-link {
+                    color: $sidenav-item-hover-color !important;
+                }
+
+                >.dropdown-menu {
+                    display: block;
+                }
             }
+        }
+
+        .dropdown:hover>.dropdown-menu>.dropdown:hover {
+            >.dropdown-item {
+                color: $sidenav-item-hover-color !important;
+            }
+            >.dropdown-menu {
+                display: block;
+            }
+        }
+        
+
+        .dropdown.active>a.dropdown-item {
+            color: $dropdown-link-active-color;
+            @include gradient-bg($dropdown-link-active-bg);
         }
     }
 }
 
-// Horizontal Menu Toggle Button
+@include media-breakpoint-down(lg) {
+    html[data-layout="topnav"] {
+        .topnav {
+            max-height: 360px;
+            overflow-y: auto;
+
+            .navbar-nav {
+                .nav-link {
+                    padding: calc($sidenav-item-padding-y * 0.8) calc($sidenav-item-padding-x * 2);
+                }
+            }
+
+            .dropdown {
+                .dropdown-menu {
+                    background-color: transparent;
+                    border: none;
+                    box-shadow: none;
+                    padding-left: calc($sidenav-item-padding-x * 3);
+                    margin-top: calc($sidenav-item-padding-y * -0.75);
+
+                    .dropdown-menu {
+                        margin-top: calc($sidenav-item-padding-y * -0.5);
+                        padding-left: calc($sidenav-item-padding-x * 1.5);
+                    }
+                }
+
+                .dropdown-item {
+                    position: relative;
+                    background-color: transparent;
+                }
+            }
+
+            .dropdown {
+                .dropdown-item {
+                    color: $sidenav-item-color;
+
+                    &.hover {
+                        color: $sidenav-item-hover-color;
+                    }
+
+                    &.active,
+                    &:active {
+                        color: $sidenav-item-active-color;
+                    }
+                }
+            }
+
+            .dropdown.active>a.dropdown-item {
+                color: $sidenav-item-active-color;
+            }
+        }
+
+        .topnav-toggle-button {
+            display: block;
+        }
+    }
+}
+
+//  Horizontal Menu Toggle Button
 .topnav-toggle-button {
     display: none;
     position: relative;
@@ -155,171 +253,10 @@ html[data-bs-theme="dark"] {
 }
 
 
-@include media-breakpoint-down(lg) {
-    html[data-layout="topnav"] {
-        .topnav {
-            max-height: 360px;
-            overflow-y: auto;
-
-            .navbar-nav {
-                .nav-link {
-                    padding: calc($menu-item-padding-y * 0.8) calc($menu-item-padding-x * 2);
-                }
-            }
-
-            .dropdown {
-                .dropdown-menu {
-                    background-color: transparent;
-                    border: none;
-                    box-shadow: none;
-                    padding-left: calc($menu-item-padding-x * 3);
-                    margin-top: calc($menu-item-padding-y * -0.75);
-
-                    .dropdown-menu {
-                        margin-top: calc($menu-item-padding-y * -0.5);
-                        padding-left: calc($menu-item-padding-x * 1.5);
-                    }
-                }
-
-                .dropdown-item {
-                    position: relative;
-                    background-color: transparent;
-                }
-            }
-
-            .dropdown {
-                .dropdown-item {
-                    color: $menu-item-color;
-
-                    &.hover {
-                        color: $menu-item-hover-color;
-                    }
-
-                    &.active,
-                    &:active {
-                        color: $menu-item-active-color;
-                    }
-                }
-            }
-
-            .dropdown.active>a.dropdown-item {
-                color: $menu-item-active-color;
-            }
-
-            .arrow-down {
-                font-size: $menu-item-font-size;
-                transform: rotate(270deg);
-                position: absolute;
-                right: $menu-item-padding-x;
-            }
-        }
-
-        .topnav-toggle-button {
-            display: flex;
-        }
-
-        .topnav-toggle-button {
-            display: block;
-        }
-    }
-}
-
-@include media-breakpoint-up(lg) {
-    .topnav {
-        .navbar-nav {
-            .nav-item {
-                &:first-of-type {
-                    .nav-link {
-                        padding-left: 0;
-                    }
-                }
-            }
-        }
-
-        .dropdown {
-            .dropdown-menu {
-                margin-top: 0;
-                min-width: calc(var(--#{$prefix}dropdown-min-width) + calc($menu-item-font-size * 1.5));
-                @include font-size(calc(#{$dropdown-font-size} - 0.01rem));
-
-                .arrow-down {
-                    position: absolute;
-                    transform: rotate(270deg);
-                    font-size: $menu-item-font-size;
-                    right: $menu-item-padding-x;
-                }
-
-                .dropdown {
-                    .dropdown-menu {
-                        position: absolute;
-                        top: 0;
-                        left: calc(100% + 8px);
-                        display: none;
-
-                        &.show {
-                            display: block;
-                        }
-                    }
-                }
-            }
-
-            &:hover {
-                >.dropdown-menu {
-                    display: block;
-
-                    .dropdown-item:hover {
-                        position: relative;
-
-                        &::before {
-                            content: "";
-                            inset: 0;
-                            position: absolute;
-                            width: $sidenav-width;
-                        }
-                    }
-                }
-            }
-        }
-
-        .dropdown:hover>.dropdown-menu>.dropdown:hover>.dropdown-menu {
-            display: block;
-        }
-
-
-
-        .dropdown.active>a.dropdown-item {
-            color: $dropdown-link-active-color;
-            @include gradient-bg($dropdown-link-active-bg);
-        }
-    }
-}
-
 @include media-breakpoint-up(xxl) {
     html[data-layout="topnav"] {
-        .page-container {
-            max-width: 90%;
+        .container-fluid {
+            max-width: 85%;
         }
     }
 }
-
-// Boxed Layout
-@include media-breakpoint-up(xl) {
-    html[data-layout="topnav"] {
-        &[data-layout-mode="boxed"] {
-            .page-container {
-                max-width: 1300px;
-                margin: 0 auto;
-            }
-        }
-    }
-}
-
-.dropdown-menu {
-
-    @media (min-width: 1024px) {
-        .megamenu-list {
-            min-width: 400px !important;
-        }
-    }
-}
-

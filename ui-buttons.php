@@ -1,822 +1,620 @@
-<!DOCTYPE html>
-<html lang="en">
+<?php include('partials/html.php'); ?>
 
 <head>
-    <?php
-    $title = "Buttons";
-    include "partials/title-meta.php" ?>
+    <?php $title = "Buttons"; include('partials/title-meta.php'); ?>
 
-    <?php include 'partials/head-css.php' ?>
+    <?php include('partials/head-css.php'); ?>
 </head>
 
 <body>
-<!-- Begin page -->
-<div class="wrapper">
+    <!-- Begin page -->
+    <div class="wrapper">
 
-    <?php include 'partials/sidenav.php' ?>
+        <?php include('partials/menu.php'); ?>
 
-    <?php include 'partials/topbar.php' ?>
+        <!-- ============================================================== -->
+        <!-- Start Main Content -->
+        <!-- ============================================================== -->
 
-    <!-- ============================================================== -->
-    <!-- Start Page Content here -->
-    <!-- ============================================================== -->
+        <div class="content-page">
 
-    <div class="page-content">
+            <div class="container-fluid">
+                <?php $subtitle = "UI"; $title = "Buttons"; include('partials/page-title.php'); ?> 
+            
+                <div class="row">
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Default Buttons</h4>
+                                </div>
 
-        <div class="page-container">
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
+                            </div>
 
-            <?php
-            $subtitle = "Base UI";
-            $title = "Buttons";
-            include "partials/page-title.php" ?>
+                            <div class="card-body">
+                                <p class="text-muted">Use any of the available <code>&lt;a&gt;</code>, <code>&lt;button&gt;</code>, or <code>&lt;input&gt;</code> classes <code>.btn</code> to quickly create a styled button.</p>
 
-            <!-- Row start -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="card-box">
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5 class="header-title">Default Buttons</h5>
-                                        <p class="card-subtitle">
-                                            Use the button classes on an <code>&lt;a&gt;</code>,
-                                            <code>&lt;button&gt;</code>, or <code>&lt;input&gt;</code> element.
-                                        </p>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" class="btn btn-default">Default</button>
+                                    <button type="button" class="btn btn-primary">Primary</button>
+                                    <button type="button" class="btn btn-secondary">Secondary</button>
+                                    <button type="button" class="btn btn-success">Success</button>
+                                    <button type="button" class="btn btn-danger">Danger</button>
+                                    <button type="button" class="btn btn-warning">Warning</button>
+                                    <button type="button" class="btn btn-info">Info</button>
+                                    <button type="button" class="btn btn-light">Light</button>
+                                    <button type="button" class="btn btn-dark">Dark</button>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+                    </div> <!-- end col -->
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Button Rounded</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <p class="text-muted">Use <code>.rounded-pill</code> with a default button to give it pill-shaped rounded corners.</p>
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" class="btn btn-default rounded-pill">Default</button>
+                                    <button type="button" class="btn btn-primary rounded-pill">Primary</button>
+                                    <button type="button" class="btn btn-secondary rounded-pill">Secondary</button>
+                                    <button type="button" class="btn btn-success rounded-pill">Success</button>
+                                    <button type="button" class="btn btn-danger rounded-pill">Danger</button>
+                                    <button type="button" class="btn btn-warning rounded-pill">Warning</button>
+                                    <button type="button" class="btn btn-info rounded-pill">Info</button>
+                                    <button type="button" class="btn btn-light rounded-pill">Light</button>
+                                    <button type="button" class="btn btn-dark rounded-pill">Dark</button>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+                    </div> <!-- end col -->
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Button Outline</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <p class="text-muted">Use the <code>.btn-outline-**</code> classes to quickly create buttons with borders.</p>
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" class="btn btn-outline-primary">Primary</button>
+                                    <button type="button" class="btn btn-outline-secondary">Secondary</button>
+                                    <button type="button" class="btn btn-outline-success"> Success</button>
+                                    <button type="button" class="btn btn-outline-danger">Danger</button>
+                                    <button type="button" class="btn btn-outline-warning">Warning</button>
+                                    <button type="button" class="btn btn-outline-info">Info</button>
+                                    <button type="button" class="btn btn-outline-light">Light</button>
+                                    <button type="button" class="btn btn-outline-dark">Dark</button>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+                    </div> <!-- end col -->
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Button Outline Rounded</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <p class="text-muted">Use <code>.rounded-pill</code> with an outline button to give it pill-shaped rounded corners.</p>
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" class="btn btn-outline-primary rounded-pill">Primary</button>
+                                    <button type="button" class="btn btn-outline-secondary rounded-pill">Secondary</button>
+                                    <button type="button" class="btn btn-outline-success rounded-pill">Success</button>
+                                    <button type="button" class="btn btn-outline-danger rounded-pill">Danger</button>
+                                    <button type="button" class="btn btn-outline-warning rounded-pill">Warning</button>
+                                    <button type="button" class="btn btn-outline-info rounded-pill">Info</button>
+                                    <button type="button" class="btn btn-outline-light rounded-pill">Light</button>
+                                    <button type="button" class="btn btn-outline-dark rounded-pill">Dark</button>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+                    </div> <!-- end col -->
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Soft Buttons</h4>
+                                </div>
+
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <p class="text-muted">Use <code>btn-soft-**</code> class with the below-mentioned variation to create a button with the soft background.</p>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" class="btn btn-soft-primary">Primary</button>
+                                    <button type="button" class="btn btn-soft-secondary">Secondary</button>
+                                    <button type="button" class="btn btn-soft-success">Success</button>
+                                    <button type="button" class="btn btn-soft-danger">Danger</button>
+                                    <button type="button" class="btn btn-soft-warning">Warning</button>
+                                    <button type="button" class="btn btn-soft-info">Info</button>
+                                    <button type="button" class="btn btn-soft-dark">Dark</button>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+                    </div> <!-- end col -->
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Soft Rounded Buttons</h4>
+                                </div>
+
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <p class="text-muted">Use the <code>btn-soft-**</code> class along with <code>.rounded-pill</code> to create a softly styled button with rounded corners.</p>
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" class="btn btn-soft-primary rounded-pill">Primary</button>
+                                    <button type="button" class="btn btn-soft-secondary rounded-pill">Secondary</button>
+                                    <button type="button" class="btn btn-soft-success rounded-pill">Success</button>
+                                    <button type="button" class="btn btn-soft-danger rounded-pill">Danger</button>
+                                    <button type="button" class="btn btn-soft-warning rounded-pill">Warning</button>
+                                    <button type="button" class="btn btn-soft-info rounded-pill">Info</button>
+                                    <button type="button" class="btn btn-soft-dark rounded-pill">Dark</button>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+                    </div> <!-- end col -->
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Ghost Buttons</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <p class="text-muted">Use the <code>btn-ghost-**</code> class to create buttons with a transparent background that highlight with color on hover.</p>
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" class="btn btn-ghost-primary">Primary</button>
+                                    <button type="button" class="btn btn-ghost-secondary">Secondary</button>
+                                    <button type="button" class="btn btn-ghost-success">Success</button>
+                                    <button type="button" class="btn btn-ghost-danger">Danger</button>
+                                    <button type="button" class="btn btn-ghost-warning">Warning</button>
+                                    <button type="button" class="btn btn-ghost-info">Info</button>
+                                    <button type="button" class="btn btn-ghost-dark">Dark</button>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+                    </div> <!-- end col -->
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Ghost Rounded Buttons</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <p class="text-muted">Use <code>btn-ghost-**</code> with <code>.rounded-pill</code> for rounded ghost buttons that highlight on hover.</p>
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" class="btn btn-ghost-primary rounded-pill">Primary</button>
+                                    <button type="button" class="btn btn-ghost-secondary rounded-pill">Secondary</button>
+                                    <button type="button" class="btn btn-ghost-success rounded-pill">Success</button>
+                                    <button type="button" class="btn btn-ghost-danger rounded-pill">Danger</button>
+                                    <button type="button" class="btn btn-ghost-warning rounded-pill">Warning</button>
+                                    <button type="button" class="btn btn-ghost-info rounded-pill">Info</button>
+                                    <button type="button" class="btn btn-ghost-dark rounded-pill">Dark</button>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+                    </div> <!-- end col -->
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Gradient Buttons</h4>
+                                </div>
+
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <p class="text-muted">Use the <code>.bg-gradient</code> class to apply a gradient style to buttons.</p>
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" class="btn btn-default bg-gradient">Default</button>
+                                    <button type="button" class="btn btn-primary bg-gradient">Primary</button>
+                                    <button type="button" class="btn btn-secondary bg-gradient">Secondary</button>
+                                    <button type="button" class="btn btn-success bg-gradient">Success</button>
+                                    <button type="button" class="btn btn-danger bg-gradient">Danger</button>
+                                    <button type="button" class="btn btn-warning bg-gradient">Warning</button>
+                                    <button type="button" class="btn btn-info bg-gradient">Info</button>
+                                    <button type="button" class="btn btn-light bg-gradient">Light</button>
+                                    <button type="button" class="btn btn-dark bg-gradient">Dark</button>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+                    </div> <!-- end col -->
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Gradient Rounded Buttons</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <p class="text-muted">Use the <code>.bg-gradient</code> and <code>.rounded-pill</code> classes to apply a gradient style with rounded edges to buttons.</p>
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" class="btn btn-default rounded-pill bg-gradient">Default</button>
+                                    <button type="button" class="btn btn-primary rounded-pill bg-gradient">Primary</button>
+                                    <button type="button" class="btn btn-secondary rounded-pill bg-gradient">Secondary</button>
+                                    <button type="button" class="btn btn-success rounded-pill bg-gradient">Success</button>
+                                    <button type="button" class="btn btn-danger rounded-pill bg-gradient">Danger</button>
+                                    <button type="button" class="btn btn-warning rounded-pill bg-gradient">Warning</button>
+                                    <button type="button" class="btn btn-info rounded-pill bg-gradient">Info</button>
+                                    <button type="button" class="btn btn-light rounded-pill bg-gradient">Light</button>
+                                    <button type="button" class="btn btn-dark rounded-pill bg-gradient">Dark</button>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+                    </div> <!-- end col -->
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Button Sizes</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <p class="text-muted">Want larger or smaller buttons? Use <code>.btn-lg</code> or <code>.btn-sm</code> to adjust the button size.</p>
+
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    <button type="button" class="btn btn-primary btn-lg">Large</button>
+                                    <button type="button" class="btn btn-info">Normal</button>
+                                    <button type="button" class="btn btn-success btn-sm">Small</button>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+                    </div> <!-- end col -->
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Disabled Buttons</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <p class="text-muted">Use the <code>disabled</code> attribute on a <code>&lt;button&gt;</code> to make it inactive and non-interactive.</p>
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" class="btn btn-info" disabled>Info</button>
+                                    <button type="button" class="btn btn-soft-success" disabled>Success</button>
+                                    <button type="button" class="btn btn-danger" disabled>Danger</button>
+                                    <button type="button" class="btn btn-dark" disabled>Dark</button>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+                    </div> <!-- end col -->
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Block Button</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <p class="text-muted font-14">To create block-level buttons, add the <code>.d-grid</code> class to the parent <code>&lt;div&gt;</code>.</p>
+
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-sm btn-primary">Block Button</button>
+                                    <button type="button" class="btn btn-lg btn-success">Block Button</button>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+                    </div> <!-- end col -->
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Toggle Button</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <p class="text-muted">Add <code>data-bs-toggle="button"</code> to toggle a button’s <code>active</code> state. For pre-toggled buttons, also add <code>.active</code> and <code>aria-pressed="true"</code>.</p>
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="button">Toggle button</button>
+                                    <button type="button" class="btn btn-primary active" data-bs-toggle="button" aria-pressed="true">Active toggle button</button>
+                                    <button type="button" class="btn btn-primary" disabled data-bs-toggle="button">Disabled toggle button</button>
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+                    </div><!--end col-->
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">Icon Buttons</h4>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <p class="text-muted">Icon only button. Use it when you want a button with just an icon and no text, ideal for compact UI elements or toolbars.</p>
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" class="btn btn-success btn-icon">
+                                        <i class="ti ti-check fs-lg"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-icon">
+                                        <i class="ti ti-trash fs-xl"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-soft-primary rounded-circle btn-icon">
+                                        <i class="ti ti-message fs-xxl"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-info rounded-circle btn-icon">
+                                        <i class="ti ti-share fs-xxl"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-warning rounded-circle btn-icon">
+                                        <i class="ti ti-alert-triangle fs-xl"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-soft-dark btn-icon">
+                                        <i class="ti ti-user fs-xl"></i>
+                                    </button>
+
+                                    <button type="button" class="btn btn-light">
+                                        <i class="ti ti-arrow-left align-middle me-1 fs-xl"></i> Back
+                                    </button>
+                                    <button type="button" class="btn btn-primary">
+                                        <i data-lucide="rocket" class="avatar-xxs me-1"></i> Launch
+                                    </button>
+
+                                    <button type="button" class="btn btn-outline-success">
+                                        <i class="ti ti-wallet align-middle me-1 fs-xl"></i> Wallet
+                                    </button>
+                                    <button type="button" class="btn btn-secondary">
+                                        <i class="ti ti-settings fs-xl me-1"></i> <span>Settings</span>
+                                    </button>
+                                </div>
+
+
+                                <div class="d-flex flex-wrap gap-2 mt-3">
+                                    <!-- Small buttons -->
+                                    <button class="btn btn-sm btn-outline-secondary btn-icon" type="button">
+                                        <i class="ti ti-user"></i> <!-- Profile -->
+                                    </button>
+                                    <button class="btn btn-sm btn-primary btn-icon" type="button">
+                                        <i class="ti ti-message-circle"></i> <!-- Message -->
+                                    </button>
+                                    <button class="btn btn-sm btn-success btn-icon rounded-circle" type="button">
+                                        <i class="ti ti-send"></i> <!-- Share/Send -->
+                                    </button>
+                                    <button class="btn btn-sm btn-info btn-icon rounded-circle" type="button">
+                                        <i class="ti ti-bell"></i> <!-- Notification -->
+                                    </button>
+                                    <button class="btn btn-sm btn-warning btn-icon" type="button">
+                                        <i class="ti ti-alert-triangle"></i> <!-- Warning/Alert -->
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger btn-icon" type="button">
+                                        <i class="ti ti-trash"></i> <!-- Delete -->
+                                    </button>
+
+                                    <!-- Large buttons -->
+                                    <button class="btn btn-outline-secondary btn-icon btn-lg" type="button">
+                                        <i class="ti ti-user"></i>
+                                    </button>
+                                    <button class="btn btn-primary btn-icon btn-lg rounded-circle" type="button">
+                                        <i class="ti ti-message-circle"></i>
+                                    </button>
+                                    <button class="btn btn-success btn-icon btn-lg rounded-circle" type="button">
+                                        <i class="ti ti-send"></i>
+                                    </button>
+                                    <button class="btn btn-info btn-icon btn-lg" type="button">
+                                        <i class="ti ti-bell"></i>
+                                    </button>
+                                    <button class="btn btn-warning btn-icon btn-lg" type="button">
+                                        <i class="ti ti-alert-triangle"></i>
+                                    </button>
+                                    <button class="btn btn-danger btn-icon btn-lg" type="button">
+                                        <i class="ti ti-trash"></i>
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-icon btn-lg" type="button">
+                                        <i class="ti ti-heart"></i>
+                                    </button>
+                                </div>
+
+
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Button Tags</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <p class="text-muted">Use <code>.btn</code> classes with <code>&lt;button&gt;</code>, <code>&lt;a&gt;</code>, or <code>&lt;input&gt;</code> elements, though rendering may vary slightly across browsers.</p>
+
+                                <div class="d-flex flex-wrap gap-2">
+                                    <a class="btn btn-primary" href="#" role="button">Link</a>
+                                    <button class="btn btn-primary" type="submit">Button</button>
+                                    <input class="btn btn-primary" type="button" value="Input">
+                                    <input class="btn btn-primary" type="submit" value="Submit">
+                                    <input class="btn btn-primary" type="reset" value="Reset">
+                                </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+                    </div> <!-- end col -->
+
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="flex-grow-1">
+                                    <h4 class="card-title">Button Group</h4>
+                                </div>
+                                <div class="card-action">
+                                    <a href="#!" class="card-action-item" data-action="card-toggle"><i class="ti ti-chevron-up"></i></a>
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <p class="text-muted">Group multiple buttons together by wrapping them with the <code>.btn</code> class inside a <code>.btn-group</code> container. This helps align buttons side by side with consistent spacing and styling.</p>
+
+                                <div class="btn-group mb-2">
+                                    <button type="button" class="btn btn-light">Left</button>
+                                    <button type="button" class="btn btn-light">Middle</button>
+                                    <button type="button" class="btn btn-light">Right</button>
+                                </div>
+
+                                <br>
+
+                                <div class="btn-group mb-2">
+                                    <button type="button" class="btn btn-light">1</button>
+                                    <button type="button" class="btn btn-light">2</button>
+                                    <button type="button" class="btn btn-light">3</button>
+                                    <button type="button" class="btn btn-light">4</button>
+                                </div>
+
+                                <div class="btn-group mb-2">
+                                    <button type="button" class="btn btn-light">5</button>
+                                    <button type="button" class="btn btn-light">6</button>
+                                    <button type="button" class="btn btn-light">7</button>
+                                </div>
+
+                                <div class="btn-group mb-2">
+                                    <button type="button" class="btn btn-light">8</button>
+                                </div>
+
+                                <br>
+
+                                <div class="btn-group mb-2">
+                                    <button type="button" class="btn btn-light">1</button>
+                                    <button type="button" class="btn btn-primary">2</button>
+                                    <button type="button" class="btn btn-light">3</button>
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"> Dropdown <span class="caret"></span> </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="#">Dropdown link</a>
+                                            <a class="dropdown-item" href="#">Dropdown link</a>
+                                        </div>
                                     </div>
-                                    <div class="card-body pt-2">
-                                        <div>
-                                            <div class="d-flex flex-wrap align-items-center gap-2">
-                                                <button type="button" class="btn btn-primary waves-effect waves-light">
-                                                    Primary
-                                                </button>
-                                                <button type="button" class="btn btn-secondary waves-effect">Secondary
-                                                </button>
-                                                <button type="button" class="btn btn-success waves-effect waves-light">
-                                                    Success
-                                                </button>
-                                                <button type="button" class="btn btn-info waves-effect waves-light">
-                                                    Info
-                                                </button>
-                                                <button type="button" class="btn btn-warning waves-effect waves-light">
-                                                    Warning
-                                                </button>
-                                                <button type="button" class="btn btn-danger waves-effect waves-light">
-                                                    Danger
-                                                </button>
-                                                <button type="button" class="btn btn-dark waves-effect waves-light">
-                                                    Dark
-                                                </button>
-                                                <button type="button" class="btn btn-purple waves-effect waves-light">
-                                                    Purple
-                                                </button>
-                                                <button type="button" class="btn btn-pink waves-effect waves-light">
-                                                    Pink
-                                                </button>
-                                                <button type="button" class="btn btn-light waves-effect">Light</button>
-                                                <button type="button" class="btn btn-link waves-effect">Link</button>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="btn-group-vertical mb-2">
+                                            <button type="button" class="btn btn-light">Top</button>
+                                            <button type="button" class="btn btn-light">Middle</button>
+                                            <button type="button" class="btn btn-light">Bottom</button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="btn-group-vertical mb-2">
+                                            <button type="button" class="btn btn-light">Button 1</button>
+                                            <button type="button" class="btn btn-light">Button 2</button>
+                                            <button type="button" class="btn btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"> Button 3 <span class="caret"></span> </button>
+                                            <div class="dropdown-menu">
+                                                <a class="dropdown-item" href="#">Dropdown link</a>
+                                                <a class="dropdown-item" href="#">Dropdown link</a>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> <!-- end card-body -->
+                        </div> <!-- end card-->
+                    </div> <!-- end col -->
 
-                            <div class="col-lg-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5 class="header-title">Default Rounded Button</h5>
-                                        <p class="card-subtitle">
-                                            Add <code>.rounded-pill</code> to default button to get rounded corners.
-                                        </p>
-                                    </div>
-                                    <div class="card-body pt-2">
-                                        <div class="d-flex flex-wrap align-items-center gap-2">
-                                            <button type="button"
-                                                    class="btn btn-primary rounded-pill waves-effect waves-light">
-                                                Primary
-                                            </button>
-                                            <button type="button" class="btn btn-secondary rounded-pill waves-effect">
-                                                Secondary
-                                            </button>
-                                            <button type="button"
-                                                    class="btn btn-success rounded-pill waves-effect waves-light">
-                                                Success
-                                            </button>
-                                            <button type="button"
-                                                    class="btn btn-info rounded-pill waves-effect waves-light">Info
-                                            </button>
-                                            <button type="button"
-                                                    class="btn btn-warning rounded-pill waves-effect waves-light">
-                                                Warning
-                                            </button>
-                                            <button type="button"
-                                                    class="btn btn-danger rounded-pill waves-effect waves-light">Danger
-                                            </button>
-                                            <button type="button"
-                                                    class="btn btn-dark rounded-pill waves-effect waves-light">Dark
-                                            </button>
-                                            <button type="button" class="btn btn-light rounded-pill waves-effect">
-                                                Light
-                                            </button>
-                                            <button type="button"
-                                                    class="btn btn-purple rounded-pill waves-effect waves-light">Purple
-                                            </button>
-                                            <button type="button"
-                                                    class="btn btn-pink rounded-pill waves-effect waves-light">Pink
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                </div> <!-- end row -->
+                
 
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5 class="header-title">Outline Buttons</h5>
-                                        <p class="card-subtitle">
-                                            In need of a button, but not the hefty background colors they bring? Replace
-                                            the default modifier classes with the <code>.btn-*-outline</code> ones to
-                                            remove all background images and colors on any button.
-                                        </p>
-                                    </div>
-                                    <div class="card-body pt-2">
-                                        <div class="d-flex flex-wrap align-items-center gap-2">
-                                            <button type="button"
-                                                    class="btn btn-outline-primary waves-effect waves-light">Primary
-                                            </button>
-                                            <button type="button" class="btn btn-outline-secondary waves-effect">
-                                                Secondary
-                                            </button>
-                                            <button type="button"
-                                                    class="btn btn-outline-success waves-effect waves-light">Success
-                                            </button>
-                                            <button type="button" class="btn btn-outline-info waves-effect waves-light">
-                                                Info
-                                            </button>
-                                            <button type="button"
-                                                    class="btn btn-outline-warning waves-effect waves-light">Warning
-                                            </button>
-                                            <button type="button"
-                                                    class="btn btn-outline-danger waves-effect waves-light">Danger
-                                            </button>
-                                            <button type="button"
-                                                    class="btn btn-outline-purple waves-effect waves-light">Purple
-                                            </button>
-                                            <button type="button" class="btn btn-outline-pink waves-effect waves-light">
-                                                Pink
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+            </div> <!-- container -->
 
-                            <div class="col-lg-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5 class="header-title">Outline Rounded Button</h5>
-                                        <p class="card-subtitle">
-                                            In need of a button, but not the hefty background colors they bring? Replace
-                                            the default modifier classes with the <code>.btn-*-outline</code> <code>.rounded-pill</code>
-                                            ones to remove all background images and colors on any button.
-                                        </p>
-                                    </div>
-                                    <div class="card-body pt-2">
-                                        <div class="d-flex flex-wrap align-items-center gap-2">
-                                            <button type="button"
-                                                    class="btn btn-outline-primary rounded-pill waves-effect waves-light">
-                                                Primary
-                                            </button>
-                                            <button type="button"
-                                                    class="btn btn-outline-secondary rounded-pill waves-effect">
-                                                Secondary
-                                            </button>
-                                            <button type="button"
-                                                    class="btn btn-outline-success rounded-pill waves-effect waves-light">
-                                                Success
-                                            </button>
-                                            <button type="button"
-                                                    class="btn btn-outline-info rounded-pill waves-effect waves-light">
-                                                Info
-                                            </button>
-                                            <button type="button"
-                                                    class="btn btn-outline-warning rounded-pill waves-effect waves-light">
-                                                Warning
-                                            </button>
-                                            <button type="button"
-                                                    class="btn btn-outline-danger rounded-pill waves-effect waves-light">
-                                                Danger
-                                            </button>
-                                            <button type="button"
-                                                    class="btn btn-outline-purple rounded-pill waves-effect waves-light">
-                                                Purple
-                                            </button>
-                                            <button type="button"
-                                                    class="btn btn-outline-pink rounded-pill waves-effect waves-light">
-                                                Pink
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
+            <?php include('partials/footer.php'); ?>
 
-                            </div>
-                        </div>
+        </div>
 
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5 class="header-title">Button-Width</h5>
-                                        <p class="card-subtitle">
-                                            Create buttons with minimum width by adding add <code>.width-xs</code>,
-                                            <code>.width-sm</code>, <code>.width-md</code>, <code>.width-lg</code> &
-                                            <code>.width-xl</code>.
-                                        </p>
-                                    </div>
-                                    <div class="card-body pt-2">
-                                        <div class="d-flex flex-wrap align-items-center gap-2">
-                                            <button type="button"
-                                                    class="btn btn-primary waves-effect waves-light width-xs">Xs
-                                            </button>
-                                            <button type="button"
-                                                    class="btn btn-purple waves-effect waves-light width-sm">Small
-                                            </button>
-                                            <button type="button"
-                                                    class="btn btn-info waves-effect waves-light width-md">Middle
-                                            </button>
-                                            <button type="button"
-                                                    class="btn btn-warning waves-effect waves-light width-lg">Large
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-lg-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5 class="header-title">Button-Sizes</h5>
-                                        <p class="card-subtitle">
-                                            Add <code>.btn-lg</code>, <code>.btn-sm</code> for additional sizes.
-                                        </p>
-                                    </div>
-                                    <div class="card-body pt-2">
-                                        <div class="d-flex flex-wrap align-items-center gap-2">
-                                            <button class="btn btn-primary waves-effect waves-light btn-lg">Large
-                                                button
-                                            </button>
-                                            <button class="btn btn-success waves-effect waves-light">Normal button
-                                            </button>
-                                            <button class="btn btn-purple waves-effect waves-light btn-sm">Small
-                                                button
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5 class="header-title">Button Labels</h5>
-                                        <p class="card-subtitle">
-                                            Use the button classes on an <code>&lt;a&gt;</code>,
-                                            <code>&lt;button&gt;</code>,
-                                            or <code>&lt;input&gt;</code> element. And put <code>&lt;span&gt;</code>
-                                            with class <code>.btn-label</code> and any <code>icon</code> inside it. If
-                                            you want to put
-                                            icon on right side then add class <code>.btn-label-right</code> in <code>&lt;span&gt;</code>
-                                        </p>
-                                    </div>
-                                    <div class="card-body pt-2">
-                                        <div class="d-flex flex-wrap align-items-center gap-2">
-                                            <button type="button" class="btn btn-success waves-effect waves-light">
-                                                    <span class="btn-label"><i class="mdi mdi-check"></i>
-                                                    </span>Success
-                                            </button>
-
-                                            <button type="button" class="btn btn-danger waves-effect waves-light">
-                                                    <span class="btn-label"><i class="mdi mdi-close"></i>
-                                                    </span>Danger
-                                            </button>
-
-                                            <button type="button" class="btn btn-info waves-effect waves-light">
-                                                    <span class="btn-label"><i class="mdi mdi-alert-circle-outline"></i>
-                                                    </span>Info
-                                            </button>
-
-                                            <button type="button" class="btn btn-warning waves-effect waves-light">
-                                                    <span class="btn-label"><i class="mdi mdi-alert"></i>
-                                                    </span>Warning
-                                            </button>
-                                            <br>
-
-                                            <button type="button" class="btn btn-primary waves-effect waves-light ms-2">
-                                                    <span class="btn-label"><i class="mdi mdi-arrow-left"></i>
-                                                    </span>Left
-                                            </button>
-
-                                            <button type="button" class="btn btn-success waves-effect waves-light">Right
-                                                <span class="btn-label btn-label-right"><i
-                                                            class="mdi mdi-arrow-right"></i>
-                                                    </span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-lg-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5 class="header-title">Button Labels Rounded</h5>
-                                        <p class="card-subtitle">
-                                            Use the button classes on an <code>&lt;a&gt;</code>,
-                                            <code>&lt;button&gt;</code>,
-                                            or <code>&lt;input&gt;</code> element. And put <code>&lt;span&gt;</code>
-                                            with class <code>.btn-label</code> and any <code>icon</code> inside it. If
-                                            you want to put
-                                            icon on right side then add class <code>.btn-label-right</code> in <code>&lt;span&gt;</code>
-                                        </p>
-                                    </div>
-                                    <div class="card-body pt-2">
-                                        <div class="d-flex flex-wrap align-items-center gap-2">
-                                            <button type="button"
-                                                    class="btn btn-success rounded-pill waves-effect waves-light">
-                                                    <span class="btn-label"><i class="mdi mdi-check"></i>
-                                                    </span>Success
-                                            </button>
-
-                                            <button type="button"
-                                                    class="btn btn-danger rounded-pill waves-effect waves-light">
-                                                    <span class="btn-label"><i class="mdi mdi-close"></i>
-                                                    </span>Danger
-                                            </button>
-
-                                            <button type="button"
-                                                    class="btn btn-info rounded-pill waves-effect waves-light">
-                                                    <span class="btn-label"><i class="mdi mdi-alert-circle-outline"></i>
-                                                    </span>Info
-                                            </button>
-
-                                            <button type="button"
-                                                    class="btn btn-warning rounded-pill waves-effect waves-light">
-                                                    <span class="btn-label"><i class="mdi mdi-alert"></i>
-                                                    </span>Warning
-                                            </button>
-                                            <br>
-
-                                            <button type="button"
-                                                    class="btn btn-primary rounded-pill waves-effect waves-light">
-                                                    <span class="btn-label"><i class="mdi mdi-arrow-left"></i>
-                                                    </span>Left
-                                            </button>
-
-                                            <button type="button"
-                                                    class="btn btn-success rounded-pill waves-effect waves-light">Right
-                                                <span class="btn-label btn-label-right"><i
-                                                            class="mdi mdi-arrow-right"></i>
-                                                    </span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-
-
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5 class="header-title">Icon Button</h5>
-                                        <p class="card-subtitle">
-                                            Icon only button.
-                                        </p>
-                                    </div>
-                                    <div class="card-body pt-2">
-                                        <div class="d-flex flex-wrap align-items-center gap-2">
-                                            <button class="btn btn-icon waves-effect btn-secondary"><i
-                                                        class="mdi mdi-heart-outline"></i></button>
-                                            <button class="btn btn-icon waves-effect waves-light btn-danger disabled"><i
-                                                        class="mdi mdi-close"></i></button>
-                                            <button class="btn btn-icon waves-effect waves-light btn-purple"><i
-                                                        class="mdi mdi-music"></i></button>
-                                            <button class="btn btn-icon waves-effect waves-light btn-primary"><i
-                                                        class="mdi mdi-star"></i></button>
-                                            <button class="btn btn-icon waves-effect waves-light btn-success"><i
-                                                        class="mdi mdi-thumb-up-outline"></i></button>
-                                            <button class="btn btn-icon waves-effect waves-light btn-info"><i
-                                                        class="mdi mdi-keyboard-outline"></i></button>
-                                            <button class="btn btn-icon waves-effect waves-light btn-warning"><i
-                                                        class="mdi mdi-wrench"></i></button>
-                                            <br>
-                                            <button class="btn  btn-secondary waves-effect"><i
-                                                        class="mdi mdi-heart-half-full me-1"></i> <span>Like</span>
-                                            </button>
-                                            <button class="btn btn-dark waves-effect waves-light"><i
-                                                        class="mdi mdi-email-outline me-1"></i> <span>Share</span>
-                                            </button>
-                                            <button class="btn btn-warning waves-effect waves-light"><i
-                                                        class="mdi mdi-launch me-1"></i> <span>Launch</span></button>
-                                            <button class="btn btn-info waves-effect waves-light disabled"><i
-                                                        class="mdi mdi-cloud-outline me-1"></i>
-                                                <span>Cloud Hosting</span></button>
-                                            <button class="btn btn-pink waves-effect waves-light">
-                                                <span>Book Flight</span> <i class="mdi mdi-airplane ms-1"></i></button>
-                                            <button class="btn btn-purple waves-effect waves-light">
-                                                <span>Donate Money</span> <i class="mdi mdi-cash-multiple ms-1"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            <div class="col-lg-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5 class="header-title">Block Button</h5>
-                                        <p class="card-subtitle">
-                                            Create block level buttons by adding class <code>.d-grid</code> to parent
-                                            div.
-                                        </p>
-                                    </div>
-                                    <div class="card-body pt-2">
-                                        <div class="d-grid gap-2">
-                                            <button type="button"
-                                                    class="btn  btn-lg btn-primary waves-effect waves-light">Block
-                                                Button
-                                            </button>
-                                            <button type="button"
-                                                    class="btn  btn-md btn-pink waves-effect waves-light active">Block
-                                                Button
-                                            </button>
-                                            <button type="button"
-                                                    class="btn  btn-sm btn-success waves-effect waves-light">Block
-                                                Button
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5 class="header-title">Button group</h5>
-                                        <p class="card-subtitle">
-                                            Wrap a series of buttons with <code>.btn</code> in <code>.btn-group</code>.
-                                        </p>
-                                    </div>
-
-                                    <div class="card-body pt-2">
-                                        <div class="btn-group">
-                                            <button type="button" class="btn btn-secondary waves-effect">Left</button>
-                                            <button type="button" class="btn btn-secondary waves-effect">Middle</button>
-                                            <button type="button" class="btn btn-secondary waves-effect">Right</button>
-                                        </div>
-                                        <br>
-
-                                        <div class="btn-group mt-2 me-1">
-                                            <button type="button" class="btn btn-secondary waves-effect">1</button>
-                                            <button type="button" class="btn btn-secondary waves-effect">2</button>
-                                            <button type="button" class="btn btn-secondary waves-effect">3</button>
-                                            <button type="button" class="btn btn-secondary waves-effect">4</button>
-                                        </div>
-                                        <div class="btn-group mt-2 me-1">
-                                            <button type="button" class="btn btn-secondary waves-effect">5</button>
-                                            <button type="button" class="btn btn-secondary waves-effect">6</button>
-                                            <button type="button" class="btn btn-secondary waves-effect">7</button>
-                                        </div>
-                                        <div class="btn-group mt-2">
-                                            <button type="button" class="btn btn-secondary waves-effect">8</button>
-                                        </div>
-                                        <br>
-                                        <div class="btn-group mt-2">
-                                            <button type="button" class="btn btn-secondary waves-effect">1</button>
-                                            <button type="button" class="btn btn-secondary waves-effect">2</button>
-                                            <button type="button" class="btn btn-secondary waves-effect">3</button>
-                                            <div class="btn-group">
-                                                <button type="button" class="btn btn-secondary dropdown-toggle"
-                                                        data-toggle="dropdown" aria-haspopup="true"
-                                                        aria-expanded="false">
-                                                    Dropdown
-                                                </button>
-                                                <div class="dropdown-menu">
-                                                    <a class="dropdown-item" href="#">Dropdown link</a>
-                                                    <a class="dropdown-item" href="#">Dropdown link</a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-3">
-                                                <div class="btn-group-vertical mt-2">
-                                                    <button type="button" class="btn btn-secondary waves-effect">Top
-                                                    </button>
-                                                    <button type="button" class="btn btn-secondary waves-effect">
-                                                        Middle
-                                                    </button>
-                                                    <button type="button" class="btn btn-secondary waves-effect">
-                                                        Bottom
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-3">
-                                                <div class="btn-group-vertical mt-2">
-                                                    <button type="button" class="btn btn-secondary waves-effect">Button
-                                                        1
-                                                    </button>
-                                                    <button type="button" class="btn btn-secondary waves-effect">Button
-                                                        2
-                                                    </button>
-                                                    <button type="button" class="btn btn-secondary dropdown-toggle"
-                                                            data-toggle="dropdown" aria-haspopup="true"
-                                                            aria-expanded="false">
-                                                        Button 3
-                                                    </button>
-                                                    <div class="dropdown-menu">
-                                                        <a class="dropdown-item" href="#">Dropdown link</a>
-                                                        <a class="dropdown-item" href="#">Dropdown link</a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            <div class="col-lg-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5 class="header-title">Button plugin</h5>
-                                        <p class="card-subtitle">
-                                            Do more with buttons. Control button states or create groups of buttons for
-                                            more components like toolbars.
-                                        </p>
-
-
-                                    </div>
-                                    <div class="card-body pt-2">
-                                        <button type="button" class="btn btn-primary waves-effect waves-light"
-                                                data-toggle="button" aria-pressed="false" autocomplete="off">
-                                            Single toggle
-                                        </button>
-                                        <div class="mt-2">
-                                            <div class="btn-group" role="group"
-                                                 aria-label="Basic checkbox toggle button group">
-                                                <input type="checkbox" class="btn-check" id="btncheck1"
-                                                       autocomplete="off">
-                                                <label class="btn btn-primary active" for="btncheck1">Active</label>
-
-                                                <input type="checkbox" class="btn-check" id="btncheck2"
-                                                       autocomplete="off">
-                                                <label class="btn btn-primary" for="btncheck2">Check</label>
-
-                                                <input type="checkbox" class="btn-check" id="btncheck3"
-                                                       autocomplete="off">
-                                                <label class="btn btn-primary" for="btncheck3">Check</label>
-                                            </div>
-                                        </div>
-                                        <div class="mt-2">
-                                            <div class="btn-group" role="group"
-                                                 aria-label="Basic radio toggle button group">
-                                                <input type="radio" class="btn-check" name="btnradio" id="btnradio1"
-                                                       autocomplete="off" checked>
-                                                <label class="btn btn-primary" for="btnradio1">Active</label>
-
-                                                <input type="radio" class="btn-check" name="btnradio" id="btnradio2"
-                                                       autocomplete="off">
-                                                <label class="btn btn-primary" for="btnradio2">Radio</label>
-
-                                                <input type="radio" class="btn-check" name="btnradio" id="btnradio3"
-                                                       autocomplete="off">
-                                                <label class="btn btn-primary" for="btnradio3">Radio</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div> <!-- end row -->
-
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5 class="header-title">Social Buttons with label</h5>
-                                        <p class="card-subtitle">
-                                            Use class <code>.btn-@yoursocial</code> to the parent.
-                                        </p>
-                                    </div>
-                                    <div class="card-body pt-2">
-                                        <div class="d-flex flex-wrap align-items-center gap-2">
-                                            <button type="button" class="btn btn-facebook waves-effect waves-light">
-                                                    <span class="btn-label"><i class="mdi mdi-facebook"></i>
-                                                    </span>Facebook
-                                            </button>
-
-                                            <button type="button" class="btn btn-twitter waves-effect waves-light">
-                                                    <span class="btn-label"><i class="mdi mdi-twitter"></i>
-                                                    </span>Twitter
-                                            </button>
-
-                                            <button type="button" class="btn btn-linkedin waves-effect waves-light">
-                                                    <span class="btn-label"><i class="mdi mdi-linkedin"></i>
-                                                    </span>Linkdin
-                                            </button>
-
-                                            <button type="button" class="btn btn-dribbble waves-effect waves-light">
-                                                    <span class="btn-label"><i data-lucide="dribbble" height="14"
-                                                                               width="14"></i>
-                                                    </span>Dribbble
-                                            </button>
-
-                                            <button type="button" class="btn btn-googleplus waves-effect waves-light">
-                                                    <span class="btn-label"><i class="mdi mdi-google-plus"></i>
-                                                    </span>Google+
-                                            </button>
-
-                                            <button type="button" class="btn btn-instagram waves-effect waves-light">
-                                                <span class="btn-label"><i class="mdi mdi-instagram"></i> </span>Instagram
-                                            </button>
-
-                                            <button type="button" class="btn btn-pinterest waves-effect waves-light">
-                                                <span class="btn-label"><i class="mdi mdi-pinterest"></i> </span>Pinterest
-                                            </button>
-
-                                            <button type="button" class="btn btn-dropbox waves-effect waves-light">
-                                                <span class="btn-label"><i class="mdi mdi-dropbox"></i> </span>Dropbox
-                                            </button>
-
-                                            <button type="button" class="btn btn-skype waves-effect waves-light">
-                                                <span class="btn-label"><i class="mdi mdi-skype"></i> </span>Skype
-                                            </button>
-
-                                            <button type="button" class="btn btn-youtube waves-effect waves-light">
-                                                <span class="btn-label"><i class="mdi mdi-youtube"></i> </span>Youtube
-                                            </button>
-
-                                            <button type="button" class="btn btn-github waves-effect waves-light">
-                                                <span class="btn-label"><i class="mdi mdi-github"></i> </span>Github
-                                            </button>
-
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            <div class="col-lg-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5 class="header-title">Social buttons</h5>
-                                        <p class="card-subtitle">
-                                            Use class <code>.btn-@yoursocial</code> to the parent.
-                                        </p>
-                                    </div>
-                                    <div class="card-body">
-
-                                        <div class="d-flex flex-wrap align-items-center gap-2">
-                                            <button type="button"
-                                                    class="btn btn-icon btn-facebook waves-effect waves-light">
-                                                <i class="mdi mdi-facebook"></i>
-                                            </button>
-
-                                            <button type="button"
-                                                    class="btn btn-icon btn-twitter waves-effect waves-light">
-                                                <i class="mdi mdi-twitter"></i>
-                                            </button>
-
-                                            <button type="button"
-                                                    class="btn btn-icon btn-linkedin waves-effect waves-light">
-                                                <i class="mdi mdi-linkedin"></i>
-                                            </button>
-
-                                            <button type="button"
-                                                    class="btn btn-icon btn-dribbble waves-effect waves-light">
-                                                <i data-lucide="dribbble" height="14" width="14"></i>
-                                            </button>
-
-                                            <button type="button"
-                                                    class="btn btn-icon btn-googleplus waves-effect waves-light">
-                                                <i class="mdi mdi-google-plus"></i>
-                                            </button>
-
-                                            <button type="button"
-                                                    class="btn btn-icon btn-instagram waves-effect waves-light">
-                                                <i class="mdi mdi-instagram"></i>
-                                            </button>
-
-                                            <button type="button"
-                                                    class="btn btn-icon btn-pinterest waves-effect waves-light">
-                                                <i class="mdi mdi-pinterest"></i>
-                                            </button>
-
-                                            <button type="button"
-                                                    class="btn btn-icon btn-dropbox waves-effect waves-light">
-                                                <i class="mdi mdi-dropbox"></i>
-                                            </button>
-
-                                            <button type="button"
-                                                    class="btn btn-icon btn-skype waves-effect waves-light">
-                                                <i class="mdi mdi-skype"></i>
-                                            </button>
-
-                                            <button type="button"
-                                                    class="btn btn-icon btn-youtube waves-effect waves-light">
-                                                <i class="mdi mdi-youtube"></i>
-                                            </button>
-
-                                            <button type="button"
-                                                    class="btn btn-icon btn-github waves-effect waves-light">
-                                                <i class="mdi mdi-github"></i>
-                                            </button>
-
-                                            <br>
-
-                                            <button type="button" class="btn btn-facebook waves-effect waves-light">
-                                                <i class="mdi mdi-facebook me-1"></i> Facebook
-                                            </button>
-
-                                            <button type="button" class="btn btn-twitter waves-effect waves-light">
-                                                <i class="mdi mdi-twitter me-1"></i> Twitter
-                                            </button>
-
-                                            <button type="button" class="btn btn-linkedin waves-effect waves-light">
-                                                <i class="mdi mdi-linkedin me-1"></i> Linkedin
-                                            </button>
-
-                                            <button type="button" class="btn btn-dribbble waves-effect waves-light">
-                                                <i data-lucide="dribbble" class="me-1" height="14" width="14"></i>
-                                                Dribbble
-                                            </button>
-
-                                            <button type="button" class="btn btn-googleplus waves-effect waves-light">
-                                                <i class="mdi mdi-google-plus me-1"></i> Google+
-                                            </button>
-
-                                            <button type="button" class="btn btn-instagram waves-effect waves-light">
-                                                <i class="mdi mdi-instagram me-1"></i> Instagram
-                                            </button>
-
-                                            <button type="button" class="btn btn-pinterest waves-effect waves-light">
-                                                <i class="mdi mdi-pinterest me-1"></i> Pinterest
-                                            </button>
-
-                                            <button type="button" class="btn btn-dropbox waves-effect waves-light">
-                                                <i class="mdi mdi-dropbox me-1"></i> Dropbox
-                                            </button>
-
-                                            <button type="button" class="btn btn-skype waves-effect waves-light">
-                                                <i class="mdi mdi-skype me-1"></i> Skype
-                                            </button>
-
-                                            <button type="button" class="btn btn-youtube waves-effect waves-light">
-                                                <i class="mdi mdi-youtube me-1"></i> Youtube
-                                            </button>
-
-                                            <button type="button" class="btn btn-github waves-effect waves-light">
-                                                <i class="mdi mdi-github me-1"></i> Github
-                                            </button>
-                                        </div>
-
-                                    </div>
-                                </div>
-                            </div>
-                        </div><!-- end row -->
-
-
-                    </div>
-                </div>
-
-            </div>
-            <!-- End of Row -->
-
-        </div> <!-- container -->
-
-        <?php include 'partials/footer.php' ?>
+        <!-- ============================================================== -->
+        <!-- End of Main Content -->
+        <!-- ============================================================== -->
 
     </div>
+    <!-- END wrapper -->
 
-    <!-- ============================================================== -->
-    <!-- End Page content -->
-    <!-- ============================================================== -->
+    <?php include('partials/customizer.php'); ?>
 
-</div>
-<!-- END wrapper -->
-
-<?php include 'partials/customizer.php' ?>
-
-<?php include 'partials/footer-scripts.php' ?>
+    <?php include('partials/footer-scripts.php'); ?>
 
 </body>
 

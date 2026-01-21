@@ -14,9 +14,22 @@ $success-text-emphasis-dark:        tint-color($success, 40%);
 $info-text-emphasis-dark:           tint-color($info, 40%);
 $warning-text-emphasis-dark:        tint-color($warning, 40%);
 $danger-text-emphasis-dark:         tint-color($danger, 40%);
+$purple-text-emphasis-dark:         tint-color($purple, 40%);
 $light-text-emphasis-dark:          $gray-100;
 $dark-text-emphasis-dark:           $gray-300;
 // scss-docs-end theme-text-dark-variables
+
+$theme-colors-text-dark: (
+  "primary":    $primary-text-emphasis-dark,
+  "secondary":  $secondary-text-emphasis-dark,
+  "success":    $success-text-emphasis-dark,
+  "info":       $info-text-emphasis-dark,
+  "warning":    $warning-text-emphasis-dark,
+  "danger":     $danger-text-emphasis-dark,
+  "purple":     $purple-text-emphasis-dark,
+  "light":      $light-text-emphasis-dark,
+  "dark":       $dark-text-emphasis-dark,
+);
 
 // scss-docs-start theme-bg-subtle-dark-variables
 $primary-bg-subtle-dark:            rgba($primary, 20%);
@@ -25,9 +38,22 @@ $success-bg-subtle-dark:            rgba($success, 20%);
 $info-bg-subtle-dark:               rgba($info, 20%);
 $warning-bg-subtle-dark:            rgba($warning, 20%);
 $danger-bg-subtle-dark:             rgba($danger, 20%);
-$light-bg-subtle-dark:              #252630;
+$purple-bg-subtle-dark:             rgba($purple, 20%);
+$light-bg-subtle-dark:              #22232c;
 $dark-bg-subtle-dark:               mix($gray-800, $black);
 // scss-docs-end theme-bg-subtle-dark-variables
+
+$theme-colors-bg-subtle-dark: (
+  "primary":    $primary-bg-subtle-dark,
+  "secondary":  $secondary-bg-subtle-dark,
+  "success":    $success-bg-subtle-dark,
+  "info":       $info-bg-subtle-dark,
+  "warning":    $warning-bg-subtle-dark,
+  "danger":     $danger-bg-subtle-dark,
+  "purple":     $purple-bg-subtle-dark,
+  "light":      $light-bg-subtle-dark,
+  "dark":       $dark-bg-subtle-dark,
+);
 
 // scss-docs-start theme-border-subtle-dark-variables
 $primary-border-subtle-dark:        shade-color($primary, 40%);
@@ -36,24 +62,41 @@ $success-border-subtle-dark:        shade-color($success, 40%);
 $info-border-subtle-dark:           shade-color($info, 40%);
 $warning-border-subtle-dark:        shade-color($warning, 40%);
 $danger-border-subtle-dark:         shade-color($danger, 40%);
+$purple-border-subtle-dark:         shade-color($purple, 40%);
 $light-border-subtle-dark:          $gray-700;
-$dark-border-subtle-dark:           $gray-800;
+$dark-border-subtle-dark:           $gray-700;
 // scss-docs-end theme-border-subtle-dark-variables
 
+$theme-colors-border-subtle-dark: (
+  "primary":    $primary-border-subtle-dark,
+  "secondary":  $secondary-border-subtle-dark,
+  "success":    $success-border-subtle-dark,
+  "info":       $info-border-subtle-dark,
+  "warning":    $warning-border-subtle-dark,
+  "danger":     $danger-border-subtle-dark,
+  "purple":     $purple-border-subtle-dark,
+  "light":      $light-border-subtle-dark,
+  "dark":       $dark-border-subtle-dark,
+);
+
 $body-color-dark:                   #aab8c5;
-$body-bg-dark:                      #2c313e;
+$body-bg-dark:                      #17181e;
+
 $body-secondary-color-dark:         #8391a2;
-$body-secondary-bg-dark:            #343c49;
-$body-tertiary-color-dark:          #f1f1f1;
-$body-tertiary-bg-dark:             #404954;
-$body-emphasis-color-dark:          #dee2e6;
-$border-color-dark:                 #3c4655; // #464f5b;
+$body-secondary-bg-dark:            #1e1f27;
+
+$body-tertiary-color-dark:          #aab8c5;
+$body-tertiary-bg-dark:             #272832;
+
+$body-emphasis-color-dark:          #b0bbc5;
+
+$border-color-dark:                 #293036;
 $border-color-translucent-dark:     #8391a2;
+
 $headings-color-dark:               $body-color-dark;
 $link-color-dark:                   tint-color($primary, 40%);
 $link-hover-color-dark:             shift-color($link-color-dark, -$link-shade-percentage);
 $code-color-dark:                   tint-color($code-color, 40%);
-
 
 //
 // Forms

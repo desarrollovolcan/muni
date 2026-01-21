@@ -1,5 +1,5 @@
 //
-// print.scss
+// _print.scss
 //
 
 // Used invoice page
@@ -10,14 +10,17 @@
     .footer {
         display: none !important;
     }
+    
     .card-body,
-    .page-content,
+    .content-page,
     body {
-        padding: 0;
+        padding: 0 !important;
         margin: 0;
     }
 
     .card {
         box-shadow: none;
+        border: none;
+        padding: 0;
     }
 }
