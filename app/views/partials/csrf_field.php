@@ -1,1 +1,0 @@
-<?php csrf_field(); ?>
