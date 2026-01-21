@@ -46,6 +46,8 @@ $router = new Router();
 $authController = new AuthController();
 $router->get('/login', fn() => $authController->loginForm());
 $router->post('/login', fn() => $authController->login());
+$router->get('/register', fn() => $authController->registerForm());
+$router->post('/register', fn() => $authController->register());
 $router->get('/logout', fn() => $authController->logout());
 
 $dashboard = new DashboardController();

@@ -20,8 +20,8 @@ INSERT INTO roles (id_rol, nombre, descripcion, estado) VALUES
 INSERT INTO rol_permiso (id_rol, id_permiso) VALUES
 (1,1),(2,2),(3,2),(4,3),(5,2);
 
-INSERT INTO usuarios (id_usuario, id_municipio, nombre, rut, email, telefono, password_hash, estado)
-VALUES (1, 1, 'Administrador Demo', '11111111-1', 'admin@demo.cl', '+56911111111', '$2y$10$hJahtF81P5aFccC9D1TXmeC4AnmIgjDKGTeOitnkBC9rWlH0I1EAK', 1);
+INSERT INTO usuarios (id_usuario, id_municipio, nombre, apellido, rut, cargo, fecha_nacimiento, email, telefono, password_hash, estado)
+VALUES (1, 1, 'Administrador', 'Demo', '11111111-1', 'Administrador', '1980-01-01', 'admin@demo.cl', '+56911111111', '$2y$10$hJahtF81P5aFccC9D1TXmeC4AnmIgjDKGTeOitnkBC9rWlH0I1EAK', 1);
 
 INSERT INTO usuario_rol (id_usuario, id_rol) VALUES (1,1);
 
@@ -50,4 +50,3 @@ VALUES (1,1,1,1,1),(2,1,2,1,1),(3,1,3,1,1);
 
 INSERT INTO entregas (id_entrega, id_solicitud, id_municipio, id_beneficiario, tipo_programacion, fecha_programada, fecha_entrega, id_estado, estado)
 VALUES (1,1,1,1,'INMEDIATA',NULL,NOW(),2,1);
-
