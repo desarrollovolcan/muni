@@ -1,4 +1,15 @@
-<?php include('partials/html.php'); ?>
+<?php
+
+declare(strict_types=1);
+
+require __DIR__ . '/app/bootstrap.php';
+
+if (!isset($_SESSION['user'])) {
+    redirect('auth-sign-in.php');
+}
+
+include('partials/html.php');
+?>
 
 <head>
     <?php $title = "Dashboard"; include('partials/title-meta.php'); ?>
