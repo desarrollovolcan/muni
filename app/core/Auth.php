@@ -26,14 +26,14 @@ class Auth
         $user = $userModel->findByEmail($email);
         if ($user && (int)$user['estado'] === 1 && password_verify($password, $user['password_hash'])) {
             session_regenerate_id(true);
-            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['user_id'] = $user['id_usuario'];
             $_SESSION['municipio_id'] = $user['id_municipio'];
-            $_SESSION['roles'] = $userModel->roles($user['id']);
-            $userModel->updateLastAccess($user['id']);
-            Audit::log('usuario', $user['id'], 'LOGIN_OK', $ip, 'Usuario municipal');
+            $_SESSION['roles'] = $userModel->roles($user['id_usuario']);
+            $userModel->updateLastAccess($user['id_usuario']);
+            Audit::log('usuario', $user['id_usuario'], 'LOGIN_OK', $ip, 'Usuario municipal');
             return true;
         }
-        Audit::log('usuario', $user['id'] ?? null, 'LOGIN_FAIL', $ip, 'Usuario municipal');
+        Audit::log('usuario', $user['id_usuario'] ?? null, 'LOGIN_FAIL', $ip, 'Usuario municipal');
         return false;
     }
 

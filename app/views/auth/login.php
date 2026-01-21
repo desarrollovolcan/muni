@@ -70,6 +70,9 @@
                                 <button class="btn btn-primary btn-lg" type="submit">Ingresar al panel</button>
                             </div>
                         </form>
+                        <div class="text-center mt-3">
+                            <small class="text-muted">¿Nuevo en el sistema? <a href="/register" class="fw-semibold">Crear cuenta</a></small>
+                        </div>
                     </div>
                 </div>
             </div>

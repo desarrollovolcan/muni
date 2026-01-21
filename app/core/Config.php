@@ -25,6 +25,7 @@ class Config
             'storage_path' => $_ENV['STORAGE_PATH'] ?? ($basePath . '/storage'),
             'session_secure' => (bool)($_ENV['SESSION_SECURE'] ?? false),
             'mail_worker_enabled' => (bool)($_ENV['MAIL_WORKER_ENABLED'] ?? false),
+            'default_municipio_id' => (int)($_ENV['DEFAULT_MUNICIPIO_ID'] ?? 1),
         ];
     }
 
