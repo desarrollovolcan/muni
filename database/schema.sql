@@ -141,6 +141,20 @@ CREATE TABLE `authority_attachments` (
   CONSTRAINT `authority_attachments_subido_por_fk` FOREIGN KEY (`subido_por`) REFERENCES `users` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `municipalidad` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(150) NOT NULL,
+  `rut` VARCHAR(20) DEFAULT NULL,
+  `direccion` VARCHAR(200) DEFAULT NULL,
+  `telefono` VARCHAR(30) DEFAULT NULL,
+  `correo` VARCHAR(150) DEFAULT NULL,
+  `logo_path` VARCHAR(255) DEFAULT NULL,
+  `color_primary` VARCHAR(20) DEFAULT NULL,
+  `color_secondary` VARCHAR(20) DEFAULT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 INSERT INTO `users` (
   `rut`,
   `nombre`,
@@ -172,6 +186,9 @@ VALUES
   ('EncargadoEventos', 'Gestión de eventos', 1),
   ('Auditor', 'Revisión y auditoría', 1),
   ('Consulta', 'Acceso de solo lectura', 1);
+
+INSERT INTO `municipalidad` (`nombre`, `rut`, `direccion`, `telefono`, `correo`, `logo_path`, `color_primary`, `color_secondary`)
+VALUES ('Municipalidad', NULL, NULL, NULL, NULL, 'assets/images/logo.png', '#6658dd', '#4a81d4');
 
 INSERT INTO `permissions` (`modulo`, `accion`, `descripcion`)
 VALUES
