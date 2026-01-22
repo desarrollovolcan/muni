@@ -12,11 +12,13 @@ $statusClasses = [
 $stmt = db()->query('SELECT id, titulo, fecha_inicio, fecha_fin, tipo, estado FROM events WHERE habilitado = 1 ORDER BY fecha_inicio');
 $calendarEvents = [];
 foreach ($stmt->fetchAll() as $evento) {
+    $start = DateTime::createFromFormat('Y-m-d H:i:s', $evento['fecha_inicio']);
+    $end = DateTime::createFromFormat('Y-m-d H:i:s', $evento['fecha_fin']);
     $calendarEvents[] = [
         'id' => (int) $evento['id'],
         'title' => $evento['titulo'],
-        'start' => $evento['fecha_inicio'],
-        'end' => $evento['fecha_fin'],
+        'start' => $start ? $start->format('Y-m-d\\TH:i:s') : $evento['fecha_inicio'],
+        'end' => $end ? $end->format('Y-m-d\\TH:i:s') : $evento['fecha_fin'],
         'className' => $statusClasses[$evento['estado']] ?? 'bg-primary-subtle text-primary',
         'url' => 'eventos-detalle.php?id=' . (int) $evento['id'],
         'extendedProps' => [

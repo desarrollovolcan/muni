@@ -48,6 +48,18 @@ function format_datetime_local(?string $value): string
     return $date ? $date->format('Y-m-d\\TH:i') : '';
 }
 
+function format_datetime_iso(?string $value): ?string
+{
+    if (!$value) {
+        return null;
+    }
+    $date = DateTime::createFromFormat('Y-m-d H:i:s', $value);
+    if (!$date) {
+        $date = DateTime::createFromFormat('Y-m-d H:i', $value);
+    }
+    return $date ? $date->format('Y-m-d\\TH:i:s') : null;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ?? null)) {
     $action = $_POST['event_action'] ?? 'save';
     $postId = isset($_POST['event_id']) ? (int) $_POST['event_id'] : 0;
@@ -122,8 +134,8 @@ try {
         $calendarEvents[] = [
             'id' => (string) $event['id'],
             'title' => $event['titulo'],
-            'start' => $event['fecha_inicio'],
-            'end' => $event['fecha_fin'],
+            'start' => format_datetime_iso($event['fecha_inicio'] ?? null),
+            'end' => format_datetime_iso($event['fecha_fin'] ?? null),
             'className' => $eventTypeMap[$tipo] ?? 'bg-primary-subtle text-primary',
             'extendedProps' => [
                 'tipo' => $tipo,

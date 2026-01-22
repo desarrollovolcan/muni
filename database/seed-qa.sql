@@ -521,6 +521,27 @@ INSERT INTO role_unit_permissions (role_id, unidad_id, permission_id) VALUES
     (19, 19, 19),
     (20, 20, 20);
 
+INSERT INTO municipalidad (nombre, rut, direccion, telefono, correo, logo_path, color_primary, color_secondary) VALUES
+    ('Municipalidad de Go Muni', '76.123.456-7', 'Av. Principal 123', '+56 2 2345 6789', 'contacto@gomuni.cl', 'assets/images/logo.png', '#1f6feb', '#0ea5e9');
+
+INSERT INTO notificacion_correos (correo_imap, password_imap, host_imap, puerto_imap, seguridad_imap, from_nombre, from_correo) VALUES
+    ('notificaciones@gomuni.cl', 'DemoPass123', 'imap.gomuni.cl', 993, 'ssl', 'Go Muni', 'notificaciones@gomuni.cl');
+
+INSERT INTO notification_settings (canal_email, canal_sms, canal_app, frecuencia) VALUES
+    (1, 0, 1, 'diario');
+
+INSERT INTO audit_logs (user_id, tabla, accion, registro_id, descripcion) VALUES
+    (1, 'events', 'crear', 1, 'Evento creado desde QA'),
+    (2, 'authorities', 'crear', 2, 'Autoridad creada desde QA'),
+    (3, 'documents', 'crear', 3, 'Documento creado desde QA'),
+    (4, 'users', 'actualizar', 4, 'Usuario actualizado desde QA'),
+    (5, 'roles', 'crear', 5, 'Rol creado desde QA'),
+    (6, 'document_categories', 'crear', 6, 'Categoría creada desde QA'),
+    (7, 'document_tags', 'crear', 7, 'Etiqueta creada desde QA'),
+    (8, 'event_authorities', 'actualizar', 8, 'Asignación de autoridades actualizada'),
+    (9, 'document_shares', 'crear', 9, 'Documento compartido'),
+    (10, 'notification_settings', 'actualizar', 1, 'Configuración de notificaciones actualizada');
+
 INSERT INTO user_sessions (user_id, session_id, ip, user_agent, last_activity) VALUES
     (1, 'sess-1', '192.168.1.1', 'QA Agent 1', NOW()),
     (2, 'sess-2', '192.168.1.2', 'QA Agent 2', NOW()),
