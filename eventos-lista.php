@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && verify_c
     redirect('eventos-lista.php');
 }
 
-$stmt = db()->query('SELECT e.id, e.titulo, e.fecha_inicio, e.tipo, e.estado, e.habilitado, u.nombre AS encargado_nombre, u.apellido AS encargado_apellido FROM events e LEFT JOIN users u ON u.id = e.encargado_id ORDER BY e.fecha_inicio DESC');
+$stmt = db()->query('SELECT e.id, e.titulo, e.fecha_inicio, e.tipo, e.estado, e.habilitado, u.nombre AS encargado_nombre, u.apellido AS encargado_apellido, COUNT(r.id) AS solicitudes_total, SUM(r.correo_enviado = 1) AS correos_enviados FROM events e LEFT JOIN users u ON u.id = e.encargado_id LEFT JOIN event_authority_requests r ON r.event_id = e.id GROUP BY e.id ORDER BY e.fecha_inicio DESC');
 $eventos = $stmt->fetchAll();
 ?>
 <?php include('partials/html.php'); ?>
@@ -77,13 +77,14 @@ $eventos = $stmt->fetchAll();
                                                 <th>Tipo</th>
                                                 <th>Estado</th>
                                                 <th>Responsable</th>
+                                                <th>Notificación</th>
                                                 <th class="text-end">Acciones</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <?php if (empty($eventos)) : ?>
                                                 <tr>
-                                                    <td colspan="6" class="text-center text-muted">No hay eventos registrados.</td>
+                                                    <td colspan="7" class="text-center text-muted">No hay eventos registrados.</td>
                                                 </tr>
                                             <?php else : ?>
                                                 <?php foreach ($eventos as $evento) : ?>
@@ -97,6 +98,15 @@ $eventos = $stmt->fetchAll();
                                                             </span>
                                                         </td>
                                                         <td><?php echo htmlspecialchars(trim(($evento['encargado_nombre'] ?? '') . ' ' . ($evento['encargado_apellido'] ?? '')), ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td>
+                                                            <?php if ((int) $evento['correos_enviados'] > 0) : ?>
+                                                                <span class="badge text-bg-success">Enviada</span>
+                                                            <?php elseif ((int) $evento['solicitudes_total'] > 0) : ?>
+                                                                <span class="badge text-bg-warning">Pendiente</span>
+                                                            <?php else : ?>
+                                                                <span class="badge text-bg-secondary">Sin enviar</span>
+                                                            <?php endif; ?>
+                                                        </td>
                                                         <td class="text-end">
                                                             <div class="dropdown">
                                                                 <button class="btn btn-sm btn-soft-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -106,6 +116,7 @@ $eventos = $stmt->fetchAll();
                                                                     <li><a class="dropdown-item" href="eventos-detalle.php?id=<?php echo (int) $evento['id']; ?>">Ver detalle</a></li>
                                                                     <li><a class="dropdown-item" href="eventos-editar.php?id=<?php echo (int) $evento['id']; ?>">Editar</a></li>
                                                                     <li><a class="dropdown-item" href="eventos-adjuntos.php">Adjuntos</a></li>
+                                                                    <li><a class="dropdown-item" href="eventos-autoridades.php?event_id=<?php echo (int) $evento['id']; ?>">Enviar confirmación de invitados</a></li>
                                                                     <li><hr class="dropdown-divider"></li>
                                                                     <li>
                                                                         <form method="post" class="px-3 py-1">
