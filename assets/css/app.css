@@ -14344,6 +14344,7 @@ textarea.form-control-lg {
   --ins-logo-lg-height: 48px;
   --ins-logo-sm-height: 36px;
   --ins-topbar-logo-height: 56px;
+  --ins-login-logo-height: 48px;
   --ins-sidenav-width: 240px;
   --ins-sidenav-width-md: 150px;
   --ins-sidenav-width-sm: 75px;
@@ -18604,6 +18605,10 @@ h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
 
 .auth-brand {
   margin-bottom: 2rem;
+}
+.auth-brand img {
+  height: var(--ins-login-logo-height);
+  width: auto;
 }
 .auth-brand .logo-dark {
   display: block;

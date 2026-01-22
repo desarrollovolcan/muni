@@ -12,6 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
     $telefono = trim($_POST['telefono'] ?? '');
     $correo = trim($_POST['correo'] ?? '');
     $logoTopbarHeight = trim($_POST['logo_topbar_height'] ?? '');
+    $logoLoginHeight = trim($_POST['logo_login_height'] ?? '');
     $logoSidenavHeight = trim($_POST['logo_sidenav_height'] ?? '');
     $logoSidenavHeightSm = trim($_POST['logo_sidenav_height_sm'] ?? '');
     $colorPrimary = trim($_POST['color_primary'] ?? '#6658dd');
@@ -31,6 +32,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
 
     if ($logoTopbarHeight !== '' && (!ctype_digit($logoTopbarHeight) || (int) $logoTopbarHeight < 16 || (int) $logoTopbarHeight > 120)) {
         $errors[] = 'El alto del logo en la barra superior debe ser un número entre 16 y 120.';
+    }
+
+    if ($logoLoginHeight !== '' && (!ctype_digit($logoLoginHeight) || (int) $logoLoginHeight < 16 || (int) $logoLoginHeight > 120)) {
+        $errors[] = 'El alto del logo en el inicio de sesión debe ser un número entre 16 y 120.';
     }
 
     if ($logoSidenavHeight !== '' && (!ctype_digit($logoSidenavHeight) || (int) $logoSidenavHeight < 16 || (int) $logoSidenavHeight > 120)) {
@@ -85,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
         $id = $stmt->fetchColumn();
 
         if ($id) {
-            $stmtUpdate = db()->prepare('UPDATE municipalidad SET nombre = ?, rut = ?, direccion = ?, telefono = ?, correo = ?, logo_path = ?, logo_topbar_height = ?, logo_sidenav_height = ?, logo_sidenav_height_sm = ?, color_primary = ?, color_secondary = ? WHERE id = ?');
+            $stmtUpdate = db()->prepare('UPDATE municipalidad SET nombre = ?, rut = ?, direccion = ?, telefono = ?, correo = ?, logo_path = ?, logo_topbar_height = ?, logo_login_height = ?, logo_sidenav_height = ?, logo_sidenav_height_sm = ?, color_primary = ?, color_secondary = ? WHERE id = ?');
             $stmtUpdate->execute([
                 $nombre,
                 $rut,
@@ -94,6 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                 $correo !== '' ? $correo : null,
                 $logoPath,
                 $logoTopbarHeight !== '' ? (int) $logoTopbarHeight : null,
+                $logoLoginHeight !== '' ? (int) $logoLoginHeight : null,
                 $logoSidenavHeight !== '' ? (int) $logoSidenavHeight : null,
                 $logoSidenavHeightSm !== '' ? (int) $logoSidenavHeightSm : null,
                 $colorPrimary,
@@ -101,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                 $id,
             ]);
         } else {
-            $stmtInsert = db()->prepare('INSERT INTO municipalidad (nombre, rut, direccion, telefono, correo, logo_path, logo_topbar_height, logo_sidenav_height, logo_sidenav_height_sm, color_primary, color_secondary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+            $stmtInsert = db()->prepare('INSERT INTO municipalidad (nombre, rut, direccion, telefono, correo, logo_path, logo_topbar_height, logo_login_height, logo_sidenav_height, logo_sidenav_height_sm, color_primary, color_secondary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
             $stmtInsert->execute([
                 $nombre,
                 $rut,
@@ -110,6 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                 $correo !== '' ? $correo : null,
                 $logoPath,
                 $logoTopbarHeight !== '' ? (int) $logoTopbarHeight : null,
+                $logoLoginHeight !== '' ? (int) $logoLoginHeight : null,
                 $logoSidenavHeight !== '' ? (int) $logoSidenavHeight : null,
                 $logoSidenavHeightSm !== '' ? (int) $logoSidenavHeightSm : null,
                 $colorPrimary,
@@ -128,6 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
         'correo' => $correo,
         'logo_path' => $logoPath,
         'logo_topbar_height' => $logoTopbarHeight,
+        'logo_login_height' => $logoLoginHeight,
         'logo_sidenav_height' => $logoSidenavHeight,
         'logo_sidenav_height_sm' => $logoSidenavHeightSm,
         'color_primary' => $colorPrimary !== '' ? $colorPrimary : '#6658dd',
@@ -238,6 +246,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                                             <div class="input-group">
                                                                 <span class="input-group-text">Barra superior (px)</span>
                                                                 <input type="number" min="16" max="120" id="muni-logo-topbar" name="logo_topbar_height" class="form-control" value="<?php echo htmlspecialchars($municipalidad['logo_topbar_height'] ?? '56', ENT_QUOTES, 'UTF-8'); ?>">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <div class="input-group">
+                                                                <span class="input-group-text">Inicio de sesión (px)</span>
+                                                                <input type="number" min="16" max="120" id="muni-logo-login" name="logo_login_height" class="form-control" value="<?php echo htmlspecialchars($municipalidad['logo_login_height'] ?? '48', ENT_QUOTES, 'UTF-8'); ?>">
                                                             </div>
                                                         </div>
                                                         <div class="col-12">

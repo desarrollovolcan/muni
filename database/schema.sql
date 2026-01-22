@@ -209,6 +209,7 @@ CREATE TABLE `municipalidad` (
   `correo` VARCHAR(150) DEFAULT NULL,
   `logo_path` VARCHAR(255) DEFAULT NULL,
   `logo_topbar_height` INT UNSIGNED DEFAULT NULL,
+  `logo_login_height` INT UNSIGNED DEFAULT NULL,
   `logo_sidenav_height` INT UNSIGNED DEFAULT NULL,
   `logo_sidenav_height_sm` INT UNSIGNED DEFAULT NULL,
   `color_primary` VARCHAR(20) DEFAULT NULL,

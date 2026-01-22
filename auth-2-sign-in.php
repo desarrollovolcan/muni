@@ -44,6 +44,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 include('partials/html.php');
+
+$municipalidad = get_municipalidad();
+$logoPath = $municipalidad['logo_path'] ?? 'assets/images/logo.png';
 ?>
 
 <head>
@@ -101,10 +104,10 @@ include('partials/html.php');
                     <div class="card-body min-vh-100 d-flex flex-column justify-content-center">
                         <div class="auth-brand mb-0 text-center">
                             <a href="index.php" class="logo-dark">
-                                <img src="assets/images/logo-black.png" alt="dark logo" height="28">
+                                <img src="<?php echo htmlspecialchars($logoPath, ENT_QUOTES, 'UTF-8'); ?>" alt="logo">
                             </a>
                             <a href="index.php" class="logo-light">
-                                <img src="assets/images/logo.png" alt="logo" height="28">
+                                <img src="<?php echo htmlspecialchars($logoPath, ENT_QUOTES, 'UTF-8'); ?>" alt="logo">
                             </a>
                         </div>
 
