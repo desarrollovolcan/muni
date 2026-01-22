@@ -8,6 +8,22 @@ if (!isset($_SESSION['user'])) {
     redirect('auth-2-sign-in.php');
 }
 
+$metricas = [
+    'usuarios' => 0,
+    'eventos' => 0,
+    'documentos' => 0,
+    'autoridades' => 0,
+];
+
+try {
+    $metricas['usuarios'] = (int) db()->query('SELECT COUNT(*) FROM users WHERE estado = 1')->fetchColumn();
+    $metricas['eventos'] = (int) db()->query('SELECT COUNT(*) FROM events WHERE habilitado = 1')->fetchColumn();
+    $metricas['documentos'] = (int) db()->query("SELECT COUNT(*) FROM documents WHERE estado = 'vigente'")->fetchColumn();
+    $metricas['autoridades'] = (int) db()->query('SELECT COUNT(*) FROM authorities WHERE estado = 1')->fetchColumn();
+} catch (Exception $e) {
+} catch (Error $e) {
+}
+
 include('partials/html.php');
 ?>
 
@@ -34,76 +50,76 @@ include('partials/html.php');
                 <?php $title = "Dashboard"; include('partials/page-title.php'); ?>
 
                 <div class="row row-cols-xxl-4 row-cols-md-2 row-cols-1">
-                    <!-- Total Sales Widget -->
+                    <!-- Usuarios activos -->
                     <div class="col">
                         <div class="card">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="avatar fs-60 avatar-img-size flex-shrink-0">
                                         <span class="avatar-title bg-primary-subtle text-primary rounded-circle fs-24">
-                                            <i class="ti ti-credit-card"></i>
+                                            <i class="ti ti-users"></i>
                                         </span>
                                     </div>
                                     <div class="text-end">
-                                        <h3 class="mb-2 fw-normal">$<span data-target="124.7">0</span>K</h3>
-                                        <p class="mb-0 text-muted"><span>Total Sales</span></p>
+                                        <h3 class="mb-2 fw-normal"><span data-target="<?php echo (int) $metricas['usuarios']; ?>">0</span></h3>
+                                        <p class="mb-0 text-muted"><span>Usuarios activos</span></p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div><!-- end col -->
 
-                    <!-- Orders Placed Widget -->
+                    <!-- Eventos activos -->
                     <div class="col">
                         <div class="card">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="avatar fs-60 avatar-img-size flex-shrink-0">
                                         <span class="avatar-title bg-success-subtle text-success rounded-circle fs-24">
-                                            <i class="ti ti-shopping-cart"></i>
+                                            <i class="ti ti-calendar-event"></i>
                                         </span>
                                     </div>
                                     <div class="text-end">
-                                        <h3 class="mb-2 fw-normal"><span data-target="2358">0</span></h3>
-                                        <p class="mb-0 text-muted"><span>Orders Placed</span></p>
+                                        <h3 class="mb-2 fw-normal"><span data-target="<?php echo (int) $metricas['eventos']; ?>">0</span></h3>
+                                        <p class="mb-0 text-muted"><span>Eventos activos</span></p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div><!-- end col -->
 
-                    <!-- Active Customers Widget -->
+                    <!-- Documentos vigentes -->
                     <div class="col">
                         <div class="card">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="avatar fs-60 avatar-img-size flex-shrink-0">
                                         <span class="avatar-title bg-info-subtle text-info rounded-circle fs-24">
-                                            <i class="ti ti-users"></i>
+                                            <i class="ti ti-file-text"></i>
                                         </span>
                                     </div>
                                     <div class="text-end">
-                                        <h3 class="mb-2 fw-normal"><span data-target="839">0</span></h3>
-                                        <p class="mb-0 text-muted"><span>Active Customers</span></p>
+                                        <h3 class="mb-2 fw-normal"><span data-target="<?php echo (int) $metricas['documentos']; ?>">0</span></h3>
+                                        <p class="mb-0 text-muted"><span>Documentos vigentes</span></p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div><!-- end col -->
 
-                    <!-- Refund Requests Widget -->
+                    <!-- Autoridades activas -->
                     <div class="col">
                         <div class="card">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="avatar fs-60 avatar-img-size flex-shrink-0">
                                         <span class="avatar-title bg-warning-subtle text-warning rounded-circle fs-24">
-                                            <i class="ti ti-rotate-clockwise-2"></i>
+                                            <i class="ti ti-id-badge-2"></i>
                                         </span>
                                     </div>
                                     <div class="text-end">
-                                        <h3 class="mb-2 fw-normal"><span data-target="41">0</span></h3>
-                                        <p class="mb-0 text-muted"><span>Refund Requests</span></p>
+                                        <h3 class="mb-2 fw-normal"><span data-target="<?php echo (int) $metricas['autoridades']; ?>">0</span></h3>
+                                        <p class="mb-0 text-muted"><span>Autoridades activas</span></p>
                                     </div>
                                 </div>
                             </div>
