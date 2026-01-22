@@ -162,6 +162,31 @@ CREATE TABLE `event_authorities` (
   CONSTRAINT `event_authorities_authority_id_fk` FOREIGN KEY (`authority_id`) REFERENCES `authorities` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `event_authority_requests` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `event_id` INT UNSIGNED NOT NULL,
+  `destinatario_nombre` VARCHAR(150) DEFAULT NULL,
+  `destinatario_correo` VARCHAR(150) NOT NULL,
+  `token` VARCHAR(64) NOT NULL,
+  `correo_enviado` TINYINT(1) NOT NULL DEFAULT 0,
+  `estado` ENUM('pendiente', 'respondido') NOT NULL DEFAULT 'pendiente',
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `responded_at` TIMESTAMP NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `event_authority_requests_token_unique` (`token`),
+  KEY `event_authority_requests_event_id_idx` (`event_id`),
+  CONSTRAINT `event_authority_requests_event_id_fk` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `event_authority_confirmations` (
+  `request_id` INT UNSIGNED NOT NULL,
+  `authority_id` INT UNSIGNED NOT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`request_id`, `authority_id`),
+  CONSTRAINT `event_authority_confirmations_request_id_fk` FOREIGN KEY (`request_id`) REFERENCES `event_authority_requests` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `event_authority_confirmations_authority_id_fk` FOREIGN KEY (`authority_id`) REFERENCES `authorities` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `authority_attachments` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `authority_id` INT UNSIGNED NOT NULL,

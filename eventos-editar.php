@@ -271,6 +271,12 @@ try {
                                             Eliminar
                                         </button>
 
+                                        <?php if ($id > 0) : ?>
+                                            <a href="eventos-autoridades.php?event_id=<?php echo (int) $id; ?>" class="btn btn-outline-primary">
+                                                Enviar confirmación de invitados
+                                            </a>
+                                        <?php endif; ?>
+
                                         <button type="button" class="btn btn-light ms-auto" data-bs-dismiss="modal">
                                             Cancelar
                                         </button>
