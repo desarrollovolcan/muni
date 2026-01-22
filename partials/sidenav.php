@@ -87,9 +87,6 @@
                             <a href="usuarios-crear.php" class="side-nav-link">Crear usuario</a>
                         </li>
                         <li class="side-nav-item">
-                            <a href="users-profile.php" class="side-nav-link">Perfil</a>
-                        </li>
-                        <li class="side-nav-item">
                             <a href="usuarios-asignar-roles.php" class="side-nav-link">Asignar roles</a>
                         </li>
                     </ul>

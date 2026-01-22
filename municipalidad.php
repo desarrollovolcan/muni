@@ -39,6 +39,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
             $extension = strtolower(pathinfo($logoUpload['name'], PATHINFO_EXTENSION));
         }
         $allowed = ['png', 'jpg', 'jpeg', 'svg'];
+        $allowedMime = [
+            'png' => ['image/png'],
+            'jpg' => ['image/jpeg'],
+            'jpeg' => ['image/jpeg'],
+            'svg' => ['image/svg+xml', 'text/plain'],
+        ];
+        if (empty($errors) && is_uploaded_file($logoUpload['tmp_name'])) {
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo->file($logoUpload['tmp_name']);
+            if (!in_array($mimeType, $allowedMime[$extension] ?? [], true)) {
+                $errors[] = 'El archivo no corresponde a un formato permitido (PNG, JPG o SVG).';
+            }
+        }
         if (empty($errors) && !in_array($extension, $allowed, true)) {
             $errors[] = 'Formato de logo no permitido. Usa PNG, JPG o SVG.';
         } elseif (empty($errors)) {
