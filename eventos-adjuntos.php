@@ -26,7 +26,50 @@
                     <div class="col-12">
                         <div class="card">
                             <div class="card-body">
-                                <p class="mb-0">Carga de archivos asociados a eventos.</p>
+                                <form class="mb-4">
+                                    <div class="row g-3 align-items-end">
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="adjunto-evento">Evento</label>
+                                            <select id="adjunto-evento" class="form-select">
+                                                <option selected>Operativo Salud</option>
+                                                <option>Consejo Municipal</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label" for="adjunto-archivo">Archivo</label>
+                                            <input type="file" id="adjunto-archivo" class="form-control">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="submit" class="btn btn-primary w-100">Subir</button>
+                                        </div>
+                                    </div>
+                                </form>
+                                <div class="table-responsive">
+                                    <table class="table table-centered mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Archivo</th>
+                                                <th>Tipo</th>
+                                                <th>Subido por</th>
+                                                <th>Fecha</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Programa_operativo.pdf</td>
+                                                <td>PDF</td>
+                                                <td>Super User</td>
+                                                <td>20/01/2026</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Plano_ubicacion.png</td>
+                                                <td>Imagen</td>
+                                                <td>María Soto</td>
+                                                <td>21/01/2026</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>

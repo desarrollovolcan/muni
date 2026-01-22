@@ -26,7 +26,41 @@
                     <div class="col-12">
                         <div class="card">
                             <div class="card-body">
-                                <p class="mb-0">Descarga y eliminación de adjuntos.</p>
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-centered mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Evento</th>
+                                                <th>Archivo</th>
+                                                <th>Tipo</th>
+                                                <th>Subido por</th>
+                                                <th class="text-end">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Operativo Salud</td>
+                                                <td>Programa_operativo.pdf</td>
+                                                <td>PDF</td>
+                                                <td>Super User</td>
+                                                <td class="text-end">
+                                                    <button class="btn btn-sm btn-outline-primary">Descargar</button>
+                                                    <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Consejo Municipal</td>
+                                                <td>Acta_reunion.docx</td>
+                                                <td>DOCX</td>
+                                                <td>Juan Pérez</td>
+                                                <td class="text-end">
+                                                    <button class="btn btn-sm btn-outline-primary">Descargar</button>
+                                                    <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>

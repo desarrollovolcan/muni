@@ -26,7 +26,57 @@
                     <div class="col-12">
                         <div class="card">
                             <div class="card-body">
-                                <p class="mb-0">Listado de autoridades vigentes e históricas.</p>
+                                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <select class="form-select">
+                                            <option value="">Estado</option>
+                                            <option>Vigente</option>
+                                            <option>Histórico</option>
+                                        </select>
+                                        <select class="form-select">
+                                            <option value="">Tipo</option>
+                                            <option>Alcalde</option>
+                                            <option>Concejal</option>
+                                            <option>Administrador Municipal</option>
+                                        </select>
+                                    </div>
+                                    <a href="autoridades-editar.php" class="btn btn-primary">Crear autoridad</a>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-centered mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Autoridad</th>
+                                                <th>Tipo</th>
+                                                <th>Periodo</th>
+                                                <th>Contacto</th>
+                                                <th class="text-end">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Ana Martínez</td>
+                                                <td>Alcaldesa</td>
+                                                <td>2024 - 2028</td>
+                                                <td>ana.martinez@muni.cl</td>
+                                                <td class="text-end">
+                                                    <a href="autoridades-detalle.php" class="btn btn-sm btn-outline-primary">Ver</a>
+                                                    <a href="autoridades-editar.php" class="btn btn-sm btn-outline-secondary">Editar</a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Pedro Ruiz</td>
+                                                <td>Concejal</td>
+                                                <td>2020 - 2024</td>
+                                                <td>pedro.ruiz@muni.cl</td>
+                                                <td class="text-end">
+                                                    <a href="autoridades-detalle.php" class="btn btn-sm btn-outline-primary">Ver</a>
+                                                    <a href="autoridades-editar.php" class="btn btn-sm btn-outline-secondary">Editar</a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>

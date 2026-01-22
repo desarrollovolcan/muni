@@ -26,7 +26,25 @@
                     <div class="col-12">
                         <div class="card">
                             <div class="card-body">
-                                <p class="mb-0">Acceso al sistema y cierre de sesión.</p>
+                                <form>
+                                    <div class="mb-3">
+                                        <label class="form-label" for="login-username">Usuario o correo</label>
+                                        <input type="text" id="login-username" class="form-control" placeholder="usuario@muni.cl">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label" for="login-password">Contraseña</label>
+                                        <input type="password" id="login-password" class="form-control" placeholder="********">
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="login-remember">
+                                            <label class="form-check-label" for="login-remember">Mantener sesión</label>
+                                        </div>
+                                        <a href="recuperar-contrasena.php" class="text-muted">¿Olvidaste tu contraseña?</a>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Ingresar</button>
+                                    <button type="button" class="btn btn-outline-secondary ms-2">Cerrar sesión</button>
+                                </form>
                             </div>
                         </div>
                     </div>

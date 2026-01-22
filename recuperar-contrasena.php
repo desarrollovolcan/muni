@@ -26,7 +26,22 @@
                     <div class="col-12">
                         <div class="card">
                             <div class="card-body">
-                                <p class="mb-0">Restablecimiento de credenciales de acceso.</p>
+                                <form>
+                                    <div class="mb-3">
+                                        <label class="form-label" for="recover-email">Correo registrado</label>
+                                        <input type="email" id="recover-email" class="form-control" placeholder="usuario@muni.cl">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label" for="recover-rut">RUT</label>
+                                        <input type="text" id="recover-rut" class="form-control" placeholder="12.345.678-9">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label" for="recover-phone">Teléfono de contacto</label>
+                                        <input type="tel" id="recover-phone" class="form-control" placeholder="+56 9 1234 5678">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Enviar instrucciones</button>
+                                    <a href="login.php" class="btn btn-link">Volver al login</a>
+                                </form>
                             </div>
                         </div>
                     </div>
