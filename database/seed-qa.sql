@@ -1,4 +1,5 @@
 -- Datos QA para pruebas de flujo
+-- Sección: unidades
 
 INSERT INTO unidades (nombre, descripcion) VALUES
     ('Administración', 'Gestión administrativa municipal'),
