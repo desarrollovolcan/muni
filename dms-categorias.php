@@ -49,6 +49,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
             }
         }
     }
+
+    if ($action === 'delete_category') {
+        $categoriaId = (int) ($_POST['categoria_id'] ?? 0);
+        if ($categoriaId > 0) {
+            $stmt = db()->prepare('DELETE FROM document_categories WHERE id = ?');
+            $stmt->execute([$categoriaId]);
+            redirect('dms-categorias.php?success=category_deleted');
+        }
+    }
+
+    if ($action === 'delete_tag') {
+        $tagId = (int) ($_POST['tag_id'] ?? 0);
+        if ($tagId > 0) {
+            $stmt = db()->prepare('DELETE FROM document_tags WHERE id = ?');
+            $stmt->execute([$tagId]);
+            redirect('dms-categorias.php?success=tag_deleted');
+        }
+    }
 }
 
 $categorias = db()->query('SELECT id, nombre, descripcion, created_at FROM document_categories ORDER BY nombre')->fetchAll();
@@ -87,8 +105,12 @@ $responsables = [
 
                 <?php if ($success === 'category') : ?>
                     <div class="alert alert-success">Categoría creada correctamente.</div>
+                <?php elseif ($success === 'category_deleted') : ?>
+                    <div class="alert alert-success">Categoría eliminada correctamente.</div>
                 <?php elseif ($success === 'tag') : ?>
                     <div class="alert alert-success">Etiqueta creada correctamente.</div>
+                <?php elseif ($success === 'tag_deleted') : ?>
+                    <div class="alert alert-success">Etiqueta eliminada correctamente.</div>
                 <?php endif; ?>
 
                 <?php if (!empty($errors)) : ?>
@@ -144,12 +166,13 @@ $responsables = [
                                                 <th>Nombre</th>
                                                 <th>Descripción</th>
                                                 <th>Creación</th>
+                                                <th class="text-end">Acciones</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <?php if (empty($categorias)) : ?>
                                                 <tr>
-                                                    <td colspan="3" class="text-muted text-center">Sin categorías registradas.</td>
+                                                    <td colspan="4" class="text-muted text-center">Sin categorías registradas.</td>
                                                 </tr>
                                             <?php endif; ?>
                                             <?php foreach ($categorias as $categoria) : ?>
@@ -157,6 +180,14 @@ $responsables = [
                                                     <td><?php echo htmlspecialchars($categoria['nombre'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                     <td><?php echo htmlspecialchars($categoria['descripcion'] ?? '—', ENT_QUOTES, 'UTF-8'); ?></td>
                                                     <td><?php echo htmlspecialchars(date('d/m/Y', strtotime($categoria['created_at'])), ENT_QUOTES, 'UTF-8'); ?></td>
+                                                    <td class="text-end">
+                                                        <form method="post">
+                                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                            <input type="hidden" name="action" value="delete_category">
+                                                            <input type="hidden" name="categoria_id" value="<?php echo (int) $categoria['id']; ?>">
+                                                            <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+                                                        </form>
+                                                    </td>
                                                 </tr>
                                             <?php endforeach; ?>
                                         </tbody>
@@ -194,7 +225,17 @@ $responsables = [
                                         <span class="text-muted">Sin etiquetas registradas.</span>
                                     <?php endif; ?>
                                     <?php foreach ($etiquetas as $etiqueta) : ?>
-                                        <span class="badge text-bg-light"><?php echo htmlspecialchars($etiqueta['nombre'], ENT_QUOTES, 'UTF-8'); ?></span>
+                                        <div class="d-inline-flex align-items-center gap-1">
+                                            <span class="badge text-bg-light"><?php echo htmlspecialchars($etiqueta['nombre'], ENT_QUOTES, 'UTF-8'); ?></span>
+                                            <form method="post">
+                                                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                <input type="hidden" name="action" value="delete_tag">
+                                                <input type="hidden" name="tag_id" value="<?php echo (int) $etiqueta['id']; ?>">
+                                                <button class="btn btn-xs btn-link text-danger p-0" type="submit" aria-label="Eliminar etiqueta">
+                                                    <i class="ti ti-x"></i>
+                                                </button>
+                                            </form>
+                                        </div>
                                     <?php endforeach; ?>
                                 </div>
                                 <div class="alert alert-info mt-3 mb-0">
