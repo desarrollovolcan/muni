@@ -115,6 +115,15 @@ CREATE TABLE `event_attachments` (
   CONSTRAINT `event_attachments_subido_por_fk` FOREIGN KEY (`subido_por`) REFERENCES `users` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `event_authorities` (
+  `event_id` INT UNSIGNED NOT NULL,
+  `authority_id` INT UNSIGNED NOT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`event_id`, `authority_id`),
+  CONSTRAINT `event_authorities_event_id_fk` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `event_authorities_authority_id_fk` FOREIGN KEY (`authority_id`) REFERENCES `authorities` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `authorities` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `nombre` VARCHAR(150) NOT NULL,
@@ -155,6 +164,19 @@ CREATE TABLE `municipalidad` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `notificacion_correos` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `correo_imap` VARCHAR(150) NOT NULL,
+  `password_imap` VARCHAR(255) NOT NULL,
+  `host_imap` VARCHAR(150) NOT NULL,
+  `puerto_imap` INT UNSIGNED NOT NULL DEFAULT 993,
+  `seguridad_imap` VARCHAR(30) NOT NULL DEFAULT 'ssl',
+  `from_nombre` VARCHAR(150) DEFAULT NULL,
+  `from_correo` VARCHAR(150) DEFAULT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 INSERT INTO `users` (
   `rut`,
   `nombre`,
@@ -189,6 +211,9 @@ VALUES
 
 INSERT INTO `municipalidad` (`nombre`, `rut`, `direccion`, `telefono`, `correo`, `logo_path`, `color_primary`, `color_secondary`)
 VALUES ('Municipalidad', NULL, NULL, NULL, NULL, 'assets/images/logo.png', '#6658dd', '#4a81d4');
+
+INSERT INTO `notificacion_correos` (`correo_imap`, `password_imap`, `host_imap`, `puerto_imap`, `seguridad_imap`, `from_nombre`, `from_correo`)
+VALUES ('notificaciones@municipalidad.cl', 'cambiar_password', 'imap.municipalidad.cl', 993, 'ssl', 'Sistema Municipal', 'notificaciones@municipalidad.cl');
 
 INSERT INTO `permissions` (`modulo`, `accion`, `descripcion`)
 VALUES

@@ -132,10 +132,27 @@
                             <a href="eventos-editar.php" class="side-nav-link">Crear evento</a>
                         </li>
                         <li class="side-nav-item">
+                            <a href="eventos-autoridades.php" class="side-nav-link">Autoridades por evento</a>
+                        </li>
+                        <li class="side-nav-item">
                             <a href="eventos-adjuntos.php" class="side-nav-link">Subir adjuntos</a>
                         </li>
                         <li class="side-nav-item">
                             <a href="eventos-adjuntos-gestionar.php" class="side-nav-link">Descargar/eliminar adjuntos</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+            <li class="side-nav-item">
+                <a href="#modulo-mantenedores" class="side-nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="modulo-mantenedores">
+                    <span class="menu-icon"><i data-lucide="settings-2"></i></span>
+                    <span class="menu-text">Mantenedores</span>
+                    <span class="menu-arrow"></span>
+                </a>
+                <div class="collapse" id="modulo-mantenedores">
+                    <ul class="side-nav sub-menu">
+                        <li class="side-nav-item">
+                            <a href="notificaciones-correo.php" class="side-nav-link">Correo de notificaciones</a>
                         </li>
                     </ul>
                 </div>
