@@ -1,4 +1,5 @@
 -- Datos QA para pruebas de flujo
+-- Sección: unidades
 
 INSERT INTO unidades (nombre, descripcion) VALUES
     ('Administración', 'Gestión administrativa municipal'),
@@ -176,6 +177,30 @@ INSERT INTO event_authorities (event_id, authority_id) VALUES
     (19, 19),
     (20, 20);
 
+INSERT INTO event_authority_requests (event_id, destinatario_nombre, destinatario_correo, token, correo_enviado, estado, responded_at) VALUES
+    (1, 'Camila González', 'camila.gonzález@municipalidad.cl', 'reqtoken01', 1, 'respondido', NOW()),
+    (2, 'Diego Muñoz', 'diego.muñoz@municipalidad.cl', 'reqtoken02', 1, 'respondido', NOW()),
+    (3, 'Valentina Rojas', 'valentina.rojas@municipalidad.cl', 'reqtoken03', 1, 'respondido', NOW()),
+    (4, 'Matías Díaz', 'matías.díaz@municipalidad.cl', 'reqtoken04', 1, 'respondido', NOW()),
+    (5, 'Fernanda Pérez', 'fernanda.pérez@municipalidad.cl', 'reqtoken05', 1, 'respondido', NOW()),
+    (6, 'Sebastián Soto', 'sebastián.soto@municipalidad.cl', 'reqtoken06', 1, 'respondido', NOW()),
+    (7, 'Constanza Contreras', 'constanza.contreras@municipalidad.cl', 'reqtoken07', 1, 'pendiente', NULL),
+    (8, 'Javiera Silva', 'javiera.silva@municipalidad.cl', 'reqtoken08', 1, 'pendiente', NULL),
+    (9, 'Rodrigo Martínez', 'rodrigo.martínez@municipalidad.cl', 'reqtoken09', 1, 'pendiente', NULL),
+    (10, 'Francisca Sepúlveda', 'francisca.sepúlveda@municipalidad.cl', 'reqtoken10', 1, 'pendiente', NULL);
+
+INSERT INTO event_authority_confirmations (request_id, authority_id) VALUES
+    (1, 1),
+    (2, 2),
+    (3, 3),
+    (4, 4),
+    (5, 5),
+    (6, 6),
+    (7, 7),
+    (8, 8),
+    (9, 9),
+    (10, 10);
+
 INSERT INTO event_attachments (event_id, archivo_nombre, archivo_ruta, archivo_tipo, subido_por) VALUES
     (1, 'adjunto_evento_1.pdf', 'uploads/eventos/adjunto_evento_1.pdf', 'application/pdf', 1),
     (2, 'adjunto_evento_2.pdf', 'uploads/eventos/adjunto_evento_2.pdf', 'application/pdf', 2),
@@ -351,6 +376,18 @@ INSERT INTO document_access (document_id, role_id) VALUES
     (18, 18),
     (19, 19),
     (20, 20);
+
+INSERT INTO document_shares (document_id, user_id) VALUES
+    (1, 1),
+    (2, 2),
+    (3, 3),
+    (4, 4),
+    (5, 5),
+    (6, 6),
+    (7, 7),
+    (8, 8),
+    (9, 9),
+    (10, 10);
 
 INSERT INTO approval_flows (nombre, entidad, unidad_id, sla_horas, estado) VALUES
     ('Flujo QA 1', 'Eventos', 1, 48, 'activo'),
