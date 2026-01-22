@@ -7,74 +7,139 @@ $success = $_GET['success'] ?? '';
 $categorias = db()->query('SELECT id, nombre FROM document_categories ORDER BY nombre')->fetchAll();
 $unidades = db()->query('SELECT id, nombre FROM unidades ORDER BY nombre')->fetchAll();
 $etiquetas = db()->query('SELECT id, nombre FROM document_tags ORDER BY nombre')->fetchAll();
+$usuarios = db()->query('SELECT id, nombre, apellido, correo FROM users WHERE estado = 1 ORDER BY nombre, apellido')->fetchAll();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ?? null)) {
-    $titulo = trim($_POST['titulo'] ?? '');
-    $descripcion = trim($_POST['descripcion'] ?? '');
-    $categoriaId = (int) ($_POST['categoria_id'] ?? 0);
-    $unidadId = (int) ($_POST['unidad_id'] ?? 0);
-    $estado = trim($_POST['estado'] ?? 'vigente');
-    $version = trim($_POST['version'] ?? '');
-    $archivoRuta = trim($_POST['archivo_ruta'] ?? '');
-    $archivoTipo = trim($_POST['archivo_tipo'] ?? '');
-    $vencimiento = trim($_POST['vencimiento'] ?? '');
-    $tagsSeleccionados = $_POST['tags'] ?? [];
+    $action = $_POST['action'] ?? 'create_document';
 
-    if ($titulo === '') {
-        $errors[] = 'El título del documento es obligatorio.';
-    }
-    if ($version === '') {
-        $errors[] = 'La versión inicial es obligatoria.';
-    }
-    if ($archivoRuta === '' || $archivoTipo === '') {
-        $errors[] = 'Completa la ruta y el tipo del archivo.';
-    }
+    if ($action === 'create_document') {
+        $titulo = trim($_POST['titulo'] ?? '');
+        $descripcion = trim($_POST['descripcion'] ?? '');
+        $categoriaId = (int) ($_POST['categoria_id'] ?? 0);
+        $unidadId = (int) ($_POST['unidad_id'] ?? 0);
+        $estado = trim($_POST['estado'] ?? 'vigente');
+        $version = trim($_POST['version'] ?? '');
+        $vencimiento = trim($_POST['vencimiento'] ?? '');
+        $tagsSeleccionados = $_POST['tags'] ?? [];
 
-    $estadoPermitido = ['vigente', 'revision', 'vencido'];
-    if (!in_array($estado, $estadoPermitido, true)) {
-        $estado = 'vigente';
-    }
-
-    if (empty($errors)) {
-        $usuarioId = $_SESSION['user']['id'] ?? 1;
-        $stmt = db()->prepare('INSERT INTO documents (titulo, descripcion, categoria_id, unidad_id, estado, created_by) VALUES (?, ?, ?, ?, ?, ?)');
-        $stmt->execute([
-            $titulo,
-            $descripcion !== '' ? $descripcion : null,
-            $categoriaId > 0 ? $categoriaId : null,
-            $unidadId > 0 ? $unidadId : null,
-            $estado,
-            $usuarioId,
-        ]);
-        $documentId = (int) db()->lastInsertId();
-
-        $stmt = db()->prepare('INSERT INTO document_versions (document_id, version, archivo_ruta, archivo_tipo, vencimiento, created_by) VALUES (?, ?, ?, ?, ?, ?)');
-        $stmt->execute([
-            $documentId,
-            $version,
-            $archivoRuta,
-            $archivoTipo,
-            $vencimiento !== '' ? $vencimiento : null,
-            $usuarioId,
-        ]);
-
-        if (is_array($tagsSeleccionados)) {
-            $stmt = db()->prepare('INSERT INTO document_tag_links (document_id, tag_id) VALUES (?, ?)');
-            foreach ($tagsSeleccionados as $tagId) {
-                $tagId = (int) $tagId;
-                if ($tagId > 0) {
-                    $stmt->execute([$documentId, $tagId]);
-                }
-            }
+        if ($titulo === '') {
+            $errors[] = 'El título del documento es obligatorio.';
+        }
+        if ($version === '') {
+            $errors[] = 'La versión inicial es obligatoria.';
         }
 
-        redirect('dms-documentos.php?success=1');
+        $archivoRuta = '';
+        $archivoTipo = '';
+        if (!empty($_FILES['archivo']) && is_array($_FILES['archivo']) && ($_FILES['archivo']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+            if ($_FILES['archivo']['error'] !== UPLOAD_ERR_OK) {
+                $errors[] = 'No se pudo subir el archivo.';
+            } else {
+                $uploadDir = __DIR__ . '/uploads/documentos';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0775, true);
+                }
+                $filename = basename($_FILES['archivo']['name']);
+                $safeName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $filename);
+                $targetPath = $uploadDir . '/' . uniqid('doc_', true) . '_' . $safeName;
+                if (!move_uploaded_file($_FILES['archivo']['tmp_name'], $targetPath)) {
+                    $errors[] = 'No se pudo guardar el archivo en el servidor.';
+                } else {
+                    $archivoRuta = 'uploads/documentos/' . basename($targetPath);
+                    $finfo = new finfo(FILEINFO_MIME_TYPE);
+                    $archivoTipo = $finfo->file($targetPath) ?: 'application/octet-stream';
+                }
+            }
+        } else {
+            $errors[] = 'Debes adjuntar un archivo.';
+        }
+
+        $estadoPermitido = ['vigente', 'revision', 'vencido'];
+        if (!in_array($estado, $estadoPermitido, true)) {
+            $estado = 'vigente';
+        }
+
+        if (empty($errors)) {
+            $usuarioId = $_SESSION['user']['id'] ?? 1;
+            $stmt = db()->prepare('INSERT INTO documents (titulo, descripcion, categoria_id, unidad_id, estado, created_by) VALUES (?, ?, ?, ?, ?, ?)');
+            $stmt->execute([
+                $titulo,
+                $descripcion !== '' ? $descripcion : null,
+                $categoriaId > 0 ? $categoriaId : null,
+                $unidadId > 0 ? $unidadId : null,
+                $estado,
+                $usuarioId,
+            ]);
+            $documentId = (int) db()->lastInsertId();
+
+            $stmt = db()->prepare('INSERT INTO document_versions (document_id, version, archivo_ruta, archivo_tipo, vencimiento, created_by) VALUES (?, ?, ?, ?, ?, ?)');
+            $stmt->execute([
+                $documentId,
+                $version,
+                $archivoRuta,
+                $archivoTipo,
+                $vencimiento !== '' ? $vencimiento : null,
+                $usuarioId,
+            ]);
+
+            if (is_array($tagsSeleccionados)) {
+                $stmt = db()->prepare('INSERT INTO document_tag_links (document_id, tag_id) VALUES (?, ?)');
+                foreach ($tagsSeleccionados as $tagId) {
+                    $tagId = (int) $tagId;
+                    if ($tagId > 0) {
+                        $stmt->execute([$documentId, $tagId]);
+                    }
+                }
+            }
+
+            redirect('dms-documentos.php?success=1');
+        }
+    }
+
+    if ($action === 'share_document') {
+        $documentId = (int) ($_POST['document_id'] ?? 0);
+        $sharedUsers = array_map('intval', $_POST['share_users'] ?? []);
+
+        if ($documentId > 0) {
+            $stmt = db()->prepare('DELETE FROM document_shares WHERE document_id = ?');
+            $stmt->execute([$documentId]);
+
+            if (!empty($sharedUsers)) {
+                $stmtInsert = db()->prepare('INSERT INTO document_shares (document_id, user_id) VALUES (?, ?)');
+                foreach ($sharedUsers as $userId) {
+                    if ($userId > 0) {
+                        $stmtInsert->execute([$documentId, $userId]);
+                    }
+                }
+            }
+
+            redirect('dms-documentos.php?success=share');
+        }
+    }
+
+    if ($action === 'delete_document') {
+        $documentId = (int) ($_POST['document_id'] ?? 0);
+        if ($documentId > 0) {
+            $stmt = db()->prepare('SELECT archivo_ruta FROM document_versions WHERE document_id = ?');
+            $stmt->execute([$documentId]);
+            $files = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            foreach ($files as $filePath) {
+                $fullPath = __DIR__ . '/' . ltrim($filePath, '/');
+                if (is_file($fullPath)) {
+                    unlink($fullPath);
+                }
+            }
+
+            $stmt = db()->prepare('DELETE FROM documents WHERE id = ?');
+            $stmt->execute([$documentId]);
+            redirect('dms-documentos.php?success=deleted');
+        }
     }
 }
 
 $documentos = db()->query(
     'SELECT d.id, d.titulo, d.estado, c.nombre AS categoria, u.nombre AS unidad,
-            v.version, v.vencimiento
+            v.version, v.vencimiento, v.archivo_ruta, COUNT(ds.user_id) AS shared_total
      FROM documents d
      LEFT JOIN document_categories c ON c.id = d.categoria_id
      LEFT JOIN unidades u ON u.id = d.unidad_id
@@ -84,8 +149,16 @@ $documentos = db()->query(
         ORDER BY dv.created_at DESC
         LIMIT 1
      )
+     LEFT JOIN document_shares ds ON ds.document_id = d.id
+     GROUP BY d.id
      ORDER BY d.created_at DESC'
 )->fetchAll();
+
+$documentShareMap = [];
+$stmt = db()->query('SELECT document_id, user_id FROM document_shares');
+foreach ($stmt->fetchAll() as $share) {
+    $documentShareMap[(int) $share['document_id']][] = (int) $share['user_id'];
+}
 ?>
 <?php include('partials/html.php'); ?>
 
@@ -113,6 +186,10 @@ $documentos = db()->query(
 
                 <?php if ($success === '1') : ?>
                     <div class="alert alert-success">Documento creado correctamente.</div>
+                <?php elseif ($success === 'share') : ?>
+                    <div class="alert alert-success">Documento compartido correctamente.</div>
+                <?php elseif ($success === 'deleted') : ?>
+                    <div class="alert alert-success">Documento eliminado correctamente.</div>
                 <?php endif; ?>
 
                 <?php if (!empty($errors)) : ?>
@@ -131,8 +208,9 @@ $documentos = db()->query(
                                 <p class="text-muted mb-0">Registra el documento y su primera versión en un solo paso.</p>
                             </div>
                             <div class="card-body">
-                                <form method="post" class="row g-3">
+                                <form method="post" class="row g-3" enctype="multipart/form-data">
                                     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                    <input type="hidden" name="action" value="create_document">
                                     <div class="col-12">
                                         <label class="form-label" for="doc-titulo">Título</label>
                                         <input type="text" id="doc-titulo" name="titulo" class="form-control" placeholder="Ej: Manual de procedimientos" required>
@@ -172,12 +250,12 @@ $documentos = db()->query(
                                         <input type="text" id="doc-version" name="version" class="form-control" placeholder="v1.0" required>
                                     </div>
                                     <div class="col-md-7">
-                                        <label class="form-label" for="doc-ruta">Ruta del archivo</label>
-                                        <input type="text" id="doc-ruta" name="archivo_ruta" class="form-control" placeholder="/docs/manual.pdf" required>
+                                        <label class="form-label" for="doc-archivo">Archivo</label>
+                                        <input type="file" id="doc-archivo" name="archivo" class="form-control" required>
                                     </div>
                                     <div class="col-md-5">
                                         <label class="form-label" for="doc-tipo">Tipo de archivo</label>
-                                        <input type="text" id="doc-tipo" name="archivo_tipo" class="form-control" placeholder="PDF" required>
+                                        <input type="text" id="doc-tipo" class="form-control" placeholder="Se detecta automáticamente" disabled>
                                     </div>
                                     <div class="col-12">
                                         <label class="form-label" for="doc-vencimiento">Vencimiento</label>
@@ -229,12 +307,14 @@ $documentos = db()->query(
                                                 <th>Versión</th>
                                                 <th>Estado</th>
                                                 <th>Vencimiento</th>
+                                                <th>Compartido</th>
+                                                <th class="text-end">Acciones</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <?php if (empty($documentos)) : ?>
                                                 <tr>
-                                                    <td colspan="6" class="text-muted text-center">Aún no hay documentos registrados.</td>
+                                                    <td colspan="8" class="text-muted text-center">Aún no hay documentos registrados.</td>
                                                 </tr>
                                             <?php endif; ?>
                                             <?php foreach ($documentos as $documento) : ?>
@@ -253,6 +333,39 @@ $documentos = db()->query(
                                                         </span>
                                                     </td>
                                                     <td><?php echo $documento['vencimiento'] ? htmlspecialchars(date('d/m/Y', strtotime($documento['vencimiento'])), ENT_QUOTES, 'UTF-8') : '—'; ?></td>
+                                                    <td>
+                                                        <span class="badge text-bg-light"><?php echo (int) $documento['shared_total']; ?> usuarios</span>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <div class="dropdown">
+                                                            <button class="btn btn-sm btn-soft-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                Acciones
+                                                            </button>
+                                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                                <li>
+                                                                    <?php if (!empty($documento['archivo_ruta'])) : ?>
+                                                                        <a class="dropdown-item" href="<?php echo htmlspecialchars($documento['archivo_ruta'], ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener">Abrir</a>
+                                                                    <?php else : ?>
+                                                                        <span class="dropdown-item text-muted">Sin archivo</span>
+                                                                    <?php endif; ?>
+                                                                </li>
+                                                                <li>
+                                                                    <button class="dropdown-item" type="button" data-bs-toggle="modal" data-bs-target="#share-modal-<?php echo (int) $documento['id']; ?>">
+                                                                        Compartir
+                                                                    </button>
+                                                                </li>
+                                                                <li><hr class="dropdown-divider"></li>
+                                                                <li>
+                                                                    <form method="post" class="px-3 py-1">
+                                                                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                        <input type="hidden" name="action" value="delete_document">
+                                                                        <input type="hidden" name="document_id" value="<?php echo (int) $documento['id']; ?>">
+                                                                        <button type="submit" class="btn btn-sm btn-outline-danger w-100">Eliminar</button>
+                                                                    </form>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </td>
                                                 </tr>
                                             <?php endforeach; ?>
                                         </tbody>
@@ -266,9 +379,9 @@ $documentos = db()->query(
             </div>
             <!-- container -->
 
-            <?php include('partials/footer.php'); ?>
+    <?php include('partials/footer.php'); ?>
 
-        </div>
+</div>
 
         <!-- ============================================================== -->
         <!-- End of Main Content -->
@@ -280,6 +393,41 @@ $documentos = db()->query(
     <?php include('partials/customizer.php'); ?>
 
     <?php include('partials/footer-scripts.php'); ?>
+
+    <?php foreach ($documentos as $documento) : ?>
+        <div class="modal fade" id="share-modal-<?php echo (int) $documento['id']; ?>" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form method="post">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Compartir documento</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                            <input type="hidden" name="action" value="share_document">
+                            <input type="hidden" name="document_id" value="<?php echo (int) $documento['id']; ?>">
+                            <label class="form-label">Selecciona usuarios</label>
+                            <?php $sharedUsers = $documentShareMap[(int) $documento['id']] ?? []; ?>
+                            <select class="form-select" name="share_users[]" multiple size="6">
+                                <?php foreach ($usuarios as $usuario) : ?>
+                                    <option value="<?php echo (int) $usuario['id']; ?>" <?php echo in_array((int) $usuario['id'], $sharedUsers, true) ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars(trim($usuario['nombre'] . ' ' . $usuario['apellido']), ENT_QUOTES, 'UTF-8'); ?>
+                                        (<?php echo htmlspecialchars($usuario['correo'], ENT_QUOTES, 'UTF-8'); ?>)
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <div class="form-text">Los usuarios seleccionados podrán acceder al documento.</div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    <?php endforeach; ?>
 
 </body>
 
