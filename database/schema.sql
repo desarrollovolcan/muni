@@ -22,6 +22,7 @@ CREATE TABLE `roles` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `nombre` VARCHAR(60) NOT NULL,
   `descripcion` VARCHAR(200) DEFAULT NULL,
+  `estado` TINYINT(1) NOT NULL DEFAULT 1,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `roles_nombre_unique` (`nombre`)
@@ -92,6 +93,7 @@ CREATE TABLE `events` (
   `cupos` INT UNSIGNED DEFAULT NULL,
   `publico_objetivo` VARCHAR(150) DEFAULT NULL,
   `estado` ENUM('borrador', 'publicado', 'finalizado', 'cancelado') NOT NULL DEFAULT 'borrador',
+  `habilitado` TINYINT(1) NOT NULL DEFAULT 1,
   `creado_por` INT UNSIGNED NOT NULL,
   `encargado_id` INT UNSIGNED DEFAULT NULL,
   `fecha_creacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -121,6 +123,7 @@ CREATE TABLE `authorities` (
   `telefono` VARCHAR(30) DEFAULT NULL,
   `fecha_inicio` DATE NOT NULL,
   `fecha_fin` DATE DEFAULT NULL,
+  `estado` TINYINT(1) NOT NULL DEFAULT 1,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -161,3 +164,34 @@ INSERT INTO `users` (
   '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe',
   1
 );
+
+INSERT INTO `roles` (`nombre`, `descripcion`, `estado`)
+VALUES
+  ('SuperAdmin', 'Control total del sistema', 1),
+  ('Admin', 'Administración general', 1),
+  ('EncargadoEventos', 'Gestión de eventos', 1),
+  ('Auditor', 'Revisión y auditoría', 1),
+  ('Consulta', 'Acceso de solo lectura', 1);
+
+INSERT INTO `permissions` (`modulo`, `accion`, `descripcion`)
+VALUES
+  ('usuarios', 'ver', 'Ver usuarios'),
+  ('usuarios', 'crear', 'Crear usuarios'),
+  ('usuarios', 'editar', 'Editar usuarios'),
+  ('usuarios', 'eliminar', 'Deshabilitar usuarios'),
+  ('roles', 'ver', 'Ver roles'),
+  ('roles', 'crear', 'Crear roles'),
+  ('roles', 'editar', 'Editar roles'),
+  ('roles', 'eliminar', 'Deshabilitar roles'),
+  ('eventos', 'ver', 'Ver eventos'),
+  ('eventos', 'crear', 'Crear eventos'),
+  ('eventos', 'editar', 'Editar eventos'),
+  ('eventos', 'eliminar', 'Deshabilitar eventos'),
+  ('eventos', 'publicar', 'Publicar eventos'),
+  ('autoridades', 'ver', 'Ver autoridades'),
+  ('autoridades', 'crear', 'Crear autoridades'),
+  ('autoridades', 'editar', 'Editar autoridades'),
+  ('autoridades', 'eliminar', 'Deshabilitar autoridades'),
+  ('adjuntos', 'subir', 'Subir adjuntos'),
+  ('adjuntos', 'eliminar', 'Eliminar adjuntos'),
+  ('adjuntos', 'descargar', 'Descargar adjuntos');

@@ -1,3 +1,20 @@
+<?php
+require __DIR__ . '/app/bootstrap.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && verify_csrf($_POST['csrf_token'] ?? null)) {
+    $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+
+    if ($_POST['action'] === 'disable' && $id > 0) {
+        $stmt = db()->prepare('UPDATE events SET habilitado = 0 WHERE id = ?');
+        $stmt->execute([$id]);
+    }
+
+    redirect('eventos-lista.php');
+}
+
+$stmt = db()->query('SELECT e.id, e.titulo, e.fecha_inicio, e.tipo, e.estado, e.habilitado, u.nombre AS encargado_nombre, u.apellido AS encargado_apellido FROM events e LEFT JOIN users u ON u.id = e.encargado_id ORDER BY e.fecha_inicio DESC');
+$eventos = $stmt->fetchAll();
+?>
 <?php include('partials/html.php'); ?>
 
 <head>
@@ -60,28 +77,35 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td>Operativo Salud</td>
-                                                <td>25/01/2026 09:00</td>
-                                                <td>Operativo</td>
-                                                <td><span class="badge text-bg-success">Publicado</span></td>
-                                                <td>María Soto</td>
-                                                <td class="text-end">
-                                                    <a href="eventos-detalle.php" class="btn btn-sm btn-outline-primary">Ver</a>
-                                                    <a href="eventos-editar.php" class="btn btn-sm btn-outline-secondary">Editar</a>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>Consejo Municipal</td>
-                                                <td>28/01/2026 18:00</td>
-                                                <td>Reunión</td>
-                                                <td><span class="badge text-bg-warning">Borrador</span></td>
-                                                <td>Juan Pérez</td>
-                                                <td class="text-end">
-                                                    <a href="eventos-detalle.php" class="btn btn-sm btn-outline-primary">Ver</a>
-                                                    <a href="eventos-editar.php" class="btn btn-sm btn-outline-secondary">Editar</a>
-                                                </td>
-                                            </tr>
+                                            <?php if (empty($eventos)) : ?>
+                                                <tr>
+                                                    <td colspan="6" class="text-center text-muted">No hay eventos registrados.</td>
+                                                </tr>
+                                            <?php else : ?>
+                                                <?php foreach ($eventos as $evento) : ?>
+                                                    <tr>
+                                                        <td><?php echo htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td><?php echo htmlspecialchars($evento['fecha_inicio'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td><?php echo htmlspecialchars($evento['tipo'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td>
+                                                            <span class="badge text-bg-<?php echo $evento['estado'] === 'publicado' ? 'success' : ($evento['estado'] === 'borrador' ? 'warning' : 'secondary'); ?>">
+                                                                <?php echo htmlspecialchars(ucfirst($evento['estado']), ENT_QUOTES, 'UTF-8'); ?>
+                                                            </span>
+                                                        </td>
+                                                        <td><?php echo htmlspecialchars(trim(($evento['encargado_nombre'] ?? '') . ' ' . ($evento['encargado_apellido'] ?? '')), ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td class="text-end">
+                                                            <a href="eventos-detalle.php?id=<?php echo (int) $evento['id']; ?>" class="btn btn-sm btn-outline-primary">Ver</a>
+                                                            <a href="eventos-editar.php?id=<?php echo (int) $evento['id']; ?>" class="btn btn-sm btn-outline-secondary">Editar</a>
+                                                            <form method="post" class="d-inline">
+                                                                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                <input type="hidden" name="action" value="disable">
+                                                                <input type="hidden" name="id" value="<?php echo (int) $evento['id']; ?>">
+                                                                <button type="submit" class="btn btn-sm btn-outline-danger" <?php echo (int) $evento['habilitado'] === 0 ? 'disabled' : ''; ?>>Deshabilitar</button>
+                                                            </form>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
                                         </tbody>
                                     </table>
                                 </div>

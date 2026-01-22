@@ -1,3 +1,15 @@
+<?php
+require __DIR__ . '/app/bootstrap.php';
+
+$id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+$evento = null;
+
+if ($id > 0) {
+    $stmt = db()->prepare('SELECT * FROM events WHERE id = ?');
+    $stmt->execute([$id]);
+    $evento = $stmt->fetch();
+}
+?>
 <?php include('partials/html.php'); ?>
 
 <head>
@@ -26,54 +38,51 @@
                     <div class="col-12">
                         <div class="card">
                             <div class="card-body">
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label text-muted">Título</label>
-                                        <div class="fw-semibold">Operativo Salud</div>
+                                <?php if (!$evento) : ?>
+                                    <div class="alert alert-warning">Evento no encontrado.</div>
+                                <?php else : ?>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted">Título</label>
+                                            <div class="fw-semibold"><?php echo htmlspecialchars($evento['titulo'], ENT_QUOTES, 'UTF-8'); ?></div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted">Estado</label>
+                                            <div><span class="badge text-bg-<?php echo $evento['estado'] === 'publicado' ? 'success' : 'secondary'; ?>"><?php echo htmlspecialchars(ucfirst($evento['estado']), ENT_QUOTES, 'UTF-8'); ?></span></div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted">Fecha inicio</label>
+                                            <div class="fw-semibold"><?php echo htmlspecialchars($evento['fecha_inicio'], ENT_QUOTES, 'UTF-8'); ?></div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted">Fecha fin</label>
+                                            <div class="fw-semibold"><?php echo htmlspecialchars($evento['fecha_fin'], ENT_QUOTES, 'UTF-8'); ?></div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted">Ubicación</label>
+                                            <div class="fw-semibold"><?php echo htmlspecialchars($evento['ubicacion'], ENT_QUOTES, 'UTF-8'); ?></div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted">Tipo</label>
+                                            <div class="fw-semibold"><?php echo htmlspecialchars($evento['tipo'], ENT_QUOTES, 'UTF-8'); ?></div>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label text-muted">Descripción</label>
+                                            <div><?php echo htmlspecialchars($evento['descripcion'], ENT_QUOTES, 'UTF-8'); ?></div>
+                                        </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label text-muted">Estado</label>
-                                        <div><span class="badge text-bg-success">Publicado</span></div>
+                                    <div class="mt-4">
+                                        <h6 class="mb-3">Adjuntos</h6>
+                                        <ul class="list-group">
+                                            <li class="list-group-item text-muted">Adjuntos pendientes de carga.</li>
+                                        </ul>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label text-muted">Fecha inicio</label>
-                                        <div class="fw-semibold">25/01/2026 09:00</div>
+                                    <div class="d-flex flex-wrap gap-2 mt-3">
+                                        <a href="eventos-editar.php?id=<?php echo (int) $evento['id']; ?>" class="btn btn-primary">Editar evento</a>
+                                        <a href="eventos-adjuntos.php" class="btn btn-outline-secondary">Subir adjuntos</a>
+                                        <a href="eventos-lista.php" class="btn btn-link">Volver al listado</a>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label text-muted">Fecha fin</label>
-                                        <div class="fw-semibold">25/01/2026 13:00</div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label text-muted">Ubicación</label>
-                                        <div class="fw-semibold">Plaza Central</div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label text-muted">Tipo</label>
-                                        <div class="fw-semibold">Operativo</div>
-                                    </div>
-                                    <div class="col-12">
-                                        <label class="form-label text-muted">Descripción</label>
-                                        <div>Operativo de salud municipal con atención primaria.</div>
-                                    </div>
-                                </div>
-                                <div class="mt-4">
-                                    <h6 class="mb-3">Adjuntos</h6>
-                                    <ul class="list-group">
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Programa_operativo.pdf
-                                            <span class="badge text-bg-secondary">PDF</span>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Plano_ubicacion.png
-                                            <span class="badge text-bg-secondary">Imagen</span>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <div class="d-flex flex-wrap gap-2 mt-3">
-                                    <a href="eventos-editar.php" class="btn btn-primary">Editar evento</a>
-                                    <a href="eventos-adjuntos.php" class="btn btn-outline-secondary">Subir adjuntos</a>
-                                    <a href="eventos-lista.php" class="btn btn-link">Volver al listado</a>
-                                </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>

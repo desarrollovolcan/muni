@@ -1,3 +1,15 @@
+<?php
+require __DIR__ . '/app/bootstrap.php';
+
+$id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+$autoridad = null;
+
+if ($id > 0) {
+    $stmt = db()->prepare('SELECT * FROM authorities WHERE id = ?');
+    $stmt->execute([$id]);
+    $autoridad = $stmt->fetch();
+}
+?>
 <?php include('partials/html.php'); ?>
 
 <head>
@@ -26,42 +38,39 @@
                     <div class="col-12">
                         <div class="card">
                             <div class="card-body">
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label text-muted">Nombre</label>
-                                        <div class="fw-semibold">Ana Martínez</div>
+                                <?php if (!$autoridad) : ?>
+                                    <div class="alert alert-warning">Autoridad no encontrada.</div>
+                                <?php else : ?>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted">Nombre</label>
+                                            <div class="fw-semibold"><?php echo htmlspecialchars($autoridad['nombre'], ENT_QUOTES, 'UTF-8'); ?></div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted">Tipo</label>
+                                            <div class="fw-semibold"><?php echo htmlspecialchars($autoridad['tipo'], ENT_QUOTES, 'UTF-8'); ?></div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted">Periodo</label>
+                                            <div class="fw-semibold"><?php echo htmlspecialchars($autoridad['fecha_inicio'], ENT_QUOTES, 'UTF-8'); ?> - <?php echo htmlspecialchars($autoridad['fecha_fin'] ?? 'Vigente', ENT_QUOTES, 'UTF-8'); ?></div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted">Contacto</label>
+                                            <div class="fw-semibold"><?php echo htmlspecialchars($autoridad['correo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></div>
+                                        </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label text-muted">Tipo</label>
-                                        <div class="fw-semibold">Alcaldesa</div>
+                                    <div class="mt-4">
+                                        <h6 class="mb-3">Adjuntos</h6>
+                                        <ul class="list-group">
+                                            <li class="list-group-item text-muted">Adjuntos pendientes de carga.</li>
+                                        </ul>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label text-muted">Periodo</label>
-                                        <div class="fw-semibold">2024 - 2028</div>
+                                    <div class="d-flex flex-wrap gap-2 mt-3">
+                                        <a href="autoridades-editar.php?id=<?php echo (int) $autoridad['id']; ?>" class="btn btn-primary">Editar autoridad</a>
+                                        <a href="autoridades-adjuntos.php" class="btn btn-outline-secondary">Gestionar adjuntos</a>
+                                        <a href="autoridades-lista.php" class="btn btn-link">Volver al listado</a>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label text-muted">Contacto</label>
-                                        <div class="fw-semibold">ana.martinez@muni.cl</div>
-                                    </div>
-                                </div>
-                                <div class="mt-4">
-                                    <h6 class="mb-3">Adjuntos</h6>
-                                    <ul class="list-group">
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Decreto_123.pdf
-                                            <span class="badge text-bg-secondary">PDF</span>
-                                        </li>
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            Resolucion_2024.pdf
-                                            <span class="badge text-bg-secondary">PDF</span>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <div class="d-flex flex-wrap gap-2 mt-3">
-                                    <a href="autoridades-editar.php" class="btn btn-primary">Editar autoridad</a>
-                                    <a href="autoridades-adjuntos.php" class="btn btn-outline-secondary">Gestionar adjuntos</a>
-                                    <a href="autoridades-lista.php" class="btn btn-link">Volver al listado</a>
-                                </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>

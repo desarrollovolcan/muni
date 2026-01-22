@@ -1,3 +1,20 @@
+<?php
+require __DIR__ . '/app/bootstrap.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && verify_csrf($_POST['csrf_token'] ?? null)) {
+    $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+
+    if ($_POST['action'] === 'disable' && $id > 0) {
+        $stmt = db()->prepare('UPDATE users SET estado = 0 WHERE id = ?');
+        $stmt->execute([$id]);
+    }
+
+    redirect('usuarios-lista.php');
+}
+
+$stmt = db()->query('SELECT id, rut, nombre, apellido, correo, rol, estado, ultimo_acceso FROM users ORDER BY id DESC');
+$usuarios = $stmt->fetchAll();
+?>
 <?php include('partials/html.php'); ?>
 
 <head>
@@ -57,30 +74,38 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td>9.999.999-9</td>
-                                                <td>Super User</td>
-                                                <td>admin@muni.cl</td>
-                                                <td>SuperAdmin</td>
-                                                <td><span class="badge text-bg-success">Habilitado</span></td>
-                                                <td>22/01/2026 08:20</td>
-                                                <td class="text-end">
-                                                    <a href="usuarios-detalle.php" class="btn btn-sm btn-outline-primary">Ver</a>
-                                                    <a href="usuarios-editar.php" class="btn btn-sm btn-outline-secondary">Editar</a>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>12.345.678-9</td>
-                                                <td>María Soto</td>
-                                                <td>maria.soto@muni.cl</td>
-                                                <td>EncargadoEventos</td>
-                                                <td><span class="badge text-bg-warning">Deshabilitado</span></td>
-                                                <td>20/01/2026 18:45</td>
-                                                <td class="text-end">
-                                                    <a href="usuarios-detalle.php" class="btn btn-sm btn-outline-primary">Ver</a>
-                                                    <a href="usuarios-editar.php" class="btn btn-sm btn-outline-secondary">Editar</a>
-                                                </td>
-                                            </tr>
+                                            <?php if (empty($usuarios)) : ?>
+                                                <tr>
+                                                    <td colspan="7" class="text-center text-muted">No hay usuarios registrados.</td>
+                                                </tr>
+                                            <?php else : ?>
+                                                <?php foreach ($usuarios as $usuario) : ?>
+                                                    <tr>
+                                                        <td><?php echo htmlspecialchars($usuario['rut'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td><?php echo htmlspecialchars(trim($usuario['nombre'] . ' ' . $usuario['apellido']), ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td><?php echo htmlspecialchars($usuario['correo'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td><?php echo htmlspecialchars($usuario['rol'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td>
+                                                            <?php if ((int) $usuario['estado'] === 1) : ?>
+                                                                <span class="badge text-bg-success">Habilitado</span>
+                                                            <?php else : ?>
+                                                                <span class="badge text-bg-secondary">Deshabilitado</span>
+                                                            <?php endif; ?>
+                                                        </td>
+                                                        <td><?php echo $usuario['ultimo_acceso'] ? htmlspecialchars($usuario['ultimo_acceso'], ENT_QUOTES, 'UTF-8') : '-'; ?></td>
+                                                        <td class="text-end">
+                                                            <a href="usuarios-detalle.php?id=<?php echo (int) $usuario['id']; ?>" class="btn btn-sm btn-outline-primary">Ver</a>
+                                                            <a href="usuarios-editar.php?id=<?php echo (int) $usuario['id']; ?>" class="btn btn-sm btn-outline-secondary">Editar</a>
+                                                            <form method="post" class="d-inline">
+                                                                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                <input type="hidden" name="action" value="disable">
+                                                                <input type="hidden" name="id" value="<?php echo (int) $usuario['id']; ?>">
+                                                                <button type="submit" class="btn btn-sm btn-outline-danger" <?php echo (int) $usuario['estado'] === 0 ? 'disabled' : ''; ?>>Deshabilitar</button>
+                                                            </form>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
                                         </tbody>
                                     </table>
                                 </div>
