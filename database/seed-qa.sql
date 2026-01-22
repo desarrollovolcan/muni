@@ -1,4 +1,5 @@
 -- Datos QA para pruebas de flujo
+-- Sección: unidades
 
 INSERT INTO unidades (nombre, descripcion) VALUES
     ('Administración', 'Gestión administrativa municipal'),
@@ -45,26 +46,26 @@ INSERT INTO roles (nombre, descripcion, estado) VALUES
     ('Encargado Participación', 'Rol 20 para QA', 1);
 
 INSERT INTO users (rut, nombre, apellido, correo, telefono, direccion, username, rol, password_hash, estado) VALUES
-    ('101.000.001-1', 'Camila', 'González', 'camila.gonzález@municipalidad.cl', '+56 9 5000 0001', 'Av. Municipal 1', 'usuario1', 'Administrador General', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
-    ('102.000.002-2', 'Diego', 'Muñoz', 'diego.muñoz@municipalidad.cl', '+56 9 5000 0002', 'Av. Municipal 2', 'usuario2', 'Encargado de Finanzas', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
+    ('101.000.001-1', 'Camila', 'González', 'camila.gonzalez@municipalidad.cl', '+56 9 5000 0001', 'Av. Municipal 1', 'usuario1', 'Administrador General', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
+    ('102.000.002-2', 'Diego', 'Muñoz', 'diego.munoz@municipalidad.cl', '+56 9 5000 0002', 'Av. Municipal 2', 'usuario2', 'Encargado de Finanzas', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
     ('103.000.003-3', 'Valentina', 'Rojas', 'valentina.rojas@municipalidad.cl', '+56 9 5000 0003', 'Av. Municipal 3', 'usuario3', 'Jefe de Recursos Humanos', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
-    ('104.000.004-4', 'Matías', 'Díaz', 'matías.díaz@municipalidad.cl', '+56 9 5000 0004', 'Av. Municipal 4', 'usuario4', 'Encargado DIDECO', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
-    ('105.000.005-5', 'Fernanda', 'Pérez', 'fernanda.pérez@municipalidad.cl', '+56 9 5000 0005', 'Av. Municipal 5', 'usuario5', 'Planificador SECPLAN', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
-    ('106.000.006-6', 'Sebastián', 'Soto', 'sebastián.soto@municipalidad.cl', '+56 9 5000 0006', 'Av. Municipal 6', 'usuario6', 'Coordinador de Tránsito', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
+    ('104.000.004-4', 'Matías', 'Díaz', 'matias.diaz@municipalidad.cl', '+56 9 5000 0004', 'Av. Municipal 4', 'usuario4', 'Encargado DIDECO', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
+    ('105.000.005-5', 'Fernanda', 'Pérez', 'fernanda.perez@municipalidad.cl', '+56 9 5000 0005', 'Av. Municipal 5', 'usuario5', 'Planificador SECPLAN', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
+    ('106.000.006-6', 'Sebastián', 'Soto', 'sebastian.soto@municipalidad.cl', '+56 9 5000 0006', 'Av. Municipal 6', 'usuario6', 'Coordinador de Tránsito', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
     ('107.000.007-7', 'Constanza', 'Contreras', 'constanza.contreras@municipalidad.cl', '+56 9 5000 0007', 'Av. Municipal 7', 'usuario7', 'Inspector de Obras', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
     ('108.000.008-8', 'Javiera', 'Silva', 'javiera.silva@municipalidad.cl', '+56 9 5000 0008', 'Av. Municipal 8', 'usuario8', 'Coordinador de Salud', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
-    ('109.000.009-0', 'Rodrigo', 'Martínez', 'rodrigo.martínez@municipalidad.cl', '+56 9 5000 0009', 'Av. Municipal 9', 'usuario9', 'Director de Educación', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
-    ('110.000.010-1', 'Francisca', 'Sepúlveda', 'francisca.sepúlveda@municipalidad.cl', '+56 9 5000 0010', 'Av. Municipal 10', 'usuario10', 'Gestor Ambiental', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
-    ('111.000.011-2', 'Cristóbal', 'Morales', 'cristóbal.morales@municipalidad.cl', '+56 9 5000 0011', 'Av. Municipal 11', 'usuario11', 'Encargado de Cultura', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
-    ('112.000.012-3', 'Daniela', 'Rodríguez', 'daniela.rodríguez@municipalidad.cl', '+56 9 5000 0012', 'Av. Municipal 12', 'usuario12', 'Encargado de Deportes', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
-    ('113.000.013-4', 'Tomás', 'López', 'tomás.lópez@municipalidad.cl', '+56 9 5000 0013', 'Av. Municipal 13', 'usuario13', 'Encargado de Seguridad', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
+    ('109.000.009-0', 'Rodrigo', 'Martínez', 'rodrigo.martinez@municipalidad.cl', '+56 9 5000 0009', 'Av. Municipal 9', 'usuario9', 'Director de Educación', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
+    ('110.000.010-1', 'Francisca', 'Sepúlveda', 'francisca.sepulveda@municipalidad.cl', '+56 9 5000 0010', 'Av. Municipal 10', 'usuario10', 'Gestor Ambiental', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
+    ('111.000.011-2', 'Cristóbal', 'Morales', 'cristobal.morales@municipalidad.cl', '+56 9 5000 0011', 'Av. Municipal 11', 'usuario11', 'Encargado de Cultura', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
+    ('112.000.012-3', 'Daniela', 'Rodríguez', 'daniela.rodriguez@municipalidad.cl', '+56 9 5000 0012', 'Av. Municipal 12', 'usuario12', 'Encargado de Deportes', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
+    ('113.000.013-4', 'Tomás', 'López', 'tomas.lopez@municipalidad.cl', '+56 9 5000 0013', 'Av. Municipal 13', 'usuario13', 'Encargado de Seguridad', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
     ('114.000.014-5', 'Paula', 'Fuentes', 'paula.fuentes@municipalidad.cl', '+56 9 5000 0014', 'Av. Municipal 14', 'usuario14', 'Encargado de Turismo', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
-    ('115.000.015-6', 'Ignacio', 'Hernández', 'ignacio.hernández@municipalidad.cl', '+56 9 5000 0015', 'Av. Municipal 15', 'usuario15', 'Encargado de Vivienda', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
+    ('115.000.015-6', 'Ignacio', 'Hernández', 'ignacio.hernandez@municipalidad.cl', '+56 9 5000 0015', 'Av. Municipal 15', 'usuario15', 'Encargado de Vivienda', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
     ('116.000.016-7', 'Macarena', 'Torres', 'macarena.torres@municipalidad.cl', '+56 9 5000 0016', 'Av. Municipal 16', 'usuario16', 'Encargado Fomento', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
     ('117.000.017-8', 'Felipe', 'Araya', 'felipe.araya@municipalidad.cl', '+56 9 5000 0017', 'Av. Municipal 17', 'usuario17', 'Encargado Adulto Mayor', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
     ('118.000.018-0', 'Daniel', 'Flores', 'daniel.flores@municipalidad.cl', '+56 9 5000 0018', 'Av. Municipal 18', 'usuario18', 'Encargado de Infancia', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
-    ('119.000.019-1', 'María', 'Castillo', 'maría.castillo@municipalidad.cl', '+56 9 5000 0019', 'Av. Municipal 19', 'usuario19', 'Encargado de Juventud', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
-    ('120.000.020-2', 'José', 'Vargas', 'josé.vargas@municipalidad.cl', '+56 9 5000 0020', 'Av. Municipal 20', 'usuario20', 'Encargado Participación', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1);
+    ('119.000.019-1', 'María', 'Castillo', 'maria.castillo@municipalidad.cl', '+56 9 5000 0019', 'Av. Municipal 19', 'usuario19', 'Encargado de Juventud', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1),
+    ('120.000.020-2', 'José', 'Vargas', 'jose.vargas@municipalidad.cl', '+56 9 5000 0020', 'Av. Municipal 20', 'usuario20', 'Encargado Participación', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe', 1);
 
 INSERT INTO permissions (modulo, accion, descripcion) VALUES
     ('modulo1', 'accion1', 'Permiso QA 1'),
@@ -133,26 +134,26 @@ INSERT INTO events (titulo, descripcion, ubicacion, fecha_inicio, fecha_fin, tip
     ('Mesa Territorial', 'Actividad planificada 20 para la comunidad.', 'Sala 20', '2025-02-20 09:00:00', '2025-02-20 11:00:00', 'Tipo QA 20', 40, 'Comunidad', 'publicado', 'publicado', 1, 20, 20, 20);
 
 INSERT INTO authorities (nombre, tipo, correo, telefono, fecha_inicio, fecha_fin, estado, aprobacion_estado, unidad_id) VALUES
-    ('Camila González', 'Alcalde', 'camila.gonzález@municipalidad.cl', '+56 9 4000 0001', '2024-01-02', NULL, 1, 'vigente', 1),
-    ('Diego Muñoz', 'Concejal', 'diego.muñoz@municipalidad.cl', '+56 9 4000 0002', '2024-01-03', NULL, 1, 'vigente', 2),
+    ('Camila González', 'Alcalde', 'camila.gonzalez@municipalidad.cl', '+56 9 4000 0001', '2024-01-02', NULL, 1, 'vigente', 1),
+    ('Diego Muñoz', 'Concejal', 'diego.munoz@municipalidad.cl', '+56 9 4000 0002', '2024-01-03', NULL, 1, 'vigente', 2),
     ('Valentina Rojas', 'Director', 'valentina.rojas@municipalidad.cl', '+56 9 4000 0003', '2024-01-04', NULL, 1, 'vigente', 3),
-    ('Matías Díaz', 'Coordinador', 'matías.díaz@municipalidad.cl', '+56 9 4000 0004', '2024-01-05', NULL, 1, 'vigente', 4),
-    ('Fernanda Pérez', 'Encargado', 'fernanda.pérez@municipalidad.cl', '+56 9 4000 0005', '2024-01-06', NULL, 1, 'vigente', 5),
-    ('Sebastián Soto', 'Jefe de Unidad', 'sebastián.soto@municipalidad.cl', '+56 9 4000 0006', '2024-01-07', NULL, 1, 'vigente', 6),
+    ('Matías Díaz', 'Coordinador', 'matias.diaz@municipalidad.cl', '+56 9 4000 0004', '2024-01-05', NULL, 1, 'vigente', 4),
+    ('Fernanda Pérez', 'Encargado', 'fernanda.perez@municipalidad.cl', '+56 9 4000 0005', '2024-01-06', NULL, 1, 'vigente', 5),
+    ('Sebastián Soto', 'Jefe de Unidad', 'sebastian.soto@municipalidad.cl', '+56 9 4000 0006', '2024-01-07', NULL, 1, 'vigente', 6),
     ('Constanza Contreras', 'Secretario Municipal', 'constanza.contreras@municipalidad.cl', '+56 9 4000 0007', '2024-01-08', NULL, 1, 'vigente', 7),
     ('Javiera Silva', 'Administrador', 'javiera.silva@municipalidad.cl', '+56 9 4000 0008', '2024-01-09', NULL, 1, 'vigente', 8),
-    ('Rodrigo Martínez', 'Inspector', 'rodrigo.martínez@municipalidad.cl', '+56 9 4000 0009', '2024-01-10', NULL, 1, 'vigente', 9),
-    ('Francisca Sepúlveda', 'Asesor', 'francisca.sepúlveda@municipalidad.cl', '+56 9 4000 0010', '2024-01-11', NULL, 1, 'vigente', 10),
-    ('Cristóbal Morales', 'Alcalde', 'cristóbal.morales@municipalidad.cl', '+56 9 4000 0011', '2024-01-12', NULL, 1, 'vigente', 11),
-    ('Daniela Rodríguez', 'Concejal', 'daniela.rodríguez@municipalidad.cl', '+56 9 4000 0012', '2024-01-13', NULL, 1, 'vigente', 12),
-    ('Tomás López', 'Director', 'tomás.lópez@municipalidad.cl', '+56 9 4000 0013', '2024-01-14', NULL, 1, 'vigente', 13),
+    ('Rodrigo Martínez', 'Inspector', 'rodrigo.martinez@municipalidad.cl', '+56 9 4000 0009', '2024-01-10', NULL, 1, 'vigente', 9),
+    ('Francisca Sepúlveda', 'Asesor', 'francisca.sepulveda@municipalidad.cl', '+56 9 4000 0010', '2024-01-11', NULL, 1, 'vigente', 10),
+    ('Cristóbal Morales', 'Alcalde', 'cristobal.morales@municipalidad.cl', '+56 9 4000 0011', '2024-01-12', NULL, 1, 'vigente', 11),
+    ('Daniela Rodríguez', 'Concejal', 'daniela.rodriguez@municipalidad.cl', '+56 9 4000 0012', '2024-01-13', NULL, 1, 'vigente', 12),
+    ('Tomás López', 'Director', 'tomas.lopez@municipalidad.cl', '+56 9 4000 0013', '2024-01-14', NULL, 1, 'vigente', 13),
     ('Paula Fuentes', 'Coordinador', 'paula.fuentes@municipalidad.cl', '+56 9 4000 0014', '2024-01-15', NULL, 1, 'vigente', 14),
-    ('Ignacio Hernández', 'Encargado', 'ignacio.hernández@municipalidad.cl', '+56 9 4000 0015', '2024-01-16', NULL, 1, 'vigente', 15),
+    ('Ignacio Hernández', 'Encargado', 'ignacio.hernandez@municipalidad.cl', '+56 9 4000 0015', '2024-01-16', NULL, 1, 'vigente', 15),
     ('Macarena Torres', 'Jefe de Unidad', 'macarena.torres@municipalidad.cl', '+56 9 4000 0016', '2024-01-17', NULL, 1, 'vigente', 16),
     ('Felipe Araya', 'Secretario Municipal', 'felipe.araya@municipalidad.cl', '+56 9 4000 0017', '2024-01-18', NULL, 1, 'vigente', 17),
     ('Daniel Flores', 'Administrador', 'daniel.flores@municipalidad.cl', '+56 9 4000 0018', '2024-01-19', NULL, 1, 'vigente', 18),
-    ('María Castillo', 'Inspector', 'maría.castillo@municipalidad.cl', '+56 9 4000 0019', '2024-01-20', NULL, 1, 'vigente', 19),
-    ('José Vargas', 'Asesor', 'josé.vargas@municipalidad.cl', '+56 9 4000 0020', '2024-01-21', NULL, 1, 'vigente', 20);
+    ('María Castillo', 'Inspector', 'maria.castillo@municipalidad.cl', '+56 9 4000 0019', '2024-01-20', NULL, 1, 'vigente', 19),
+    ('José Vargas', 'Asesor', 'jose.vargas@municipalidad.cl', '+56 9 4000 0020', '2024-01-21', NULL, 1, 'vigente', 20);
 
 INSERT INTO event_authorities (event_id, authority_id) VALUES
     (1, 1),
@@ -175,6 +176,30 @@ INSERT INTO event_authorities (event_id, authority_id) VALUES
     (18, 18),
     (19, 19),
     (20, 20);
+
+INSERT INTO event_authority_requests (event_id, destinatario_nombre, destinatario_correo, token, correo_enviado, estado, responded_at) VALUES
+    (1, 'Camila González', 'camila.gonzalez@municipalidad.cl', 'reqtoken01', 1, 'respondido', NOW()),
+    (2, 'Diego Muñoz', 'diego.munoz@municipalidad.cl', 'reqtoken02', 1, 'respondido', NOW()),
+    (3, 'Valentina Rojas', 'valentina.rojas@municipalidad.cl', 'reqtoken03', 1, 'respondido', NOW()),
+    (4, 'Matías Díaz', 'matias.diaz@municipalidad.cl', 'reqtoken04', 1, 'respondido', NOW()),
+    (5, 'Fernanda Pérez', 'fernanda.perez@municipalidad.cl', 'reqtoken05', 1, 'respondido', NOW()),
+    (6, 'Sebastián Soto', 'sebastian.soto@municipalidad.cl', 'reqtoken06', 1, 'respondido', NOW()),
+    (7, 'Constanza Contreras', 'constanza.contreras@municipalidad.cl', 'reqtoken07', 1, 'pendiente', NULL),
+    (8, 'Javiera Silva', 'javiera.silva@municipalidad.cl', 'reqtoken08', 1, 'pendiente', NULL),
+    (9, 'Rodrigo Martínez', 'rodrigo.martinez@municipalidad.cl', 'reqtoken09', 1, 'pendiente', NULL),
+    (10, 'Francisca Sepúlveda', 'francisca.sepulveda@municipalidad.cl', 'reqtoken10', 1, 'pendiente', NULL);
+
+INSERT INTO event_authority_confirmations (request_id, authority_id) VALUES
+    (1, 1),
+    (2, 2),
+    (3, 3),
+    (4, 4),
+    (5, 5),
+    (6, 6),
+    (7, 7),
+    (8, 8),
+    (9, 9),
+    (10, 10);
 
 INSERT INTO event_attachments (event_id, archivo_nombre, archivo_ruta, archivo_tipo, subido_por) VALUES
     (1, 'adjunto_evento_1.pdf', 'uploads/eventos/adjunto_evento_1.pdf', 'application/pdf', 1),
@@ -351,6 +376,18 @@ INSERT INTO document_access (document_id, role_id) VALUES
     (18, 18),
     (19, 19),
     (20, 20);
+
+INSERT INTO document_shares (document_id, user_id) VALUES
+    (1, 1),
+    (2, 2),
+    (3, 3),
+    (4, 4),
+    (5, 5),
+    (6, 6),
+    (7, 7),
+    (8, 8),
+    (9, 9),
+    (10, 10);
 
 INSERT INTO approval_flows (nombre, entidad, unidad_id, sla_horas, estado) VALUES
     ('Flujo QA 1', 'Eventos', 1, 48, 'activo'),

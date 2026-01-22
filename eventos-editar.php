@@ -19,6 +19,35 @@ if ($id > 0) {
     $evento = $stmt->fetch();
 }
 
+function normalize_datetime_input(?string $value): string
+{
+    if (!$value) {
+        return '';
+    }
+    $value = trim($value);
+    $date = DateTime::createFromFormat('Y-m-d\\TH:i', $value);
+    if ($date instanceof DateTime) {
+        return $date->format('Y-m-d H:i:s');
+    }
+    $value = str_replace('T', ' ', $value);
+    if (strlen($value) === 16) {
+        return $value . ':00';
+    }
+    return $value;
+}
+
+function format_datetime_local(?string $value): string
+{
+    if (!$value) {
+        return '';
+    }
+    $date = DateTime::createFromFormat('Y-m-d H:i:s', $value);
+    if (!$date) {
+        $date = DateTime::createFromFormat('Y-m-d H:i', $value);
+    }
+    return $date ? $date->format('Y-m-d\\TH:i') : '';
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ?? null)) {
     $action = $_POST['event_action'] ?? 'save';
     $postId = isset($_POST['event_id']) ? (int) $_POST['event_id'] : 0;
@@ -32,8 +61,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
     $titulo = trim($_POST['titulo'] ?? '');
     $descripcion = trim($_POST['descripcion'] ?? '');
     $ubicacion = trim($_POST['ubicacion'] ?? '');
-    $fechaInicio = $_POST['fecha_inicio'] ?? '';
-    $fechaFin = $_POST['fecha_fin'] ?? '';
+    $fechaInicio = normalize_datetime_input($_POST['fecha_inicio'] ?? '');
+    $fechaFin = normalize_datetime_input($_POST['fecha_fin'] ?? '');
     $tipo = trim($_POST['tipo'] ?? '');
     $estado = $_POST['estado'] ?? 'borrador';
     $cupos = $_POST['cupos'] !== '' ? (int) $_POST['cupos'] : null;
@@ -216,11 +245,11 @@ try {
                                         </div>
                                         <div class="col-md-3 mb-3">
                                             <label class="control-label form-label" for="event-start">Fecha inicio</label>
-                                            <input type="datetime-local" id="event-start" name="fecha_inicio" class="form-control" value="<?php echo htmlspecialchars($evento['fecha_inicio'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" required>
+                                            <input type="datetime-local" id="event-start" name="fecha_inicio" class="form-control" value="<?php echo htmlspecialchars(format_datetime_local($evento['fecha_inicio'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" required>
                                         </div>
                                         <div class="col-md-3 mb-3">
                                             <label class="control-label form-label" for="event-end">Fecha fin</label>
-                                            <input type="datetime-local" id="event-end" name="fecha_fin" class="form-control" value="<?php echo htmlspecialchars($evento['fecha_fin'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" required>
+                                            <input type="datetime-local" id="event-end" name="fecha_fin" class="form-control" value="<?php echo htmlspecialchars(format_datetime_local($evento['fecha_fin'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" required>
                                         </div>
                                         <div class="col-md-4 mb-3">
                                             <label class="control-label form-label" for="event-category">Tipo</label>
@@ -270,6 +299,12 @@ try {
                                         <button type="button" class="btn btn-outline-danger" id="btn-delete-event">
                                             Eliminar
                                         </button>
+
+                                        <?php if ($id > 0) : ?>
+                                            <a href="eventos-autoridades.php?event_id=<?php echo (int) $id; ?>" class="btn btn-outline-primary">
+                                                Enviar confirmación de invitados
+                                            </a>
+                                        <?php endif; ?>
 
                                         <button type="button" class="btn btn-light ms-auto" data-bs-dismiss="modal">
                                             Cancelar
