@@ -49,6 +49,35 @@ class CalendarSchedule {
         if (endInput && this.selectedEvent.end) {
             endInput.value = this.formatDateTime(this.selectedEvent.end);
         }
+        const descriptionInput = document.getElementById('event-description');
+        if (descriptionInput) {
+            descriptionInput.value = this.selectedEvent.extendedProps?.descripcion || '';
+        }
+        const locationInput = document.getElementById('event-location');
+        if (locationInput) {
+            locationInput.value = this.selectedEvent.extendedProps?.ubicacion || '';
+        }
+        const statusInput = document.getElementById('event-estado');
+        if (statusInput) {
+            statusInput.value = this.selectedEvent.extendedProps?.estado || statusInput.value;
+        }
+        const cuposInput = document.getElementById('event-cupos');
+        if (cuposInput) {
+            cuposInput.value = this.selectedEvent.extendedProps?.cupos ?? '';
+        }
+        const publicoInput = document.getElementById('event-publico');
+        if (publicoInput) {
+            publicoInput.value = this.selectedEvent.extendedProps?.publico_objetivo || '';
+        }
+        const creadorInput = document.getElementById('event-creador');
+        if (creadorInput) {
+            creadorInput.value = this.selectedEvent.extendedProps?.creado_por || creadorInput.value;
+        }
+        const encargadoInput = document.getElementById('event-encargado');
+        if (encargadoInput) {
+            const encargadoValue = this.selectedEvent.extendedProps?.encargado_id;
+            encargadoInput.value = encargadoValue ? encargadoValue : '';
+        }
         const eventIdInput = document.getElementById('event-id');
         if (eventIdInput) {
             eventIdInput.value = this.selectedEvent.id || '';
@@ -117,73 +146,9 @@ class CalendarSchedule {
         });
         }
 
-        const defaultEvents = Array.isArray(window.calendarEvents) && window.calendarEvents.length
+        const defaultEvents = Array.isArray(window.calendarEvents)
             ? window.calendarEvents
-            : [
-            {
-                title: 'Revisión de diseño',
-                start: today,
-                end: today,
-                className: 'bg-primary-subtle text-primary',
-                extendedProps: {
-                    tipo: 'Reunión'
-                }
-            },
-            {
-                title: 'Estrategia de marketing',
-                start: new Date(Date.now() + 16000000),
-                end: new Date(Date.now() + 20000000),
-                className: 'bg-secondary-subtle text-secondary',
-                extendedProps: {
-                    tipo: 'Operativo'
-                }
-            },
-            {
-                title: 'Demostración de ventas',
-                start: new Date(Date.now() + 40000000),
-                end: new Date(Date.now() + 80000000),
-                className: 'bg-success-subtle text-success',
-                extendedProps: {
-                    tipo: 'Ceremonia'
-                }
-            },
-            {
-                title: 'Entrega de informe',
-                start: new Date(Date.now() + 120000000),
-                end: new Date(Date.now() + 180000000),
-                className: 'bg-danger-subtle text-danger',
-                extendedProps: {
-                    tipo: 'Operativo'
-                }
-            },
-            {
-                title: 'Sesión de capacitación',
-                start: new Date(Date.now() + 250000000),
-                end: new Date(Date.now() + 290000000),
-                className: 'bg-info-subtle text-info',
-                extendedProps: {
-                    tipo: 'Reunión'
-                }
-            },
-            {
-                title: 'Revisión de presupuesto',
-                start: new Date(Date.now() + 400000000),
-                end: new Date(Date.now() + 450000000),
-                className: 'bg-warning-subtle text-warning',
-                extendedProps: {
-                    tipo: 'Actividad cultural'
-                }
-            },
-            {
-                title: 'Reunión de directorio',
-                start: new Date(Date.now() + 600000000),
-                end: new Date(Date.now() + 620000000),
-                className: 'bg-dark-subtle text-dark',
-                extendedProps: {
-                    tipo: 'Reunión'
-                }
-            }
-        ];
+            : [];
 
         // cal - init
         self.calendarObj = new FullCalendar.Calendar(self.calendar, {

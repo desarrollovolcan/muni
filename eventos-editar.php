@@ -127,7 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
 
 $calendarEvents = [];
 try {
-    $stmt = db()->query('SELECT id, titulo, fecha_inicio, fecha_fin, tipo FROM events ORDER BY fecha_inicio');
+    $stmt = db()->query('SELECT id, titulo, descripcion, ubicacion, fecha_inicio, fecha_fin, tipo, cupos, publico_objetivo, estado, creado_por, encargado_id FROM events ORDER BY fecha_inicio');
     $events = $stmt->fetchAll();
     foreach ($events as $event) {
         $tipo = $event['tipo'] ?? '';
@@ -139,6 +139,13 @@ try {
             'className' => $eventTypeMap[$tipo] ?? 'bg-primary-subtle text-primary',
             'extendedProps' => [
                 'tipo' => $tipo,
+                'descripcion' => $event['descripcion'] ?? '',
+                'ubicacion' => $event['ubicacion'] ?? '',
+                'estado' => $event['estado'] ?? 'borrador',
+                'cupos' => $event['cupos'],
+                'publico_objetivo' => $event['publico_objetivo'] ?? '',
+                'creado_por' => $event['creado_por'] ?? null,
+                'encargado_id' => $event['encargado_id'] ?? null,
             ],
         ];
     }
@@ -242,6 +249,7 @@ try {
                                             <select id="event-estado" name="estado" class="form-select">
                                                 <?php $estadoActual = $evento['estado'] ?? 'borrador'; ?>
                                                 <option value="borrador" <?php echo $estadoActual === 'borrador' ? 'selected' : ''; ?>>Borrador</option>
+                                                <option value="revision" <?php echo $estadoActual === 'revision' ? 'selected' : ''; ?>>Revisión</option>
                                                 <option value="publicado" <?php echo $estadoActual === 'publicado' ? 'selected' : ''; ?>>Publicado</option>
                                                 <option value="finalizado" <?php echo $estadoActual === 'finalizado' ? 'selected' : ''; ?>>Finalizado</option>
                                                 <option value="cancelado" <?php echo $estadoActual === 'cancelado' ? 'selected' : ''; ?>>Cancelado</option>
