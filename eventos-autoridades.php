@@ -18,7 +18,7 @@ if ($selectedEventId > 0) {
     $stmt->execute([$selectedEventId]);
     $linkedAuthorities = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
 
-    $stmt = db()->prepare('SELECT id, destinatario_nombre, destinatario_correo, token, estado, created_at, responded_at FROM event_authority_requests WHERE event_id = ? ORDER BY created_at DESC');
+    $stmt = db()->prepare('SELECT id, destinatario_nombre, destinatario_correo, token, correo_enviado, estado, created_at, responded_at FROM event_authority_requests WHERE event_id = ? ORDER BY created_at DESC');
     $stmt->execute([$selectedEventId]);
     $validationRequests = $stmt->fetchAll();
 }
@@ -129,26 +129,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
 
     if ($action === 'send_validation') {
         $eventId = isset($_POST['event_id']) ? (int) $_POST['event_id'] : 0;
-        $recipientUserId = isset($_POST['recipient_user_id']) ? (int) $_POST['recipient_user_id'] : 0;
-        $recipientName = trim($_POST['recipient_name'] ?? '');
-        $recipientEmail = trim($_POST['recipient_email'] ?? '');
+        $recipientUserIds = array_map('intval', $_POST['recipient_user_ids'] ?? []);
 
         if ($eventId === 0) {
             $validationErrors[] = 'Selecciona un evento válido.';
         }
 
-        if ($recipientUserId > 0) {
-            $stmt = db()->prepare('SELECT nombre, apellido, correo FROM users WHERE id = ?');
-            $stmt->execute([$recipientUserId]);
-            $user = $stmt->fetch();
-            if ($user) {
-                $recipientName = trim(($user['nombre'] ?? '') . ' ' . ($user['apellido'] ?? ''));
-                $recipientEmail = $user['correo'] ?? '';
+        $recipients = [];
+        if (!empty($recipientUserIds)) {
+            $placeholders = implode(',', array_fill(0, count($recipientUserIds), '?'));
+            $stmt = db()->prepare("SELECT nombre, apellido, correo FROM users WHERE id IN ($placeholders)");
+            $stmt->execute($recipientUserIds);
+            foreach ($stmt->fetchAll() as $user) {
+                if (!empty($user['correo'])) {
+                    $recipients[] = [
+                        'nombre' => trim(($user['nombre'] ?? '') . ' ' . ($user['apellido'] ?? '')),
+                        'correo' => $user['correo'],
+                    ];
+                }
             }
         }
 
-        if ($recipientEmail === '') {
-            $validationErrors[] = 'Indica el correo del usuario que validará.';
+        if (empty($recipients)) {
+            $validationErrors[] = 'Selecciona al menos un usuario para validar las autoridades.';
         }
 
         $event = null;
@@ -170,23 +173,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
         }
 
         if (empty($validationErrors) && $event) {
-            $token = bin2hex(random_bytes(16));
-            $stmt = db()->prepare('INSERT INTO event_authority_requests (event_id, destinatario_nombre, destinatario_correo, token) VALUES (?, ?, ?, ?)');
-            $stmt->execute([
-                $eventId,
-                $recipientName !== '' ? $recipientName : null,
-                $recipientEmail,
-                $token,
-            ]);
-
             $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
             $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
             $basePath = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
             $baseUrl = $scheme . '://' . $host . ($basePath !== '' ? $basePath : '');
-            $validationUrl = $baseUrl . '/eventos-validacion.php?token=' . urlencode($token);
 
             $municipalidad = get_municipalidad();
-            $emailPreview = build_event_validation_email($municipalidad, $event, $eventAuthorities, $validationUrl, $recipientName);
             $subject = 'Validación de autoridades: ' . $event['titulo'];
             $headers = "MIME-Version: 1.0\r\n";
             $headers .= "Content-type:text/html;charset=UTF-8\r\n";
@@ -198,12 +190,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                 $headers .= 'From: ' . ($fromName ? $fromName . ' <' . $fromEmail . '>' : $fromEmail) . "\r\n";
             }
 
-            $mailSent = mail($recipientEmail, $subject, $emailPreview, $headers);
-            $validationLink = $validationUrl;
-            if ($mailSent) {
-                $validationNotice = 'Correo de validación enviado correctamente.';
+            $stmtInsert = db()->prepare('INSERT INTO event_authority_requests (event_id, destinatario_nombre, destinatario_correo, token, correo_enviado) VALUES (?, ?, ?, ?, ?)');
+            $firstLink = null;
+            $allSent = true;
+
+            foreach ($recipients as $recipient) {
+                $token = bin2hex(random_bytes(16));
+                $validationUrl = $baseUrl . '/eventos-validacion.php?token=' . urlencode($token);
+                $emailPreview = build_event_validation_email($municipalidad, $event, $eventAuthorities, $validationUrl, $recipient['nombre'] ?? null);
+                $mailSent = mail($recipient['correo'], $subject, $emailPreview, $headers);
+                $allSent = $allSent && $mailSent;
+
+                $stmtInsert->execute([
+                    $eventId,
+                    $recipient['nombre'] !== '' ? $recipient['nombre'] : null,
+                    $recipient['correo'],
+                    $token,
+                    $mailSent ? 1 : 0,
+                ]);
+
+                if ($firstLink === null) {
+                    $firstLink = $validationUrl;
+                }
+            }
+
+            $validationLink = $firstLink;
+            if ($allSent) {
+                $validationNotice = 'Correos de validación enviados correctamente.';
             } else {
-                $validationErrors[] = 'No se pudo enviar el correo automáticamente. Comparte el enlace de validación manualmente.';
+                $validationErrors[] = 'Algunos correos no se pudieron enviar automáticamente. Comparte los enlaces de validación manualmente si es necesario.';
             }
         }
     }
@@ -345,10 +360,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                                 <?php endif; ?>
                                             </div>
                                         </div>
-                                        <div class="col-lg-4">
-                                            <label class="form-label" for="recipient-user">Usuario destinatario</label>
-                                            <select id="recipient-user" name="recipient_user_id" class="form-select">
-                                                <option value="">Selecciona un usuario</option>
+                                        <div class="col-lg-8">
+                                            <label class="form-label" for="recipient-users">Usuarios destinatarios</label>
+                                            <select id="recipient-users" name="recipient_user_ids[]" class="form-select" multiple size="6">
                                                 <?php foreach ($users as $user) : ?>
                                                     <option value="<?php echo (int) $user['id']; ?>">
                                                         <?php echo htmlspecialchars(trim($user['nombre'] . ' ' . $user['apellido']), ENT_QUOTES, 'UTF-8'); ?>
@@ -356,13 +370,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                                     </option>
                                                 <?php endforeach; ?>
                                             </select>
-                                            <div class="form-text">Si seleccionas un usuario, su correo se usará automáticamente.</div>
-                                        </div>
-                                        <div class="col-lg-4">
-                                            <label class="form-label" for="recipient-name">Nombre destinatario</label>
-                                            <input type="text" id="recipient-name" name="recipient_name" class="form-control" placeholder="Nombre del validador">
-                                            <label class="form-label mt-2" for="recipient-email">Correo destinatario</label>
-                                            <input type="email" id="recipient-email" name="recipient_email" class="form-control" placeholder="correo@municipalidad.cl">
+                                            <div class="form-text">Selecciona uno o más usuarios para enviar la validación (se generará un enlace por persona).</div>
                                         </div>
                                     </div>
                                 </form>
@@ -384,6 +392,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                                         <th>Destinatario</th>
                                                         <th>Correo</th>
                                                         <th>Estado</th>
+                                                        <th>Estado correo</th>
                                                         <th>Enviado</th>
                                                         <th>Respondido</th>
                                                     </tr>
@@ -396,6 +405,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                                             <td>
                                                                 <span class="badge text-bg-<?php echo $request['estado'] === 'respondido' ? 'success' : 'warning'; ?>">
                                                                     <?php echo htmlspecialchars(ucfirst($request['estado']), ENT_QUOTES, 'UTF-8'); ?>
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <span class="badge text-bg-<?php echo (int) $request['correo_enviado'] === 1 ? 'success' : 'secondary'; ?>">
+                                                                    <?php echo (int) $request['correo_enviado'] === 1 ? 'Enviado' : 'Pendiente'; ?>
                                                                 </span>
                                                             </td>
                                                             <td><?php echo htmlspecialchars($request['created_at'], ENT_QUOTES, 'UTF-8'); ?></td>

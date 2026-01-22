@@ -168,6 +168,7 @@ CREATE TABLE `event_authority_requests` (
   `destinatario_nombre` VARCHAR(150) DEFAULT NULL,
   `destinatario_correo` VARCHAR(150) NOT NULL,
   `token` VARCHAR(64) NOT NULL,
+  `correo_enviado` TINYINT(1) NOT NULL DEFAULT 0,
   `estado` ENUM('pendiente', 'respondido') NOT NULL DEFAULT 'pendiente',
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `responded_at` TIMESTAMP NULL DEFAULT NULL,
