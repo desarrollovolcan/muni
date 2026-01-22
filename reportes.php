@@ -1,3 +1,42 @@
+<?php
+require __DIR__ . '/app/bootstrap.php';
+
+$eventCount = (int) db()->query('SELECT COUNT(*) FROM events')->fetchColumn();
+$documentCount = (int) db()->query("SELECT COUNT(*) FROM documents WHERE estado = 'vigente'")->fetchColumn();
+$pendingApprovals = (int) db()->query("SELECT COUNT(*) FROM events WHERE aprobacion_estado = 'revision'")->fetchColumn();
+$alertsCount = (int) db()->query("SELECT COUNT(*) FROM document_versions WHERE vencimiento IS NOT NULL AND vencimiento <= DATE_ADD(CURDATE(), INTERVAL 30 DAY)")->fetchColumn();
+
+$unitStats = db()->query(
+    'SELECT u.nombre,
+            COUNT(DISTINCT e.id) AS eventos,
+            COUNT(DISTINCT d.id) AS documentos,
+            COUNT(DISTINCT nr.id) AS alertas
+     FROM unidades u
+     LEFT JOIN events e ON e.unidad_id = u.id
+     LEFT JOIN documents d ON d.unidad_id = u.id
+     LEFT JOIN notification_rules nr ON nr.destino LIKE CONCAT("%", u.nombre, "%")
+     GROUP BY u.id, u.nombre
+     ORDER BY u.nombre'
+)->fetchAll();
+
+$criticalDocs = db()->query(
+    'SELECT d.titulo, v.vencimiento
+     FROM documents d
+     JOIN document_versions v ON v.id = (
+        SELECT dv.id FROM document_versions dv
+        WHERE dv.document_id = d.id
+        ORDER BY dv.created_at DESC
+        LIMIT 1
+     )
+     WHERE v.vencimiento IS NOT NULL
+     ORDER BY v.vencimiento ASC
+     LIMIT 3'
+)->fetchAll();
+
+$pendingEvents = db()->query(
+    "SELECT titulo, aprobacion_estado FROM events WHERE aprobacion_estado = 'revision' ORDER BY fecha_creacion DESC LIMIT 2"
+)->fetchAll();
+?>
 <?php include('partials/html.php'); ?>
 
 <head>
@@ -29,8 +68,8 @@
                                 <div class="d-flex align-items-center justify-content-between">
                                     <div>
                                         <h5 class="text-muted fw-normal mt-0">Eventos activos</h5>
-                                        <h3 class="my-2">42</h3>
-                                        <p class="mb-0 text-muted">+12% vs mes anterior</p>
+                                        <h3 class="my-2"><?php echo $eventCount; ?></h3>
+                                        <p class="mb-0 text-muted">Registros totales</p>
                                     </div>
                                     <div class="avatar-sm">
                                         <span class="avatar-title bg-primary-subtle text-primary rounded">
@@ -47,8 +86,8 @@
                                 <div class="d-flex align-items-center justify-content-between">
                                     <div>
                                         <h5 class="text-muted fw-normal mt-0">Documentos vigentes</h5>
-                                        <h3 class="my-2">128</h3>
-                                        <p class="mb-0 text-muted">8 vencen en 30 días</p>
+                                        <h3 class="my-2"><?php echo $documentCount; ?></h3>
+                                        <p class="mb-0 text-muted">En estado vigente</p>
                                     </div>
                                     <div class="avatar-sm">
                                         <span class="avatar-title bg-success-subtle text-success rounded">
@@ -65,8 +104,8 @@
                                 <div class="d-flex align-items-center justify-content-between">
                                     <div>
                                         <h5 class="text-muted fw-normal mt-0">Aprobaciones pendientes</h5>
-                                        <h3 class="my-2">9</h3>
-                                        <p class="mb-0 text-muted">3 atrasadas</p>
+                                        <h3 class="my-2"><?php echo $pendingApprovals; ?></h3>
+                                        <p class="mb-0 text-muted">Eventos en revisión</p>
                                     </div>
                                     <div class="avatar-sm">
                                         <span class="avatar-title bg-warning-subtle text-warning rounded">
@@ -83,8 +122,8 @@
                                 <div class="d-flex align-items-center justify-content-between">
                                     <div>
                                         <h5 class="text-muted fw-normal mt-0">Alertas enviadas</h5>
-                                        <h3 class="my-2">76</h3>
-                                        <p class="mb-0 text-muted">Últimas 24 horas</p>
+                                        <h3 class="my-2"><?php echo $alertsCount; ?></h3>
+                                        <p class="mb-0 text-muted">Vencimientos 30 días</p>
                                     </div>
                                     <div class="avatar-sm">
                                         <span class="avatar-title bg-info-subtle text-info rounded">
@@ -105,11 +144,6 @@
                                     <h5 class="card-title mb-0">Indicadores por unidad</h5>
                                     <p class="text-muted mb-0">Comparativo mensual de actividad.</p>
                                 </div>
-                                <select class="form-select w-auto">
-                                    <option>Últimos 30 días</option>
-                                    <option>Últimos 90 días</option>
-                                    <option>Año actual</option>
-                                </select>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
@@ -120,31 +154,22 @@
                                                 <th>Eventos</th>
                                                 <th>Documentos</th>
                                                 <th>Alertas</th>
-                                                <th>Tiempo promedio</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td>DIDECO</td>
-                                                <td>18</td>
-                                                <td>46</td>
-                                                <td>22</td>
-                                                <td>1.8 días</td>
-                                            </tr>
-                                            <tr>
-                                                <td>SECPLAN</td>
-                                                <td>12</td>
-                                                <td>31</td>
-                                                <td>28</td>
-                                                <td>2.1 días</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Administración</td>
-                                                <td>9</td>
-                                                <td>51</td>
-                                                <td>26</td>
-                                                <td>1.2 días</td>
-                                            </tr>
+                                            <?php if (empty($unitStats)) : ?>
+                                                <tr>
+                                                    <td colspan="4" class="text-muted text-center">No hay datos disponibles.</td>
+                                                </tr>
+                                            <?php endif; ?>
+                                            <?php foreach ($unitStats as $stat) : ?>
+                                                <tr>
+                                                    <td><?php echo htmlspecialchars($stat['nombre'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                    <td><?php echo (int) $stat['eventos']; ?></td>
+                                                    <td><?php echo (int) $stat['documentos']; ?></td>
+                                                    <td><?php echo (int) $stat['alertas']; ?></td>
+                                                </tr>
+                                            <?php endforeach; ?>
                                         </tbody>
                                     </table>
                                 </div>
@@ -158,18 +183,23 @@
                             </div>
                             <div class="card-body">
                                 <div class="list-group">
-                                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                                        Documento vencido: Informe presupuestario Q1
-                                        <span class="badge text-bg-danger">Urgente</span>
-                                    </div>
-                                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                                        Evento sin aprobación final: Operativo Salud
-                                        <span class="badge text-bg-warning">Pendiente</span>
-                                    </div>
-                                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                                        Autoridad con mandato finalizando
-                                        <span class="badge text-bg-info">30 días</span>
-                                    </div>
+                                    <?php if (empty($criticalDocs) && empty($pendingEvents)) : ?>
+                                        <div class="list-group-item text-muted">Sin alertas críticas.</div>
+                                    <?php endif; ?>
+                                    <?php foreach ($criticalDocs as $doc) : ?>
+                                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                                            Documento vencido: <?php echo htmlspecialchars($doc['titulo'], ENT_QUOTES, 'UTF-8'); ?>
+                                            <span class="badge text-bg-danger">
+                                                <?php echo htmlspecialchars(date('d/m/Y', strtotime($doc['vencimiento'])), ENT_QUOTES, 'UTF-8'); ?>
+                                            </span>
+                                        </div>
+                                    <?php endforeach; ?>
+                                    <?php foreach ($pendingEvents as $event) : ?>
+                                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                                            Evento pendiente: <?php echo htmlspecialchars($event['titulo'], ENT_QUOTES, 'UTF-8'); ?>
+                                            <span class="badge text-bg-warning">Revisión</span>
+                                        </div>
+                                    <?php endforeach; ?>
                                 </div>
                             </div>
                         </div>
