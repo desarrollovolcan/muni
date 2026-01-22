@@ -489,57 +489,47 @@
 
             <!-- User Dropdown -->
             <div class="topbar-item nav-user">
+                <?php
+                $userName = $_SESSION['user']['nombre'] ?? 'Usuario';
+                $userLastName = $_SESSION['user']['apellido'] ?? '';
+                $userRole = $_SESSION['user']['rol'] ?? 'Sin rol';
+                $userFullName = trim($userName . ' ' . $userLastName);
+                ?>
                 <div class="dropdown">
                     <a class="topbar-link dropdown-toggle drop-arrow-none px-2" data-bs-toggle="dropdown" data-bs-offset="0,19" href="#!" aria-haspopup="false" aria-expanded="false">
                         <img src="assets/images/users/user-3.jpg" width="32" class="rounded-circle me-lg-2 d-flex" alt="user-image">
                         <div class="d-lg-flex align-items-center gap-1 d-none">
-                            <h5 class="my-0">Geneva</h5>
+                            <h5 class="my-0"><?php echo htmlspecialchars($userFullName ?: 'Usuario', ENT_QUOTES, 'UTF-8'); ?></h5>
                             <i class="ti ti-chevron-down align-middle"></i>
                         </div>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end">
                         <!-- Header -->
                         <div class="dropdown-header noti-title">
-                            <h6 class="text-overflow m-0">Welcome back 👋!</h6>
+                            <h6 class="text-overflow m-0">Usuario activo</h6>
+                            <span class="fs-12 fw-semibold text-muted"><?php echo htmlspecialchars($userFullName ?: 'Usuario', ENT_QUOTES, 'UTF-8'); ?></span>
+                            <span class="d-block fs-12 text-muted"><?php echo htmlspecialchars($userRole, ENT_QUOTES, 'UTF-8'); ?></span>
                         </div>
 
-                        <!-- My Profile -->
+                        <!-- Edit Profile -->
                         <a href="users-profile.php" class="dropdown-item">
                             <i class="ti ti-user-circle me-1 fs-17 align-middle"></i>
-                            <span class="align-middle">Profile</span>
+                            <span class="align-middle">Editar perfil</span>
                         </a>
 
-                        <!-- Notifications -->
-                        <a href="javascript:void(0);" class="dropdown-item">
-                            <i class="ti ti-bell-ringing me-1 fs-17 align-middle"></i>
-                            <span class="align-middle">Notifications</span>
-                        </a>
-
-                        <!-- Settings -->
-                        <a href="javascript:void(0);" class="dropdown-item">
-                            <i class="ti ti-settings-2 me-1 fs-17 align-middle"></i>
-                            <span class="align-middle">Account Settings</span>
-                        </a>
-
-                        <!-- Support -->
-                        <a href="javascript:void(0);" class="dropdown-item">
-                            <i class="ti ti-headset me-1 fs-17 align-middle"></i>
-                            <span class="align-middle">Support Center</span>
+                        <!-- Change Password -->
+                        <a href="auth-new-pass.php" class="dropdown-item">
+                            <i class="ti ti-lock me-1 fs-17 align-middle"></i>
+                            <span class="align-middle">Cambiar contraseña</span>
                         </a>
 
                         <!-- Divider -->
                         <div class="dropdown-divider"></div>
 
-                        <!-- Lock -->
-                        <a href="auth-lock-screen.php" class="dropdown-item">
-                            <i class="ti ti-lock me-1 fs-17 align-middle"></i>
-                            <span class="align-middle">Lock Screen</span>
-                        </a>
-
                         <!-- Logout -->
-                        <a href="javascript:void(0);" class="dropdown-item fw-semibold">
+                        <a href="logout.php" class="dropdown-item fw-semibold">
                             <i class="ti ti-logout-2 me-1 fs-17 align-middle"></i>
-                            <span class="align-middle">Log Out</span>
+                            <span class="align-middle">Cerrar aplicación</span>
                         </a>
                     </div>
 
