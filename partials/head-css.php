@@ -23,4 +23,25 @@ $secondaryRgb = hex_to_rgb($secondaryColor) ?? [74, 129, 212];
         --ins-secondary: <?php echo htmlspecialchars($secondaryColor, ENT_QUOTES, 'UTF-8'); ?>;
         --ins-secondary-rgb: <?php echo (int) $secondaryRgb[0]; ?>, <?php echo (int) $secondaryRgb[1]; ?>, <?php echo (int) $secondaryRgb[2]; ?>;
     }
+
+    .side-nav-title {
+        font-size: 0.7rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: rgba(var(--ins-body-color-rgb), 0.6);
+    }
+
+    .side-nav .side-nav-item .side-nav-link {
+        border-radius: 0.5rem;
+        padding: 0.55rem 0.85rem;
+        margin: 0.15rem 0.5rem;
+    }
+
+    .side-nav .side-nav-item .side-nav-link:hover {
+        background-color: rgba(var(--ins-primary-rgb), 0.08);
+    }
+
+    .side-nav .side-nav-item.active > .side-nav-link {
+        background-color: rgba(var(--ins-primary-rgb), 0.15);
+    }
 </style>
