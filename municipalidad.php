@@ -11,6 +11,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
     $direccion = trim($_POST['direccion'] ?? '');
     $telefono = trim($_POST['telefono'] ?? '');
     $correo = trim($_POST['correo'] ?? '');
+    $logoTopbarHeight = trim($_POST['logo_topbar_height'] ?? '');
+    $logoSidenavHeight = trim($_POST['logo_sidenav_height'] ?? '');
+    $logoSidenavHeightSm = trim($_POST['logo_sidenav_height_sm'] ?? '');
     $colorPrimary = trim($_POST['color_primary'] ?? '#6658dd');
     $colorSecondary = trim($_POST['color_secondary'] ?? '#4a81d4');
 
@@ -24,6 +27,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
 
     if ($colorSecondary !== '' && !preg_match('/^#([A-Fa-f0-9]{3}){1,2}$/', $colorSecondary)) {
         $errors[] = 'El color secundario debe ser un valor hexadecimal válido.';
+    }
+
+    if ($logoTopbarHeight !== '' && (!ctype_digit($logoTopbarHeight) || (int) $logoTopbarHeight < 16 || (int) $logoTopbarHeight > 120)) {
+        $errors[] = 'El alto del logo en la barra superior debe ser un número entre 16 y 120.';
+    }
+
+    if ($logoSidenavHeight !== '' && (!ctype_digit($logoSidenavHeight) || (int) $logoSidenavHeight < 16 || (int) $logoSidenavHeight > 120)) {
+        $errors[] = 'El alto del logo en el menú lateral debe ser un número entre 16 y 120.';
+    }
+
+    if ($logoSidenavHeightSm !== '' && (!ctype_digit($logoSidenavHeightSm) || (int) $logoSidenavHeightSm < 16 || (int) $logoSidenavHeightSm > 120)) {
+        $errors[] = 'El alto del logo en el menú lateral compacto debe ser un número entre 16 y 120.';
     }
 
     $logoPath = $municipalidad['logo_path'] ?? 'assets/images/logo.png';
@@ -70,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
         $id = $stmt->fetchColumn();
 
         if ($id) {
-            $stmtUpdate = db()->prepare('UPDATE municipalidad SET nombre = ?, rut = ?, direccion = ?, telefono = ?, correo = ?, logo_path = ?, color_primary = ?, color_secondary = ? WHERE id = ?');
+            $stmtUpdate = db()->prepare('UPDATE municipalidad SET nombre = ?, rut = ?, direccion = ?, telefono = ?, correo = ?, logo_path = ?, logo_topbar_height = ?, logo_sidenav_height = ?, logo_sidenav_height_sm = ?, color_primary = ?, color_secondary = ? WHERE id = ?');
             $stmtUpdate->execute([
                 $nombre,
                 $rut,
@@ -78,12 +93,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                 $telefono !== '' ? $telefono : null,
                 $correo !== '' ? $correo : null,
                 $logoPath,
+                $logoTopbarHeight !== '' ? (int) $logoTopbarHeight : null,
+                $logoSidenavHeight !== '' ? (int) $logoSidenavHeight : null,
+                $logoSidenavHeightSm !== '' ? (int) $logoSidenavHeightSm : null,
                 $colorPrimary,
                 $colorSecondary,
                 $id,
             ]);
         } else {
-            $stmtInsert = db()->prepare('INSERT INTO municipalidad (nombre, rut, direccion, telefono, correo, logo_path, color_primary, color_secondary) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+            $stmtInsert = db()->prepare('INSERT INTO municipalidad (nombre, rut, direccion, telefono, correo, logo_path, logo_topbar_height, logo_sidenav_height, logo_sidenav_height_sm, color_primary, color_secondary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
             $stmtInsert->execute([
                 $nombre,
                 $rut,
@@ -91,6 +109,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                 $telefono !== '' ? $telefono : null,
                 $correo !== '' ? $correo : null,
                 $logoPath,
+                $logoTopbarHeight !== '' ? (int) $logoTopbarHeight : null,
+                $logoSidenavHeight !== '' ? (int) $logoSidenavHeight : null,
+                $logoSidenavHeightSm !== '' ? (int) $logoSidenavHeightSm : null,
                 $colorPrimary,
                 $colorSecondary,
             ]);
@@ -106,6 +127,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
         'telefono' => $telefono,
         'correo' => $correo,
         'logo_path' => $logoPath,
+        'logo_topbar_height' => $logoTopbarHeight,
+        'logo_sidenav_height' => $logoSidenavHeight,
+        'logo_sidenav_height_sm' => $logoSidenavHeightSm,
         'color_primary' => $colorPrimary !== '' ? $colorPrimary : '#6658dd',
         'color_secondary' => $colorSecondary !== '' ? $colorSecondary : '#4a81d4',
     ]);
@@ -206,6 +230,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                                     <label class="form-label" for="muni-logo">Logo institucional</label>
                                                     <input type="file" id="muni-logo" name="logo" class="form-control" accept=".png,.jpg,.jpeg,.svg">
                                                     <small class="text-muted">PNG, JPG o SVG. Se usará como logo del proyecto.</small>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Tamaños del logo por sección</label>
+                                                    <div class="row g-2">
+                                                        <div class="col-12">
+                                                            <div class="input-group">
+                                                                <span class="input-group-text">Barra superior (px)</span>
+                                                                <input type="number" min="16" max="120" id="muni-logo-topbar" name="logo_topbar_height" class="form-control" value="<?php echo htmlspecialchars($municipalidad['logo_topbar_height'] ?? '56', ENT_QUOTES, 'UTF-8'); ?>">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <div class="input-group">
+                                                                <span class="input-group-text">Menú lateral (px)</span>
+                                                                <input type="number" min="16" max="120" id="muni-logo-sidenav" name="logo_sidenav_height" class="form-control" value="<?php echo htmlspecialchars($municipalidad['logo_sidenav_height'] ?? '48', ENT_QUOTES, 'UTF-8'); ?>">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <div class="input-group">
+                                                                <span class="input-group-text">Menú lateral compacto (px)</span>
+                                                                <input type="number" min="16" max="120" id="muni-logo-sidenav-sm" name="logo_sidenav_height_sm" class="form-control" value="<?php echo htmlspecialchars($municipalidad['logo_sidenav_height_sm'] ?? '36', ENT_QUOTES, 'UTF-8'); ?>">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <small class="text-muted d-block mt-2">Define el alto del logo según la sección donde se verá.</small>
                                                 </div>
                                                 <div>
                                                     <label class="form-label">Vista previa</label>
