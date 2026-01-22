@@ -79,16 +79,16 @@
                 <div class="collapse" id="modulo-seguridad">
                     <ul class="side-nav sub-menu">
                         <li class="side-nav-item">
-                            <a href="auth-2-sign-in.php" class="side-nav-link">Login / Logout</a>
+                            <a href="login.php" class="side-nav-link">Login / Logout</a>
                         </li>
                         <li class="side-nav-item">
-                            <a href="auth-2-reset-pass.php" class="side-nav-link">Recuperar contraseña</a>
+                            <a href="recuperar-contrasena.php" class="side-nav-link">Recuperar contraseña</a>
                         </li>
                         <li class="side-nav-item">
-                            <a href="pages-empty.php" class="side-nav-link">Gestión de sesiones</a>
+                            <a href="sesiones.php" class="side-nav-link">Gestión de sesiones</a>
                         </li>
                         <li class="side-nav-item">
-                            <a href="pages-empty.php" class="side-nav-link">Bitácora (auditoría)</a>
+                            <a href="bitacora.php" class="side-nav-link">Bitácora (auditoría)</a>
                         </li>
                     </ul>
                 </div>
@@ -102,22 +102,22 @@
                 <div class="collapse" id="modulo-usuarios">
                     <ul class="side-nav sub-menu">
                         <li class="side-nav-item">
-                            <a href="pages-empty.php" class="side-nav-link">Listar usuarios</a>
+                            <a href="usuarios-lista.php" class="side-nav-link">Listar usuarios</a>
                         </li>
                         <li class="side-nav-item">
-                            <a href="pages-empty.php" class="side-nav-link">Crear usuario</a>
+                            <a href="usuarios-crear.php" class="side-nav-link">Crear usuario</a>
                         </li>
                         <li class="side-nav-item">
-                            <a href="pages-empty.php" class="side-nav-link">Editar usuario</a>
+                            <a href="usuarios-editar.php" class="side-nav-link">Editar usuario</a>
                         </li>
                         <li class="side-nav-item">
-                            <a href="pages-empty.php" class="side-nav-link">Ver detalle</a>
+                            <a href="usuarios-detalle.php" class="side-nav-link">Ver detalle</a>
                         </li>
                         <li class="side-nav-item">
                             <a href="users-profile.php" class="side-nav-link">Perfil</a>
                         </li>
                         <li class="side-nav-item">
-                            <a href="pages-empty.php" class="side-nav-link">Asignar roles</a>
+                            <a href="usuarios-asignar-roles.php" class="side-nav-link">Asignar roles</a>
                         </li>
                     </ul>
                 </div>
@@ -131,13 +131,13 @@
                 <div class="collapse" id="modulo-roles">
                     <ul class="side-nav sub-menu">
                         <li class="side-nav-item">
-                            <a href="users-roles.php" class="side-nav-link">Listar roles</a>
+                            <a href="roles-lista.php" class="side-nav-link">Listar roles</a>
                         </li>
                         <li class="side-nav-item">
-                            <a href="users-role-details.php" class="side-nav-link">Crear/editar rol</a>
+                            <a href="roles-editar.php" class="side-nav-link">Crear/editar rol</a>
                         </li>
                         <li class="side-nav-item">
-                            <a href="users-permissions.php" class="side-nav-link">Matriz de permisos</a>
+                            <a href="roles-permisos.php" class="side-nav-link">Matriz de permisos</a>
                         </li>
                     </ul>
                 </div>
@@ -151,19 +151,19 @@
                 <div class="collapse" id="modulo-eventos">
                     <ul class="side-nav sub-menu">
                         <li class="side-nav-item">
-                            <a href="pages-empty.php" class="side-nav-link">Listar eventos</a>
+                            <a href="eventos-lista.php" class="side-nav-link">Listar eventos</a>
                         </li>
                         <li class="side-nav-item">
-                            <a href="pages-empty.php" class="side-nav-link">Crear/editar evento</a>
+                            <a href="eventos-editar.php" class="side-nav-link">Crear/editar evento</a>
                         </li>
                         <li class="side-nav-item">
-                            <a href="pages-empty.php" class="side-nav-link">Ver detalle evento</a>
+                            <a href="eventos-detalle.php" class="side-nav-link">Ver detalle evento</a>
                         </li>
                         <li class="side-nav-item">
-                            <a href="pages-empty.php" class="side-nav-link">Subir adjuntos</a>
+                            <a href="eventos-adjuntos.php" class="side-nav-link">Subir adjuntos</a>
                         </li>
                         <li class="side-nav-item">
-                            <a href="pages-empty.php" class="side-nav-link">Descargar/eliminar adjuntos</a>
+                            <a href="eventos-adjuntos-gestionar.php" class="side-nav-link">Descargar/eliminar adjuntos</a>
                         </li>
                     </ul>
                 </div>
@@ -177,16 +177,16 @@
                 <div class="collapse" id="modulo-autoridades">
                     <ul class="side-nav sub-menu">
                         <li class="side-nav-item">
-                            <a href="pages-empty.php" class="side-nav-link">Listar autoridades</a>
+                            <a href="autoridades-lista.php" class="side-nav-link">Listar autoridades</a>
                         </li>
                         <li class="side-nav-item">
-                            <a href="pages-empty.php" class="side-nav-link">Crear/editar autoridad</a>
+                            <a href="autoridades-editar.php" class="side-nav-link">Crear/editar autoridad</a>
                         </li>
                         <li class="side-nav-item">
-                            <a href="pages-empty.php" class="side-nav-link">Ver detalle</a>
+                            <a href="autoridades-detalle.php" class="side-nav-link">Ver detalle</a>
                         </li>
                         <li class="side-nav-item">
-                            <a href="pages-empty.php" class="side-nav-link">Adjuntos</a>
+                            <a href="autoridades-adjuntos.php" class="side-nav-link">Adjuntos</a>
                         </li>
                     </ul>
                 </div>
