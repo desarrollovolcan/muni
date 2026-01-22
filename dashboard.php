@@ -5,7 +5,7 @@ declare(strict_types=1);
 require __DIR__ . '/app/bootstrap.php';
 
 if (!isset($_SESSION['user'])) {
-    redirect('auth-sign-in.php');
+    redirect('auth-2-sign-in.php');
 }
 
 include('partials/html.php');
