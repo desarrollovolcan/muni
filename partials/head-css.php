@@ -22,6 +22,10 @@ $secondaryRgb = hex_to_rgb($secondaryColor) ?? [74, 129, 212];
         --ins-primary-rgb: <?php echo (int) $primaryRgb[0]; ?>, <?php echo (int) $primaryRgb[1]; ?>, <?php echo (int) $primaryRgb[2]; ?>;
         --ins-secondary: <?php echo htmlspecialchars($secondaryColor, ENT_QUOTES, 'UTF-8'); ?>;
         --ins-secondary-rgb: <?php echo (int) $secondaryRgb[0]; ?>, <?php echo (int) $secondaryRgb[1]; ?>, <?php echo (int) $secondaryRgb[2]; ?>;
+        --bs-primary: <?php echo htmlspecialchars($primaryColor, ENT_QUOTES, 'UTF-8'); ?>;
+        --bs-primary-rgb: <?php echo (int) $primaryRgb[0]; ?>, <?php echo (int) $primaryRgb[1]; ?>, <?php echo (int) $primaryRgb[2]; ?>;
+        --bs-secondary: <?php echo htmlspecialchars($secondaryColor, ENT_QUOTES, 'UTF-8'); ?>;
+        --bs-secondary-rgb: <?php echo (int) $secondaryRgb[0]; ?>, <?php echo (int) $secondaryRgb[1]; ?>, <?php echo (int) $secondaryRgb[2]; ?>;
     }
 
     .side-nav-title {

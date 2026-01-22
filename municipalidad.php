@@ -3,6 +3,7 @@ require __DIR__ . '/app/bootstrap.php';
 
 $municipalidad = get_municipalidad();
 $errors = [];
+$success = $_GET['success'] ?? '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ?? null)) {
     $nombre = trim($_POST['nombre'] ?? '');
@@ -19,18 +20,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
 
     $logoPath = $municipalidad['logo_path'] ?? 'assets/images/logo.png';
     if (!empty($_FILES['logo']['name'])) {
-        $uploadDir = __DIR__ . '/assets/images/';
+        $uploadDir = __DIR__ . '/assets/images/municipalidad/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0775, true);
+        }
         $extension = strtolower(pathinfo($_FILES['logo']['name'], PATHINFO_EXTENSION));
         $allowed = ['png', 'jpg', 'jpeg', 'svg'];
         if (!in_array($extension, $allowed, true)) {
             $errors[] = 'Formato de logo no permitido. Usa PNG, JPG o SVG.';
         } else {
-            $fileName = 'logo-municipalidad.' . $extension;
+            $fileName = 'logo-municipalidad-' . date('YmdHis') . '.' . $extension;
             $targetPath = $uploadDir . $fileName;
             if (!move_uploaded_file($_FILES['logo']['tmp_name'], $targetPath)) {
                 $errors[] = 'No se pudo cargar el logo.';
             } else {
-                $logoPath = 'assets/images/' . $fileName;
+                $logoPath = 'assets/images/municipalidad/' . $fileName;
             }
         }
     }
@@ -66,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
             ]);
         }
 
-        redirect('municipalidad.php');
+        redirect('municipalidad.php?success=1');
     }
 
     $municipalidad = array_merge($municipalidad, [
@@ -104,6 +108,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
             <div class="container-fluid">
 
                 <?php $subtitle = "Configuración"; $title = "Municipalidad"; include('partials/page-title.php'); ?>
+
+                <?php if ($success === '1') : ?>
+                    <div class="alert alert-success">Información actualizada correctamente.</div>
+                <?php endif; ?>
 
                 <div class="row">
                     <div class="col-12">
