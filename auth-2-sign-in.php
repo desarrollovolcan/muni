@@ -6,7 +6,7 @@ require __DIR__ . '/app/bootstrap.php';
 require __DIR__ . '/app/models/User.php';
 
 if (isset($_SESSION['user'])) {
-    redirect('index.php');
+    redirect('dashboard.php');
 }
 
 $errors = [];
@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'cargo' => $user['cargo'],
                 'rol' => $user['rol'],
             ];
-            redirect('index.php');
+            redirect('dashboard.php');
         }
     }
 }
