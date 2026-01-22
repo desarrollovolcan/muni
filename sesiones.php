@@ -25,6 +25,12 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
+                            <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                <div>
+                                    <h5 class="card-title mb-0">Sesiones activas</h5>
+                                    <p class="text-muted mb-0">Monitorea y administra las sesiones del sistema.</p>
+                                </div>
+                            </div>
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <table class="table table-striped table-centered mb-0">

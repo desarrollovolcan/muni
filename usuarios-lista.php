@@ -42,23 +42,27 @@ $usuarios = $stmt->fetchAll();
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
+                            <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                <div>
+                                    <h5 class="card-title mb-0">Usuarios</h5>
+                                    <p class="text-muted mb-0">Gestión y administración de usuarios.</p>
+                                </div>
+                                <a href="usuarios-crear.php" class="btn btn-primary">Nuevo usuario</a>
+                            </div>
                             <div class="card-body">
-                                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-                                    <div class="d-flex flex-wrap gap-2">
-                                        <input type="text" class="form-control" placeholder="Buscar por nombre o RUT">
-                                        <select class="form-select">
-                                            <option value="">Estado</option>
-                                            <option>Habilitado</option>
-                                            <option>Deshabilitado</option>
-                                        </select>
-                                        <select class="form-select">
-                                            <option value="">Rol</option>
-                                            <option>SuperAdmin</option>
-                                            <option>Admin</option>
-                                            <option>Consulta</option>
-                                        </select>
-                                    </div>
-                                    <a href="usuarios-crear.php" class="btn btn-primary">Crear usuario</a>
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    <input type="text" class="form-control" placeholder="Buscar por nombre o RUT">
+                                    <select class="form-select">
+                                        <option value="">Estado</option>
+                                        <option>Habilitado</option>
+                                        <option>Deshabilitado</option>
+                                    </select>
+                                    <select class="form-select">
+                                        <option value="">Rol</option>
+                                        <option>SuperAdmin</option>
+                                        <option>Admin</option>
+                                        <option>Consulta</option>
+                                    </select>
                                 </div>
                                 <div class="table-responsive">
                                     <table class="table table-striped table-centered mb-0">
@@ -94,14 +98,25 @@ $usuarios = $stmt->fetchAll();
                                                         </td>
                                                         <td><?php echo $usuario['ultimo_acceso'] ? htmlspecialchars($usuario['ultimo_acceso'], ENT_QUOTES, 'UTF-8') : '-'; ?></td>
                                                         <td class="text-end">
-                                                            <a href="usuarios-detalle.php?id=<?php echo (int) $usuario['id']; ?>" class="btn btn-sm btn-outline-primary">Ver</a>
-                                                            <a href="usuarios-editar.php?id=<?php echo (int) $usuario['id']; ?>" class="btn btn-sm btn-outline-secondary">Editar</a>
-                                                            <form method="post" class="d-inline">
-                                                                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                                                <input type="hidden" name="action" value="disable">
-                                                                <input type="hidden" name="id" value="<?php echo (int) $usuario['id']; ?>">
-                                                                <button type="submit" class="btn btn-sm btn-outline-danger" <?php echo (int) $usuario['estado'] === 0 ? 'disabled' : ''; ?>>Deshabilitar</button>
-                                                            </form>
+                                                            <div class="dropdown">
+                                                                <button class="btn btn-sm btn-soft-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                    Acciones
+                                                                </button>
+                                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                                    <li><a class="dropdown-item" href="usuarios-detalle.php?id=<?php echo (int) $usuario['id']; ?>">Ver detalle</a></li>
+                                                                    <li><a class="dropdown-item" href="usuarios-editar.php?id=<?php echo (int) $usuario['id']; ?>">Editar</a></li>
+                                                                    <li><a class="dropdown-item" href="usuarios-asignar-roles.php?id=<?php echo (int) $usuario['id']; ?>">Asignar roles</a></li>
+                                                                    <li><hr class="dropdown-divider"></li>
+                                                                    <li>
+                                                                        <form method="post" class="px-3 py-1">
+                                                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                            <input type="hidden" name="action" value="disable">
+                                                                            <input type="hidden" name="id" value="<?php echo (int) $usuario['id']; ?>">
+                                                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100" <?php echo (int) $usuario['estado'] === 0 ? 'disabled' : ''; ?>>Deshabilitar</button>
+                                                                        </form>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 <?php endforeach; ?>

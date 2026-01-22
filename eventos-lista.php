@@ -42,27 +42,31 @@ $eventos = $stmt->fetchAll();
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
+                            <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                <div>
+                                    <h5 class="card-title mb-0">Eventos municipales</h5>
+                                    <p class="text-muted mb-0">Listado y control de eventos.</p>
+                                </div>
+                                <a href="eventos-editar.php" class="btn btn-primary">Nuevo evento</a>
+                            </div>
                             <div class="card-body">
-                                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-                                    <div class="d-flex flex-wrap gap-2">
-                                        <input type="date" class="form-control">
-                                        <input type="date" class="form-control">
-                                        <select class="form-select">
-                                            <option value="">Estado</option>
-                                            <option>Borrador</option>
-                                            <option>Publicado</option>
-                                            <option>Finalizado</option>
-                                            <option>Cancelado</option>
-                                        </select>
-                                        <select class="form-select">
-                                            <option value="">Tipo</option>
-                                            <option>Reunión</option>
-                                            <option>Operativo</option>
-                                            <option>Ceremonia</option>
-                                            <option>Actividad cultural</option>
-                                        </select>
-                                    </div>
-                                    <a href="eventos-editar.php" class="btn btn-primary">Crear evento</a>
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    <input type="date" class="form-control">
+                                    <input type="date" class="form-control">
+                                    <select class="form-select">
+                                        <option value="">Estado</option>
+                                        <option>Borrador</option>
+                                        <option>Publicado</option>
+                                        <option>Finalizado</option>
+                                        <option>Cancelado</option>
+                                    </select>
+                                    <select class="form-select">
+                                        <option value="">Tipo</option>
+                                        <option>Reunión</option>
+                                        <option>Operativo</option>
+                                        <option>Ceremonia</option>
+                                        <option>Actividad cultural</option>
+                                    </select>
                                 </div>
                                 <div class="table-responsive">
                                     <table class="table table-hover table-centered mb-0">
@@ -94,14 +98,25 @@ $eventos = $stmt->fetchAll();
                                                         </td>
                                                         <td><?php echo htmlspecialchars(trim(($evento['encargado_nombre'] ?? '') . ' ' . ($evento['encargado_apellido'] ?? '')), ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td class="text-end">
-                                                            <a href="eventos-detalle.php?id=<?php echo (int) $evento['id']; ?>" class="btn btn-sm btn-outline-primary">Ver</a>
-                                                            <a href="eventos-editar.php?id=<?php echo (int) $evento['id']; ?>" class="btn btn-sm btn-outline-secondary">Editar</a>
-                                                            <form method="post" class="d-inline">
-                                                                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                                                <input type="hidden" name="action" value="disable">
-                                                                <input type="hidden" name="id" value="<?php echo (int) $evento['id']; ?>">
-                                                                <button type="submit" class="btn btn-sm btn-outline-danger" <?php echo (int) $evento['habilitado'] === 0 ? 'disabled' : ''; ?>>Deshabilitar</button>
-                                                            </form>
+                                                            <div class="dropdown">
+                                                                <button class="btn btn-sm btn-soft-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                    Acciones
+                                                                </button>
+                                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                                    <li><a class="dropdown-item" href="eventos-detalle.php?id=<?php echo (int) $evento['id']; ?>">Ver detalle</a></li>
+                                                                    <li><a class="dropdown-item" href="eventos-editar.php?id=<?php echo (int) $evento['id']; ?>">Editar</a></li>
+                                                                    <li><a class="dropdown-item" href="eventos-adjuntos.php">Adjuntos</a></li>
+                                                                    <li><hr class="dropdown-divider"></li>
+                                                                    <li>
+                                                                        <form method="post" class="px-3 py-1">
+                                                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                            <input type="hidden" name="action" value="disable">
+                                                                            <input type="hidden" name="id" value="<?php echo (int) $evento['id']; ?>">
+                                                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100" <?php echo (int) $evento['habilitado'] === 0 ? 'disabled' : ''; ?>>Deshabilitar</button>
+                                                                        </form>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 <?php endforeach; ?>

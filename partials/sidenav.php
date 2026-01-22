@@ -108,12 +108,6 @@
                             <a href="usuarios-crear.php" class="side-nav-link">Crear usuario</a>
                         </li>
                         <li class="side-nav-item">
-                            <a href="usuarios-editar.php" class="side-nav-link">Editar usuario</a>
-                        </li>
-                        <li class="side-nav-item">
-                            <a href="usuarios-detalle.php" class="side-nav-link">Ver detalle</a>
-                        </li>
-                        <li class="side-nav-item">
                             <a href="users-profile.php" class="side-nav-link">Perfil</a>
                         </li>
                         <li class="side-nav-item">
@@ -134,7 +128,7 @@
                             <a href="roles-lista.php" class="side-nav-link">Listar roles</a>
                         </li>
                         <li class="side-nav-item">
-                            <a href="roles-editar.php" class="side-nav-link">Crear/editar rol</a>
+                            <a href="roles-editar.php" class="side-nav-link">Crear rol</a>
                         </li>
                         <li class="side-nav-item">
                             <a href="roles-permisos.php" class="side-nav-link">Matriz de permisos</a>
@@ -154,10 +148,7 @@
                             <a href="eventos-lista.php" class="side-nav-link">Listar eventos</a>
                         </li>
                         <li class="side-nav-item">
-                            <a href="eventos-editar.php" class="side-nav-link">Crear/editar evento</a>
-                        </li>
-                        <li class="side-nav-item">
-                            <a href="eventos-detalle.php" class="side-nav-link">Ver detalle evento</a>
+                            <a href="eventos-editar.php" class="side-nav-link">Crear evento</a>
                         </li>
                         <li class="side-nav-item">
                             <a href="eventos-adjuntos.php" class="side-nav-link">Subir adjuntos</a>
@@ -180,10 +171,7 @@
                             <a href="autoridades-lista.php" class="side-nav-link">Listar autoridades</a>
                         </li>
                         <li class="side-nav-item">
-                            <a href="autoridades-editar.php" class="side-nav-link">Crear/editar autoridad</a>
-                        </li>
-                        <li class="side-nav-item">
-                            <a href="autoridades-detalle.php" class="side-nav-link">Ver detalle</a>
+                            <a href="autoridades-editar.php" class="side-nav-link">Crear autoridad</a>
                         </li>
                         <li class="side-nav-item">
                             <a href="autoridades-adjuntos.php" class="side-nav-link">Adjuntos</a>

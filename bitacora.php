@@ -25,6 +25,12 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
+                            <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                <div>
+                                    <h5 class="card-title mb-0">Bitácora</h5>
+                                    <p class="text-muted mb-0">Auditoría de movimientos y acciones registradas.</p>
+                                </div>
+                            </div>
                             <div class="card-body">
                                 <form class="row g-3 mb-4">
                                     <div class="col-md-4">

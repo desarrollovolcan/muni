@@ -25,6 +25,13 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
+                            <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                <div>
+                                    <h5 class="card-title mb-0">Adjuntos de autoridades</h5>
+                                    <p class="text-muted mb-0">Documentos asociados a autoridades.</p>
+                                </div>
+                                <button type="button" class="btn btn-primary" onclick="document.getElementById('autoridad-archivo').focus();">Subir adjunto</button>
+                            </div>
                             <div class="card-body">
                                 <form class="mb-4">
                                     <div class="row g-3 align-items-end">
