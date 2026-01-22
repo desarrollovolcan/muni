@@ -25,7 +25,7 @@ class CalendarSchedule {
         this.formEvent.classList.remove('was-validated');
         this.newEventData = null;
         this.btnDeleteEvent.style.display = "block";
-        this.modalTitle.text = ('Edit Event');
+        this.modalTitle.text = ('Editar evento');
         this.modal.show();
         this.selectedEvent = info.event;
         const titleInput = document.getElementById('event-title');
@@ -49,6 +49,14 @@ class CalendarSchedule {
         if (endInput && this.selectedEvent.end) {
             endInput.value = this.formatDateTime(this.selectedEvent.end);
         }
+        const eventIdInput = document.getElementById('event-id');
+        if (eventIdInput) {
+            eventIdInput.value = this.selectedEvent.id || '';
+        }
+        const actionInput = document.getElementById('event-action');
+        if (actionInput) {
+            actionInput.value = 'save';
+        }
     }
 
     onSelect(info) {
@@ -57,7 +65,7 @@ class CalendarSchedule {
         this.selectedEvent = null;
         this.newEventData = info;
         this.btnDeleteEvent.style.display = "none";
-        this.modalTitle.text = ('Add New Event');
+        this.modalTitle.text = ('Crear evento');
         this.modal.show();
         this.calendarObj.unselect();
         const startInput = document.getElementById('event-start');
@@ -67,6 +75,14 @@ class CalendarSchedule {
         const endInput = document.getElementById('event-end');
         if (endInput && info?.date) {
             endInput.value = this.formatDateTime(info.date);
+        }
+        const eventIdInput = document.getElementById('event-id');
+        if (eventIdInput) {
+            eventIdInput.value = '';
+        }
+        const actionInput = document.getElementById('event-action');
+        if (actionInput) {
+            actionInput.value = 'save';
         }
     }
 
@@ -86,7 +102,8 @@ class CalendarSchedule {
         const self = this;
         const externalEventContainerEl = document.getElementById('external-events');
 
-        new FullCalendar.Draggable(externalEventContainerEl, {
+        if (externalEventContainerEl) {
+            new FullCalendar.Draggable(externalEventContainerEl, {
             itemSelector: '.external-event',
             eventData: function (eventEl) {
                 return {
@@ -98,10 +115,13 @@ class CalendarSchedule {
                 };
             }
         });
+        }
 
-        const defaultEvents = [
+        const defaultEvents = Array.isArray(window.calendarEvents) && window.calendarEvents.length
+            ? window.calendarEvents
+            : [
             {
-                title: 'Design Review',
+                title: 'Revisión de diseño',
                 start: today,
                 end: today,
                 className: 'bg-primary-subtle text-primary',
@@ -110,7 +130,7 @@ class CalendarSchedule {
                 }
             },
             {
-                title: 'Marketing Strategy',
+                title: 'Estrategia de marketing',
                 start: new Date(Date.now() + 16000000),
                 end: new Date(Date.now() + 20000000),
                 className: 'bg-secondary-subtle text-secondary',
@@ -119,7 +139,7 @@ class CalendarSchedule {
                 }
             },
             {
-                title: 'Sales Demo',
+                title: 'Demostración de ventas',
                 start: new Date(Date.now() + 40000000),
                 end: new Date(Date.now() + 80000000),
                 className: 'bg-success-subtle text-success',
@@ -128,7 +148,7 @@ class CalendarSchedule {
                 }
             },
             {
-                title: 'Deadline Submission',
+                title: 'Entrega de informe',
                 start: new Date(Date.now() + 120000000),
                 end: new Date(Date.now() + 180000000),
                 className: 'bg-danger-subtle text-danger',
@@ -137,7 +157,7 @@ class CalendarSchedule {
                 }
             },
             {
-                title: 'Training Session',
+                title: 'Sesión de capacitación',
                 start: new Date(Date.now() + 250000000),
                 end: new Date(Date.now() + 290000000),
                 className: 'bg-info-subtle text-info',
@@ -146,7 +166,7 @@ class CalendarSchedule {
                 }
             },
             {
-                title: 'Budget Review',
+                title: 'Revisión de presupuesto',
                 start: new Date(Date.now() + 400000000),
                 end: new Date(Date.now() + 450000000),
                 className: 'bg-warning-subtle text-warning',
@@ -155,7 +175,7 @@ class CalendarSchedule {
                 }
             },
             {
-                title: 'Board Meeting',
+                title: 'Reunión de directorio',
                 start: new Date(Date.now() + 600000000),
                 end: new Date(Date.now() + 620000000),
                 className: 'bg-dark-subtle text-dark',
@@ -174,14 +194,15 @@ class CalendarSchedule {
             slotMaxTime: '19:00:00',
             themeSystem: 'bootstrap',
             bootstrapFontAwesome: false,
+            locale: window.calendarLocale || 'es',
             buttonText: {
-                today: 'Today',
-                month: 'Month',
-                week: 'Week',
-                day: 'Day',
-                list: 'List',
-                prev: 'Prev',
-                next: 'Next'
+                today: 'Hoy',
+                month: 'Mes',
+                week: 'Semana',
+                day: 'Día',
+                list: 'Lista',
+                prev: 'Anterior',
+                next: 'Siguiente'
             },
             initialView: 'dayGridMonth',
             handleWindowResize: true,
@@ -248,6 +269,15 @@ class CalendarSchedule {
 
         // delete event
         self.btnDeleteEvent.addEventListener('click', function (e) {
+            if (self.formEvent?.dataset.submit === 'server') {
+                const actionInput = document.getElementById('event-action');
+                if (actionInput) {
+                    actionInput.value = 'delete';
+                }
+                self.formEvent?.submit();
+                return;
+            }
+
             if (self.selectedEvent) {
                 self.selectedEvent.remove();
                 self.selectedEvent = null;

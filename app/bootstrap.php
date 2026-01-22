@@ -85,3 +85,38 @@ function hex_to_rgb(string $hex): ?array
         hexdec(substr($hex, 4, 2)),
     ];
 }
+
+function ensure_event_types(): array
+{
+    $defaults = [
+        ['nombre' => 'Reunión', 'color_class' => 'bg-primary-subtle text-primary'],
+        ['nombre' => 'Operativo', 'color_class' => 'bg-secondary-subtle text-secondary'],
+        ['nombre' => 'Ceremonia', 'color_class' => 'bg-success-subtle text-success'],
+        ['nombre' => 'Actividad cultural', 'color_class' => 'bg-warning-subtle text-warning'],
+    ];
+
+    try {
+        db()->exec(
+            'CREATE TABLE IF NOT EXISTS event_types (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                nombre VARCHAR(120) NOT NULL,
+                color_class VARCHAR(120) NOT NULL DEFAULT "bg-primary-subtle text-primary",
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+        );
+
+        $count = (int) db()->query('SELECT COUNT(*) FROM event_types')->fetchColumn();
+        if ($count === 0) {
+            $stmt = db()->prepare('INSERT INTO event_types (nombre, color_class) VALUES (?, ?)');
+            foreach ($defaults as $default) {
+                $stmt->execute([$default['nombre'], $default['color_class']]);
+            }
+        }
+
+        return db()->query('SELECT id, nombre, color_class FROM event_types ORDER BY nombre')->fetchAll();
+    } catch (Exception $e) {
+    } catch (Error $e) {
+    }
+
+    return $defaults;
+}

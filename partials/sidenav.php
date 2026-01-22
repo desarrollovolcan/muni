@@ -210,6 +210,9 @@
                             <a href="municipalidad.php" class="side-nav-link">Municipalidad</a>
                         </li>
                         <li class="side-nav-item">
+                            <a href="eventos-tipos.php" class="side-nav-link">Tipos de evento</a>
+                        </li>
+                        <li class="side-nav-item">
                             <a href="notificaciones-correo.php" class="side-nav-link">Correo de notificaciones</a>
                         </li>
                         <li class="side-nav-item">

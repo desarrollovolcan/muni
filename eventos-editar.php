@@ -4,8 +4,14 @@ require __DIR__ . '/app/bootstrap.php';
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $evento = null;
 $errors = [];
+$success = $_GET['success'] ?? '';
 
 $usuarios = db()->query('SELECT id, nombre, apellido FROM users WHERE estado = 1 ORDER BY nombre')->fetchAll();
+$eventTypes = ensure_event_types();
+$eventTypeMap = [];
+foreach ($eventTypes as $eventType) {
+    $eventTypeMap[$eventType['nombre']] = $eventType['color_class'] ?? 'bg-primary-subtle text-primary';
+}
 
 if ($id > 0) {
     $stmt = db()->prepare('SELECT * FROM events WHERE id = ?');
@@ -14,6 +20,15 @@ if ($id > 0) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ?? null)) {
+    $action = $_POST['event_action'] ?? 'save';
+    $postId = isset($_POST['event_id']) ? (int) $_POST['event_id'] : 0;
+
+    if ($action === 'delete' && $postId > 0) {
+        $stmt = db()->prepare('DELETE FROM events WHERE id = ?');
+        $stmt->execute([$postId]);
+        redirect('eventos-editar.php?success=1');
+    }
+
     $titulo = trim($_POST['titulo'] ?? '');
     $descripcion = trim($_POST['descripcion'] ?? '');
     $ubicacion = trim($_POST['ubicacion'] ?? '');
@@ -31,7 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
     }
 
     if (empty($errors)) {
-        if ($id > 0) {
+        $targetId = $postId > 0 ? $postId : $id;
+        if ($targetId > 0) {
             $stmt = db()->prepare('UPDATE events SET titulo = ?, descripcion = ?, ubicacion = ?, fecha_inicio = ?, fecha_fin = ?, tipo = ?, cupos = ?, publico_objetivo = ?, estado = ?, creado_por = ?, encargado_id = ? WHERE id = ?');
             $stmt->execute([
                 $titulo,
@@ -45,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                 $estado,
                 $creadoPor,
                 $encargado ?: null,
-                $id,
+                $targetId,
             ]);
         } else {
             $stmt = db()->prepare('INSERT INTO events (titulo, descripcion, ubicacion, fecha_inicio, fecha_fin, tipo, cupos, publico_objetivo, estado, creado_por, encargado_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
@@ -64,8 +80,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
             ]);
         }
 
-        redirect('eventos-lista.php');
+        redirect('eventos-editar.php?success=1');
     }
+}
+
+$calendarEvents = [];
+try {
+    $stmt = db()->query('SELECT id, titulo, fecha_inicio, fecha_fin, tipo FROM events ORDER BY fecha_inicio');
+    $events = $stmt->fetchAll();
+    foreach ($events as $event) {
+        $tipo = $event['tipo'] ?? '';
+        $calendarEvents[] = [
+            'id' => (string) $event['id'],
+            'title' => $event['titulo'],
+            'start' => $event['fecha_inicio'],
+            'end' => $event['fecha_fin'],
+            'className' => $eventTypeMap[$tipo] ?? 'bg-primary-subtle text-primary',
+            'extendedProps' => [
+                'tipo' => $tipo,
+            ],
+        ];
+    }
+} catch (Exception $e) {
+} catch (Error $e) {
 }
 ?>
 <?php include('partials/html.php'); ?>
@@ -92,6 +129,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
 
                 <?php $subtitle = "Eventos Municipales"; $title = "Crear/editar evento"; include('partials/page-title.php'); ?>
 
+                <?php if ($success === '1') : ?>
+                    <div class="alert alert-success">Evento actualizado correctamente.</div>
+                <?php endif; ?>
+
                 <?php if (!empty($errors)) : ?>
                     <div class="alert alert-danger">
                         <?php foreach ($errors as $error) : ?>
@@ -111,21 +152,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                             <div id="external-events">
                                 <p class="text-muted mt-2 fst-italic fs-xs mb-3">Arrastra un tipo de evento al calendario o haz clic en la fecha.</p>
 
-                                <div class="external-event fc-event bg-primary-subtle text-primary fw-semibold" data-class="bg-primary-subtle text-primary" data-tipo="Reunión">
-                                    <i class="ti ti-circle-filled me-2"></i>Reunión
-                                </div>
-
-                                <div class="external-event fc-event bg-secondary-subtle text-secondary fw-semibold" data-class="bg-secondary-subtle text-secondary" data-tipo="Operativo">
-                                    <i class="ti ti-circle-filled me-2"></i>Operativo
-                                </div>
-
-                                <div class="external-event fc-event bg-success-subtle text-success fw-semibold" data-class="bg-success-subtle text-success" data-tipo="Ceremonia">
-                                    <i class="ti ti-circle-filled me-2"></i>Ceremonia
-                                </div>
-
-                                <div class="external-event fc-event bg-warning-subtle text-warning fw-semibold" data-class="bg-warning-subtle text-warning" data-tipo="Actividad cultural">
-                                    <i class="ti ti-circle-filled me-2"></i>Actividad cultural
-                                </div>
+                                <?php foreach ($eventTypes as $eventType) : ?>
+                                    <div class="external-event fc-event <?php echo htmlspecialchars($eventType['color_class'], ENT_QUOTES, 'UTF-8'); ?> fw-semibold" data-class="<?php echo htmlspecialchars($eventType['color_class'], ENT_QUOTES, 'UTF-8'); ?>" data-tipo="<?php echo htmlspecialchars($eventType['nombre'], ENT_QUOTES, 'UTF-8'); ?>">
+                                        <i class="ti ti-circle-filled me-2"></i><?php echo htmlspecialchars($eventType['nombre'], ENT_QUOTES, 'UTF-8'); ?>
+                                    </div>
+                                <?php endforeach; ?>
                             </div>
 
                         </div>
@@ -157,6 +188,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                 </div>
                                 <div class="modal-body">
                                     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                    <input type="hidden" name="event_id" id="event-id" value="<?php echo (int) ($evento['id'] ?? 0); ?>">
+                                    <input type="hidden" name="event_action" id="event-action" value="save">
                                     <div class="row">
                                         <div class="col-md-8 mb-3">
                                             <label class="control-label form-label" for="event-title">Título</label>
@@ -193,10 +226,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                             <label class="control-label form-label" for="event-category">Tipo</label>
                                             <select class="form-select" name="tipo" id="event-category" required>
                                                 <?php $tipoActual = $evento['tipo'] ?? ''; ?>
-                                                <option value="Reunión" <?php echo $tipoActual === 'Reunión' ? 'selected' : ''; ?>>Reunión</option>
-                                                <option value="Operativo" <?php echo $tipoActual === 'Operativo' ? 'selected' : ''; ?>>Operativo</option>
-                                                <option value="Ceremonia" <?php echo $tipoActual === 'Ceremonia' ? 'selected' : ''; ?>>Ceremonia</option>
-                                                <option value="Actividad cultural" <?php echo $tipoActual === 'Actividad cultural' ? 'selected' : ''; ?>>Actividad cultural</option>
+                                                <?php foreach ($eventTypes as $eventType) : ?>
+                                                    <option value="<?php echo htmlspecialchars($eventType['nombre'], ENT_QUOTES, 'UTF-8'); ?>" <?php echo $tipoActual === $eventType['nombre'] ? 'selected' : ''; ?>>
+                                                        <?php echo htmlspecialchars($eventType['nombre'], ENT_QUOTES, 'UTF-8'); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
                                             </select>
                                         </div>
                                         <div class="col-md-4 mb-3">
@@ -274,6 +308,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
 
     <!-- Calendar App Demo js -->
     <script src="assets/js/pages/apps-calendar.js"></script>
+
+    <script>
+        window.calendarLocale = 'es';
+        window.calendarEvents = <?php echo json_encode($calendarEvents, JSON_UNESCAPED_UNICODE); ?>;
+    </script>
 
 </body>
 
