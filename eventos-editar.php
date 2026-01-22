@@ -19,6 +19,47 @@ if ($id > 0) {
     $evento = $stmt->fetch();
 }
 
+function normalize_datetime_input(?string $value): string
+{
+    if (!$value) {
+        return '';
+    }
+    $value = trim($value);
+    $date = DateTime::createFromFormat('Y-m-d\\TH:i', $value);
+    if ($date instanceof DateTime) {
+        return $date->format('Y-m-d H:i:s');
+    }
+    $value = str_replace('T', ' ', $value);
+    if (strlen($value) === 16) {
+        return $value . ':00';
+    }
+    return $value;
+}
+
+function format_datetime_local(?string $value): string
+{
+    if (!$value) {
+        return '';
+    }
+    $date = DateTime::createFromFormat('Y-m-d H:i:s', $value);
+    if (!$date) {
+        $date = DateTime::createFromFormat('Y-m-d H:i', $value);
+    }
+    return $date ? $date->format('Y-m-d\\TH:i') : '';
+}
+
+function format_datetime_iso(?string $value): ?string
+{
+    if (!$value) {
+        return null;
+    }
+    $date = DateTime::createFromFormat('Y-m-d H:i:s', $value);
+    if (!$date) {
+        $date = DateTime::createFromFormat('Y-m-d H:i', $value);
+    }
+    return $date ? $date->format('Y-m-d\\TH:i:s') : null;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ?? null)) {
     $action = $_POST['event_action'] ?? 'save';
     $postId = isset($_POST['event_id']) ? (int) $_POST['event_id'] : 0;
@@ -32,8 +73,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
     $titulo = trim($_POST['titulo'] ?? '');
     $descripcion = trim($_POST['descripcion'] ?? '');
     $ubicacion = trim($_POST['ubicacion'] ?? '');
-    $fechaInicio = $_POST['fecha_inicio'] ?? '';
-    $fechaFin = $_POST['fecha_fin'] ?? '';
+    $fechaInicio = normalize_datetime_input($_POST['fecha_inicio'] ?? '');
+    $fechaFin = normalize_datetime_input($_POST['fecha_fin'] ?? '');
     $tipo = trim($_POST['tipo'] ?? '');
     $estado = $_POST['estado'] ?? 'borrador';
     $cupos = $_POST['cupos'] !== '' ? (int) $_POST['cupos'] : null;
@@ -86,18 +127,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
 
 $calendarEvents = [];
 try {
-    $stmt = db()->query('SELECT id, titulo, fecha_inicio, fecha_fin, tipo FROM events ORDER BY fecha_inicio');
+    $stmt = db()->query('SELECT id, titulo, descripcion, ubicacion, fecha_inicio, fecha_fin, tipo, cupos, publico_objetivo, estado, creado_por, encargado_id FROM events ORDER BY fecha_inicio');
     $events = $stmt->fetchAll();
     foreach ($events as $event) {
         $tipo = $event['tipo'] ?? '';
         $calendarEvents[] = [
             'id' => (string) $event['id'],
             'title' => $event['titulo'],
-            'start' => $event['fecha_inicio'],
-            'end' => $event['fecha_fin'],
+            'start' => format_datetime_iso($event['fecha_inicio'] ?? null),
+            'end' => format_datetime_iso($event['fecha_fin'] ?? null),
             'className' => $eventTypeMap[$tipo] ?? 'bg-primary-subtle text-primary',
             'extendedProps' => [
                 'tipo' => $tipo,
+                'descripcion' => $event['descripcion'] ?? '',
+                'ubicacion' => $event['ubicacion'] ?? '',
+                'estado' => $event['estado'] ?? 'borrador',
+                'cupos' => $event['cupos'],
+                'publico_objetivo' => $event['publico_objetivo'] ?? '',
+                'creado_por' => $event['creado_por'] ?? null,
+                'encargado_id' => $event['encargado_id'] ?? null,
             ],
         ];
     }
@@ -201,6 +249,7 @@ try {
                                             <select id="event-estado" name="estado" class="form-select">
                                                 <?php $estadoActual = $evento['estado'] ?? 'borrador'; ?>
                                                 <option value="borrador" <?php echo $estadoActual === 'borrador' ? 'selected' : ''; ?>>Borrador</option>
+                                                <option value="revision" <?php echo $estadoActual === 'revision' ? 'selected' : ''; ?>>Revisión</option>
                                                 <option value="publicado" <?php echo $estadoActual === 'publicado' ? 'selected' : ''; ?>>Publicado</option>
                                                 <option value="finalizado" <?php echo $estadoActual === 'finalizado' ? 'selected' : ''; ?>>Finalizado</option>
                                                 <option value="cancelado" <?php echo $estadoActual === 'cancelado' ? 'selected' : ''; ?>>Cancelado</option>
@@ -216,11 +265,11 @@ try {
                                         </div>
                                         <div class="col-md-3 mb-3">
                                             <label class="control-label form-label" for="event-start">Fecha inicio</label>
-                                            <input type="datetime-local" id="event-start" name="fecha_inicio" class="form-control" value="<?php echo htmlspecialchars($evento['fecha_inicio'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" required>
+                                            <input type="datetime-local" id="event-start" name="fecha_inicio" class="form-control" value="<?php echo htmlspecialchars(format_datetime_local($evento['fecha_inicio'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" required>
                                         </div>
                                         <div class="col-md-3 mb-3">
                                             <label class="control-label form-label" for="event-end">Fecha fin</label>
-                                            <input type="datetime-local" id="event-end" name="fecha_fin" class="form-control" value="<?php echo htmlspecialchars($evento['fecha_fin'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" required>
+                                            <input type="datetime-local" id="event-end" name="fecha_fin" class="form-control" value="<?php echo htmlspecialchars(format_datetime_local($evento['fecha_fin'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" required>
                                         </div>
                                         <div class="col-md-4 mb-3">
                                             <label class="control-label form-label" for="event-category">Tipo</label>
@@ -270,6 +319,12 @@ try {
                                         <button type="button" class="btn btn-outline-danger" id="btn-delete-event">
                                             Eliminar
                                         </button>
+
+                                        <?php if ($id > 0) : ?>
+                                            <a href="eventos-autoridades.php?event_id=<?php echo (int) $id; ?>" class="btn btn-outline-primary">
+                                                Enviar confirmación de invitados
+                                            </a>
+                                        <?php endif; ?>
 
                                         <button type="button" class="btn btn-light ms-auto" data-bs-dismiss="modal">
                                             Cancelar

@@ -1,3 +1,32 @@
+<?php
+require __DIR__ . '/app/bootstrap.php';
+
+$statusClasses = [
+    'publicado' => 'bg-success-subtle text-success',
+    'borrador' => 'bg-warning-subtle text-warning',
+    'revision' => 'bg-info-subtle text-info',
+    'finalizado' => 'bg-secondary-subtle text-secondary',
+    'cancelado' => 'bg-danger-subtle text-danger',
+];
+
+$stmt = db()->query('SELECT id, titulo, fecha_inicio, fecha_fin, tipo, estado FROM events WHERE habilitado = 1 ORDER BY fecha_inicio');
+$calendarEvents = [];
+foreach ($stmt->fetchAll() as $evento) {
+    $start = DateTime::createFromFormat('Y-m-d H:i:s', $evento['fecha_inicio']);
+    $end = DateTime::createFromFormat('Y-m-d H:i:s', $evento['fecha_fin']);
+    $calendarEvents[] = [
+        'id' => (int) $evento['id'],
+        'title' => $evento['titulo'],
+        'start' => $start ? $start->format('Y-m-d\\TH:i:s') : $evento['fecha_inicio'],
+        'end' => $end ? $end->format('Y-m-d\\TH:i:s') : $evento['fecha_fin'],
+        'className' => $statusClasses[$evento['estado']] ?? 'bg-primary-subtle text-primary',
+        'url' => 'eventos-detalle.php?id=' . (int) $evento['id'],
+        'extendedProps' => [
+            'tipo' => $evento['tipo'],
+        ],
+    ];
+}
+?>
 <?php include('partials/html.php'); ?>
 
 <head>
@@ -163,6 +192,11 @@
 
     <!-- Calendar App Demo js -->
     <script src="assets/js/pages/apps-calendar.js"></script>
+
+    <script>
+        window.calendarLocale = 'es';
+        window.calendarEvents = <?php echo json_encode($calendarEvents, JSON_UNESCAPED_UNICODE); ?>;
+    </script>
 
 </body>
 

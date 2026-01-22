@@ -84,17 +84,17 @@
   <div class="email-wrapper">
     <div class="email-content">
       <div class="email-header">
-        <a href="#"><img src="assets/images/logo.png" alt="UBold" /></a>
+        <a href="#"><img src="assets/images/logo.png" alt="Go Muni" /></a>
         <span>Reset your password quickly and securely.</span>
       </div>
       <div class="email-body">
         <p>Hi,</p>
-        <p>We received a request to reset your UBold account password. Click the button below to continue.</p>
+        <p>We received a request to reset your Go Muni account password. Click the button below to continue.</p>
         <p style="text-align: center;">
           <a href="#" class="btn">Reset Password</a>
         </p>
         <p>This link will expire in 30 minutes. If you didn't request a password reset, you can safely ignore this email.</p>
-        <p>Thanks,<br><b>UBold Security Team</b></p>
+        <p>Thanks,<br><b>Go Muni Security Team</b></p>
       </div>
       <div class="email-footer">
         <a href="#">Need help?</a> Contact our support.
