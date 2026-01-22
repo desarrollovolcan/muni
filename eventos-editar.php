@@ -92,27 +92,80 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
 
                 <?php $subtitle = "Eventos Municipales"; $title = "Crear/editar evento"; include('partials/page-title.php'); ?>
 
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-body">
-                                <?php if (!empty($errors)) : ?>
-                                    <div class="alert alert-danger">
-                                        <?php foreach ($errors as $error) : ?>
-                                            <div><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
-                                        <?php endforeach; ?>
-                                    </div>
-                                <?php endif; ?>
-                                <form method="post">
+                <?php if (!empty($errors)) : ?>
+                    <div class="alert alert-danger">
+                        <?php foreach ($errors as $error) : ?>
+                            <div><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+
+                <div class="d-flex mb-3 gap-1">
+                    <div class="card h-100 mb-0 d-none d-lg-flex rounded-end-0">
+                        <div class="card-body">
+                            <button class="btn btn-primary w-100 btn-new-event">
+                                <i class="ti ti-plus me-2 align-middle"></i>
+                                <?php echo $id > 0 ? 'Editar evento' : 'Crear evento'; ?>
+                            </button>
+
+                            <div id="external-events">
+                                <p class="text-muted mt-2 fst-italic fs-xs mb-3">Arrastra un tipo de evento al calendario o haz clic en la fecha.</p>
+
+                                <div class="external-event fc-event bg-primary-subtle text-primary fw-semibold" data-class="bg-primary-subtle text-primary" data-tipo="Reunión">
+                                    <i class="ti ti-circle-filled me-2"></i>Reunión
+                                </div>
+
+                                <div class="external-event fc-event bg-secondary-subtle text-secondary fw-semibold" data-class="bg-secondary-subtle text-secondary" data-tipo="Operativo">
+                                    <i class="ti ti-circle-filled me-2"></i>Operativo
+                                </div>
+
+                                <div class="external-event fc-event bg-success-subtle text-success fw-semibold" data-class="bg-success-subtle text-success" data-tipo="Ceremonia">
+                                    <i class="ti ti-circle-filled me-2"></i>Ceremonia
+                                </div>
+
+                                <div class="external-event fc-event bg-warning-subtle text-warning fw-semibold" data-class="bg-warning-subtle text-warning" data-tipo="Actividad cultural">
+                                    <i class="ti ti-circle-filled me-2"></i>Actividad cultural
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="card h-100 mb-0 rounded-start-0 flex-grow-1 border-start-0">
+                        <div class="d-lg-none d-inline-flex card-header">
+                            <button class="btn btn-primary btn-new-event">
+                                <i class="ti ti-plus me-2 align-middle"></i>
+                                <?php echo $id > 0 ? 'Editar evento' : 'Crear evento'; ?>
+                            </button>
+                        </div>
+
+                        <div class="card-body" style="height: calc(100% - 350px);" data-simplebar data-simplebar-md>
+                            <div id="calendar"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" id="event-modal" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content">
+                            <form class="needs-validation" name="event-form" id="forms-event" data-submit="server" method="post" novalidate>
+                                <div class="modal-header">
+                                    <h4 class="modal-title" id="modal-title">
+                                        <?php echo $id > 0 ? 'Editar evento' : 'Crear evento'; ?>
+                                    </h4>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
                                     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
                                     <div class="row">
                                         <div class="col-md-8 mb-3">
-                                            <label class="form-label" for="evento-titulo">Título</label>
-                                            <input type="text" id="evento-titulo" name="titulo" class="form-control" value="<?php echo htmlspecialchars($evento['titulo'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                                            <label class="control-label form-label" for="event-title">Título</label>
+                                            <input class="form-control" type="text" name="titulo" id="event-title" value="<?php echo htmlspecialchars($evento['titulo'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" required>
+                                            <div class="invalid-feedback">Ingresa un título válido.</div>
                                         </div>
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label" for="evento-estado">Estado</label>
-                                            <select id="evento-estado" name="estado" class="form-select">
+                                            <label class="form-label" for="event-estado">Estado</label>
+                                            <select id="event-estado" name="estado" class="form-select">
                                                 <?php $estadoActual = $evento['estado'] ?? 'borrador'; ?>
                                                 <option value="borrador" <?php echo $estadoActual === 'borrador' ? 'selected' : ''; ?>>Borrador</option>
                                                 <option value="publicado" <?php echo $estadoActual === 'publicado' ? 'selected' : ''; ?>>Publicado</option>
@@ -121,24 +174,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                             </select>
                                         </div>
                                         <div class="col-12 mb-3">
-                                            <label class="form-label" for="evento-descripcion">Descripción</label>
-                                            <textarea id="evento-descripcion" name="descripcion" class="form-control" rows="3"><?php echo htmlspecialchars($evento['descripcion'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+                                            <label class="control-label form-label" for="event-description">Descripción</label>
+                                            <textarea id="event-description" name="descripcion" class="form-control" rows="3" required><?php echo htmlspecialchars($evento['descripcion'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label" for="evento-ubicacion">Ubicación/Dirección</label>
-                                            <input type="text" id="evento-ubicacion" name="ubicacion" class="form-control" value="<?php echo htmlspecialchars($evento['ubicacion'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                                            <label class="control-label form-label" for="event-location">Ubicación/Dirección</label>
+                                            <input type="text" id="event-location" name="ubicacion" class="form-control" value="<?php echo htmlspecialchars($evento['ubicacion'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" required>
                                         </div>
                                         <div class="col-md-3 mb-3">
-                                            <label class="form-label" for="evento-inicio">Fecha inicio</label>
-                                            <input type="datetime-local" id="evento-inicio" name="fecha_inicio" class="form-control" value="<?php echo htmlspecialchars($evento['fecha_inicio'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                                            <label class="control-label form-label" for="event-start">Fecha inicio</label>
+                                            <input type="datetime-local" id="event-start" name="fecha_inicio" class="form-control" value="<?php echo htmlspecialchars($evento['fecha_inicio'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" required>
                                         </div>
                                         <div class="col-md-3 mb-3">
-                                            <label class="form-label" for="evento-fin">Fecha fin</label>
-                                            <input type="datetime-local" id="evento-fin" name="fecha_fin" class="form-control" value="<?php echo htmlspecialchars($evento['fecha_fin'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                                            <label class="control-label form-label" for="event-end">Fecha fin</label>
+                                            <input type="datetime-local" id="event-end" name="fecha_fin" class="form-control" value="<?php echo htmlspecialchars($evento['fecha_fin'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" required>
                                         </div>
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label" for="evento-tipo">Tipo</label>
-                                            <select id="evento-tipo" name="tipo" class="form-select">
+                                            <label class="control-label form-label" for="event-category">Tipo</label>
+                                            <select class="form-select" name="tipo" id="event-category" required>
                                                 <?php $tipoActual = $evento['tipo'] ?? ''; ?>
                                                 <option value="Reunión" <?php echo $tipoActual === 'Reunión' ? 'selected' : ''; ?>>Reunión</option>
                                                 <option value="Operativo" <?php echo $tipoActual === 'Operativo' ? 'selected' : ''; ?>>Operativo</option>
@@ -147,16 +200,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                             </select>
                                         </div>
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label" for="evento-cupos">Cupos (opcional)</label>
-                                            <input type="number" id="evento-cupos" name="cupos" class="form-control" value="<?php echo htmlspecialchars((string) ($evento['cupos'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
+                                            <label class="control-label form-label" for="event-cupos">Cupos (opcional)</label>
+                                            <input type="number" id="event-cupos" name="cupos" class="form-control" value="<?php echo htmlspecialchars((string) ($evento['cupos'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
                                         </div>
                                         <div class="col-md-4 mb-3">
-                                            <label class="form-label" for="evento-publico">Público objetivo</label>
-                                            <input type="text" id="evento-publico" name="publico_objetivo" class="form-control" value="<?php echo htmlspecialchars($evento['publico_objetivo'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                                            <label class="control-label form-label" for="event-publico">Público objetivo</label>
+                                            <input type="text" id="event-publico" name="publico_objetivo" class="form-control" value="<?php echo htmlspecialchars($evento['publico_objetivo'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label" for="evento-creador">Creado por</label>
-                                            <select id="evento-creador" name="creado_por" class="form-select">
+                                            <label class="control-label form-label" for="event-creador">Creado por</label>
+                                            <select id="event-creador" name="creado_por" class="form-select" required>
                                                 <?php $creadorActual = (int) ($evento['creado_por'] ?? 0); ?>
                                                 <?php foreach ($usuarios as $usuario) : ?>
                                                     <option value="<?php echo (int) $usuario['id']; ?>" <?php echo $creadorActual === (int) $usuario['id'] ? 'selected' : ''; ?>>
@@ -166,8 +219,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                             </select>
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label" for="evento-encargado">Encargado</label>
-                                            <select id="evento-encargado" name="encargado_id" class="form-select">
+                                            <label class="control-label form-label" for="event-encargado">Encargado</label>
+                                            <select id="event-encargado" name="encargado_id" class="form-select">
                                                 <?php $encargadoActual = (int) ($evento['encargado_id'] ?? 0); ?>
                                                 <option value="">Sin encargado</option>
                                                 <?php foreach ($usuarios as $usuario) : ?>
@@ -178,12 +231,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="d-flex flex-wrap gap-2">
-                                        <button type="submit" class="btn btn-primary">Guardar evento</button>
-                                        <a href="eventos-lista.php" class="btn btn-outline-secondary">Volver</a>
+
+                                    <div class="d-flex flex-wrap align-items-center gap-2">
+                                        <button type="button" class="btn btn-outline-danger" id="btn-delete-event">
+                                            Eliminar
+                                        </button>
+
+                                        <button type="button" class="btn btn-light ms-auto" data-bs-dismiss="modal">
+                                            Cancelar
+                                        </button>
+
+                                        <button type="submit" class="btn btn-primary" id="btn-save-event">
+                                            Guardar evento
+                                        </button>
                                     </div>
-                                </form>
-                            </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -205,6 +268,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
     <?php include('partials/customizer.php'); ?>
 
     <?php include('partials/footer-scripts.php'); ?>
+
+    <!-- Fullcalendar js -->
+    <script src="assets/plugins/fullcalendar/index.global.min.js"></script>
+
+    <!-- Calendar App Demo js -->
+    <script src="assets/js/pages/apps-calendar.js"></script>
 
 </body>
 
