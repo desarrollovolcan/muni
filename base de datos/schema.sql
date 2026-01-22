@@ -11,3 +11,6 @@ CREATE TABLE `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `users_rut_unique` (`rut`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `users` (`nombre`, `apellido`, `rut`, `cargo`, `fecha_nacimiento`, `rol`, `password_hash`)
+VALUES ('Super', 'User', '9.999.999-9', 'Administrador', '1990-01-01', 'Super user', '$2y$12$nNyFQLLuFHy7yjLILUTlIO3NQ96Vw5rS90YCDml1ZKINCPv7Lvshe');
