@@ -15482,6 +15482,17 @@ html[data-skin=flat][data-bs-theme=dark][data-topbar-color=dark], html[data-skin
 .logo-topbar .logo-dark {
   display: block;
 }
+.logo-topbar span.logo-lg,
+.logo-topbar span.logo-sm {
+  display: block;
+  height: var(--ins-topbar-height);
+}
+.logo-topbar span.logo-lg img,
+.logo-topbar span.logo-sm img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
 html[data-topbar-color=dark] .logo-topbar .logo-light,
 html[data-bs-theme=dark] .logo-topbar .logo-light {
