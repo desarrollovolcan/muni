@@ -1,4 +1,78 @@
-<?php include('partials/html.php'); ?>
+<?php
+
+declare(strict_types=1);
+
+require __DIR__ . '/app/bootstrap.php';
+require __DIR__ . '/app/models/User.php';
+
+if (isset($_SESSION['user'])) {
+    redirect('index.php');
+}
+
+$errors = [];
+$success = false;
+$values = [
+    'nombre' => '',
+    'apellido' => '',
+    'rut' => '',
+    'cargo' => '',
+    'fecha_nacimiento' => '',
+    'rol' => '',
+];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $values = [
+        'nombre' => trim((string) ($_POST['nombre'] ?? '')),
+        'apellido' => trim((string) ($_POST['apellido'] ?? '')),
+        'rut' => trim((string) ($_POST['rut'] ?? '')),
+        'cargo' => trim((string) ($_POST['cargo'] ?? '')),
+        'fecha_nacimiento' => trim((string) ($_POST['fecha_nacimiento'] ?? '')),
+        'rol' => trim((string) ($_POST['rol'] ?? '')),
+    ];
+    $password = (string) ($_POST['password'] ?? '');
+    $passwordConfirmation = (string) ($_POST['password_confirmation'] ?? '');
+
+    if (!verify_csrf($_POST['csrf_token'] ?? null)) {
+        $errors[] = 'Tu sesión expiró. Vuelve a intentar.';
+    }
+
+    foreach ($values as $key => $value) {
+        if ($value === '') {
+            $errors[] = 'Todos los campos son obligatorios.';
+            break;
+        }
+    }
+
+    if ($password === '' || strlen($password) < 8) {
+        $errors[] = 'La contraseña debe tener al menos 8 caracteres.';
+    }
+
+    if ($password !== $passwordConfirmation) {
+        $errors[] = 'Las contraseñas no coinciden.';
+    }
+
+    if ($values['fecha_nacimiento'] !== '' && !DateTime::createFromFormat('Y-m-d', $values['fecha_nacimiento'])) {
+        $errors[] = 'La fecha de nacimiento debe tener formato válido.';
+    }
+
+    if (!$errors) {
+        $existing = User::findByRut(db(), $values['rut']);
+        if ($existing) {
+            $errors[] = 'El RUT ya se encuentra registrado.';
+        }
+    }
+
+    if (!$errors) {
+        User::create(db(), array_merge($values, [
+            'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+        ]));
+        $success = true;
+        $values = array_fill_keys(array_keys($values), '');
+    }
+}
+
+include('partials/html.php');
+?>
 
 <head>
     <?php $title = "Create New Account"; include('partials/title-meta.php'); ?>
@@ -23,42 +97,87 @@
                             <a href="index.php" class="logo-light">
                                 <img src="assets/images/logo.png" alt="logo" height="28">
                             </a>
-                            <p class="text-muted w-lg-75 mt-3 mx-auto">Let’s get you started. Create your account by entering your details below.</p>
+                            <p class="text-muted w-lg-75 mt-3 mx-auto">Crea tu cuenta con los datos del funcionario municipal.</p>
                         </div>
 
-                        <form>
+                        <?php if ($success) { ?>
+                            <div class="alert alert-success" role="alert">
+                                Registro completado. Ahora puedes iniciar sesión.
+                            </div>
+                        <?php } ?>
+
+                        <?php if ($errors) { ?>
+                            <div class="alert alert-danger" role="alert">
+                                <ul class="mb-0">
+                                    <?php foreach ($errors as $error) { ?>
+                                        <li><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></li>
+                                    <?php } ?>
+                                </ul>
+                            </div>
+                        <?php } ?>
+
+                        <form method="post" action="auth-sign-up.php">
+                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
                             <div class="mb-3">
-                                <label for="userName" class="form-label">Name <span class="text-danger">*</span></label>
+                                <label for="userName" class="form-label">Nombre <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <input type="text" class="form-control" id="userName" placeholder="Geneva K." required>
+                                    <input type="text" class="form-control" id="userName" name="nombre" placeholder="María" value="<?php echo htmlspecialchars($values['nombre'], ENT_QUOTES, 'UTF-8'); ?>" required>
                                 </div>
                             </div>
 
                             <div class="mb-3">
-                                <label for="userEmail" class="form-label">Email address <span class="text-danger">*</span></label>
+                                <label for="userLastName" class="form-label">Apellido <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <input type="email" class="form-control" id="userEmail" placeholder="you@example.com" required>
+                                    <input type="text" class="form-control" id="userLastName" name="apellido" placeholder="González" value="<?php echo htmlspecialchars($values['apellido'], ENT_QUOTES, 'UTF-8'); ?>" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="userRut" class="form-label">RUT <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="userRut" name="rut" placeholder="12.345.678-9" value="<?php echo htmlspecialchars($values['rut'], ENT_QUOTES, 'UTF-8'); ?>" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="userCargo" class="form-label">Cargo <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="userCargo" name="cargo" placeholder="Administrador" value="<?php echo htmlspecialchars($values['cargo'], ENT_QUOTES, 'UTF-8'); ?>" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="userBirthdate" class="form-label">Fecha de nacimiento <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="date" class="form-control" id="userBirthdate" name="fecha_nacimiento" value="<?php echo htmlspecialchars($values['fecha_nacimiento'], ENT_QUOTES, 'UTF-8'); ?>" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="userRole" class="form-label">Rol <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="userRole" name="rol" placeholder="Supervisor" value="<?php echo htmlspecialchars($values['rol'], ENT_QUOTES, 'UTF-8'); ?>" required>
                                 </div>
                             </div>
 
                             <div class="mb-3" data-password="bar">
-                                <label for="userPassword" class="form-label">Password <span class="text-danger">*</span></label>
+                                <label for="userPassword" class="form-label">Contraseña <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <input type="password" class="form-control" id="userPassword" placeholder="••••••••" required>
+                                    <input type="password" class="form-control" id="userPassword" name="password" placeholder="••••••••" required>
                                 </div>
                                 <div class="password-bar my-2"></div>
-                                <p class="text-muted fs-xs mb-0">Use 8+ characters with letters, numbers & symbols.</p>
+                                <p class="text-muted fs-xs mb-0">Usa 8+ caracteres con letras y números.</p>
                             </div>
 
                             <div class="mb-3">
-                                <div class="form-check">
-                                    <input class="form-check-input form-check-input-light fs-14" type="checkbox" id="termAndPolicy">
-                                    <label class="form-check-label" for="termAndPolicy">Agree the Terms & Policy</label>
+                                <label for="userPasswordConfirmation" class="form-label">Confirmar contraseña <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="userPasswordConfirmation" name="password_confirmation" placeholder="••••••••" required>
                                 </div>
                             </div>
 
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-primary fw-semibold py-2">Create Account</button>
+                                <button type="submit" class="btn btn-primary fw-semibold py-2">Crear cuenta</button>
                             </div>
                         </form>
 
