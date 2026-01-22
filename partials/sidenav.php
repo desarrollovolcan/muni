@@ -9,16 +9,16 @@
                 <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo">
             </span>
             <span class="logo-sm">
-                <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo-sm.png', ENT_QUOTES, 'UTF-8'); ?>" alt="small logo">
+                <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo">
             </span>
         </span>
 
         <span class="logo logo-dark">
             <span class="logo-lg">
-                <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo-black.png', ENT_QUOTES, 'UTF-8'); ?>" alt="dark logo">
+                <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo">
             </span>
             <span class="logo-sm">
-                <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo-sm.png', ENT_QUOTES, 'UTF-8'); ?>" alt="small logo">
+                <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo">
             </span>
         </span>
     </a>

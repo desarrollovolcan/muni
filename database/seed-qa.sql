@@ -521,8 +521,8 @@ INSERT INTO role_unit_permissions (role_id, unidad_id, permission_id) VALUES
     (19, 19, 19),
     (20, 20, 20);
 
-INSERT INTO municipalidad (nombre, rut, direccion, telefono, correo, logo_path, color_primary, color_secondary) VALUES
-    ('Municipalidad de Go Muni', '76.123.456-7', 'Av. Principal 123', '+56 2 2345 6789', 'contacto@gomuni.cl', 'assets/images/logo.png', '#1f6feb', '#0ea5e9');
+INSERT INTO municipalidad (nombre, rut, direccion, telefono, correo, logo_path, logo_topbar_height, logo_login_height, logo_sidenav_height, logo_sidenav_height_sm, color_primary, color_secondary) VALUES
+    ('Municipalidad de Go Muni', '76.123.456-7', 'Av. Principal 123', '+56 2 2345 6789', 'contacto@gomuni.cl', 'assets/images/logo.png', 56, 48, 48, 36, '#1f6feb', '#0ea5e9');
 
 INSERT INTO notificacion_correos (correo_imap, password_imap, host_imap, puerto_imap, seguridad_imap, from_nombre, from_correo) VALUES
     ('notificaciones@gomuni.cl', 'DemoPass123', 'imap.gomuni.cl', 993, 'ssl', 'Go Muni', 'notificaciones@gomuni.cl');
