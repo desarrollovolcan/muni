@@ -35,70 +35,6 @@
                 <i class="ti ti-menu-4 fs-22"></i>
             </button>
 
-            <!-- Mega Menu Dropdown -->
-            <div class="topbar-item d-none d-md-flex">
-                <div class="dropdown">
-                    <button class="topbar-link btn fw-medium btn-link dropdown-toggle drop-arrow-none" data-lang="mega-menu" data-bs-toggle="dropdown" data-bs-offset="0,17" type="button" aria-haspopup="false" aria-expanded="false">
-                        Mega Menu <i class="ti ti-chevron-down ms-1 fs-16"></i>
-                    </button>
-                    <div class="dropdown-menu dropdown-menu-xxl p-0">
-                        <div class="h-100" style="max-height: 380px;" data-simplebar>
-                            <div class="row g-0">
-
-                                <!-- Dashboard & Analytics -->
-                                <div class="col-md-4">
-                                    <div class="p-2">
-                                        <h5 class="mb-1 fw-semibold fs-sm dropdown-header">Dashboard & Analytics</h5>
-                                        <ul class="list-unstyled megamenu-list">
-                                            <li><a href="javascript:void(0);" class="dropdown-item"><i class="ti ti-chart-line align-middle me-2 fs-16"></i> Sales Dashboard</a></li>
-                                            <li><a href="javascript:void(0);" class="dropdown-item"><i class="ti ti-bulb align-middle me-2 fs-16"></i> Marketing Dashboard</a></li>
-                                            <li><a href="javascript:void(0);" class="dropdown-item"><i class="ti ti-currency-dollar align-middle me-2 fs-16"></i> Finance Overview</a></li>
-                                            <li><a href="javascript:void(0);" class="dropdown-item"><i class="ti ti-users align-middle me-2 fs-16"></i> User Analytics</a></li>
-                                            <li><a href="javascript:void(0);" class="dropdown-item"><i class="ti ti-activity align-middle me-2 fs-16"></i> Traffic Insights</a></li>
-                                            <li><a href="javascript:void(0);" class="dropdown-item"><i class="ti ti-gauge align-middle me-2 fs-16"></i> Performance Metrics</a></li>
-                                            <li><a href="javascript:void(0);" class="dropdown-item"><i class="ti ti-zoom-check align-middle me-2 fs-16"></i> Conversion Tracking</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-
-                                <!-- Project Management -->
-                                <div class="col-md-4">
-                                    <div class="p-2">
-                                        <h5 class="mb-1 fw-semibold fs-sm dropdown-header">Project Management</h5>
-                                        <ul class="list-unstyled megamenu-list">
-                                            <li><a href="javascript:void(0);" class="dropdown-item"><i class="ti ti-layout-kanban align-middle me-2 fs-16"></i> Kanban Workflow</a></li>
-                                            <li><a href="javascript:void(0);" class="dropdown-item"><i class="ti ti-calendar-stats align-middle me-2 fs-16"></i> Project Timeline</a></li>
-                                            <li><a href="javascript:void(0);" class="dropdown-item"><i class="ti ti-list-check align-middle me-2 fs-16"></i> Task Management</a></li>
-                                            <li><a href="javascript:void(0);" class="dropdown-item"><i class="ti ti-users-group align-middle me-2 fs-16"></i> Team Members</a></li>
-                                            <li><a href="javascript:void(0);" class="dropdown-item"><i class="ti ti-clipboard-list align-middle me-2 fs-16"></i> Assignments</a></li>
-                                            <li><a href="javascript:void(0);" class="dropdown-item"><i class="ti ti-chart-pie align-middle me-2 fs-16"></i> Resource Allocation</a></li>
-                                            <li><a href="javascript:void(0);" class="dropdown-item"><i class="ti ti-file-invoice align-middle me-2 fs-16"></i> Project Reports</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-
-                                <!-- User Management -->
-                                <div class="col-md-4">
-                                    <div class="p-2">
-                                        <h5 class="mb-1 fw-semibold fs-sm dropdown-header">User Management</h5>
-                                        <ul class="list-unstyled megamenu-list">
-                                            <li><a href="javascript:void(0);" class="dropdown-item"><i class="ti ti-user-circle align-middle me-2 fs-16"></i> User Profiles</a></li>
-                                            <li><a href="javascript:void(0);" class="dropdown-item"><i class="ti ti-lock me-2 align-middle fs-16"></i> Access Control</a></li>
-                                            <li><a href="javascript:void(0);" class="dropdown-item"><i class="ti ti-shield-lock align-middle me-2 fs-16"></i> Role Permissions</a></li>
-                                            <li><a href="javascript:void(0);" class="dropdown-item"><i class="ti ti-notes align-middle me-2 fs-16"></i> Activity Logs</a></li>
-                                            <li><a href="javascript:void(0);" class="dropdown-item"><i class="ti ti-settings align-middle me-2 fs-16"></i> Security Settings</a></li>
-                                            <li><a href="javascript:void(0);" class="dropdown-item"><i class="ti ti-users align-middle me-2 fs-16"></i> User Groups</a></li>
-                                            <li><a href="javascript:void(0);" class="dropdown-item"><i class="ti ti-key align-middle me-2 fs-16"></i> Authentication </a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </div> <!-- .d-flex-->
 
         <div class="d-flex align-items-center gap-2">
@@ -108,41 +44,6 @@
                 <input type="search" class="form-control topbar-search rounded-pill" name="search" placeholder="Quick Search...">
                 <i data-lucide="search" class="app-search-icon text-muted"></i>
             </div>
-
-            <!-- Language Dropdown -->
-            <div class="topbar-item">
-                <div class="dropdown">
-                    <button class="topbar-link fw-bold" data-bs-toggle="dropdown" data-bs-offset="0,24" type="button" aria-haspopup="false" aria-expanded="false">
-                        <img src="assets/images/flags/us.svg" alt="user-image" class="rounded" height="20" id="selected-language-image">
-                    </button>
-                    <div class="dropdown-menu dropdown-menu-end">
-                        <a href="javascript:void(0);" class="dropdown-item" data-translator-lang="en" title="English">
-                            <img src="assets/images/flags/us.svg" alt="English" class="me-1 rounded" height="18" data-translator-image>
-                            <span class="align-middle">English</span>
-                        </a>
-                        <a href="javascript:void(0);" class="dropdown-item" data-translator-lang="de" title="German">
-                            <img src="assets/images/flags/de.svg" alt="German" class="me-1 rounded" height="18" data-translator-image>
-                            <span class="align-middle">Deutsch</span>
-                        </a>
-                        <a href="javascript:void(0);" class="dropdown-item" data-translator-lang="it" title="Italian">
-                            <img src="assets/images/flags/it.svg" alt="Italian" class="me-1 rounded" height="18" data-translator-image>
-                            <span class="align-middle">Italiano</span>
-                        </a>
-                        <a href="javascript:void(0);" class="dropdown-item" data-translator-lang="es" title="Spanish">
-                            <img src="assets/images/flags/es.svg" alt="Spanish" class="me-1 rounded" height="18" data-translator-image>
-                            <span class="align-middle">Español</span>
-                        </a>
-                        <a href="javascript:void(0);" class="dropdown-item" data-translator-lang="ru" title="Russian">
-                            <img src="assets/images/flags/ru.svg" alt="Russian" class="me-1 rounded" height="18" data-translator-image>
-                            <span class="align-middle">Русский</span>
-                        </a>
-                        <a href="javascript:void(0);" class="dropdown-item" data-translator-lang="hi" title="Hindi">
-                            <img src="assets/images/flags/in.svg" alt="Hindi" class="me-1 rounded" height="18" data-translator-image>
-                            <span class="align-middle">हिन्दी</span>
-                        </a>
-                    </div> <!-- end dropdown-menu-->
-                </div> <!-- end dropdown-->
-            </div> <!-- end topbar item-->
 
             <!-- Notification Dropdown -->
             <div class="topbar-item">
@@ -536,12 +437,6 @@
                 </div>
             </div>
 
-            <!-- Button Trigger Customizer Offcanvas -->
-            <div class="topbar-item d-none d-sm-flex">
-                <button class="topbar-link" data-bs-toggle="offcanvas" data-bs-target="#theme-settings-offcanvas" type="button">
-                    <i class="ti ti-settings icon-spin fs-24"></i>
-                </button>
-            </div>
         </div>
     </div>
 </header>
