@@ -170,6 +170,41 @@ CREATE TABLE `authority_attachments` (
   `archivo_tipo` VARCHAR(50) NOT NULL,
   `subido_por` INT UNSIGNED NOT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `last_activity` TIMESTAMP NULL DEFAULT NULL,
+  `ended_at` TIMESTAMP NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `user_sessions_session_unique` (`session_id`),
+  CONSTRAINT `user_sessions_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `audit_logs` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` INT UNSIGNED DEFAULT NULL,
+  `tabla` VARCHAR(60) NOT NULL,
+  `accion` VARCHAR(20) NOT NULL,
+  `registro_id` INT UNSIGNED DEFAULT NULL,
+  `descripcion` VARCHAR(255) DEFAULT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `audit_logs_user_id_idx` (`user_id`),
+  CONSTRAINT `audit_logs_user_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `events` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `titulo` VARCHAR(150) NOT NULL,
+  `descripcion` TEXT NOT NULL,
+  `ubicacion` VARCHAR(200) NOT NULL,
+  `fecha_inicio` DATETIME NOT NULL,
+  `fecha_fin` DATETIME NOT NULL,
+  `tipo` VARCHAR(80) NOT NULL,
+  `cupos` INT UNSIGNED DEFAULT NULL,
+  `publico_objetivo` VARCHAR(150) DEFAULT NULL,
+  `estado` ENUM('borrador', 'publicado', 'finalizado', 'cancelado') NOT NULL DEFAULT 'borrador',
+  `habilitado` TINYINT(1) NOT NULL DEFAULT 1,
+  `creado_por` INT UNSIGNED NOT NULL,
+  `encargado_id` INT UNSIGNED DEFAULT NULL,
+  `fecha_creacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   CONSTRAINT `authority_attachments_authority_id_fk` FOREIGN KEY (`authority_id`) REFERENCES `authorities` (`id`) ON DELETE CASCADE,
   CONSTRAINT `authority_attachments_subido_por_fk` FOREIGN KEY (`subido_por`) REFERENCES `users` (`id`) ON DELETE RESTRICT
