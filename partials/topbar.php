@@ -1,28 +1,31 @@
 <!-- Topbar Start -->
 <header class="app-topbar">
     <?php $municipalidad = get_municipalidad(); ?>
-    <?php $logoTopbarHeight = (int) ($municipalidad['logo_topbar_height'] ?? 56); ?>
+    <?php
+    $logoTopbarHeight = (int) ($municipalidad['logo_topbar_height'] ?? 56);
+    $logoTopbarHeightSm = min($logoTopbarHeight, 40);
+    ?>
     <div class="container-fluid topbar-menu">
         <div class="d-flex align-items-center gap-2">
             <!-- Topbar Brand Logo -->
             <div class="logo-topbar">
                 <!-- Logo light -->
                 <a href="index.php" class="logo-light">
-                    <span class="logo-lg">
+                    <span class="logo-lg d-none d-sm-inline">
                         <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo" style="height: <?php echo $logoTopbarHeight; ?>px;">
                     </span>
-                    <span class="logo-sm">
-                        <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo" style="height: <?php echo $logoTopbarHeight; ?>px;">
+                    <span class="logo-sm d-inline d-sm-none">
+                        <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo" style="height: <?php echo $logoTopbarHeightSm; ?>px;">
                     </span>
                 </a>
 
                 <!-- Logo Dark -->
                 <a href="index.php" class="logo-dark">
-                    <span class="logo-lg">
+                    <span class="logo-lg d-none d-sm-inline">
                         <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo" style="height: <?php echo $logoTopbarHeight; ?>px;">
                     </span>
-                    <span class="logo-sm">
-                        <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo" style="height: <?php echo $logoTopbarHeight; ?>px;">
+                    <span class="logo-sm d-inline d-sm-none">
+                        <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo" style="height: <?php echo $logoTopbarHeightSm; ?>px;">
                     </span>
                 </a>
             </div>
