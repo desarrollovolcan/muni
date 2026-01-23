@@ -9,13 +9,155 @@ $bulkErrors = [];
 $bulkSuccess = '';
 $success = $_GET['success'] ?? '';
 
+function excel_serial_to_date($value): ?string
+{
+    if (!is_numeric($value)) {
+        return null;
+    }
+    $serial = (int) $value;
+    if ($serial <= 0) {
+        return null;
+    }
+    $base = new DateTime('1899-12-30');
+    $base->modify('+' . $serial . ' days');
+    return $base->format('Y-m-d');
+}
+
+function parse_excel_sheet(string $path): array
+{
+    $rows = [];
+    $zip = new ZipArchive();
+    if ($zip->open($path) !== true) {
+        return $rows;
+    }
+
+    $sharedStrings = [];
+    $sharedXml = $zip->getFromName('xl/sharedStrings.xml');
+    if ($sharedXml !== false) {
+        $shared = simplexml_load_string($sharedXml);
+        if ($shared) {
+            foreach ($shared->si as $si) {
+                if (isset($si->t)) {
+                    $sharedStrings[] = (string) $si->t;
+                } else {
+                    $text = '';
+                    foreach ($si->r as $run) {
+                        $text .= (string) $run->t;
+                    }
+                    $sharedStrings[] = $text;
+                }
+            }
+        }
+    }
+
+    $sheetXml = $zip->getFromName('xl/worksheets/sheet1.xml');
+    if ($sheetXml === false) {
+        $zip->close();
+        return $rows;
+    }
+
+    $sheet = simplexml_load_string($sheetXml);
+    if (!$sheet) {
+        $zip->close();
+        return $rows;
+    }
+
+    foreach ($sheet->sheetData->row as $row) {
+        $rowData = [];
+        foreach ($row->c as $cell) {
+            $cellRef = (string) $cell['r'];
+            $column = preg_replace('/\d+/', '', $cellRef);
+            $columnIndex = ord($column) - ord('A');
+            $value = '';
+            if (isset($cell->v)) {
+                $value = (string) $cell->v;
+                $type = (string) $cell['t'];
+                if ($type === 's') {
+                    $value = $sharedStrings[(int) $value] ?? '';
+                }
+            } elseif (isset($cell->is->t)) {
+                $value = (string) $cell->is->t;
+            }
+            $rowData[$columnIndex] = $value;
+        }
+        if (!empty($rowData)) {
+            ksort($rowData);
+            $rows[] = array_values($rowData);
+        }
+    }
+
+    $zip->close();
+    return $rows;
+}
+
 if (isset($_GET['action']) && $_GET['action'] === 'download-template') {
-    header('Content-Type: text/csv; charset=utf-8');
-    header('Content-Disposition: attachment; filename="plantilla-autoridades.csv"');
-    $output = fopen('php://output', 'w');
-    fputcsv($output, ['nombre', 'tipo', 'correo', 'telefono', 'fecha_inicio', 'fecha_fin', 'estado']);
-    fputcsv($output, ['Juan Perez', 'Concejal', 'juan.perez@municipalidad.cl', '+56 9 1234 5678', '2024-01-01', '', '1']);
-    fclose($output);
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="plantilla-autoridades.xlsx"');
+
+    $tempFile = tempnam(sys_get_temp_dir(), 'xlsx');
+    $zip = new ZipArchive();
+    $zip->open($tempFile, ZipArchive::CREATE | ZipArchive::OVERWRITE);
+
+    $sheetXml = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <sheetData>
+    <row r="1">
+      <c r="A1" t="inlineStr"><is><t>nombre</t></is></c>
+      <c r="B1" t="inlineStr"><is><t>tipo</t></is></c>
+      <c r="C1" t="inlineStr"><is><t>correo</t></is></c>
+      <c r="D1" t="inlineStr"><is><t>telefono</t></is></c>
+      <c r="E1" t="inlineStr"><is><t>fecha_inicio</t></is></c>
+      <c r="F1" t="inlineStr"><is><t>fecha_fin</t></is></c>
+      <c r="G1" t="inlineStr"><is><t>estado</t></is></c>
+    </row>
+    <row r="2">
+      <c r="A2" t="inlineStr"><is><t>Juan Perez</t></is></c>
+      <c r="B2" t="inlineStr"><is><t>Concejal</t></is></c>
+      <c r="C2" t="inlineStr"><is><t>juan.perez@municipalidad.cl</t></is></c>
+      <c r="D2" t="inlineStr"><is><t>+56 9 1234 5678</t></is></c>
+      <c r="E2" t="inlineStr"><is><t>2024-01-01</t></is></c>
+      <c r="F2" t="inlineStr"><is><t></t></is></c>
+      <c r="G2" t="inlineStr"><is><t>1</t></is></c>
+    </row>
+  </sheetData>
+</worksheet>
+XML;
+
+    $zip->addFromString('[Content_Types].xml', <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+  <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+</Types>
+XML);
+    $zip->addFromString('_rels/.rels', <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>
+XML);
+    $zip->addFromString('xl/workbook.xml', <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <sheets>
+    <sheet name="Autoridades" sheetId="1" r:id="rId1"/>
+  </sheets>
+</workbook>
+XML);
+    $zip->addFromString('xl/_rels/workbook.xml.rels', <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+</Relationships>
+XML);
+    $zip->addFromString('xl/worksheets/sheet1.xml', $sheetXml);
+    $zip->close();
+
+    readfile($tempFile);
+    unlink($tempFile);
     exit;
 }
 
@@ -40,41 +182,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'bulk_upload' && verify_csrf($_POST['csrf_token'] ?? null)) {
     if (!isset($_FILES['autoridades_excel']) || $_FILES['autoridades_excel']['error'] !== UPLOAD_ERR_OK) {
-        $bulkErrors[] = 'Selecciona un archivo CSV válido.';
+        $bulkErrors[] = 'Selecciona un archivo Excel válido.';
     } else {
-        $file = fopen($_FILES['autoridades_excel']['tmp_name'], 'r');
-        if ($file === false) {
-            $bulkErrors[] = 'No se pudo leer el archivo cargado.';
+        $extension = strtolower(pathinfo($_FILES['autoridades_excel']['name'], PATHINFO_EXTENSION));
+        if ($extension !== 'xlsx') {
+            $bulkErrors[] = 'El archivo debe estar en formato Excel (.xlsx).';
         } else {
-            $header = fgetcsv($file);
-            if ($header === false) {
-                $bulkErrors[] = 'El archivo está vacío.';
+            $rows = parse_excel_sheet($_FILES['autoridades_excel']['tmp_name']);
+            if (empty($rows)) {
+                $bulkErrors[] = 'El archivo está vacío o no tiene una hoja válida.';
             } else {
                 $expected = ['nombre', 'tipo', 'correo', 'telefono', 'fecha_inicio', 'fecha_fin', 'estado'];
-                $normalizedHeader = array_map('strtolower', array_map('trim', $header));
-                if ($normalizedHeader !== $expected) {
-                    $bulkErrors[] = 'La plantilla no coincide con el formato requerido. Descarga la plantilla para usar el formato correcto.';
+                $header = array_map('trim', $rows[0]);
+                $normalizedHeader = array_map('strtolower', $header);
+                $columnMap = [];
+                foreach ($normalizedHeader as $index => $column) {
+                    if ($column !== '') {
+                        $columnMap[$column] = $index;
+                    }
+                }
+                $missing = array_diff($expected, array_keys($columnMap));
+                if (!empty($missing)) {
+                    $bulkErrors[] = 'Faltan columnas requeridas: ' . implode(', ', $missing) . '. Descarga la plantilla para usar el formato correcto.';
                 } else {
-                    $stmtInsert = db()->prepare(
-                        'INSERT INTO authorities (nombre, tipo, correo, telefono, fecha_inicio, fecha_fin, estado) VALUES (?, ?, ?, ?, ?, ?, ?)'
-                    );
-                    $inserted = 0;
-                    $rowNumber = 1;
-                    while (($row = fgetcsv($file)) !== false) {
-                        $rowNumber++;
-                        if (count(array_filter($row, fn($value) => trim((string) $value) !== '')) === 0) {
+                    $validRows = [];
+                    for ($i = 1; $i < count($rows); $i++) {
+                        $rowNumber = $i + 1;
+                        $row = $rows[$i];
+                        $nombre = trim((string) ($row[$columnMap['nombre']] ?? ''));
+                        $tipo = trim((string) ($row[$columnMap['tipo']] ?? ''));
+                        $correo = trim((string) ($row[$columnMap['correo']] ?? ''));
+                        $telefono = trim((string) ($row[$columnMap['telefono']] ?? ''));
+                        $fechaInicio = trim((string) ($row[$columnMap['fecha_inicio']] ?? ''));
+                        $fechaFin = trim((string) ($row[$columnMap['fecha_fin']] ?? ''));
+                        $estadoRaw = trim((string) ($row[$columnMap['estado']] ?? ''));
+
+                        if ($nombre === '' && $tipo === '' && $fechaInicio === '' && $correo === '' && $telefono === '' && $fechaFin === '' && $estadoRaw === '') {
                             continue;
                         }
-                        $row = array_pad($row, count($expected), '');
-                        [$nombre, $tipo, $correo, $telefono, $fechaInicio, $fechaFin, $estadoRaw] = array_map('trim', $row);
                         if ($nombre === '' || $tipo === '' || $fechaInicio === '') {
                             $bulkErrors[] = "Fila {$rowNumber}: faltan campos obligatorios (nombre, tipo o fecha_inicio).";
                             continue;
+                        }
+                        if ($fechaInicio !== '' && is_numeric($fechaInicio)) {
+                            $fechaInicio = excel_serial_to_date($fechaInicio) ?? $fechaInicio;
                         }
                         $inicio = DateTime::createFromFormat('Y-m-d', $fechaInicio);
                         if (!$inicio || $inicio->format('Y-m-d') !== $fechaInicio) {
                             $bulkErrors[] = "Fila {$rowNumber}: fecha_inicio inválida (usa YYYY-MM-DD).";
                             continue;
+                        }
+                        if ($fechaFin !== '' && is_numeric($fechaFin)) {
+                            $fechaFin = excel_serial_to_date($fechaFin) ?? $fechaFin;
                         }
                         $fechaFin = $fechaFin !== '' ? $fechaFin : null;
                         if ($fechaFin !== null) {
@@ -85,7 +244,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             }
                         }
                         $estado = in_array(strtolower($estadoRaw), ['0', 'deshabilitado', 'inactivo'], true) ? 0 : 1;
-                        $stmtInsert->execute([
+                        $validRows[] = [
                             $nombre,
                             $tipo,
                             $correo !== '' ? $correo : null,
@@ -93,17 +252,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             $fechaInicio,
                             $fechaFin,
                             $estado,
-                        ]);
-                        $inserted++;
+                        ];
                     }
-                    if ($inserted > 0) {
-                        $bulkSuccess = "Se cargaron {$inserted} autoridades correctamente.";
-                    } elseif (empty($bulkErrors)) {
+                    if (!empty($bulkErrors)) {
+                        $bulkErrors[] = 'Corrige los errores en el archivo antes de cargar.';
+                    } elseif (!empty($validRows)) {
+                        $stmtInsert = db()->prepare(
+                            'INSERT INTO authorities (nombre, tipo, correo, telefono, fecha_inicio, fecha_fin, estado) VALUES (?, ?, ?, ?, ?, ?, ?)'
+                        );
+                        foreach ($validRows as $data) {
+                            $stmtInsert->execute($data);
+                        }
+                        $bulkSuccess = "Se cargaron " . count($validRows) . " autoridades correctamente.";
+                    } else {
                         $bulkErrors[] = 'No se encontraron filas válidas para importar.';
                     }
                 }
             }
-            fclose($file);
         }
     }
 }
@@ -253,7 +418,7 @@ $autoridades = db()->query('SELECT id, nombre, tipo, fecha_inicio, fecha_fin, co
                             <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
                                 <div>
                                     <h5 class="card-title mb-0">Carga masiva de autoridades</h5>
-                                    <p class="text-muted mb-0">Sube un archivo CSV con el formato indicado para crear autoridades en bloque.</p>
+                                    <p class="text-muted mb-0">Sube un archivo Excel con el formato indicado para crear autoridades en bloque.</p>
                                 </div>
                                 <a class="btn btn-sm btn-outline-primary" href="autoridades-editar.php?action=download-template">Descargar plantilla</a>
                             </div>
@@ -272,8 +437,8 @@ $autoridades = db()->query('SELECT id, nombre, tipo, fecha_inicio, fecha_fin, co
                                     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
                                     <input type="hidden" name="action" value="bulk_upload">
                                     <div class="col-md-8">
-                                        <label class="form-label" for="autoridades-excel">Archivo CSV</label>
-                                        <input type="file" id="autoridades-excel" name="autoridades_excel" class="form-control" accept=".csv">
+                                        <label class="form-label" for="autoridades-excel">Archivo Excel (.xlsx)</label>
+                                        <input type="file" id="autoridades-excel" name="autoridades_excel" class="form-control" accept=".xlsx">
                                         <div class="form-text">Columnas requeridas: nombre, tipo, correo, telefono, fecha_inicio, fecha_fin, estado.</div>
                                     </div>
                                     <div class="col-md-4 d-flex gap-2">
