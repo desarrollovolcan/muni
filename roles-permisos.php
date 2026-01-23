@@ -7,7 +7,6 @@ $modules = [
     ['key' => 'eventos', 'label' => 'Eventos', 'permisos' => ['view', 'create', 'edit', 'delete', 'publish']],
     ['key' => 'autoridades', 'label' => 'Autoridades', 'permisos' => ['view', 'create', 'edit', 'delete']],
     ['key' => 'adjuntos', 'label' => 'Adjuntos', 'permisos' => ['view', 'create', 'delete']],
-    ['key' => 'reportes', 'label' => 'Reportes', 'permisos' => ['view', 'export']],
 ];
 
 $permisosDisponibles = [
@@ -21,16 +20,56 @@ $permisosDisponibles = [
 
 try {
     db()->exec(
+        'CREATE TABLE IF NOT EXISTS permissions (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+            modulo VARCHAR(60) NOT NULL,
+            accion VARCHAR(30) NOT NULL,
+            descripcion VARCHAR(200) DEFAULT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY permissions_modulo_accion_unique (modulo, accion)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+    );
+    db()->exec(
         'CREATE TABLE IF NOT EXISTS role_permissions (
-            role_id INT NOT NULL,
-            module VARCHAR(100) NOT NULL,
-            permission VARCHAR(60) NOT NULL,
-            allowed TINYINT(1) NOT NULL DEFAULT 0,
-            PRIMARY KEY (role_id, module, permission)
+            role_id INT UNSIGNED NOT NULL,
+            permission_id INT UNSIGNED NOT NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (role_id, permission_id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
     );
 } catch (Exception $e) {
 } catch (Error $e) {
+}
+
+try {
+    $stmtPermission = db()->prepare(
+        'INSERT INTO permissions (modulo, accion, descripcion)
+         VALUES (:modulo, :accion, :descripcion)
+         ON DUPLICATE KEY UPDATE descripcion = VALUES(descripcion)'
+    );
+    foreach ($modules as $module) {
+        foreach ($module['permisos'] as $permisoKey) {
+            $stmtPermission->execute([
+                'modulo' => $module['key'],
+                'accion' => $permisoKey,
+                'descripcion' => $module['label'] . ' - ' . ($permisosDisponibles[$permisoKey] ?? $permisoKey),
+            ]);
+        }
+    }
+} catch (Exception $e) {
+} catch (Error $e) {
+}
+
+$permissions = [];
+try {
+    $permissions = db()->query('SELECT id, modulo, accion FROM permissions')->fetchAll();
+} catch (Exception $e) {
+} catch (Error $e) {
+}
+
+$permissionMap = [];
+foreach ($permissions as $permission) {
+    $permissionMap[$permission['modulo']][$permission['accion']] = (int) $permission['id'];
 }
 
 $roles = db()->query('SELECT id, nombre FROM roles ORDER BY nombre')->fetchAll();
@@ -49,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
         $stmtDelete->execute([$selectedRoleId]);
 
         if (!empty($permisosSeleccionados)) {
-            $stmtInsert = db()->prepare('INSERT INTO role_permissions (role_id, module, permission, allowed) VALUES (?, ?, ?, 1)');
+            $stmtInsert = db()->prepare('INSERT INTO role_permissions (role_id, permission_id) VALUES (?, ?)');
             foreach ($modules as $module) {
                 $moduleKey = $module['key'];
                 if (!isset($permisosSeleccionados[$moduleKey]) || !is_array($permisosSeleccionados[$moduleKey])) {
@@ -59,7 +98,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                     if ($valor !== '1') {
                         continue;
                     }
-                    $stmtInsert->execute([$selectedRoleId, $moduleKey, $permisoKey]);
+                    $permissionId = $permissionMap[$moduleKey][$permisoKey] ?? null;
+                    if (!$permissionId) {
+                        continue;
+                    }
+                    $stmtInsert->execute([$selectedRoleId, $permissionId]);
                 }
             }
         }
@@ -70,10 +113,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
 
 $permisosRol = [];
 if ($selectedRoleId > 0) {
-    $stmtPerms = db()->prepare('SELECT module, permission FROM role_permissions WHERE role_id = ? AND allowed = 1');
+    $stmtPerms = db()->prepare('SELECT p.modulo, p.accion FROM role_permissions rp INNER JOIN permissions p ON p.id = rp.permission_id WHERE rp.role_id = ?');
     $stmtPerms->execute([$selectedRoleId]);
     foreach ($stmtPerms->fetchAll() as $permiso) {
-        $permisosRol[$permiso['module']][$permiso['permission']] = true;
+        $permisosRol[$permiso['modulo']][$permiso['accion']] = true;
     }
 }
 
