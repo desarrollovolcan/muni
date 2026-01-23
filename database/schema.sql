@@ -3,6 +3,8 @@ CREATE TABLE `users` (
   `rut` VARCHAR(20) NOT NULL,
   `nombre` VARCHAR(100) NOT NULL,
   `apellido` VARCHAR(100) NOT NULL,
+  `cargo` VARCHAR(100) DEFAULT NULL,
+  `fecha_nacimiento` DATE DEFAULT NULL,
   `correo` VARCHAR(150) NOT NULL,
   `telefono` VARCHAR(30) NOT NULL,
   `direccion` VARCHAR(200) DEFAULT NULL,

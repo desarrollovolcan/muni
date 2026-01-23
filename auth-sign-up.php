@@ -17,6 +17,9 @@ $values = [
     'nombre' => '',
     'apellido' => '',
     'rut' => '',
+    'correo' => '',
+    'telefono' => '',
+    'username' => '',
     'cargo' => '',
     'fecha_nacimiento' => '',
     'rol' => '',
@@ -27,6 +30,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'nombre' => trim((string) ($_POST['nombre'] ?? '')),
         'apellido' => trim((string) ($_POST['apellido'] ?? '')),
         'rut' => trim((string) ($_POST['rut'] ?? '')),
+        'correo' => trim((string) ($_POST['correo'] ?? '')),
+        'telefono' => trim((string) ($_POST['telefono'] ?? '')),
+        'username' => trim((string) ($_POST['username'] ?? '')),
         'cargo' => trim((string) ($_POST['cargo'] ?? '')),
         'fecha_nacimiento' => trim((string) ($_POST['fecha_nacimiento'] ?? '')),
         'rol' => trim((string) ($_POST['rol'] ?? '')),
@@ -53,6 +59,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'Las contraseñas no coinciden.';
     }
 
+    if ($values['correo'] !== '' && !filter_var($values['correo'], FILTER_VALIDATE_EMAIL)) {
+        $errors[] = 'El correo electrónico no es válido.';
+    }
+
+    if ($values['username'] !== '' && preg_match('/\s/', $values['username'])) {
+        $errors[] = 'El nombre de usuario no puede contener espacios.';
+    }
+
     if ($values['fecha_nacimiento'] !== '' && !DateTime::createFromFormat('Y-m-d', $values['fecha_nacimiento'])) {
         $errors[] = 'La fecha de nacimiento debe tener formato válido.';
     }
@@ -65,8 +79,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (!$errors) {
+        $existing = User::findByCorreo(db(), $values['correo']);
+        if ($existing) {
+            $errors[] = 'El correo ya se encuentra registrado.';
+        }
+    }
+
+    if (!$errors) {
+        $existing = User::findByUsername(db(), $values['username']);
+        if ($existing) {
+            $errors[] = 'El nombre de usuario ya se encuentra registrado.';
+        }
+    }
+
+    if (!$errors) {
         User::create(db(), array_merge($values, [
             'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+            'estado' => 0,
         ]));
         $success = true;
         $values = array_fill_keys(array_keys($values), '');
@@ -142,7 +171,7 @@ include('partials/html.php');
 
                             <?php if ($success) { ?>
                                 <div class="alert alert-success" role="alert">
-                                    Registro completado. Ahora puedes iniciar sesión.
+                                    Registro completado. Tu cuenta quedará pendiente de aprobación antes de iniciar sesión.
                                 </div>
                             <?php } ?>
 
@@ -179,6 +208,30 @@ include('partials/html.php');
                                     <div class="app-search">
                                         <input type="text" class="form-control" id="userRut" name="rut" placeholder="12.345.678-9" value="<?php echo htmlspecialchars($values['rut'], ENT_QUOTES, 'UTF-8'); ?>" required>
                                         <i data-lucide="id-card" class="app-search-icon text-muted"></i>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="userEmail" class="form-label">Correo electrónico <span class="text-danger">*</span></label>
+                                    <div class="app-search">
+                                        <input type="email" class="form-control" id="userEmail" name="correo" placeholder="correo@municipalidad.cl" value="<?php echo htmlspecialchars($values['correo'], ENT_QUOTES, 'UTF-8'); ?>" required>
+                                        <i data-lucide="mail" class="app-search-icon text-muted"></i>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="userPhone" class="form-label">Teléfono <span class="text-danger">*</span></label>
+                                    <div class="app-search">
+                                        <input type="text" class="form-control" id="userPhone" name="telefono" placeholder="+56 9 1234 5678" value="<?php echo htmlspecialchars($values['telefono'], ENT_QUOTES, 'UTF-8'); ?>" required>
+                                        <i data-lucide="phone" class="app-search-icon text-muted"></i>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="userUsername" class="form-label">Nombre de usuario <span class="text-danger">*</span></label>
+                                    <div class="app-search">
+                                        <input type="text" class="form-control" id="userUsername" name="username" placeholder="usuario.muni" value="<?php echo htmlspecialchars($values['username'], ENT_QUOTES, 'UTF-8'); ?>" required>
+                                        <i data-lucide="user" class="app-search-icon text-muted"></i>
                                     </div>
                                 </div>
 
