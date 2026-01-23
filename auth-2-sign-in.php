@@ -30,6 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = User::findByRut(db(), $rut);
         if (!$user || !password_verify($password, $user['password_hash'])) {
             $errors[] = 'Credenciales inválidas.';
+        } elseif ((int) ($user['estado'] ?? 0) !== 1) {
+            $errors[] = 'Tu cuenta está pendiente de aprobación.';
         } else {
             session_regenerate_id(true);
             $_SESSION['user'] = [
