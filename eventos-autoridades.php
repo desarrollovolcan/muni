@@ -686,15 +686,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
 
                                 <?php if (!empty($whatsappLinks)) : ?>
                                     <div class="mt-4">
-                                        <label class="form-label">Links de WhatsApp</label>
+                                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                                            <label class="form-label mb-0">Links de WhatsApp</label>
+                                            <span class="badge text-bg-success">Link directo</span>
+                                        </div>
                                         <div class="list-group">
                                             <?php foreach ($whatsappLinks as $linkData) : ?>
-                                                <a class="list-group-item list-group-item-action" href="<?php echo htmlspecialchars($linkData['link'], ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener">
-                                                    <?php echo htmlspecialchars($linkData['nombre'], ENT_QUOTES, 'UTF-8'); ?>
-                                                    <span class="text-muted small ms-2"><?php echo htmlspecialchars($linkData['telefono'], ENT_QUOTES, 'UTF-8'); ?></span>
+                                                <a class="list-group-item list-group-item-action d-flex align-items-center gap-3" href="<?php echo htmlspecialchars($linkData['link'], ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener">
+                                                    <span class="badge rounded-pill text-bg-success"><i class="ti ti-brand-whatsapp"></i></span>
+                                                    <div class="flex-grow-1">
+                                                        <div class="fw-semibold"><?php echo htmlspecialchars($linkData['nombre'], ENT_QUOTES, 'UTF-8'); ?></div>
+                                                        <div class="text-muted small"><?php echo htmlspecialchars($linkData['telefono'], ENT_QUOTES, 'UTF-8'); ?></div>
+                                                    </div>
+                                                    <span class="btn btn-sm btn-success">Abrir WhatsApp</span>
                                                 </a>
                                             <?php endforeach; ?>
                                         </div>
+                                        <div class="form-text mt-2">Los enlaces abren WhatsApp Web o la app instalada con el mensaje prellenado.</div>
                                     </div>
                                 <?php endif; ?>
 
