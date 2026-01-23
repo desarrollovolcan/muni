@@ -1,15 +1,20 @@
 <?php
 require __DIR__ . '/app/bootstrap.php';
 
+$errorMessage = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && verify_csrf($_POST['csrf_token'] ?? null)) {
     $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
 
-    if ($_POST['action'] === 'disable' && $id > 0) {
-        $stmt = db()->prepare('UPDATE users SET estado = 0 WHERE id = ?');
-        $stmt->execute([$id]);
+    if ($_POST['action'] === 'delete' && $id > 0) {
+        try {
+            $stmt = db()->prepare('DELETE FROM users WHERE id = ?');
+            $stmt->execute([$id]);
+            redirect('usuarios-lista.php');
+        } catch (Exception $e) {
+            $errorMessage = 'No se pudo eliminar el usuario. Verifica dependencias asociadas.';
+        }
     }
-
-    redirect('usuarios-lista.php');
 }
 
 $stmt = db()->query('SELECT id, rut, nombre, apellido, correo, rol, estado, ultimo_acceso FROM users ORDER BY id DESC');
@@ -50,6 +55,9 @@ $usuarios = $stmt->fetchAll();
                                 <a href="usuarios-crear.php" class="btn btn-primary">Nuevo usuario</a>
                             </div>
                             <div class="card-body">
+                                <?php if ($errorMessage !== '') : ?>
+                                    <div class="alert alert-danger"><?php echo htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8'); ?></div>
+                                <?php endif; ?>
                                 <div class="d-flex flex-wrap gap-2 mb-3">
                                     <input type="text" class="form-control" placeholder="Buscar por nombre o RUT">
                                     <select class="form-select">
@@ -108,11 +116,11 @@ $usuarios = $stmt->fetchAll();
                                                                     <li><a class="dropdown-item" href="usuarios-asignar-roles.php?id=<?php echo (int) $usuario['id']; ?>">Asignar roles</a></li>
                                                                     <li><hr class="dropdown-divider"></li>
                                                                     <li>
-                                                                        <form method="post" class="px-3 py-1">
+                                                                        <form method="post" class="px-3 py-1" data-confirm="¿Estás seguro de eliminar este usuario?">
                                                                             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                                                            <input type="hidden" name="action" value="disable">
+                                                                            <input type="hidden" name="action" value="delete">
                                                                             <input type="hidden" name="id" value="<?php echo (int) $usuario['id']; ?>">
-                                                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100" <?php echo (int) $usuario['estado'] === 0 ? 'disabled' : ''; ?>>Deshabilitar</button>
+                                                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100">Eliminar</button>
                                                                         </form>
                                                                     </li>
                                                                 </ul>

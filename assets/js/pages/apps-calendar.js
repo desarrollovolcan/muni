@@ -7,8 +7,13 @@
 class CalendarSchedule {
 
     constructor() {
+        this.isReadOnly = window.calendarReadOnly === true;
         this.body = document.body;
-        this.modal = new bootstrap.Modal(document.getElementById('event-modal'), {backdrop: 'static'});
+        this.modal = null;
+        const modalElement = document.getElementById('event-modal');
+        if (modalElement && !this.isReadOnly) {
+            this.modal = new bootstrap.Modal(modalElement, {backdrop: 'static'});
+        }
         this.calendar = document.getElementById('calendar');
         this.formEvent = document.getElementById('forms-event');
         this.btnNewEvent = document.querySelectorAll('.btn-new-event');
@@ -21,12 +26,19 @@ class CalendarSchedule {
     }
 
     onEventClick(info) {
+        if (this.isReadOnly) {
+            return;
+        }
         this.formEvent?.reset();
         this.formEvent.classList.remove('was-validated');
         this.newEventData = null;
-        this.btnDeleteEvent.style.display = "block";
-        this.modalTitle.text = ('Editar evento');
-        this.modal.show();
+        if (this.btnDeleteEvent) {
+            this.btnDeleteEvent.style.display = "block";
+        }
+        if (this.modalTitle) {
+            this.modalTitle.text = ('Editar evento');
+        }
+        this.modal?.show();
         this.selectedEvent = info.event;
         const titleInput = document.getElementById('event-title');
         if (titleInput) {
@@ -89,13 +101,20 @@ class CalendarSchedule {
     }
 
     onSelect(info) {
+        if (this.isReadOnly) {
+            return;
+        }
         this.formEvent?.reset();
         this.formEvent?.classList.remove('was-validated');
         this.selectedEvent = null;
         this.newEventData = info;
-        this.btnDeleteEvent.style.display = "none";
-        this.modalTitle.text = ('Crear evento');
-        this.modal.show();
+        if (this.btnDeleteEvent) {
+            this.btnDeleteEvent.style.display = "none";
+        }
+        if (this.modalTitle) {
+            this.modalTitle.text = ('Crear evento');
+        }
+        this.modal?.show();
         this.calendarObj.unselect();
         const startInput = document.getElementById('event-start');
         if (startInput && info?.date) {
@@ -131,7 +150,7 @@ class CalendarSchedule {
         const self = this;
         const externalEventContainerEl = document.getElementById('external-events');
 
-        if (externalEventContainerEl) {
+        if (externalEventContainerEl && !this.isReadOnly) {
             new FullCalendar.Draggable(externalEventContainerEl, {
             itemSelector: '.external-event',
             eventData: function (eventEl) {
@@ -178,14 +197,14 @@ class CalendarSchedule {
                 right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
             },
             initialEvents: defaultEvents,
-            editable: true,
-            droppable: true, // this allows things to be dropped onto the calendar !!!
+            editable: !self.isReadOnly,
+            droppable: !self.isReadOnly, // this allows things to be dropped onto the calendar !!!
             // dayMaxEventRows: false, // allow "more" link when too many events
-            selectable: true,
-            dateClick: function (info) {
+            selectable: !self.isReadOnly,
+            dateClick: self.isReadOnly ? null : function (info) {
                 self.onSelect(info);
             },
-            eventClick: function (info) {
+            eventClick: self.isReadOnly ? null : function (info) {
                 self.onEventClick(info);
             }
         });
@@ -193,17 +212,22 @@ class CalendarSchedule {
         self.calendarObj.render();
 
         // on new event button click
-        self.btnNewEvent.forEach(function (btn) {
-            btn.addEventListener('click', function (e) {
-                self.onSelect({
-                    date: new Date(),
-                    allDay: true
+        if (!self.isReadOnly) {
+            self.btnNewEvent.forEach(function (btn) {
+                btn.addEventListener('click', function (e) {
+                    self.onSelect({
+                        date: new Date(),
+                        allDay: true
+                    });
                 });
             });
-        });
+        }
 
         // save event
         self.formEvent?.addEventListener('submit', function (e) {
+            if (self.isReadOnly) {
+                return;
+            }
             if (self.formEvent?.dataset.submit === 'server') {
                 return;
             }
@@ -233,6 +257,7 @@ class CalendarSchedule {
         });
 
         // delete event
+        if (self.btnDeleteEvent) {
         self.btnDeleteEvent.addEventListener('click', function (e) {
             if (self.formEvent?.dataset.submit === 'server') {
                 const actionInput = document.getElementById('event-action');
@@ -246,9 +271,10 @@ class CalendarSchedule {
             if (self.selectedEvent) {
                 self.selectedEvent.remove();
                 self.selectedEvent = null;
-                self.modal.hide();
+                self.modal?.hide();
             }
         });
+        }
     }
 
 }
