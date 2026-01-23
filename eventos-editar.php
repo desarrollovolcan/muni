@@ -5,6 +5,7 @@ $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $evento = null;
 $errors = [];
 $success = $_GET['success'] ?? '';
+$validationLink = null;
 
 $usuarios = db()->query('SELECT id, nombre, apellido FROM users WHERE estado = 1 ORDER BY nombre')->fetchAll();
 $eventTypes = ensure_event_types();
@@ -24,6 +25,10 @@ if ($id > 0) {
     $stmt = db()->prepare('SELECT * FROM events WHERE id = ?');
     $stmt->execute([$id]);
     $evento = $stmt->fetch();
+    if ($evento) {
+        $evento['validation_token'] = ensure_event_validation_token($id, $evento['validation_token'] ?? null);
+        $validationLink = base_url() . '/eventos-validacion.php?token=' . urlencode($evento['validation_token']);
+    }
 }
 
 function normalize_datetime_input(?string $value): string
@@ -125,7 +130,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['list_action']) && ve
                 $targetId,
             ]);
         } else {
-            $stmt = db()->prepare('INSERT INTO events (titulo, descripcion, ubicacion, fecha_inicio, fecha_fin, tipo, cupos, publico_objetivo, estado, creado_por, encargado_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+            $validationToken = bin2hex(random_bytes(16));
+            $stmt = db()->prepare('INSERT INTO events (titulo, descripcion, ubicacion, fecha_inicio, fecha_fin, tipo, cupos, publico_objetivo, estado, creado_por, encargado_id, validation_token) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
             $stmt->execute([
                 $titulo,
                 $descripcion,
@@ -138,6 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['list_action']) && ve
                 $estado,
                 $creadoPor,
                 $encargado ?: null,
+                $validationToken,
             ]);
         }
 
@@ -333,6 +340,16 @@ try {
                                                 <?php endforeach; ?>
                                             </select>
                                         </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Enlace público de validación</label>
+                                        <?php if ($validationLink) : ?>
+                                            <input type="text" class="form-control" value="<?php echo htmlspecialchars($validationLink, ENT_QUOTES, 'UTF-8'); ?>" readonly>
+                                            <div class="form-text">Comparte este enlace para validar qué autoridades asistirán al evento.</div>
+                                        <?php else : ?>
+                                            <div class="form-control-plaintext text-muted">Guarda el evento para generar el enlace de validación.</div>
+                                        <?php endif; ?>
                                     </div>
 
                                     <div class="d-flex flex-wrap align-items-center gap-2">

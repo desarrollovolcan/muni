@@ -13,6 +13,8 @@ $selectedEventId = isset($_GET['event_id']) ? (int) $_GET['event_id'] : 0;
 $linkedAuthorities = [];
 $validationRequests = [];
 $emailTemplate = null;
+$eventValidationLink = null;
+$selectedEvent = null;
 
 try {
     db()->exec(
@@ -31,6 +33,14 @@ try {
 }
 
 if ($selectedEventId > 0) {
+    $stmt = db()->prepare('SELECT * FROM events WHERE id = ?');
+    $stmt->execute([$selectedEventId]);
+    $selectedEvent = $stmt->fetch();
+    if ($selectedEvent) {
+        $selectedEvent['validation_token'] = ensure_event_validation_token($selectedEventId, $selectedEvent['validation_token'] ?? null);
+        $eventValidationLink = base_url() . '/eventos-validacion.php?token=' . urlencode($selectedEvent['validation_token']);
+    }
+
     $stmt = db()->prepare('SELECT authority_id FROM event_authorities WHERE event_id = ?');
     $stmt->execute([$selectedEventId]);
     $linkedAuthorities = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
@@ -232,14 +242,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
         }
 
         if (empty($validationErrors) && $event) {
-            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-            $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-            $basePath = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
-            $baseUrl = $scheme . '://' . $host . ($basePath !== '' ? $basePath : '');
+            $event['validation_token'] = ensure_event_validation_token($eventId, $event['validation_token'] ?? null);
+            $validationUrl = base_url() . '/eventos-validacion.php?token=' . urlencode($event['validation_token']);
 
             $municipalidad = get_municipalidad();
             $logoPath = $municipalidad['logo_path'] ?? 'assets/images/logo.png';
-            $logoUrl = preg_match('/^https?:\\/\\//', $logoPath) ? $logoPath : $baseUrl . '/' . ltrim($logoPath, '/');
+            $logoUrl = preg_match('/^https?:\\/\\//', $logoPath) ? $logoPath : base_url() . '/' . ltrim($logoPath, '/');
             $municipalidad['logo_path'] = $logoUrl;
             $subject = 'Validación de autoridades: ' . $event['titulo'];
             $headers = "MIME-Version: 1.0\r\n";
@@ -252,13 +260,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                 $headers .= 'From: ' . ($fromName ? $fromName . ' <' . $fromEmail . '>' : $fromEmail) . "\r\n";
             }
 
-            $stmtInsert = db()->prepare('INSERT INTO event_authority_requests (event_id, destinatario_nombre, destinatario_correo, token, correo_enviado) VALUES (?, ?, ?, ?, ?)');
-            $firstLink = null;
+            $stmtRequest = db()->prepare('SELECT id FROM event_authority_requests WHERE event_id = ? AND token = ? LIMIT 1');
+            $stmtRequest->execute([$eventId, $event['validation_token']]);
+            $requestId = $stmtRequest->fetchColumn();
+            if (!$requestId) {
+                $stmtInsert = db()->prepare('INSERT INTO event_authority_requests (event_id, destinatario_nombre, destinatario_correo, token, correo_enviado) VALUES (?, ?, ?, ?, ?)');
+                $placeholderEmail = $municipalidad['correo'] ?? 'validacion@municipalidad.local';
+                $stmtInsert->execute([
+                    $eventId,
+                    'Enlace público',
+                    $placeholderEmail,
+                    $event['validation_token'],
+                    0,
+                ]);
+            }
+
             $allSent = true;
+            $anySent = false;
 
             foreach ($recipients as $recipient) {
-                $token = bin2hex(random_bytes(16));
-                $validationUrl = $baseUrl . '/eventos-validacion.php?token=' . urlencode($token);
                 $emailPreview = build_event_validation_email($municipalidad, $event, $eventAuthorities, $validationUrl, $recipient['nombre'] ?? null);
                 if ($emailTemplate) {
                     $autoridadesLista = '';
@@ -266,7 +286,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                         $autoridadesLista .= '<li>' . htmlspecialchars($authority['nombre'], ENT_QUOTES, 'UTF-8') . ' · ' . htmlspecialchars($authority['tipo'], ENT_QUOTES, 'UTF-8') . '</li>';
                     }
                     $logoPath = $municipalidad['logo_path'] ?? 'assets/images/logo.png';
-                    $logoUrl = preg_match('/^https?:\\/\\//', $logoPath) ? $logoPath : $baseUrl . '/' . ltrim($logoPath, '/');
+                    $logoUrl = preg_match('/^https?:\\/\\//', $logoPath) ? $logoPath : base_url() . '/' . ltrim($logoPath, '/');
                     $templateData = [
                         'municipalidad_nombre' => htmlspecialchars($municipalidad['nombre'] ?? 'Municipalidad', ENT_QUOTES, 'UTF-8'),
                         'municipalidad_logo' => htmlspecialchars($logoUrl, ENT_QUOTES, 'UTF-8'),
@@ -295,22 +315,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                     }
                 }
                 $mailSent = mail($recipient['correo'], $subject, $emailPreview, $headers);
+                $anySent = $anySent || $mailSent;
                 $allSent = $allSent && $mailSent;
-
-                $stmtInsert->execute([
-                    $eventId,
-                    $recipient['nombre'] !== '' ? $recipient['nombre'] : null,
-                    $recipient['correo'],
-                    $token,
-                    $mailSent ? 1 : 0,
-                ]);
-
-                if ($firstLink === null) {
-                    $firstLink = $validationUrl;
-                }
             }
 
-            $validationLink = $firstLink;
+            $stmtUpdate = db()->prepare('UPDATE event_authority_requests SET correo_enviado = ? WHERE event_id = ? AND token = ?');
+            $stmtUpdate->execute([$anySent ? 1 : 0, $eventId, $event['validation_token']]);
+
+            $validationLink = $validationUrl;
             if ($allSent) {
                 $validationNotice = 'Correos de validación enviados correctamente.';
             } else {
@@ -466,15 +478,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                                     </option>
                                                 <?php endforeach; ?>
                                             </select>
-                                            <div class="form-text">Selecciona uno o más usuarios para enviar la validación (se generará un enlace por persona).</div>
+                                            <div class="form-text">Selecciona uno o más usuarios para enviar el enlace público del evento.</div>
                                         </div>
                                     </div>
                                 </form>
 
-                                <?php if ($validationLink) : ?>
+                                <?php if ($validationLink || $eventValidationLink) : ?>
                                     <div class="mt-4">
                                         <label class="form-label">Enlace de validación</label>
-                                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($validationLink, ENT_QUOTES, 'UTF-8'); ?>" readonly>
+                                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($validationLink ?: $eventValidationLink, ENT_QUOTES, 'UTF-8'); ?>" readonly>
                                     </div>
                                 <?php endif; ?>
 

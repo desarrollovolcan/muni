@@ -3,11 +3,16 @@ require __DIR__ . '/app/bootstrap.php';
 
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $evento = null;
+$validationLink = null;
 
 if ($id > 0) {
     $stmt = db()->prepare('SELECT * FROM events WHERE id = ?');
     $stmt->execute([$id]);
     $evento = $stmt->fetch();
+    if ($evento) {
+        $evento['validation_token'] = ensure_event_validation_token($id, $evento['validation_token'] ?? null);
+        $validationLink = base_url() . '/eventos-validacion.php?token=' . urlencode($evento['validation_token']);
+    }
 }
 ?>
 <?php include('partials/html.php'); ?>
@@ -69,6 +74,10 @@ if ($id > 0) {
                                         <div class="col-12">
                                             <label class="form-label text-muted">Descripción</label>
                                             <div><?php echo htmlspecialchars($evento['descripcion'], ENT_QUOTES, 'UTF-8'); ?></div>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label text-muted">Enlace público de validación</label>
+                                            <input type="text" class="form-control" value="<?php echo htmlspecialchars($validationLink ?? '', ENT_QUOTES, 'UTF-8'); ?>" readonly>
                                         </div>
                                     </div>
                                     <div class="d-flex flex-wrap gap-2 mt-3">

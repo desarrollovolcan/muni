@@ -117,11 +117,13 @@ CREATE TABLE `events` (
   `estado` ENUM('borrador', 'revision', 'publicado', 'finalizado', 'cancelado') NOT NULL DEFAULT 'borrador',
   `aprobacion_estado` ENUM('borrador', 'revision', 'publicado') NOT NULL DEFAULT 'borrador',
   `habilitado` TINYINT(1) NOT NULL DEFAULT 1,
+  `validation_token` VARCHAR(64) DEFAULT NULL,
   `unidad_id` INT UNSIGNED DEFAULT NULL,
   `creado_por` INT UNSIGNED NOT NULL,
   `encargado_id` INT UNSIGNED DEFAULT NULL,
   `fecha_creacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `events_validation_token_unique` (`validation_token`),
   CONSTRAINT `events_creado_por_fk` FOREIGN KEY (`creado_por`) REFERENCES `users` (`id`) ON DELETE RESTRICT,
   CONSTRAINT `events_encargado_fk` FOREIGN KEY (`encargado_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

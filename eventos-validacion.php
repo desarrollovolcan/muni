@@ -17,11 +17,30 @@ if ($token === '') {
     $request = $stmt->fetch();
 
     if (!$request) {
-        $errors[] = 'El enlace de validación no fue encontrado o ya expiró.';
+        $stmtEvent = db()->prepare('SELECT * FROM events WHERE validation_token = ?');
+        $stmtEvent->execute([$token]);
+        $event = $stmtEvent->fetch();
+        if ($event) {
+            $municipalidad = get_municipalidad();
+            $placeholderEmail = $municipalidad['correo'] ?? 'validacion@municipalidad.local';
+            $stmtInsert = db()->prepare('INSERT INTO event_authority_requests (event_id, destinatario_nombre, destinatario_correo, token, correo_enviado) VALUES (?, ?, ?, ?, ?)');
+            $stmtInsert->execute([
+                (int) $event['id'],
+                'Enlace público',
+                $placeholderEmail,
+                $token,
+                0,
+            ]);
+            $stmtRequest = db()->prepare('SELECT * FROM event_authority_requests WHERE token = ?');
+            $stmtRequest->execute([$token]);
+            $request = $stmtRequest->fetch();
+        } else {
+            $errors[] = 'El enlace de validación no fue encontrado o ya expiró.';
+        }
     }
 }
 
-if ($request) {
+if ($request && !$event) {
     $stmt = db()->prepare('SELECT * FROM events WHERE id = ?');
     $stmt->execute([(int) $request['event_id']]);
     $event = $stmt->fetch();
