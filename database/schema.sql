@@ -9,6 +9,7 @@ CREATE TABLE `users` (
   `username` VARCHAR(60) NOT NULL,
   `rol` VARCHAR(60) DEFAULT NULL,
   `unidad_id` INT UNSIGNED DEFAULT NULL,
+  `avatar_path` VARCHAR(255) DEFAULT NULL,
   `password_hash` VARCHAR(255) NOT NULL,
   `estado` TINYINT(1) NOT NULL DEFAULT 1,
   `fecha_creacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -116,11 +117,13 @@ CREATE TABLE `events` (
   `estado` ENUM('borrador', 'revision', 'publicado', 'finalizado', 'cancelado') NOT NULL DEFAULT 'borrador',
   `aprobacion_estado` ENUM('borrador', 'revision', 'publicado') NOT NULL DEFAULT 'borrador',
   `habilitado` TINYINT(1) NOT NULL DEFAULT 1,
+  `validation_token` VARCHAR(64) DEFAULT NULL,
   `unidad_id` INT UNSIGNED DEFAULT NULL,
   `creado_por` INT UNSIGNED NOT NULL,
   `encargado_id` INT UNSIGNED DEFAULT NULL,
   `fecha_creacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `events_validation_token_unique` (`validation_token`),
   CONSTRAINT `events_creado_por_fk` FOREIGN KEY (`creado_por`) REFERENCES `users` (`id`) ON DELETE RESTRICT,
   CONSTRAINT `events_encargado_fk` FOREIGN KEY (`encargado_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -211,6 +214,7 @@ CREATE TABLE `municipalidad` (
   `logo_topbar_height` INT UNSIGNED DEFAULT NULL,
   `logo_sidenav_height` INT UNSIGNED DEFAULT NULL,
   `logo_sidenav_height_sm` INT UNSIGNED DEFAULT NULL,
+  `logo_auth_height` INT UNSIGNED DEFAULT NULL,
   `color_primary` VARCHAR(20) DEFAULT NULL,
   `color_secondary` VARCHAR(20) DEFAULT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -228,6 +232,16 @@ CREATE TABLE `notificacion_correos` (
   `from_correo` VARCHAR(150) DEFAULT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `email_templates` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `template_key` VARCHAR(80) NOT NULL,
+  `subject` VARCHAR(200) NOT NULL,
+  `body_html` MEDIUMTEXT NOT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email_templates_key_unique` (`template_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `notification_settings` (
@@ -373,11 +387,29 @@ VALUES
   ('Auditor', 'Revisión y auditoría', 1),
   ('Consulta', 'Acceso de solo lectura', 1);
 
+-- Datos QA para pruebas de flujo -- Sección: unidades
 INSERT INTO `unidades` (`nombre`, `descripcion`)
 VALUES
-  ('Administración', 'Unidad Administrativa'),
-  ('DIDECO', 'Desarrollo Comunitario'),
-  ('SECPLAN', 'Secretaría Comunal de Planificación');
+  ('Administración', 'Gestión administrativa municipal'),
+  ('Finanzas', 'Gestión presupuestaria y contable'),
+  ('Recursos Humanos', 'Gestión de personal y bienestar'),
+  ('DIDECO', 'Desarrollo comunitario'),
+  ('SECPLAN', 'Planificación comunal'),
+  ('Tránsito', 'Permisos y gestión vial'),
+  ('Obras Municipales', 'Permisos y fiscalización de obras'),
+  ('Salud', 'Coordinación de atención primaria'),
+  ('Educación', 'Gestión educativa comunal'),
+  ('Medio Ambiente', 'Programas y fiscalización ambiental'),
+  ('Cultura', 'Actividades culturales'),
+  ('Deportes', 'Programas deportivos'),
+  ('Seguridad', 'Prevención y seguridad pública'),
+  ('Turismo', 'Promoción turística'),
+  ('Vivienda', 'Programas habitacionales'),
+  ('Fomento Productivo', 'Apoyo a emprendedores'),
+  ('Adulto Mayor', 'Programas para personas mayores'),
+  ('Infancia', 'Programas de infancia'),
+  ('Juventud', 'Programas juveniles'),
+  ('Participación Ciudadana', 'Vinculación con la comunidad');
 
 INSERT INTO `municipalidad` (`nombre`, `rut`, `direccion`, `telefono`, `correo`, `logo_path`, `color_primary`, `color_secondary`)
 VALUES ('Municipalidad', NULL, NULL, NULL, NULL, 'assets/images/logo.png', '#6658dd', '#4a81d4');
