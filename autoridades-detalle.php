@@ -67,7 +67,6 @@ if ($id > 0) {
                                     </div>
                                     <div class="d-flex flex-wrap gap-2 mt-3">
                                         <a href="autoridades-editar.php?id=<?php echo (int) $autoridad['id']; ?>" class="btn btn-primary">Editar autoridad</a>
-                                        <a href="autoridades-adjuntos.php" class="btn btn-outline-secondary">Gestionar adjuntos</a>
                                         <a href="autoridades-lista.php" class="btn btn-link">Volver al listado</a>
                                     </div>
                                 <?php endif; ?>

@@ -11,6 +11,8 @@ if (isset($_SESSION['user'])) {
 
 $errors = [];
 $success = false;
+$municipalidad = get_municipalidad();
+$logoAuthHeight = (int) ($municipalidad['logo_auth_height'] ?? 48);
 $values = [
     'nombre' => '',
     'apellido' => '',
@@ -75,7 +77,7 @@ include('partials/html.php');
 ?>
 
 <head>
-    <?php $title = "Create New Account"; include('partials/title-meta.php'); ?>
+    <?php $title = "Crear cuenta"; include('partials/title-meta.php'); ?>
 
     <?php include('partials/head-css.php'); ?>
 </head>
@@ -92,10 +94,10 @@ include('partials/html.php');
                         </div>
                         <div class="auth-brand text-center mb-4">
                             <a href="index.php" class="logo-dark">
-                                <img src="assets/images/logo-black.png" alt="dark logo" height="28">
+                                <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo municipalidad" style="height: <?php echo $logoAuthHeight; ?>px;">
                             </a>
                             <a href="index.php" class="logo-light">
-                                <img src="assets/images/logo.png" alt="logo" height="28">
+                                <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo municipalidad" style="height: <?php echo $logoAuthHeight; ?>px;">
                             </a>
                             <p class="text-muted w-lg-75 mt-3 mx-auto">Crea tu cuenta con los datos del funcionario municipal.</p>
                         </div>
@@ -182,7 +184,7 @@ include('partials/html.php');
                         </form>
 
                         <p class="text-muted text-center mt-4 mb-0">
-                            Already have an account? <a href="auth-sign-in.php" class="text-decoration-underline link-offset-3 fw-semibold">Login</a>
+                            ¿Ya tienes cuenta? <a href="auth-sign-in.php" class="text-decoration-underline link-offset-3 fw-semibold">Iniciar sesión</a>
                         </p>
                     </div>
 
@@ -197,7 +199,7 @@ include('partials/html.php');
 
     <?php include('partials/footer-scripts.php'); ?>
 
-    <!-- Password Suggestion Js -->
+    <!-- Sugerencia de contraseña -->
     <script src="assets/js/pages/auth-password.js"></script>
 
 </body>

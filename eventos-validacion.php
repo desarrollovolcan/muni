@@ -17,11 +17,30 @@ if ($token === '') {
     $request = $stmt->fetch();
 
     if (!$request) {
-        $errors[] = 'El enlace de validación no fue encontrado o ya expiró.';
+        $stmtEvent = db()->prepare('SELECT * FROM events WHERE validation_token = ?');
+        $stmtEvent->execute([$token]);
+        $event = $stmtEvent->fetch();
+        if ($event) {
+            $municipalidad = get_municipalidad();
+            $placeholderEmail = $municipalidad['correo'] ?? 'validacion@municipalidad.local';
+            $stmtInsert = db()->prepare('INSERT INTO event_authority_requests (event_id, destinatario_nombre, destinatario_correo, token, correo_enviado) VALUES (?, ?, ?, ?, ?)');
+            $stmtInsert->execute([
+                (int) $event['id'],
+                'Enlace público',
+                $placeholderEmail,
+                $token,
+                0,
+            ]);
+            $stmtRequest = db()->prepare('SELECT * FROM event_authority_requests WHERE token = ?');
+            $stmtRequest->execute([$token]);
+            $request = $stmtRequest->fetch();
+        } else {
+            $errors[] = 'El enlace de validación no fue encontrado o ya expiró.';
+        }
     }
 }
 
-if ($request) {
+if ($request && !$event) {
     $stmt = db()->prepare('SELECT * FROM events WHERE id = ?');
     $stmt->execute([(int) $request['event_id']]);
     $event = $stmt->fetch();
@@ -79,7 +98,7 @@ $municipalidad = get_municipalidad();
         <div class="row justify-content-center">
             <div class="col-lg-9">
                 <div class="text-center mb-4">
-                    <img src="<?php echo htmlspecialchars($municipalidad['logo_path'], ENT_QUOTES, 'UTF-8'); ?>" alt="Logo municipal" height="40">
+                    <img src="<?php echo htmlspecialchars($municipalidad['logo_path'], ENT_QUOTES, 'UTF-8'); ?>" alt="Logo municipal" height="60">
                     <h3 class="mt-3 mb-1">Validación de autoridades</h3>
                     <p class="text-muted mb-0">Confirma qué autoridades asistirán al evento.</p>
                 </div>
@@ -146,7 +165,7 @@ $municipalidad = get_municipalidad();
                                         <?php endforeach; ?>
                                     </div>
                                     <div class="d-flex flex-wrap align-items-center gap-2 mt-4">
-                                        <button type="submit" class="btn btn-primary">Confirmar asistencia</button>
+                                        <button type="submit" class="btn btn-primary">Enviar validación</button>
                                         <span class="text-muted small">Puedes actualizar esta selección si cambia la disponibilidad.</span>
                                     </div>
                                 </form>

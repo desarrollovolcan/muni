@@ -36,6 +36,28 @@ function redirect(string $path): void
     exit;
 }
 
+function base_url(): string
+{
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $basePath = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
+
+    return $scheme . '://' . $host . ($basePath !== '' ? $basePath : '');
+}
+
+function ensure_event_validation_token(int $eventId, ?string $currentToken): string
+{
+    if (!empty($currentToken)) {
+        return $currentToken;
+    }
+
+    $token = bin2hex(random_bytes(16));
+    $stmt = db()->prepare('UPDATE events SET validation_token = ? WHERE id = ?');
+    $stmt->execute([$token, $eventId]);
+
+    return $token;
+}
+
 function csrf_token(): string
 {
     if (!isset($_SESSION['csrf_token'])) {
@@ -65,6 +87,10 @@ function get_municipalidad(): array
     return [
         'nombre' => 'Municipalidad',
         'logo_path' => 'assets/images/logo.png',
+        'logo_topbar_height' => 56,
+        'logo_sidenav_height' => 48,
+        'logo_sidenav_height_sm' => 36,
+        'logo_auth_height' => 48,
         'color_primary' => '#6658dd',
         'color_secondary' => '#4a81d4',
     ];
