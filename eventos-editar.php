@@ -5,6 +5,7 @@ $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $evento = null;
 $errors = [];
 $success = $_GET['success'] ?? '';
+$validationLink = null;
 
 $usuarios = db()->query('SELECT id, nombre, apellido FROM users WHERE estado = 1 ORDER BY nombre')->fetchAll();
 $eventTypes = ensure_event_types();
@@ -12,11 +13,22 @@ $eventTypeMap = [];
 foreach ($eventTypes as $eventType) {
     $eventTypeMap[$eventType['nombre']] = $eventType['color_class'] ?? 'bg-primary-subtle text-primary';
 }
+$eventosListado = [];
+try {
+    $stmtListado = db()->query('SELECT e.id, e.titulo, e.fecha_inicio, e.tipo, e.estado, e.habilitado, u.nombre AS encargado_nombre, u.apellido AS encargado_apellido, COUNT(r.id) AS solicitudes_total, SUM(r.correo_enviado = 1) AS correos_enviados FROM events e LEFT JOIN users u ON u.id = e.encargado_id LEFT JOIN event_authority_requests r ON r.event_id = e.id GROUP BY e.id ORDER BY e.fecha_inicio DESC');
+    $eventosListado = $stmtListado->fetchAll();
+} catch (Exception $e) {
+} catch (Error $e) {
+}
 
 if ($id > 0) {
     $stmt = db()->prepare('SELECT * FROM events WHERE id = ?');
     $stmt->execute([$id]);
     $evento = $stmt->fetch();
+    if ($evento) {
+        $evento['validation_token'] = ensure_event_validation_token($id, $evento['validation_token'] ?? null);
+        $validationLink = base_url() . '/eventos-validacion.php?token=' . urlencode($evento['validation_token']);
+    }
 }
 
 function normalize_datetime_input(?string $value): string
@@ -60,7 +72,20 @@ function format_datetime_iso(?string $value): ?string
     return $date ? $date->format('Y-m-d\\TH:i:s') : null;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ?? null)) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['list_action']) && $_POST['list_action'] === 'delete' && verify_csrf($_POST['csrf_token'] ?? null)) {
+    $deleteId = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+    if ($deleteId > 0) {
+        try {
+            $stmt = db()->prepare('DELETE FROM events WHERE id = ?');
+            $stmt->execute([$deleteId]);
+            redirect('eventos-editar.php');
+        } catch (Exception $e) {
+            $errors[] = 'No se pudo eliminar el evento. Verifica dependencias asociadas.';
+        }
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['list_action']) && verify_csrf($_POST['csrf_token'] ?? null)) {
     $action = $_POST['event_action'] ?? 'save';
     $postId = isset($_POST['event_id']) ? (int) $_POST['event_id'] : 0;
 
@@ -105,7 +130,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                 $targetId,
             ]);
         } else {
-            $stmt = db()->prepare('INSERT INTO events (titulo, descripcion, ubicacion, fecha_inicio, fecha_fin, tipo, cupos, publico_objetivo, estado, creado_por, encargado_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+            $validationToken = bin2hex(random_bytes(16));
+            $stmt = db()->prepare('INSERT INTO events (titulo, descripcion, ubicacion, fecha_inicio, fecha_fin, tipo, cupos, publico_objetivo, estado, creado_por, encargado_id, validation_token) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
             $stmt->execute([
                 $titulo,
                 $descripcion,
@@ -118,6 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                 $estado,
                 $creadoPor,
                 $encargado ?: null,
+                $validationToken,
             ]);
         }
 
@@ -315,6 +342,16 @@ try {
                                         </div>
                                     </div>
 
+                                    <div class="mb-3">
+                                        <label class="form-label">Enlace público de validación</label>
+                                        <?php if ($validationLink) : ?>
+                                            <input type="text" class="form-control" value="<?php echo htmlspecialchars($validationLink, ENT_QUOTES, 'UTF-8'); ?>" readonly>
+                                            <div class="form-text">Comparte este enlace para validar qué autoridades asistirán al evento.</div>
+                                        <?php else : ?>
+                                            <div class="form-control-plaintext text-muted">Guarda el evento para generar el enlace de validación.</div>
+                                        <?php endif; ?>
+                                    </div>
+
                                     <div class="d-flex flex-wrap align-items-center gap-2">
                                         <button type="button" class="btn btn-outline-danger" id="btn-delete-event">
                                             Eliminar
@@ -336,6 +373,83 @@ try {
                                     </div>
                                 </div>
                             </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Listado de eventos</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-centered mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Evento</th>
+                                                <th>Fecha</th>
+                                                <th>Tipo</th>
+                                                <th>Estado</th>
+                                                <th>Responsable</th>
+                                                <th>Notificación</th>
+                                                <th class="text-end">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php if (empty($eventosListado)) : ?>
+                                                <tr>
+                                                    <td colspan="7" class="text-center text-muted">No hay eventos registrados.</td>
+                                                </tr>
+                                            <?php else : ?>
+                                                <?php foreach ($eventosListado as $eventoListado) : ?>
+                                                    <tr>
+                                                        <td><?php echo htmlspecialchars($eventoListado['titulo'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td><?php echo htmlspecialchars($eventoListado['fecha_inicio'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td><?php echo htmlspecialchars($eventoListado['tipo'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td>
+                                                            <span class="badge text-bg-<?php echo $eventoListado['estado'] === 'publicado' ? 'success' : ($eventoListado['estado'] === 'borrador' ? 'warning' : 'secondary'); ?>">
+                                                                <?php echo htmlspecialchars(ucfirst($eventoListado['estado']), ENT_QUOTES, 'UTF-8'); ?>
+                                                            </span>
+                                                        </td>
+                                                        <td><?php echo htmlspecialchars(trim(($eventoListado['encargado_nombre'] ?? '') . ' ' . ($eventoListado['encargado_apellido'] ?? '')), ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td>
+                                                            <?php if ((int) $eventoListado['correos_enviados'] > 0) : ?>
+                                                                <span class="badge text-bg-success">Enviada</span>
+                                                            <?php elseif ((int) $eventoListado['solicitudes_total'] > 0) : ?>
+                                                                <span class="badge text-bg-warning">Pendiente</span>
+                                                            <?php else : ?>
+                                                                <span class="badge text-bg-secondary">Sin enviar</span>
+                                                            <?php endif; ?>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <div class="dropdown">
+                                                                <button class="btn btn-sm btn-soft-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                    Acciones
+                                                                </button>
+                                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                                    <li><a class="dropdown-item" href="eventos-detalle.php?id=<?php echo (int) $eventoListado['id']; ?>">Ver</a></li>
+                                                                    <li><a class="dropdown-item" href="eventos-editar.php?id=<?php echo (int) $eventoListado['id']; ?>">Editar</a></li>
+                                                                    <li><hr class="dropdown-divider"></li>
+                                                                    <li>
+                                                                        <form method="post" class="px-3 py-1" data-confirm="¿Estás seguro de eliminar este evento?">
+                                                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                            <input type="hidden" name="list_action" value="delete">
+                                                                            <input type="hidden" name="id" value="<?php echo (int) $eventoListado['id']; ?>">
+                                                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100">Eliminar</button>
+                                                                        </form>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -12,8 +12,35 @@ $users = db()->query('SELECT id, nombre, apellido, correo FROM users WHERE estad
 $selectedEventId = isset($_GET['event_id']) ? (int) $_GET['event_id'] : 0;
 $linkedAuthorities = [];
 $validationRequests = [];
+$emailTemplate = null;
+$eventValidationLink = null;
+$selectedEvent = null;
+
+try {
+    db()->exec(
+        'CREATE TABLE IF NOT EXISTS email_templates (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+            template_key VARCHAR(80) NOT NULL,
+            subject VARCHAR(200) NOT NULL,
+            body_html MEDIUMTEXT NOT NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY email_templates_key_unique (template_key)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+    );
+} catch (Exception $e) {
+} catch (Error $e) {
+}
 
 if ($selectedEventId > 0) {
+    $stmt = db()->prepare('SELECT * FROM events WHERE id = ?');
+    $stmt->execute([$selectedEventId]);
+    $selectedEvent = $stmt->fetch();
+    if ($selectedEvent) {
+        $selectedEvent['validation_token'] = ensure_event_validation_token($selectedEventId, $selectedEvent['validation_token'] ?? null);
+        $eventValidationLink = base_url() . '/eventos-validacion.php?token=' . urlencode($selectedEvent['validation_token']);
+    }
+
     $stmt = db()->prepare('SELECT authority_id FROM event_authorities WHERE event_id = ?');
     $stmt->execute([$selectedEventId]);
     $linkedAuthorities = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
@@ -21,6 +48,14 @@ if ($selectedEventId > 0) {
     $stmt = db()->prepare('SELECT id, destinatario_nombre, destinatario_correo, token, correo_enviado, estado, created_at, responded_at FROM event_authority_requests WHERE event_id = ? ORDER BY created_at DESC');
     $stmt->execute([$selectedEventId]);
     $validationRequests = $stmt->fetchAll();
+}
+
+try {
+    $stmt = db()->prepare('SELECT subject, body_html FROM email_templates WHERE template_key = ? LIMIT 1');
+    $stmt->execute(['validacion_autoridades']);
+    $emailTemplate = $stmt->fetch() ?: null;
+} catch (Exception $e) {
+} catch (Error $e) {
 }
 
 function build_event_validation_email(array $municipalidad, array $event, array $authorities, string $validationUrl, ?string $recipientName): string
@@ -101,6 +136,40 @@ function build_event_validation_email(array $municipalidad, array $event, array 
 HTML;
 }
 
+function render_event_email_template(array $template, array $data): string
+{
+    $replacements = [
+        '{{municipalidad_nombre}}' => $data['municipalidad_nombre'] ?? '',
+        '{{municipalidad_logo}}' => $data['municipalidad_logo'] ?? '',
+        '{{destinatario_nombre}}' => $data['destinatario_nombre'] ?? '',
+        '{{evento_titulo}}' => $data['evento_titulo'] ?? '',
+        '{{evento_descripcion}}' => $data['evento_descripcion'] ?? '',
+        '{{evento_fecha_inicio}}' => $data['evento_fecha_inicio'] ?? '',
+        '{{evento_fecha_fin}}' => $data['evento_fecha_fin'] ?? '',
+        '{{evento_ubicacion}}' => $data['evento_ubicacion'] ?? '',
+        '{{evento_tipo}}' => $data['evento_tipo'] ?? '',
+        '{{autoridades_lista}}' => $data['autoridades_lista'] ?? '',
+        '{{validation_link}}' => $data['validation_link'] ?? '',
+    ];
+
+    return strtr($template['body_html'] ?? '', $replacements);
+}
+
+function render_event_email_subject(string $subject, array $data): string
+{
+    $replacements = [
+        '{{municipalidad_nombre}}' => $data['municipalidad_nombre'] ?? '',
+        '{{destinatario_nombre}}' => $data['destinatario_nombre'] ?? '',
+        '{{evento_titulo}}' => $data['evento_titulo'] ?? '',
+        '{{evento_fecha_inicio}}' => $data['evento_fecha_inicio'] ?? '',
+        '{{evento_fecha_fin}}' => $data['evento_fecha_fin'] ?? '',
+        '{{evento_ubicacion}}' => $data['evento_ubicacion'] ?? '',
+        '{{evento_tipo}}' => $data['evento_tipo'] ?? '',
+    ];
+
+    return strtr($subject, $replacements);
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ?? null)) {
     $action = $_POST['action'] ?? 'save_authorities';
 
@@ -173,12 +242,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
         }
 
         if (empty($validationErrors) && $event) {
-            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-            $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-            $basePath = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
-            $baseUrl = $scheme . '://' . $host . ($basePath !== '' ? $basePath : '');
+            $event['validation_token'] = ensure_event_validation_token($eventId, $event['validation_token'] ?? null);
+            $validationUrl = base_url() . '/eventos-validacion.php?token=' . urlencode($event['validation_token']);
 
             $municipalidad = get_municipalidad();
+            $logoPath = $municipalidad['logo_path'] ?? 'assets/images/logo.png';
+            $logoUrl = preg_match('/^https?:\\/\\//', $logoPath) ? $logoPath : base_url() . '/' . ltrim($logoPath, '/');
+            $municipalidad['logo_path'] = $logoUrl;
             $subject = 'Validación de autoridades: ' . $event['titulo'];
             $headers = "MIME-Version: 1.0\r\n";
             $headers .= "Content-type:text/html;charset=UTF-8\r\n";
@@ -190,31 +260,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                 $headers .= 'From: ' . ($fromName ? $fromName . ' <' . $fromEmail . '>' : $fromEmail) . "\r\n";
             }
 
-            $stmtInsert = db()->prepare('INSERT INTO event_authority_requests (event_id, destinatario_nombre, destinatario_correo, token, correo_enviado) VALUES (?, ?, ?, ?, ?)');
-            $firstLink = null;
-            $allSent = true;
-
-            foreach ($recipients as $recipient) {
-                $token = bin2hex(random_bytes(16));
-                $validationUrl = $baseUrl . '/eventos-validacion.php?token=' . urlencode($token);
-                $emailPreview = build_event_validation_email($municipalidad, $event, $eventAuthorities, $validationUrl, $recipient['nombre'] ?? null);
-                $mailSent = mail($recipient['correo'], $subject, $emailPreview, $headers);
-                $allSent = $allSent && $mailSent;
-
+            $stmtRequest = db()->prepare('SELECT id FROM event_authority_requests WHERE event_id = ? AND token = ? LIMIT 1');
+            $stmtRequest->execute([$eventId, $event['validation_token']]);
+            $requestId = $stmtRequest->fetchColumn();
+            if (!$requestId) {
+                $stmtInsert = db()->prepare('INSERT INTO event_authority_requests (event_id, destinatario_nombre, destinatario_correo, token, correo_enviado) VALUES (?, ?, ?, ?, ?)');
+                $placeholderEmail = $municipalidad['correo'] ?? 'validacion@municipalidad.local';
                 $stmtInsert->execute([
                     $eventId,
-                    $recipient['nombre'] !== '' ? $recipient['nombre'] : null,
-                    $recipient['correo'],
-                    $token,
-                    $mailSent ? 1 : 0,
+                    'Enlace público',
+                    $placeholderEmail,
+                    $event['validation_token'],
+                    0,
                 ]);
-
-                if ($firstLink === null) {
-                    $firstLink = $validationUrl;
-                }
             }
 
-            $validationLink = $firstLink;
+            $allSent = true;
+            $anySent = false;
+
+            foreach ($recipients as $recipient) {
+                $emailPreview = build_event_validation_email($municipalidad, $event, $eventAuthorities, $validationUrl, $recipient['nombre'] ?? null);
+                if ($emailTemplate) {
+                    $autoridadesLista = '';
+                    foreach ($eventAuthorities as $authority) {
+                        $autoridadesLista .= '<li>' . htmlspecialchars($authority['nombre'], ENT_QUOTES, 'UTF-8') . ' · ' . htmlspecialchars($authority['tipo'], ENT_QUOTES, 'UTF-8') . '</li>';
+                    }
+                    $logoPath = $municipalidad['logo_path'] ?? 'assets/images/logo.png';
+                    $logoUrl = preg_match('/^https?:\\/\\//', $logoPath) ? $logoPath : base_url() . '/' . ltrim($logoPath, '/');
+                    $templateData = [
+                        'municipalidad_nombre' => htmlspecialchars($municipalidad['nombre'] ?? 'Municipalidad', ENT_QUOTES, 'UTF-8'),
+                        'municipalidad_logo' => htmlspecialchars($logoUrl, ENT_QUOTES, 'UTF-8'),
+                        'destinatario_nombre' => htmlspecialchars($recipient['nombre'] ?? 'Equipo municipal', ENT_QUOTES, 'UTF-8'),
+                        'evento_titulo' => htmlspecialchars($event['titulo'], ENT_QUOTES, 'UTF-8'),
+                        'evento_descripcion' => nl2br(htmlspecialchars($event['descripcion'], ENT_QUOTES, 'UTF-8')),
+                        'evento_fecha_inicio' => htmlspecialchars($event['fecha_inicio'], ENT_QUOTES, 'UTF-8'),
+                        'evento_fecha_fin' => htmlspecialchars($event['fecha_fin'], ENT_QUOTES, 'UTF-8'),
+                        'evento_ubicacion' => htmlspecialchars($event['ubicacion'], ENT_QUOTES, 'UTF-8'),
+                        'evento_tipo' => htmlspecialchars($event['tipo'], ENT_QUOTES, 'UTF-8'),
+                        'autoridades_lista' => $autoridadesLista,
+                        'validation_link' => htmlspecialchars($validationUrl, ENT_QUOTES, 'UTF-8'),
+                    ];
+                    $subjectData = [
+                        'municipalidad_nombre' => $municipalidad['nombre'] ?? 'Municipalidad',
+                        'destinatario_nombre' => $recipient['nombre'] ?? 'Equipo municipal',
+                        'evento_titulo' => $event['titulo'] ?? '',
+                        'evento_fecha_inicio' => $event['fecha_inicio'] ?? '',
+                        'evento_fecha_fin' => $event['fecha_fin'] ?? '',
+                        'evento_ubicacion' => $event['ubicacion'] ?? '',
+                        'evento_tipo' => $event['tipo'] ?? '',
+                    ];
+                    $emailPreview = render_event_email_template($emailTemplate, $templateData);
+                    if (!empty($emailTemplate['subject'])) {
+                        $subject = render_event_email_subject($emailTemplate['subject'], $subjectData);
+                    }
+                }
+                $mailSent = mail($recipient['correo'], $subject, $emailPreview, $headers);
+                $anySent = $anySent || $mailSent;
+                $allSent = $allSent && $mailSent;
+            }
+
+            $stmtUpdate = db()->prepare('UPDATE event_authority_requests SET correo_enviado = ? WHERE event_id = ? AND token = ?');
+            $stmtUpdate->execute([$anySent ? 1 : 0, $eventId, $event['validation_token']]);
+
+            $validationLink = $validationUrl;
             if ($allSent) {
                 $validationNotice = 'Correos de validación enviados correctamente.';
             } else {
@@ -370,15 +478,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                                     </option>
                                                 <?php endforeach; ?>
                                             </select>
-                                            <div class="form-text">Selecciona uno o más usuarios para enviar la validación (se generará un enlace por persona).</div>
+                                            <div class="form-text">Selecciona uno o más usuarios para enviar el enlace público del evento.</div>
                                         </div>
                                     </div>
                                 </form>
 
-                                <?php if ($validationLink) : ?>
+                                <?php if ($validationLink || $eventValidationLink) : ?>
                                     <div class="mt-4">
                                         <label class="form-label">Enlace de validación</label>
-                                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($validationLink, ENT_QUOTES, 'UTF-8'); ?>" readonly>
+                                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($validationLink ?: $eventValidationLink, ENT_QUOTES, 'UTF-8'); ?>" readonly>
                                     </div>
                                 <?php endif; ?>
 
