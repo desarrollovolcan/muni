@@ -1,4 +1,13 @@
-<?php include('partials/html.php'); ?>
+<?php
+
+declare(strict_types=1);
+
+require __DIR__ . '/app/bootstrap.php';
+
+$municipalidad = get_municipalidad();
+
+include('partials/html.php');
+?>
 
 <head>
     <?php $title = "Reset Password"; include('partials/title-meta.php'); ?>
@@ -55,10 +64,10 @@
                     <div class="card-body min-vh-100 d-flex flex-column justify-content-center">
                         <div class="auth-brand mb-0 text-center">
                             <a href="index.php" class="logo-dark">
-                                <img src="assets/images/logo-black.png" alt="dark logo" height="28">
+                                <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo" height="28">
                             </a>
                             <a href="index.php" class="logo-light">
-                                <img src="assets/images/logo.png" alt="logo" height="28">
+                                <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo" height="28">
                             </a>
                         </div>
 

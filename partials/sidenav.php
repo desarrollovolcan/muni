@@ -37,16 +37,7 @@
 
         <!--- Sidenav Menu -->
         <ul class="side-nav">
-            <li class="side-nav-title mt-2" data-lang="menu-title">Inicio</li>
-
-            <li class="side-nav-item">
-                <a href="dashboard.php" class="side-nav-link">
-                    <span class="menu-icon"><i data-lucide="layout-dashboard"></i></span>
-                    <span class="menu-text">Panel</span>
-                </a>
-            </li>
-
-            <li class="side-nav-title" data-lang="modules-title">Aplicaciones</li>
+            <li class="side-nav-title mt-2" data-lang="menu-title">Gestión</li>
 
             <li class="side-nav-item">
                 <a href="#modulo-eventos" class="side-nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="modulo-eventos">
@@ -128,34 +119,7 @@
                 </a>
             </li>
 
-            <li class="side-nav-title" data-lang="settings-title">Configuración</li>
-
-            <li class="side-nav-item">
-                <a href="#modulo-seguridad" class="side-nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="modulo-seguridad">
-                    <span class="menu-icon"><i data-lucide="shield-check"></i></span>
-                    <span class="menu-text">Seguridad y Acceso</span>
-                    <span class="menu-arrow"></span>
-                </a>
-                <div class="collapse" id="modulo-seguridad">
-                    <ul class="side-nav sub-menu">
-                        <li class="side-nav-item">
-                            <a href="auth-sign-in.php" class="side-nav-link">Iniciar sesión</a>
-                        </li>
-                        <li class="side-nav-item">
-                            <a href="logout.php" class="side-nav-link">Cerrar sesión</a>
-                        </li>
-                        <li class="side-nav-item">
-                            <a href="recuperar-contrasena.php" class="side-nav-link">Recuperar contraseña</a>
-                        </li>
-                        <li class="side-nav-item">
-                            <a href="sesiones.php" class="side-nav-link">Gestión de sesiones</a>
-                        </li>
-                        <li class="side-nav-item">
-                            <a href="bitacora.php" class="side-nav-link">Bitácora (auditoría)</a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
+            <li class="side-nav-title" data-lang="settings-title">Administración</li>
 
             <li class="side-nav-item">
                 <a href="#modulo-usuarios" class="side-nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="modulo-usuarios">
@@ -197,21 +161,6 @@
                         </li>
                         <li class="side-nav-item">
                             <a href="permisos-unidades.php" class="side-nav-link">Permisos por unidad</a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-
-            <li class="side-nav-item">
-                <a href="#modulo-aprobaciones" class="side-nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="modulo-aprobaciones">
-                    <span class="menu-icon"><i data-lucide="check-circle-2"></i></span>
-                    <span class="menu-text">Aprobaciones</span>
-                    <span class="menu-arrow"></span>
-                </a>
-                <div class="collapse" id="modulo-aprobaciones">
-                    <ul class="side-nav sub-menu">
-                        <li class="side-nav-item">
-                            <a href="flujos-aprobacion.php" class="side-nav-link">Flujos de aprobación</a>
                         </li>
                     </ul>
                 </div>
