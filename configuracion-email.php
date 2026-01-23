@@ -27,36 +27,144 @@ $defaultBody = <<<HTML
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Validación de autoridades</title>
 </head>
-<body style="font-family: Arial, sans-serif; background-color: #f4f6fb; margin: 0; padding: 24px;">
-  <table width="100%" cellpadding="0" cellspacing="0">
+
+<body style="margin:0;padding:0;background-color:#f4f6fb;font-family:Arial,Helvetica,sans-serif;">
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;">
+    Confirmación de autoridades para {{evento_titulo}}.
+  </div>
+
+  <table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f4f6fb" style="margin:0;padding:0;">
     <tr>
-      <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="background: #ffffff; border-radius: 12px; overflow: hidden;">
+      <td align="center" style="padding:24px 12px;">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background-color:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e6ebf2;">
           <tr>
-            <td style="padding: 24px; background: #0d47a1; color: #ffffff;">
-              <img src="{{municipalidad_logo}}" alt="Logo" style="height: 28px; vertical-align: middle;">
-              <span style="font-weight: bold; margin-left: 8px;">{{municipalidad_nombre}}</span>
+            <td style="padding:0;background:#007DC6;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding:16px 20px;">
+                    <table cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="vertical-align:middle;">
+                          <img src="{{municipalidad_logo}}" alt="Logo municipalidad" height="30" style="display:block;border:0;outline:none;text-decoration:none;">
+                        </td>
+                        <td style="vertical-align:middle;padding-left:10px;color:#ffffff;font-weight:700;font-size:15px;letter-spacing:0.2px;">
+                          {{municipalidad_nombre}}
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td align="right" style="padding:16px 20px;color:#dbeeff;font-size:12px;white-space:nowrap;">
+                    Validación de autoridades
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
           <tr>
-            <td style="padding: 24px;">
-              <p>Hola {{destinatario_nombre}},</p>
-              <p>Te invitamos a confirmar las autoridades asistentes al evento <strong>{{evento_titulo}}</strong>.</p>
-              <p><strong>Fecha:</strong> {{evento_fecha_inicio}} - {{evento_fecha_fin}}</p>
-              <p><strong>Lugar:</strong> {{evento_ubicacion}}</p>
-              <p><strong>Tipo:</strong> {{evento_tipo}}</p>
-              <p><strong>Descripción:</strong><br>{{evento_descripcion}}</p>
-              <p><strong>Autoridades preseleccionadas:</strong></p>
-              <ul>
+            <td style="height:4px;background:#FCB017;line-height:4px;font-size:0;">&nbsp;</td>
+          </tr>
+          <tr>
+            <td style="padding:26px 24px 10px 24px;color:#1f2a37;font-size:14px;line-height:1.65;">
+              <p style="margin:0 0 12px 0;">
+                Hola <strong style="color:#111827;">{{destinatario_nombre}}</strong>,
+              </p>
+              <p style="margin:0 0 14px 0;color:#374151;">
+                Te invitamos a confirmar las autoridades asistentes al evento
+                <strong style="color:#111827;">{{evento_titulo}}</strong>.
+              </p>
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0 18px 0;background:#f8fafc;border:1px solid #e6ebf2;border-radius:12px;">
+                <tr>
+                  <td style="padding:14px 14px 6px 14px;">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="font-size:12px;color:#6A7880;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;">
+                          Detalles del evento
+                        </td>
+                        <td align="right" style="font-size:12px;color:#6A7880;">
+                          <span style="display:inline-block;width:8px;height:8px;border-radius:999px;background:#8EC53F;vertical-align:middle;margin-right:6px;"></span>
+                          Información oficial
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:0 14px 14px 14px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" style="font-size:13px;line-height:1.6;color:#374151;">
+                      <tr>
+                        <td style="padding-top:10px;width:110px;color:#6A7880;"><strong>Fecha</strong></td>
+                        <td style="padding-top:10px;">{{evento_fecha_inicio}} - {{evento_fecha_fin}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding-top:8px;width:110px;color:#6A7880;"><strong>Lugar</strong></td>
+                        <td style="padding-top:8px;">{{evento_ubicacion}}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding-top:8px;width:110px;color:#6A7880;"><strong>Tipo</strong></td>
+                        <td style="padding-top:8px;">{{evento_tipo}}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:0 0 8px 0;">
+                <strong style="color:#111827;">Descripción</strong>
+              </p>
+              <div style="margin:0 0 16px 0;color:#374151;">
+                {{evento_descripcion}}
+              </div>
+              <p style="margin:0 0 8px 0;">
+                <strong style="color:#111827;">Autoridades preseleccionadas</strong>
+              </p>
+              <ul style="margin:0 0 18px 0;padding-left:18px;color:#374151;">
                 {{autoridades_lista}}
               </ul>
-              <p style="text-align: center; margin: 24px 0;">
-                <a href="{{validation_link}}" style="background: #1565c0; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 999px;">Confirmar asistencia</a>
-              </p>
-              <p>Si no puedes abrir el botón, copia y pega el siguiente enlace:</p>
-              <p><a href="{{validation_link}}">{{validation_link}}</a></p>
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin:18px 0 10px 0;">
+                <tr>
+                  <td align="center" style="padding:8px 0 6px 0;">
+                    <a href="{{validation_link}}"
+                       style="background:#FCB017;color:#1f2a37;text-decoration:none;
+                              padding:12px 22px;border-radius:12px;font-weight:700;
+                              display:inline-block;border:1px solid #CD7B16;">
+                      Confirmar asistencia
+                    </a>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="font-size:12px;color:#6A7880;padding-top:8px;">
+                    Este enlace es personal. Evita reenviarlo a terceros.
+                  </td>
+                </tr>
+              </table>
+              <div style="margin:18px 0 0 0;padding:14px;border:1px dashed #cdd6e3;border-radius:12px;background:#ffffff;">
+                <p style="margin:0 0 6px 0;font-size:12px;color:#6A7880;">
+                  Si el botón no funciona, copia y pega este enlace en tu navegador:
+                </p>
+                <p style="margin:0;word-break:break-all;font-size:13px;">
+                  <a href="{{validation_link}}" style="color:#007DC6;text-decoration:underline;">
+                    {{validation_link}}
+                  </a>
+                </p>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:16px 24px 22px 24px;background:#ffffff;border-top:1px solid #eef2f7;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="font-size:12px;color:#6A7880;line-height:1.5;">
+                    Este correo fue enviado por <strong>{{municipalidad_nombre}}</strong>.
+                    Si no reconoces esta solicitud, puedes ignorar este mensaje.
+                  </td>
+                  <td align="right" style="font-size:12px;color:#6A7880;white-space:nowrap;">
+                    <span style="display:inline-block;width:10px;height:10px;border-radius:999px;background:#007DC6;vertical-align:middle;margin-right:6px;"></span>
+                    Notificación institucional
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
         </table>
@@ -72,11 +180,18 @@ $stmt->execute([$templateKey]);
 $template = $stmt->fetch() ?: ['subject' => $defaultSubject, 'body_html' => $defaultBody];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ?? null)) {
-    $subject = trim($_POST['subject'] ?? '');
-    $bodyHtml = trim($_POST['body_html'] ?? '');
+    $action = $_POST['action'] ?? 'save';
 
-    if ($subject === '' || $bodyHtml === '') {
-        $errors[] = 'Completa el asunto y el cuerpo del correo.';
+    if ($action === 'restore') {
+        $subject = $defaultSubject;
+        $bodyHtml = $defaultBody;
+    } else {
+        $subject = trim($_POST['subject'] ?? '');
+        $bodyHtml = trim($_POST['body_html'] ?? '');
+
+        if ($subject === '' || $bodyHtml === '') {
+            $errors[] = 'Completa el asunto y el cuerpo del correo.';
+        }
     }
 
     if (empty($errors)) {
@@ -117,7 +232,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                     <h5 class="card-title mb-0">Correo de validación de autoridades</h5>
                                     <p class="text-muted mb-0">Configura el correo HTML que se enviará con el enlace de validación.</p>
                                 </div>
-                                <button type="submit" form="template-form" class="btn btn-primary">Guardar configuración</button>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="submit" form="restore-template-form" class="btn btn-outline-secondary">Restaurar plantilla</button>
+                                    <button type="submit" form="template-form" class="btn btn-primary">Guardar configuración</button>
+                                </div>
                             </div>
                             <div class="card-body">
                                 <?php if (!empty($errors)) : ?>
@@ -133,6 +251,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
 
                                 <form id="template-form" method="post">
                                     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                    <input type="hidden" name="action" value="save">
                                     <div class="mb-3">
                                         <label class="form-label" for="email-subject">Asunto del correo</label>
                                         <input type="text" id="email-subject" name="subject" class="form-control" value="<?php echo htmlspecialchars($template['subject'], ENT_QUOTES, 'UTF-8'); ?>">
@@ -142,6 +261,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                         <textarea id="email-body" name="body_html" class="form-control" rows="14"><?php echo htmlspecialchars($template['body_html'], ENT_QUOTES, 'UTF-8'); ?></textarea>
                                         <div class="form-text">Puedes usar HTML completo con estilos en línea.</div>
                                     </div>
+                                </form>
+                                <form id="restore-template-form" method="post">
+                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                    <input type="hidden" name="action" value="restore">
                                 </form>
                             </div>
                         </div>
