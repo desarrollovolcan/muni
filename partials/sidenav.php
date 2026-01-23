@@ -52,9 +52,6 @@
                 <div class="collapse" id="modulo-eventos">
                     <ul class="side-nav sub-menu">
                         <li class="side-nav-item">
-                            <a href="eventos-lista.php" class="side-nav-link">Listar eventos</a>
-                        </li>
-                        <li class="side-nav-item">
                             <a href="eventos-editar.php" class="side-nav-link">Crear evento</a>
                         </li>
                         <li class="side-nav-item">
@@ -79,9 +76,6 @@
                 <div class="collapse" id="modulo-autoridades">
                     <ul class="side-nav sub-menu">
                         <li class="side-nav-item">
-                            <a href="autoridades-lista.php" class="side-nav-link">Listar autoridades</a>
-                        </li>
-                        <li class="side-nav-item">
                             <a href="autoridades-editar.php" class="side-nav-link">Crear autoridad</a>
                         </li>
                         <li class="side-nav-item">
@@ -98,13 +92,6 @@
                 </a>
             </li>
 
-            <li class="side-nav-item">
-                <a href="reportes.php" class="side-nav-link">
-                    <span class="menu-icon"><i data-lucide="bar-chart-3"></i></span>
-                    <span class="menu-text">Reportes</span>
-                </a>
-            </li>
-
             <li class="side-nav-title" data-lang="settings-title">Administración</li>
 
             <li class="side-nav-item">
@@ -115,9 +102,6 @@
                 </a>
                 <div class="collapse" id="modulo-usuarios">
                     <ul class="side-nav sub-menu">
-                        <li class="side-nav-item">
-                            <a href="usuarios-lista.php" class="side-nav-link">Listar usuarios</a>
-                        </li>
                         <li class="side-nav-item">
                             <a href="usuarios-crear.php" class="side-nav-link">Crear usuario</a>
                         </li>
@@ -136,9 +120,6 @@
                 </a>
                 <div class="collapse" id="modulo-roles">
                     <ul class="side-nav sub-menu">
-                        <li class="side-nav-item">
-                            <a href="roles-lista.php" class="side-nav-link">Listar roles</a>
-                        </li>
                         <li class="side-nav-item">
                             <a href="roles-editar.php" class="side-nav-link">Crear rol</a>
                         </li>
@@ -168,9 +149,6 @@
                         </li>
                         <li class="side-nav-item">
                             <a href="notificaciones-correo.php" class="side-nav-link">Correo de notificaciones</a>
-                        </li>
-                        <li class="side-nav-item">
-                            <a href="notificaciones-automaticas.php" class="side-nav-link">Notificaciones automáticas</a>
                         </li>
                     </ul>
                 </div>

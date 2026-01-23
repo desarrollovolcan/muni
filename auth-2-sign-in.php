@@ -39,6 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'rut' => $user['rut'],
                 'cargo' => $user['cargo'],
                 'rol' => $user['rol'],
+                'avatar_path' => $user['avatar_path'] ?? null,
             ];
             redirect('dashboard.php');
         }

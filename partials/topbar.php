@@ -291,10 +291,14 @@
                 $userLastName = $_SESSION['user']['apellido'] ?? '';
                 $userRole = $_SESSION['user']['rol'] ?? 'Sin rol';
                 $userFullName = trim($userName . ' ' . $userLastName);
+                $userAvatar = $_SESSION['user']['avatar_path'] ?? '';
+                if ($userAvatar === '') {
+                    $userAvatar = 'assets/images/users/user-1.jpg';
+                }
                 ?>
                 <div class="dropdown">
                     <a class="topbar-link dropdown-toggle drop-arrow-none px-2" data-bs-toggle="dropdown" data-bs-offset="0,19" href="#!" aria-haspopup="false" aria-expanded="false">
-                        <img src="assets/images/users/user-3.jpg" width="32" class="rounded-circle me-lg-2 d-flex" alt="user-image">
+                        <img src="<?php echo htmlspecialchars($userAvatar, ENT_QUOTES, 'UTF-8'); ?>" width="32" class="rounded-circle me-lg-2 d-flex" alt="user-image">
                         <div class="d-lg-flex align-items-center gap-1 d-none">
                             <h5 class="my-0"><?php echo htmlspecialchars($userFullName ?: 'Usuario', ENT_QUOTES, 'UTF-8'); ?></h5>
                             <i class="ti ti-chevron-down align-middle"></i>
