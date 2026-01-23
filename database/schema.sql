@@ -232,6 +232,16 @@ CREATE TABLE `notificacion_correos` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `email_templates` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `template_key` VARCHAR(80) NOT NULL,
+  `subject` VARCHAR(200) NOT NULL,
+  `body_html` MEDIUMTEXT NOT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email_templates_key_unique` (`template_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `notification_settings` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `canal_email` TINYINT(1) NOT NULL DEFAULT 1,

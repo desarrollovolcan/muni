@@ -57,6 +57,9 @@
                         <li class="side-nav-item">
                             <a href="eventos-autoridades.php" class="side-nav-link">Autoridades por evento</a>
                         </li>
+                        <li class="side-nav-item">
+                            <a href="eventos-procesados.php" class="side-nav-link">Eventos procesados</a>
+                        </li>
                     </ul>
                 </div>
             </li>
@@ -137,6 +140,9 @@
                         </li>
                         <li class="side-nav-item">
                             <a href="notificaciones-correo.php" class="side-nav-link">Correo de notificaciones</a>
+                        </li>
+                        <li class="side-nav-item">
+                            <a href="configuracion-email.php" class="side-nav-link">Configuración Email</a>
                         </li>
                     </ul>
                 </div>
