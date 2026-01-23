@@ -142,6 +142,9 @@
                             <a href="notificaciones-correo.php" class="side-nav-link">Correo de notificaciones</a>
                         </li>
                         <li class="side-nav-item">
+                            <a href="notificaciones-whatsapp.php" class="side-nav-link">WhatsApp de notificaciones</a>
+                        </li>
+                        <li class="side-nav-item">
                             <a href="configuracion-email.php" class="side-nav-link">Configuración Email</a>
                         </li>
                     </ul>
