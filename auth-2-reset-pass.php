@@ -1,7 +1,17 @@
-<?php include('partials/html.php'); ?>
+<?php
+
+declare(strict_types=1);
+
+require __DIR__ . '/app/bootstrap.php';
+
+$municipalidad = get_municipalidad();
+$logoAuthHeight = (int) ($municipalidad['logo_auth_height'] ?? 48);
+
+include('partials/html.php');
+?>
 
 <head>
-    <?php $title = "Reset Password"; include('partials/title-meta.php'); ?>
+    <?php $title = "Recuperar contraseña"; include('partials/title-meta.php'); ?>
 
     <?php include('partials/head-css.php'); ?>
 </head>
@@ -55,21 +65,21 @@
                     <div class="card-body min-vh-100 d-flex flex-column justify-content-center">
                         <div class="auth-brand mb-0 text-center">
                             <a href="index.php" class="logo-dark">
-                                <img src="assets/images/logo-black.png" alt="dark logo" height="28">
+                                <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo" style="height: <?php echo $logoAuthHeight; ?>px;">
                             </a>
                             <a href="index.php" class="logo-light">
-                                <img src="assets/images/logo.png" alt="logo" height="28">
+                                <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo" style="height: <?php echo $logoAuthHeight; ?>px;">
                             </a>
                         </div>
 
                         <div class="mt-auto">
-                            <p class="text-muted text-center auth-sub-text mx-auto">Enter your email address and we'll send you a link to reset your password.</p>
+                            <p class="text-muted text-center auth-sub-text mx-auto">Ingresa tu correo y te enviaremos un enlace para restablecer la contraseña.</p>
 
                             <form class="mt-4">
                                 <div class="mb-3">
-                                    <label for="userEmail" class="form-label">Email address <span class="text-danger">*</span></label>
+                                    <label for="userEmail" class="form-label">Correo electrónico <span class="text-danger">*</span></label>
                                     <div class="app-search">
-                                        <input type="email" class="form-control" id="userEmail" placeholder="you@example.com" required>
+                                        <input type="email" class="form-control" id="userEmail" placeholder="usuario@muni.cl" required>
                                         <i data-lucide="circle-user" class="app-search-icon text-muted"></i>
                                     </div>
                                 </div>
@@ -77,18 +87,18 @@
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <div class="form-check">
                                         <input class="form-check-input form-check-input-light fs-14" type="checkbox" id="termAndPolicy">
-                                        <label class="form-check-label" for="termAndPolicy">Agree the Terms & Policy</label>
+                                        <label class="form-check-label" for="termAndPolicy">Acepto los términos y la política</label>
                                     </div>
                                 </div>
 
                                 <div class="d-grid">
-                                    <button type="submit" class="btn btn-primary fw-semibold py-2">Send Request</button>
+                                    <button type="submit" class="btn btn-primary fw-semibold py-2">Enviar solicitud</button>
                                 </div>
                             </form>
                         </div>
 
                         <p class="text-muted text-center mt-4 mb-0">
-                            Return to <a href="auth-2-sign-in.php" class="text-decoration-underline link-offset-3 fw-semibold">Sign in</a>
+                            Volver a <a href="auth-2-sign-in.php" class="text-decoration-underline link-offset-3 fw-semibold">iniciar sesión</a>
                         </p>
 
                         <p class="text-center text-muted mt-auto mb-0">

@@ -71,15 +71,8 @@ if ($id > 0) {
                                             <div><?php echo htmlspecialchars($evento['descripcion'], ENT_QUOTES, 'UTF-8'); ?></div>
                                         </div>
                                     </div>
-                                    <div class="mt-4">
-                                        <h6 class="mb-3">Adjuntos</h6>
-                                        <ul class="list-group">
-                                            <li class="list-group-item text-muted">Adjuntos pendientes de carga.</li>
-                                        </ul>
-                                    </div>
                                     <div class="d-flex flex-wrap gap-2 mt-3">
                                         <a href="eventos-editar.php?id=<?php echo (int) $evento['id']; ?>" class="btn btn-primary">Editar evento</a>
-                                        <a href="eventos-adjuntos.php" class="btn btn-outline-secondary">Subir adjuntos</a>
                                         <a href="eventos-lista.php" class="btn btn-link">Volver al listado</a>
                                     </div>
                                 <?php endif; ?>

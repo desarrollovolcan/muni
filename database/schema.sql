@@ -9,6 +9,7 @@ CREATE TABLE `users` (
   `username` VARCHAR(60) NOT NULL,
   `rol` VARCHAR(60) DEFAULT NULL,
   `unidad_id` INT UNSIGNED DEFAULT NULL,
+  `avatar_path` VARCHAR(255) DEFAULT NULL,
   `password_hash` VARCHAR(255) NOT NULL,
   `estado` TINYINT(1) NOT NULL DEFAULT 1,
   `fecha_creacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -211,6 +212,7 @@ CREATE TABLE `municipalidad` (
   `logo_topbar_height` INT UNSIGNED DEFAULT NULL,
   `logo_sidenav_height` INT UNSIGNED DEFAULT NULL,
   `logo_sidenav_height_sm` INT UNSIGNED DEFAULT NULL,
+  `logo_auth_height` INT UNSIGNED DEFAULT NULL,
   `color_primary` VARCHAR(20) DEFAULT NULL,
   `color_secondary` VARCHAR(20) DEFAULT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -228,6 +230,16 @@ CREATE TABLE `notificacion_correos` (
   `from_correo` VARCHAR(150) DEFAULT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `email_templates` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `template_key` VARCHAR(80) NOT NULL,
+  `subject` VARCHAR(200) NOT NULL,
+  `body_html` MEDIUMTEXT NOT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email_templates_key_unique` (`template_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `notification_settings` (

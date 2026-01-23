@@ -1,7 +1,97 @@
-<?php include('partials/html.php'); ?>
+<?php
+require __DIR__ . '/app/bootstrap.php';
+
+$municipalidad = get_municipalidad();
+$logoAuthHeight = (int) ($municipalidad['logo_auth_height'] ?? 48);
+$errors = [];
+$successMessage = '';
+$correoConfig = db()->query('SELECT * FROM notificacion_correos LIMIT 1')->fetch();
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ?? null)) {
+    $action = $_POST['action'] ?? '';
+    $email = trim($_POST['email'] ?? '');
+
+    if ($action === 'send_code') {
+        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = 'Ingresa un correo válido.';
+        } else {
+            $stmt = db()->prepare('SELECT id FROM users WHERE correo = ? LIMIT 1');
+            $stmt->execute([$email]);
+            $userId = (int) $stmt->fetchColumn();
+            if ($userId === 0) {
+                $errors[] = 'No encontramos un usuario asociado a ese correo.';
+            }
+        }
+
+        if (!$correoConfig) {
+            $errors[] = 'No hay un correo de notificaciones configurado.';
+        }
+
+        $fromEmail = $correoConfig['from_correo'] ?? $correoConfig['correo_imap'] ?? '';
+        $fromName = $correoConfig['from_nombre'] ?? 'Municipalidad';
+        if ($fromEmail === '') {
+            $errors[] = 'Configura el correo remitente en Notificaciones.';
+        }
+
+        if (empty($errors)) {
+            $code = (string) random_int(100000, 999999);
+            $_SESSION['reset_code'] = $code;
+            $_SESSION['reset_email'] = $email;
+            $_SESSION['reset_expires'] = time() + 15 * 60;
+
+            $subject = 'Código de restablecimiento de contraseña';
+            $body = "Tu código de verificación es: {$code}\n\nEste código expira en 15 minutos.";
+            $headers = "From: {$fromName} <{$fromEmail}>\r\n";
+
+            if (!@mail($email, $subject, $body, $headers)) {
+                $errors[] = 'No se pudo enviar el código. Verifica la configuración de correo.';
+            } else {
+                $successMessage = 'Te enviamos un código de verificación al correo ingresado.';
+            }
+        }
+    }
+
+    if ($action === 'reset_password') {
+        $codeInput = trim($_POST['code'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $passwordConfirm = $_POST['password_confirm'] ?? '';
+
+        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = 'Ingresa un correo válido.';
+        }
+        if ($codeInput === '') {
+            $errors[] = 'Ingresa el código de verificación.';
+        }
+        if ($password === '' || $passwordConfirm === '') {
+            $errors[] = 'Ingresa y confirma la nueva contraseña.';
+        }
+        if ($password !== $passwordConfirm) {
+            $errors[] = 'Las contraseñas no coinciden.';
+        }
+
+        $sessionCode = $_SESSION['reset_code'] ?? '';
+        $sessionEmail = $_SESSION['reset_email'] ?? '';
+        $sessionExpires = (int) ($_SESSION['reset_expires'] ?? 0);
+        if ($sessionCode === '' || $sessionEmail === '' || $sessionExpires < time()) {
+            $errors[] = 'El código expiró. Solicita uno nuevo.';
+        } elseif ($sessionEmail !== $email || $sessionCode !== $codeInput) {
+            $errors[] = 'El código de verificación no es válido.';
+        }
+
+        if (empty($errors)) {
+            $stmt = db()->prepare('UPDATE users SET password_hash = ? WHERE correo = ?');
+            $stmt->execute([password_hash($password, PASSWORD_BCRYPT), $email]);
+            unset($_SESSION['reset_code'], $_SESSION['reset_email'], $_SESSION['reset_expires']);
+            $successMessage = 'La contraseña se actualizó correctamente.';
+        }
+    }
+}
+
+include('partials/html.php');
+?>
 
 <head>
-    <?php $title = "New Password"; include('partials/title-meta.php'); ?>
+    <?php $title = "Restablecer contraseña"; include('partials/title-meta.php'); ?>
 
     <?php include('partials/head-css.php'); ?>
 </head>
@@ -18,67 +108,63 @@
                         </div>
                         <div class="auth-brand text-center mb-4">
                             <a href="index.php" class="logo-dark">
-                                <img src="assets/images/logo-black.png" alt="dark logo" height="28">
+                                <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo" style="height: <?php echo $logoAuthHeight; ?>px;">
                             </a>
                             <a href="index.php" class="logo-light">
-                                <img src="assets/images/logo.png" alt="logo" height="28">
+                                <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo" style="height: <?php echo $logoAuthHeight; ?>px;">
                             </a>
-                            <p class="text-muted w-lg-75 mt-3 mx-auto">We've emailed you a 6-digit verification code. Please enter it below to confirm your email address</p>
+                            <p class="text-muted w-lg-75 mt-3 mx-auto">Ingresa tu correo para recibir el código de verificación.</p>
                         </div>
 
-                        <form>
+                        <?php if (!empty($errors)) : ?>
+                            <div class="alert alert-danger">
+                                <?php foreach ($errors as $error) : ?>
+                                    <div><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                        <?php if ($successMessage !== '') : ?>
+                            <div class="alert alert-success"><?php echo htmlspecialchars($successMessage, ENT_QUOTES, 'UTF-8'); ?></div>
+                        <?php endif; ?>
+
+                        <form method="post" class="mb-3">
+                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                            <input type="hidden" name="action" value="send_code">
                             <div class="mb-3">
-                                <label for="userEmail" class="form-label">Email address <span class="text-danger">*</span></label>
-                                <div class="input-group">
-                                    <input type="email" class="form-control" id="userEmail" placeholder="you@example.com" disabled>
-                                </div>
+                                <label for="resetEmail" class="form-label">Correo electrónico <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="resetEmail" name="email" placeholder="usuario@muni.cl" required>
                             </div>
-
-                            <div class="mb-3">
-                                <label class="form-label">Enter your 6-digit code <span class="text-danger">*</span></label>
-                                <div class="d-flex gap-2 two-factor">
-                                    <input type="text" class="form-control text-center" required>
-                                    <input type="text" class="form-control text-center" required>
-                                    <input type="text" class="form-control text-center" required>
-                                    <input type="text" class="form-control text-center" required>
-                                    <input type="text" class="form-control text-center" required>
-                                    <input type="text" class="form-control text-center" required>
-                                </div>
-                            </div>
-
-                            <div class="mb-3" data-password="bar">
-                                <label for="userPassword" class="form-label">Password <span class="text-danger">*</span></label>
-                                <div class="input-group">
-                                    <input type="password" class="form-control" id="userPassword" placeholder="••••••••" required>
-                                </div>
-
-                                <div class="password-bar my-2"></div>
-                                <p class="text-muted fs-xs mb-0">Use 8+ characters with letters, numbers & symbols.</p>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="userNewPassword" class="form-label">Confirm New Password <span class="text-danger">*</span></label>
-                                <div class="input-group">
-                                    <input type="password" class="form-control" id="userNewPassword" placeholder="••••••••" required>
-                                </div>
-                            </div>
-
-                            <div class="mb-3">
-                                <div class="form-check">
-                                    <input class="form-check-input form-check-input-light fs-14" type="checkbox" id="termAndPolicy">
-                                    <label class="form-check-label" for="termAndPolicy">Agree the Terms & Policy</label>
-                                </div>
-                            </div>
-
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-primary fw-semibold py-2">Update Password</button>
+                                <button type="submit" class="btn btn-primary fw-semibold py-2">Enviar código</button>
                             </div>
-
                         </form>
 
-                        <p class="mt-4 text-muted text-center mb-4">Don’t have a code? <a href="#" class="text-decoration-underline link-offset-2 fw-semibold">Resend</a> or <a href="#" class="text-decoration-underline link-offset-2 fw-semibold">Call Us</a></p>
-                        <p class="text-muted text-center mb-0">
-                            Return to <a href="auth-sign-in.php" class="text-decoration-underline link-offset-3 fw-semibold">Sign in</a>
+                        <form method="post">
+                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                            <input type="hidden" name="action" value="reset_password">
+                            <div class="mb-3">
+                                <label for="resetEmailConfirm" class="form-label">Correo electrónico <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="resetEmailConfirm" name="email" placeholder="usuario@muni.cl" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="resetCode" class="form-label">Código de verificación <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="resetCode" name="code" maxlength="6" placeholder="123456" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="resetPassword" class="form-label">Nueva contraseña <span class="text-danger">*</span></label>
+                                <input type="password" class="form-control" id="resetPassword" name="password" placeholder="********" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="resetPasswordConfirm" class="form-label">Confirmar contraseña <span class="text-danger">*</span></label>
+                                <input type="password" class="form-control" id="resetPasswordConfirm" name="password_confirm" placeholder="********" required>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary fw-semibold py-2">Actualizar contraseña</button>
+                            </div>
+                        </form>
+
+                        <p class="text-muted text-center mt-4 mb-0">
+                            Volver a <a href="auth-sign-in.php" class="text-decoration-underline link-offset-3 fw-semibold">iniciar sesión</a>
                         </p>
                     </div>
 
@@ -92,12 +178,6 @@
     <!-- end auth-fluid-->
 
     <?php include('partials/footer-scripts.php'); ?>
-
-    <!-- Two Factor Validator Js -->
-    <script src="assets/js/pages/auth-two-factor.js"></script>
-
-    <!-- Password Suggestion Js -->
-    <script src="assets/js/pages/auth-password.js"></script>
 
 </body>
 
