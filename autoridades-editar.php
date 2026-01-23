@@ -5,8 +5,19 @@ $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $autoridad = null;
 $errors = [];
 $errorMessage = '';
+$bulkErrors = [];
+$bulkSuccess = '';
 $success = $_GET['success'] ?? '';
-$autoridades = db()->query('SELECT id, nombre, tipo, fecha_inicio, fecha_fin, correo, estado FROM authorities ORDER BY fecha_inicio DESC')->fetchAll();
+
+if (isset($_GET['action']) && $_GET['action'] === 'download-template') {
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="plantilla-autoridades.csv"');
+    $output = fopen('php://output', 'w');
+    fputcsv($output, ['nombre', 'tipo', 'correo', 'telefono', 'fecha_inicio', 'fecha_fin', 'estado']);
+    fputcsv($output, ['Juan Perez', 'Concejal', 'juan.perez@municipalidad.cl', '+56 9 1234 5678', '2024-01-01', '', '1']);
+    fclose($output);
+    exit;
+}
 
 if ($id > 0) {
     $stmt = db()->prepare('SELECT * FROM authorities WHERE id = ?');
@@ -23,6 +34,76 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             redirect('autoridades-editar.php');
         } catch (Exception $e) {
             $errorMessage = 'No se pudo eliminar la autoridad. Verifica dependencias asociadas.';
+        }
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'bulk_upload' && verify_csrf($_POST['csrf_token'] ?? null)) {
+    if (!isset($_FILES['autoridades_excel']) || $_FILES['autoridades_excel']['error'] !== UPLOAD_ERR_OK) {
+        $bulkErrors[] = 'Selecciona un archivo CSV válido.';
+    } else {
+        $file = fopen($_FILES['autoridades_excel']['tmp_name'], 'r');
+        if ($file === false) {
+            $bulkErrors[] = 'No se pudo leer el archivo cargado.';
+        } else {
+            $header = fgetcsv($file);
+            if ($header === false) {
+                $bulkErrors[] = 'El archivo está vacío.';
+            } else {
+                $expected = ['nombre', 'tipo', 'correo', 'telefono', 'fecha_inicio', 'fecha_fin', 'estado'];
+                $normalizedHeader = array_map('strtolower', array_map('trim', $header));
+                if ($normalizedHeader !== $expected) {
+                    $bulkErrors[] = 'La plantilla no coincide con el formato requerido. Descarga la plantilla para usar el formato correcto.';
+                } else {
+                    $stmtInsert = db()->prepare(
+                        'INSERT INTO authorities (nombre, tipo, correo, telefono, fecha_inicio, fecha_fin, estado) VALUES (?, ?, ?, ?, ?, ?, ?)'
+                    );
+                    $inserted = 0;
+                    $rowNumber = 1;
+                    while (($row = fgetcsv($file)) !== false) {
+                        $rowNumber++;
+                        if (count(array_filter($row, fn($value) => trim((string) $value) !== '')) === 0) {
+                            continue;
+                        }
+                        $row = array_pad($row, count($expected), '');
+                        [$nombre, $tipo, $correo, $telefono, $fechaInicio, $fechaFin, $estadoRaw] = array_map('trim', $row);
+                        if ($nombre === '' || $tipo === '' || $fechaInicio === '') {
+                            $bulkErrors[] = "Fila {$rowNumber}: faltan campos obligatorios (nombre, tipo o fecha_inicio).";
+                            continue;
+                        }
+                        $inicio = DateTime::createFromFormat('Y-m-d', $fechaInicio);
+                        if (!$inicio || $inicio->format('Y-m-d') !== $fechaInicio) {
+                            $bulkErrors[] = "Fila {$rowNumber}: fecha_inicio inválida (usa YYYY-MM-DD).";
+                            continue;
+                        }
+                        $fechaFin = $fechaFin !== '' ? $fechaFin : null;
+                        if ($fechaFin !== null) {
+                            $fin = DateTime::createFromFormat('Y-m-d', $fechaFin);
+                            if (!$fin || $fin->format('Y-m-d') !== $fechaFin) {
+                                $bulkErrors[] = "Fila {$rowNumber}: fecha_fin inválida (usa YYYY-MM-DD).";
+                                continue;
+                            }
+                        }
+                        $estado = in_array(strtolower($estadoRaw), ['0', 'deshabilitado', 'inactivo'], true) ? 0 : 1;
+                        $stmtInsert->execute([
+                            $nombre,
+                            $tipo,
+                            $correo !== '' ? $correo : null,
+                            $telefono !== '' ? $telefono : null,
+                            $fechaInicio,
+                            $fechaFin,
+                            $estado,
+                        ]);
+                        $inserted++;
+                    }
+                    if ($inserted > 0) {
+                        $bulkSuccess = "Se cargaron {$inserted} autoridades correctamente.";
+                    } elseif (empty($bulkErrors)) {
+                        $bulkErrors[] = 'No se encontraron filas válidas para importar.';
+                    }
+                }
+            }
+            fclose($file);
         }
     }
 }
@@ -70,6 +151,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_
         }
     }
 }
+
+$autoridades = db()->query('SELECT id, nombre, tipo, fecha_inicio, fecha_fin, correo, estado FROM authorities ORDER BY fecha_inicio DESC')->fetchAll();
 ?>
 <?php include('partials/html.php'); ?>
 
@@ -158,6 +241,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_
                                     <div class="d-flex flex-wrap gap-2">
                                         <button type="submit" class="btn btn-primary">Guardar autoridad</button>
                                         <a href="autoridades-lista.php" class="btn btn-outline-secondary">Volver</a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                <div>
+                                    <h5 class="card-title mb-0">Carga masiva de autoridades</h5>
+                                    <p class="text-muted mb-0">Sube un archivo CSV con el formato indicado para crear autoridades en bloque.</p>
+                                </div>
+                                <a class="btn btn-sm btn-outline-primary" href="autoridades-editar.php?action=download-template">Descargar plantilla</a>
+                            </div>
+                            <div class="card-body">
+                                <?php if (!empty($bulkErrors)) : ?>
+                                    <div class="alert alert-danger">
+                                        <?php foreach ($bulkErrors as $bulkError) : ?>
+                                            <div><?php echo htmlspecialchars($bulkError, ENT_QUOTES, 'UTF-8'); ?></div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
+                                <?php if ($bulkSuccess !== '') : ?>
+                                    <div class="alert alert-success"><?php echo htmlspecialchars($bulkSuccess, ENT_QUOTES, 'UTF-8'); ?></div>
+                                <?php endif; ?>
+                                <form method="post" enctype="multipart/form-data" class="row gy-2 align-items-end">
+                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                    <input type="hidden" name="action" value="bulk_upload">
+                                    <div class="col-md-8">
+                                        <label class="form-label" for="autoridades-excel">Archivo CSV</label>
+                                        <input type="file" id="autoridades-excel" name="autoridades_excel" class="form-control" accept=".csv">
+                                        <div class="form-text">Columnas requeridas: nombre, tipo, correo, telefono, fecha_inicio, fecha_fin, estado.</div>
+                                    </div>
+                                    <div class="col-md-4 d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary">Subir masivamente</button>
                                     </div>
                                 </form>
                             </div>
