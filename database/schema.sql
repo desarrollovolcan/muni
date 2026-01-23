@@ -385,11 +385,29 @@ VALUES
   ('Auditor', 'Revisión y auditoría', 1),
   ('Consulta', 'Acceso de solo lectura', 1);
 
+-- Datos QA para pruebas de flujo -- Sección: unidades
 INSERT INTO `unidades` (`nombre`, `descripcion`)
 VALUES
-  ('Administración', 'Unidad Administrativa'),
-  ('DIDECO', 'Desarrollo Comunitario'),
-  ('SECPLAN', 'Secretaría Comunal de Planificación');
+  ('Administración', 'Gestión administrativa municipal'),
+  ('Finanzas', 'Gestión presupuestaria y contable'),
+  ('Recursos Humanos', 'Gestión de personal y bienestar'),
+  ('DIDECO', 'Desarrollo comunitario'),
+  ('SECPLAN', 'Planificación comunal'),
+  ('Tránsito', 'Permisos y gestión vial'),
+  ('Obras Municipales', 'Permisos y fiscalización de obras'),
+  ('Salud', 'Coordinación de atención primaria'),
+  ('Educación', 'Gestión educativa comunal'),
+  ('Medio Ambiente', 'Programas y fiscalización ambiental'),
+  ('Cultura', 'Actividades culturales'),
+  ('Deportes', 'Programas deportivos'),
+  ('Seguridad', 'Prevención y seguridad pública'),
+  ('Turismo', 'Promoción turística'),
+  ('Vivienda', 'Programas habitacionales'),
+  ('Fomento Productivo', 'Apoyo a emprendedores'),
+  ('Adulto Mayor', 'Programas para personas mayores'),
+  ('Infancia', 'Programas de infancia'),
+  ('Juventud', 'Programas juveniles'),
+  ('Participación Ciudadana', 'Vinculación con la comunidad');
 
 INSERT INTO `municipalidad` (`nombre`, `rut`, `direccion`, `telefono`, `correo`, `logo_path`, `color_primary`, `color_secondary`)
 VALUES ('Municipalidad', NULL, NULL, NULL, NULL, 'assets/images/logo.png', '#6658dd', '#4a81d4');
