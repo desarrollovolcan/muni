@@ -115,7 +115,6 @@ $eventos = $stmt->fetchAll();
                                                                 <ul class="dropdown-menu dropdown-menu-end">
                                                                     <li><a class="dropdown-item" href="eventos-detalle.php?id=<?php echo (int) $evento['id']; ?>">Ver detalle</a></li>
                                                                     <li><a class="dropdown-item" href="eventos-editar.php?id=<?php echo (int) $evento['id']; ?>">Editar</a></li>
-                                                                    <li><a class="dropdown-item" href="eventos-adjuntos.php">Adjuntos</a></li>
                                                                     <li><a class="dropdown-item" href="eventos-autoridades.php?event_id=<?php echo (int) $evento['id']; ?>">Enviar confirmación de invitados</a></li>
                                                                     <li><hr class="dropdown-divider"></li>
                                                                     <li>

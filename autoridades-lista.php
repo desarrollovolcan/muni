@@ -93,7 +93,6 @@ $autoridades = db()->query('SELECT id, nombre, tipo, fecha_inicio, fecha_fin, co
                                                                 <ul class="dropdown-menu dropdown-menu-end">
                                                                     <li><a class="dropdown-item" href="autoridades-detalle.php?id=<?php echo (int) $autoridad['id']; ?>">Ver detalle</a></li>
                                                                     <li><a class="dropdown-item" href="autoridades-editar.php?id=<?php echo (int) $autoridad['id']; ?>">Editar</a></li>
-                                                                    <li><a class="dropdown-item" href="autoridades-adjuntos.php">Adjuntos</a></li>
                                                                     <li><hr class="dropdown-divider"></li>
                                                                     <li>
                                                                         <form method="post" class="px-3 py-1">
