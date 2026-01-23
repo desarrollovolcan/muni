@@ -211,6 +211,7 @@ CREATE TABLE `municipalidad` (
   `logo_topbar_height` INT UNSIGNED DEFAULT NULL,
   `logo_sidenav_height` INT UNSIGNED DEFAULT NULL,
   `logo_sidenav_height_sm` INT UNSIGNED DEFAULT NULL,
+  `logo_auth_height` INT UNSIGNED DEFAULT NULL,
   `color_primary` VARCHAR(20) DEFAULT NULL,
   `color_secondary` VARCHAR(20) DEFAULT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
