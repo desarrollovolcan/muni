@@ -67,7 +67,20 @@ function format_datetime_iso(?string $value): ?string
     return $date ? $date->format('Y-m-d\\TH:i:s') : null;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ?? null)) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['list_action']) && $_POST['list_action'] === 'delete' && verify_csrf($_POST['csrf_token'] ?? null)) {
+    $deleteId = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+    if ($deleteId > 0) {
+        try {
+            $stmt = db()->prepare('DELETE FROM events WHERE id = ?');
+            $stmt->execute([$deleteId]);
+            redirect('eventos-editar.php');
+        } catch (Exception $e) {
+            $errors[] = 'No se pudo eliminar el evento. Verifica dependencias asociadas.';
+        }
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['list_action']) && verify_csrf($_POST['csrf_token'] ?? null)) {
     $action = $_POST['event_action'] ?? 'save';
     $postId = isset($_POST['event_id']) ? (int) $_POST['event_id'] : 0;
 
@@ -364,12 +377,13 @@ try {
                                                 <th>Estado</th>
                                                 <th>Responsable</th>
                                                 <th>Notificación</th>
+                                                <th class="text-end">Acciones</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <?php if (empty($eventosListado)) : ?>
                                                 <tr>
-                                                    <td colspan="6" class="text-center text-muted">No hay eventos registrados.</td>
+                                                    <td colspan="7" class="text-center text-muted">No hay eventos registrados.</td>
                                                 </tr>
                                             <?php else : ?>
                                                 <?php foreach ($eventosListado as $eventoListado) : ?>
@@ -391,6 +405,26 @@ try {
                                                             <?php else : ?>
                                                                 <span class="badge text-bg-secondary">Sin enviar</span>
                                                             <?php endif; ?>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <div class="dropdown">
+                                                                <button class="btn btn-sm btn-soft-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                    Acciones
+                                                                </button>
+                                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                                    <li><a class="dropdown-item" href="eventos-detalle.php?id=<?php echo (int) $eventoListado['id']; ?>">Ver</a></li>
+                                                                    <li><a class="dropdown-item" href="eventos-editar.php?id=<?php echo (int) $eventoListado['id']; ?>">Editar</a></li>
+                                                                    <li><hr class="dropdown-divider"></li>
+                                                                    <li>
+                                                                        <form method="post" class="px-3 py-1" data-confirm="¿Estás seguro de eliminar este evento?">
+                                                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                            <input type="hidden" name="list_action" value="delete">
+                                                                            <input type="hidden" name="id" value="<?php echo (int) $eventoListado['id']; ?>">
+                                                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100">Eliminar</button>
+                                                                        </form>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 <?php endforeach; ?>

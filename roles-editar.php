@@ -4,6 +4,7 @@ require __DIR__ . '/app/bootstrap.php';
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $rol = null;
 $errors = [];
+$errorMessage = '';
 $success = $_GET['success'] ?? '';
 $roles = db()->query('SELECT id, nombre, descripcion, estado FROM roles ORDER BY nombre')->fetchAll();
 
@@ -13,7 +14,20 @@ if ($id > 0) {
     $rol = $stmt->fetch();
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ?? null)) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete' && verify_csrf($_POST['csrf_token'] ?? null)) {
+    $deleteId = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+    if ($deleteId > 0) {
+        try {
+            $stmt = db()->prepare('DELETE FROM roles WHERE id = ?');
+            $stmt->execute([$deleteId]);
+            redirect('roles-editar.php');
+        } catch (Exception $e) {
+            $errorMessage = 'No se pudo eliminar el rol. Verifica dependencias asociadas.';
+        }
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_csrf($_POST['csrf_token'] ?? null)) {
     $nombre = trim($_POST['nombre'] ?? '');
     $descripcion = trim($_POST['descripcion'] ?? '');
     $estado = isset($_POST['estado']) && $_POST['estado'] === '0' ? 0 : 1;
@@ -64,6 +78,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                     <div class="col-12">
                         <div class="card">
                             <div class="card-body">
+                                <?php if ($errorMessage !== '') : ?>
+                                    <div class="alert alert-danger"><?php echo htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8'); ?></div>
+                                <?php endif; ?>
                                 <?php if (!empty($errors)) : ?>
                                     <div class="alert alert-danger">
                                         <?php foreach ($errors as $error) : ?>
@@ -116,12 +133,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                                 <th>Rol</th>
                                                 <th>Descripción</th>
                                                 <th>Estado</th>
+                                                <th class="text-end">Acciones</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <?php if (empty($roles)) : ?>
                                                 <tr>
-                                                    <td colspan="3" class="text-center text-muted">No hay roles registrados.</td>
+                                                    <td colspan="4" class="text-center text-muted">No hay roles registrados.</td>
                                                 </tr>
                                             <?php else : ?>
                                                 <?php foreach ($roles as $rolItem) : ?>
@@ -134,6 +152,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                                             <?php else : ?>
                                                                 <span class="badge text-bg-secondary">Inactivo</span>
                                                             <?php endif; ?>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <div class="dropdown">
+                                                                <button class="btn btn-sm btn-soft-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                    Acciones
+                                                                </button>
+                                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                                    <li><a class="dropdown-item" href="roles-editar.php?id=<?php echo (int) $rolItem['id']; ?>">Ver</a></li>
+                                                                    <li><a class="dropdown-item" href="roles-editar.php?id=<?php echo (int) $rolItem['id']; ?>">Editar</a></li>
+                                                                    <li><a class="dropdown-item" href="roles-permisos.php?rol_id=<?php echo (int) $rolItem['id']; ?>">Permisos</a></li>
+                                                                    <li><hr class="dropdown-divider"></li>
+                                                                    <li>
+                                                                        <form method="post" class="px-3 py-1" data-confirm="¿Estás seguro de eliminar este rol?">
+                                                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                            <input type="hidden" name="action" value="delete">
+                                                                            <input type="hidden" name="id" value="<?php echo (int) $rolItem['id']; ?>">
+                                                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100">Eliminar</button>
+                                                                        </form>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 <?php endforeach; ?>

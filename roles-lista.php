@@ -1,15 +1,20 @@
 <?php
 require __DIR__ . '/app/bootstrap.php';
 
+$errorMessage = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && verify_csrf($_POST['csrf_token'] ?? null)) {
     $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
 
-    if ($_POST['action'] === 'disable' && $id > 0) {
-        $stmt = db()->prepare('UPDATE roles SET estado = 0 WHERE id = ?');
-        $stmt->execute([$id]);
+    if ($_POST['action'] === 'delete' && $id > 0) {
+        try {
+            $stmt = db()->prepare('DELETE FROM roles WHERE id = ?');
+            $stmt->execute([$id]);
+            redirect('roles-lista.php');
+        } catch (Exception $e) {
+            $errorMessage = 'No se pudo eliminar el rol. Verifica dependencias asociadas.';
+        }
     }
-
-    redirect('roles-lista.php');
 }
 
 $roles = db()->query('SELECT id, nombre, descripcion, estado FROM roles ORDER BY nombre')->fetchAll();
@@ -49,6 +54,9 @@ $roles = db()->query('SELECT id, nombre, descripcion, estado FROM roles ORDER BY
                                 <a href="roles-editar.php" class="btn btn-primary">Nuevo rol</a>
                             </div>
                             <div class="card-body">
+                                <?php if ($errorMessage !== '') : ?>
+                                    <div class="alert alert-danger"><?php echo htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8'); ?></div>
+                                <?php endif; ?>
                                 <div class="mb-3">
                                     <input type="text" class="form-control" placeholder="Buscar rol">
                                 </div>
@@ -85,15 +93,16 @@ $roles = db()->query('SELECT id, nombre, descripcion, estado FROM roles ORDER BY
                                                                     Acciones
                                                                 </button>
                                                                 <ul class="dropdown-menu dropdown-menu-end">
+                                                                    <li><a class="dropdown-item" href="roles-editar.php?id=<?php echo (int) $rol['id']; ?>">Ver</a></li>
                                                                     <li><a class="dropdown-item" href="roles-editar.php?id=<?php echo (int) $rol['id']; ?>">Editar</a></li>
-                                                                    <li><a class="dropdown-item" href="roles-permisos.php">Permisos</a></li>
+                                                                    <li><a class="dropdown-item" href="roles-permisos.php?rol_id=<?php echo (int) $rol['id']; ?>">Permisos</a></li>
                                                                     <li><hr class="dropdown-divider"></li>
                                                                     <li>
-                                                                        <form method="post" class="px-3 py-1">
+                                                                        <form method="post" class="px-3 py-1" data-confirm="¿Estás seguro de eliminar este rol?">
                                                                             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                                                            <input type="hidden" name="action" value="disable">
+                                                                            <input type="hidden" name="action" value="delete">
                                                                             <input type="hidden" name="id" value="<?php echo (int) $rol['id']; ?>">
-                                                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100" <?php echo (int) $rol['estado'] === 0 ? 'disabled' : ''; ?>>Deshabilitar</button>
+                                                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100">Eliminar</button>
                                                                         </form>
                                                                     </li>
                                                                 </ul>

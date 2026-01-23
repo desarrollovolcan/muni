@@ -1,15 +1,20 @@
 <?php
 require __DIR__ . '/app/bootstrap.php';
 
+$errorMessage = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && verify_csrf($_POST['csrf_token'] ?? null)) {
     $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
 
-    if ($_POST['action'] === 'disable' && $id > 0) {
-        $stmt = db()->prepare('UPDATE authorities SET estado = 0 WHERE id = ?');
-        $stmt->execute([$id]);
+    if ($_POST['action'] === 'delete' && $id > 0) {
+        try {
+            $stmt = db()->prepare('DELETE FROM authorities WHERE id = ?');
+            $stmt->execute([$id]);
+            redirect('autoridades-lista.php');
+        } catch (Exception $e) {
+            $errorMessage = 'No se pudo eliminar la autoridad. Verifica dependencias asociadas.';
+        }
     }
-
-    redirect('autoridades-lista.php');
 }
 
 $autoridades = db()->query('SELECT id, nombre, tipo, fecha_inicio, fecha_fin, correo, estado FROM authorities ORDER BY fecha_inicio DESC')->fetchAll();
@@ -49,6 +54,9 @@ $autoridades = db()->query('SELECT id, nombre, tipo, fecha_inicio, fecha_fin, co
                                 <a href="autoridades-editar.php" class="btn btn-primary">Nueva autoridad</a>
                             </div>
                             <div class="card-body">
+                                <?php if ($errorMessage !== '') : ?>
+                                    <div class="alert alert-danger"><?php echo htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8'); ?></div>
+                                <?php endif; ?>
                                 <div class="d-flex flex-wrap gap-2 mb-3">
                                     <select class="form-select">
                                         <option value="">Estado</option>
@@ -91,15 +99,15 @@ $autoridades = db()->query('SELECT id, nombre, tipo, fecha_inicio, fecha_fin, co
                                                                     Acciones
                                                                 </button>
                                                                 <ul class="dropdown-menu dropdown-menu-end">
-                                                                    <li><a class="dropdown-item" href="autoridades-detalle.php?id=<?php echo (int) $autoridad['id']; ?>">Ver detalle</a></li>
+                                                                    <li><a class="dropdown-item" href="autoridades-detalle.php?id=<?php echo (int) $autoridad['id']; ?>">Ver</a></li>
                                                                     <li><a class="dropdown-item" href="autoridades-editar.php?id=<?php echo (int) $autoridad['id']; ?>">Editar</a></li>
                                                                     <li><hr class="dropdown-divider"></li>
                                                                     <li>
-                                                                        <form method="post" class="px-3 py-1">
+                                                                        <form method="post" class="px-3 py-1" data-confirm="¿Estás seguro de eliminar esta autoridad?">
                                                                             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                                                            <input type="hidden" name="action" value="disable">
+                                                                            <input type="hidden" name="action" value="delete">
                                                                             <input type="hidden" name="id" value="<?php echo (int) $autoridad['id']; ?>">
-                                                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100" <?php echo (int) $autoridad['estado'] === 0 ? 'disabled' : ''; ?>>Deshabilitar</button>
+                                                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100">Eliminar</button>
                                                                         </form>
                                                                     </li>
                                                                 </ul>

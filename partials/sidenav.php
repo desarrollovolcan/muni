@@ -57,12 +57,6 @@
                         <li class="side-nav-item">
                             <a href="eventos-autoridades.php" class="side-nav-link">Autoridades por evento</a>
                         </li>
-                        <li class="side-nav-item">
-                            <a href="eventos-adjuntos.php" class="side-nav-link">Subir adjuntos</a>
-                        </li>
-                        <li class="side-nav-item">
-                            <a href="eventos-adjuntos-gestionar.php" class="side-nav-link">Descargar/eliminar adjuntos</a>
-                        </li>
                     </ul>
                 </div>
             </li>
