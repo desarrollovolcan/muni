@@ -65,6 +65,10 @@ function get_municipalidad(): array
     return [
         'nombre' => 'Municipalidad',
         'logo_path' => 'assets/images/logo.png',
+        'logo_topbar_height' => 56,
+        'logo_sidenav_height' => 48,
+        'logo_sidenav_height_sm' => 36,
+        'logo_auth_height' => 48,
         'color_primary' => '#6658dd',
         'color_secondary' => '#4a81d4',
     ];
