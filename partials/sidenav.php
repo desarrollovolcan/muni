@@ -78,9 +78,6 @@
                         <li class="side-nav-item">
                             <a href="autoridades-editar.php" class="side-nav-link">Crear autoridad</a>
                         </li>
-                        <li class="side-nav-item">
-                            <a href="autoridades-adjuntos.php" class="side-nav-link">Adjuntos</a>
-                        </li>
                     </ul>
                 </div>
             </li>
@@ -125,9 +122,6 @@
                         </li>
                         <li class="side-nav-item">
                             <a href="roles-permisos.php" class="side-nav-link">Matriz de permisos</a>
-                        </li>
-                        <li class="side-nav-item">
-                            <a href="permisos-unidades.php" class="side-nav-link">Permisos por unidad</a>
                         </li>
                     </ul>
                 </div>
