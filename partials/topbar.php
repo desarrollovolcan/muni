@@ -42,10 +42,10 @@
 
         </div> <!-- .d-flex-->
 
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
 
             <!-- Search -->
-            <div class="app-search d-none d-xl-flex me-2">
+            <div class="app-search d-none d-md-flex me-2 flex-grow-1 flex-lg-grow-0">
                 <input type="search" class="form-control topbar-search rounded-pill" name="search" placeholder="Quick Search...">
                 <i data-lucide="search" class="app-search-icon text-muted"></i>
             </div>
