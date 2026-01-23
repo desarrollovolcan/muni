@@ -404,9 +404,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
             $whatsappAny = false;
 
             $whatsappConfig = null;
-            if ($needsWhatsapp) {
+            if ($needsWhatsapp || $needsWhatsappLink) {
                 $whatsappConfig = db()->query('SELECT * FROM notificacion_whatsapp LIMIT 1')->fetch();
-                if (!$whatsappConfig || empty($whatsappConfig['phone_number_id']) || empty($whatsappConfig['access_token'])) {
+                if ($needsWhatsapp && (!$whatsappConfig || empty($whatsappConfig['phone_number_id']) || empty($whatsappConfig['access_token']))) {
                     $validationErrors[] = 'Configura WhatsApp Business API antes de enviar mensajes.';
                 }
             }
@@ -473,7 +473,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
 
             if (empty($validationErrors) && $needsWhatsappLink) {
                 foreach ($whatsappRecipients as $recipient) {
-                    $normalizedPhone = normalize_whatsapp_phone($recipient['telefono'] ?? null, null);
+                    $normalizedPhone = normalize_whatsapp_phone(
+                        $recipient['telefono'] ?? null,
+                        $whatsappConfig['country_code'] ?? null
+                    );
                     if ($normalizedPhone === null) {
                         continue;
                     }
