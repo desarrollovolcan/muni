@@ -58,4 +58,40 @@ $secondaryRgb = hex_to_rgb($secondaryColor) ?? [74, 129, 212];
     .side-nav .side-nav-item.active > .side-nav-link {
         background-color: rgba(var(--ins-primary-rgb), 0.15);
     }
+
+    .app-topbar .logo-topbar a {
+        display: flex;
+        align-items: center;
+    }
+
+    .app-topbar .logo-topbar img {
+        max-width: 100%;
+        height: auto;
+        max-height: var(--ins-topbar-logo-height);
+        object-fit: contain;
+    }
+
+    @media (max-width: 768px) {
+        .app-topbar .topbar-menu {
+            flex-wrap: wrap;
+            row-gap: 0.35rem;
+        }
+
+        .app-topbar .topbar-menu > .d-flex:first-child,
+        .app-topbar .topbar-menu > .d-flex:last-child {
+            flex: 1 1 100%;
+        }
+
+        .app-topbar .topbar-menu > .d-flex:last-child {
+            justify-content: space-between;
+        }
+
+        .app-topbar .logo-topbar {
+            max-width: calc(100vw - 120px);
+        }
+
+        .app-topbar .topnav-toggle-button {
+            margin-left: auto;
+        }
+    }
 </style>
