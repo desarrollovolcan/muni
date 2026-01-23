@@ -4,6 +4,7 @@ require __DIR__ . '/app/bootstrap.php';
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $autoridad = null;
 $errors = [];
+$errorMessage = '';
 $success = $_GET['success'] ?? '';
 $autoridades = db()->query('SELECT id, nombre, tipo, fecha_inicio, fecha_fin, correo, estado FROM authorities ORDER BY fecha_inicio DESC')->fetchAll();
 
@@ -13,7 +14,20 @@ if ($id > 0) {
     $autoridad = $stmt->fetch();
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ?? null)) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete' && verify_csrf($_POST['csrf_token'] ?? null)) {
+    $deleteId = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+    if ($deleteId > 0) {
+        try {
+            $stmt = db()->prepare('DELETE FROM authorities WHERE id = ?');
+            $stmt->execute([$deleteId]);
+            redirect('autoridades-editar.php');
+        } catch (Exception $e) {
+            $errorMessage = 'No se pudo eliminar la autoridad. Verifica dependencias asociadas.';
+        }
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_csrf($_POST['csrf_token'] ?? null)) {
     $nombre = trim($_POST['nombre'] ?? '');
     $tipo = trim($_POST['tipo'] ?? '');
     $correo = trim($_POST['correo'] ?? '');
@@ -85,6 +99,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                     <div class="col-12">
                         <div class="card">
                             <div class="card-body">
+                                <?php if ($errorMessage !== '') : ?>
+                                    <div class="alert alert-danger"><?php echo htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8'); ?></div>
+                                <?php endif; ?>
                                 <?php if (!empty($errors)) : ?>
                                     <div class="alert alert-danger">
                                         <?php foreach ($errors as $error) : ?>
@@ -163,12 +180,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                                 <th>Periodo</th>
                                                 <th>Contacto</th>
                                                 <th>Estado</th>
+                                                <th class="text-end">Acciones</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <?php if (empty($autoridades)) : ?>
                                                 <tr>
-                                                    <td colspan="5" class="text-center text-muted">No hay autoridades registradas.</td>
+                                                    <td colspan="6" class="text-center text-muted">No hay autoridades registradas.</td>
                                                 </tr>
                                             <?php else : ?>
                                                 <?php foreach ($autoridades as $autoridadItem) : ?>
@@ -183,6 +201,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                                             <?php else : ?>
                                                                 <span class="badge text-bg-secondary">Deshabilitado</span>
                                                             <?php endif; ?>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <div class="dropdown">
+                                                                <button class="btn btn-sm btn-soft-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                    Acciones
+                                                                </button>
+                                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                                    <li><a class="dropdown-item" href="autoridades-detalle.php?id=<?php echo (int) $autoridadItem['id']; ?>">Ver</a></li>
+                                                                    <li><a class="dropdown-item" href="autoridades-editar.php?id=<?php echo (int) $autoridadItem['id']; ?>">Editar</a></li>
+                                                                    <li><hr class="dropdown-divider"></li>
+                                                                    <li>
+                                                                        <form method="post" class="px-3 py-1" data-confirm="¿Estás seguro de eliminar esta autoridad?">
+                                                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                            <input type="hidden" name="action" value="delete">
+                                                                            <input type="hidden" name="id" value="<?php echo (int) $autoridadItem['id']; ?>">
+                                                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100">Eliminar</button>
+                                                                        </form>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 <?php endforeach; ?>

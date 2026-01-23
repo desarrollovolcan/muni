@@ -2,6 +2,7 @@
 require __DIR__ . '/app/bootstrap.php';
 
 $errors = [];
+$errorMessage = '';
 $roles = db()->query('SELECT id, nombre FROM roles WHERE estado = 1 ORDER BY nombre')->fetchAll();
 $success = $_GET['success'] ?? '';
 $usuarios = db()->query('SELECT id, rut, nombre, apellido, correo, rol, estado, ultimo_acceso, avatar_path FROM users ORDER BY id DESC')->fetchAll();
@@ -46,7 +47,20 @@ function handle_avatar_upload(array $file, array &$errors): ?string
     return 'uploads/avatars/' . $filename;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ?? null)) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete' && verify_csrf($_POST['csrf_token'] ?? null)) {
+    $deleteId = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+    if ($deleteId > 0) {
+        try {
+            $stmt = db()->prepare('DELETE FROM users WHERE id = ?');
+            $stmt->execute([$deleteId]);
+            redirect('usuarios-crear.php');
+        } catch (Exception $e) {
+            $errorMessage = 'No se pudo eliminar el usuario. Verifica dependencias asociadas.';
+        }
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_csrf($_POST['csrf_token'] ?? null)) {
     $rut = trim($_POST['rut'] ?? '');
     $nombre = trim($_POST['nombre'] ?? '');
     $apellido = trim($_POST['apellido'] ?? '');
@@ -130,6 +144,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                     <div class="col-12">
                         <div class="card">
                             <div class="card-body">
+                                <?php if ($errorMessage !== '') : ?>
+                                    <div class="alert alert-danger"><?php echo htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8'); ?></div>
+                                <?php endif; ?>
                                 <?php if (!empty($errors)) : ?>
                                     <div class="alert alert-danger">
                                         <?php foreach ($errors as $error) : ?>
@@ -232,12 +249,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                                 <th>Rol</th>
                                                 <th>Estado</th>
                                                 <th>Último acceso</th>
+                                                <th class="text-end">Acciones</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <?php if (empty($usuarios)) : ?>
                                                 <tr>
-                                                    <td colspan="7" class="text-center text-muted">No hay usuarios registrados.</td>
+                                                    <td colspan="8" class="text-center text-muted">No hay usuarios registrados.</td>
                                                 </tr>
                                             <?php else : ?>
                                                 <?php foreach ($usuarios as $usuario) : ?>
@@ -260,6 +278,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                                             <?php endif; ?>
                                                         </td>
                                                         <td><?php echo $usuario['ultimo_acceso'] ? htmlspecialchars($usuario['ultimo_acceso'], ENT_QUOTES, 'UTF-8') : '-'; ?></td>
+                                                        <td class="text-end">
+                                                            <div class="dropdown">
+                                                                <button class="btn btn-sm btn-soft-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                    Acciones
+                                                                </button>
+                                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                                    <li><a class="dropdown-item" href="usuarios-detalle.php?id=<?php echo (int) $usuario['id']; ?>">Ver</a></li>
+                                                                    <li><a class="dropdown-item" href="usuarios-editar.php?id=<?php echo (int) $usuario['id']; ?>">Editar</a></li>
+                                                                    <li><hr class="dropdown-divider"></li>
+                                                                    <li>
+                                                                        <form method="post" class="px-3 py-1" data-confirm="¿Estás seguro de eliminar este usuario?">
+                                                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                            <input type="hidden" name="action" value="delete">
+                                                                            <input type="hidden" name="id" value="<?php echo (int) $usuario['id']; ?>">
+                                                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100">Eliminar</button>
+                                                                        </form>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
+                                                        </td>
                                                     </tr>
                                                 <?php endforeach; ?>
                                             <?php endif; ?>

@@ -1,15 +1,20 @@
 <?php
 require __DIR__ . '/app/bootstrap.php';
 
+$errorMessage = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && verify_csrf($_POST['csrf_token'] ?? null)) {
     $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
 
-    if ($_POST['action'] === 'disable' && $id > 0) {
-        $stmt = db()->prepare('UPDATE events SET habilitado = 0 WHERE id = ?');
-        $stmt->execute([$id]);
+    if ($_POST['action'] === 'delete' && $id > 0) {
+        try {
+            $stmt = db()->prepare('DELETE FROM events WHERE id = ?');
+            $stmt->execute([$id]);
+            redirect('eventos-lista.php');
+        } catch (Exception $e) {
+            $errorMessage = 'No se pudo eliminar el evento. Verifica dependencias asociadas.';
+        }
     }
-
-    redirect('eventos-lista.php');
 }
 
 $stmt = db()->query('SELECT e.id, e.titulo, e.fecha_inicio, e.tipo, e.estado, e.habilitado, u.nombre AS encargado_nombre, u.apellido AS encargado_apellido, COUNT(r.id) AS solicitudes_total, SUM(r.correo_enviado = 1) AS correos_enviados FROM events e LEFT JOIN users u ON u.id = e.encargado_id LEFT JOIN event_authority_requests r ON r.event_id = e.id GROUP BY e.id ORDER BY e.fecha_inicio DESC');
@@ -50,6 +55,9 @@ $eventos = $stmt->fetchAll();
                                 <a href="eventos-editar.php" class="btn btn-primary">Nuevo evento</a>
                             </div>
                             <div class="card-body">
+                                <?php if ($errorMessage !== '') : ?>
+                                    <div class="alert alert-danger"><?php echo htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8'); ?></div>
+                                <?php endif; ?>
                                 <div class="d-flex flex-wrap gap-2 mb-3">
                                     <input type="date" class="form-control">
                                     <input type="date" class="form-control">
@@ -113,16 +121,16 @@ $eventos = $stmt->fetchAll();
                                                                     Acciones
                                                                 </button>
                                                                 <ul class="dropdown-menu dropdown-menu-end">
-                                                                    <li><a class="dropdown-item" href="eventos-detalle.php?id=<?php echo (int) $evento['id']; ?>">Ver detalle</a></li>
+                                                                    <li><a class="dropdown-item" href="eventos-detalle.php?id=<?php echo (int) $evento['id']; ?>">Ver</a></li>
                                                                     <li><a class="dropdown-item" href="eventos-editar.php?id=<?php echo (int) $evento['id']; ?>">Editar</a></li>
                                                                     <li><a class="dropdown-item" href="eventos-autoridades.php?event_id=<?php echo (int) $evento['id']; ?>">Enviar confirmación de invitados</a></li>
                                                                     <li><hr class="dropdown-divider"></li>
                                                                     <li>
-                                                                        <form method="post" class="px-3 py-1">
+                                                                        <form method="post" class="px-3 py-1" data-confirm="¿Estás seguro de eliminar este evento?">
                                                                             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                                                            <input type="hidden" name="action" value="disable">
+                                                                            <input type="hidden" name="action" value="delete">
                                                                             <input type="hidden" name="id" value="<?php echo (int) $evento['id']; ?>">
-                                                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100" <?php echo (int) $evento['habilitado'] === 0 ? 'disabled' : ''; ?>>Deshabilitar</button>
+                                                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100">Eliminar</button>
                                                                         </form>
                                                                     </li>
                                                                 </ul>
