@@ -5,6 +5,7 @@ $errors = [];
 $validationErrors = [];
 $validationNotice = null;
 $validationLink = null;
+$whatsappLinks = [];
 $emailPreview = null;
 $events = db()->query('SELECT id, titulo FROM events WHERE habilitado = 1 ORDER BY fecha_inicio DESC')->fetchAll();
 $authorities = db()->query('SELECT id, nombre, tipo FROM authorities WHERE estado = 1 ORDER BY nombre')->fetchAll();
@@ -272,6 +273,11 @@ function send_whatsapp_message(array $config, string $to, string $message, ?stri
     return true;
 }
 
+function build_whatsapp_link(string $phone, string $message): string
+{
+    return 'https://wa.me/' . $phone . '?text=' . urlencode($message);
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ?? null)) {
     $action = $_POST['action'] ?? 'save_authorities';
 
@@ -331,11 +337,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
 
         $needsEmail = in_array($deliveryChannel, ['email', 'both'], true);
         $needsWhatsapp = in_array($deliveryChannel, ['whatsapp', 'both'], true);
+        $needsWhatsappLink = $deliveryChannel === 'whatsapp_link';
 
         if ($needsEmail && empty($recipients)) {
             $validationErrors[] = 'Selecciona al menos un usuario con correo válido para enviar la validación.';
         }
-        if ($needsWhatsapp && empty($whatsappRecipients)) {
+        if (($needsWhatsapp || $needsWhatsappLink) && empty($whatsappRecipients)) {
             $validationErrors[] = 'Selecciona al menos un usuario con teléfono para enviar WhatsApp.';
         }
 
@@ -464,11 +471,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                 }
             }
 
+            if (empty($validationErrors) && $needsWhatsappLink) {
+                foreach ($whatsappRecipients as $recipient) {
+                    $normalizedPhone = normalize_whatsapp_phone($recipient['telefono'] ?? null, null);
+                    if ($normalizedPhone === null) {
+                        continue;
+                    }
+                    $message = 'Hola ' . ($recipient['nombre'] ?: 'equipo municipal') . '. '
+                        . 'Por favor valida las autoridades del evento "' . ($event['titulo'] ?? '') . '". '
+                        . 'Link: ' . $validationUrl;
+                    $whatsappLinks[] = [
+                        'nombre' => $recipient['nombre'] ?: 'Equipo municipal',
+                        'telefono' => $normalizedPhone,
+                        'link' => build_whatsapp_link($normalizedPhone, $message),
+                    ];
+                }
+            }
+
             $stmtUpdate = db()->prepare('UPDATE event_authority_requests SET correo_enviado = ? WHERE event_id = ? AND token = ?');
             $stmtUpdate->execute([$anySent ? 1 : 0, $eventId, $event['validation_token']]);
 
             $validationLink = $validationUrl;
-            if ($needsEmail && $allSent && !$needsWhatsapp) {
+            if ($needsWhatsappLink && !empty($whatsappLinks)) {
+                $validationNotice = 'Links de WhatsApp generados correctamente.';
+            } elseif ($needsEmail && $allSent && !$needsWhatsapp) {
                 $validationNotice = 'Correos de validación enviados correctamente.';
             } elseif ($needsWhatsapp && $whatsappSent && !$needsEmail) {
                 $validationNotice = 'Mensajes de WhatsApp enviados correctamente.';
@@ -641,6 +667,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                                 <option value="email">Correo</option>
                                                 <option value="whatsapp">WhatsApp</option>
                                                 <option value="both">Correo y WhatsApp</option>
+                                                <option value="whatsapp_link">WhatsApp (link directo)</option>
                                             </select>
                                             <div class="form-text">WhatsApp requiere teléfono en usuarios y configuración previa.</div>
                                         </div>
@@ -651,6 +678,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                     <div class="mt-4">
                                         <label class="form-label">Enlace de validación</label>
                                         <input type="text" class="form-control" value="<?php echo htmlspecialchars($validationLink ?: $eventValidationLink, ENT_QUOTES, 'UTF-8'); ?>" readonly>
+                                    </div>
+                                <?php endif; ?>
+
+                                <?php if (!empty($whatsappLinks)) : ?>
+                                    <div class="mt-4">
+                                        <label class="form-label">Links de WhatsApp</label>
+                                        <div class="list-group">
+                                            <?php foreach ($whatsappLinks as $linkData) : ?>
+                                                <a class="list-group-item list-group-item-action" href="<?php echo htmlspecialchars($linkData['link'], ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener">
+                                                    <?php echo htmlspecialchars($linkData['nombre'], ENT_QUOTES, 'UTF-8'); ?>
+                                                    <span class="text-muted small ms-2"><?php echo htmlspecialchars($linkData['telefono'], ENT_QUOTES, 'UTF-8'); ?></span>
+                                                </a>
+                                            <?php endforeach; ?>
+                                        </div>
                                     </div>
                                 <?php endif; ?>
 
