@@ -11,6 +11,7 @@
     <div class="wrapper">
 
         <?php include('partials/menu.php'); ?>
+        <?php $municipalidad = get_municipalidad(); ?>
 
         <!-- ============================================================== -->
         <!-- Start Main Content -->
@@ -26,6 +27,9 @@
                     <div class="col-12">
                         <div class="card">
                             <div class="card-body">
+                                <div class="text-center mb-4">
+                                    <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo municipalidad" class="img-fluid" style="max-height: 48px;">
+                                </div>
                                 <form>
                                     <div class="mb-3">
                                         <label class="form-label" for="login-username">Usuario o correo</label>
