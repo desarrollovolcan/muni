@@ -21,6 +21,12 @@
             <div class="container-fluid">
 
                 <?php $subtitle = "Users"; $title = "Profile"; include('partials/page-title.php'); ?>
+                <?php
+                $userName = $_SESSION['user']['nombre'] ?? 'Usuario';
+                $userLastName = $_SESSION['user']['apellido'] ?? '';
+                $userFullName = trim($userName . ' ' . $userLastName);
+                $userAvatar = $_SESSION['user']['avatar_path'] ?? 'assets/images/users/user-1.jpg';
+                ?>
 
                 <div class="row">
                     <div class="col-12">
@@ -42,11 +48,11 @@
                                 <div class="card-body">
                                     <div class="d-flex align-items-center mb-4">
                                         <div class="me-3 position-relative">
-                                            <img src="assets/images/users/user-3.jpg" alt="avatar" class="rounded-circle" width="72" height="72">
+                                            <img src="<?php echo htmlspecialchars($userAvatar, ENT_QUOTES, 'UTF-8'); ?>" alt="avatar" class="rounded-circle" width="72" height="72">
                                         </div>
                                         <div>
                                             <h5 class="mb-0 d-flex align-items-center">
-                                                <a href="#!" class="link-reset">Geneva Lee</a>
+                                                <a href="#!" class="link-reset"><?php echo htmlspecialchars($userFullName ?: 'Usuario', ENT_QUOTES, 'UTF-8'); ?></a>
                                                 <img src="assets/images/flags/us.svg" alt="US" class="ms-2 rounded-circle" height="16">
                                             </h5>
                                             <p class="text-muted mb-2">Senior Developer</p>

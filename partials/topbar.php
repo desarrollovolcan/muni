@@ -1,26 +1,31 @@
 <!-- Topbar Start -->
 <header class="app-topbar">
+    <?php $municipalidad = get_municipalidad(); ?>
+    <?php
+    $logoTopbarHeight = (int) ($municipalidad['logo_topbar_height'] ?? 56);
+    $logoTopbarHeightSm = min($logoTopbarHeight, 40);
+    ?>
     <div class="container-fluid topbar-menu">
         <div class="d-flex align-items-center gap-2">
             <!-- Topbar Brand Logo -->
             <div class="logo-topbar">
                 <!-- Logo light -->
                 <a href="index.php" class="logo-light">
-                    <span class="logo-lg">
-                        <img src="assets/images/logo.png" alt="logo">
+                    <span class="logo-lg d-none d-sm-inline">
+                        <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo" style="height: <?php echo $logoTopbarHeight; ?>px;">
                     </span>
-                    <span class="logo-sm">
-                        <img src="assets/images/logo.png" alt="logo">
+                    <span class="logo-sm d-inline d-sm-none">
+                        <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo" style="height: <?php echo $logoTopbarHeightSm; ?>px;">
                     </span>
                 </a>
 
                 <!-- Logo Dark -->
                 <a href="index.php" class="logo-dark">
-                    <span class="logo-lg">
-                        <img src="assets/images/logo.png" alt="logo">
+                    <span class="logo-lg d-none d-sm-inline">
+                        <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo" style="height: <?php echo $logoTopbarHeight; ?>px;">
                     </span>
-                    <span class="logo-sm">
-                        <img src="assets/images/logo.png" alt="logo">
+                    <span class="logo-sm d-inline d-sm-none">
+                        <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo" style="height: <?php echo $logoTopbarHeightSm; ?>px;">
                     </span>
                 </a>
             </div>
@@ -225,115 +230,6 @@
             <div class="topbar-item">
                 <div class="dropdown">
                     <button class="topbar-link" data-bs-toggle="dropdown" data-bs-offset="0,24" type="button" aria-haspopup="false" aria-expanded="false">
-                        <i data-lucide="layout-grid" class="fs-xxl"></i>
-                    </button>
-
-                    <div class="dropdown-menu dropdown-menu-lg p-2 dropdown-menu-end">
-                        <div class="row align-items-center g-1">
-                            <div class="col-4">
-                                <a href="javascript:void(0);" class="dropdown-item border border-dashed rounded text-center py-2">
-                                    <span class="avatar-sm d-block mx-auto mb-1">
-                                        <span class="avatar-title text-bg-light rounded-circle">
-                                            <img src="assets/images/logos/google.svg" alt="Google Logo" height="18">
-                                        </span>
-                                    </span>
-                                    <span class="align-middle fw-medium">Google</span>
-                                </a>
-                            </div>
-
-                            <div class="col-4">
-                                <a href="javascript:void(0);" class="dropdown-item border border-dashed rounded text-center py-2">
-                                    <span class="avatar-sm d-block mx-auto mb-1">
-                                        <span class="avatar-title text-bg-light rounded-circle">
-                                            <img src="assets/images/logos/figma.svg" alt="Figma Logo" height="18">
-                                        </span>
-                                    </span>
-                                    <span class="align-middle fw-medium">Figma</span>
-                                </a>
-                            </div>
-
-                            <div class="col-4">
-                                <a href="javascript:void(0);" class="dropdown-item border border-dashed rounded text-center py-2">
-                                    <span class="avatar-sm d-block mx-auto mb-1">
-                                        <span class="avatar-title text-bg-light rounded-circle">
-                                            <img src="assets/images/logos/slack.svg" alt="Slack Logo" height="18">
-                                        </span>
-                                    </span>
-                                    <span class="align-middle fw-medium">Slack</span>
-                                </a>
-                            </div>
-
-                            <div class="col-4">
-                                <a href="javascript:void(0);" class="dropdown-item border border-dashed rounded text-center py-2">
-                                    <span class="avatar-sm d-block mx-auto mb-1">
-                                        <span class="avatar-title text-bg-light rounded-circle">
-                                            <img src="assets/images/logos/dropbox.svg" alt="Dropbox Logo" height="18">
-                                        </span>
-                                    </span>
-                                    <span class="align-middle fw-medium">Dropbox</span>
-                                </a>
-                            </div>
-
-                            <div class="col-4 text-center">
-                                <a href="javascript:void(0);" class="btn btn-sm rounded-circle btn-icon btn-danger">
-                                    <i data-lucide="circle-plus" class="fs-18"></i>
-                                </a>
-                            </div>
-
-                            <div class="col-4">
-                                <a href="javascript:void(0);" class="dropdown-item border border-dashed rounded text-center py-2">
-                                    <span class="avatar-sm d-block mx-auto mb-1">
-                                        <span class="avatar-title bg-primary-subtle text-primary rounded-circle">
-                                            <i class="ti ti-calendar fs-18"></i>
-                                        </span>
-                                    </span>
-                                    <span class="align-middle fw-medium">Calendar</span>
-                                </a>
-                            </div>
-
-                            <div class="col-4">
-                                <a href="javascript:void(0);" class="dropdown-item border border-dashed rounded text-center py-2">
-                                    <span class="avatar-sm d-block mx-auto mb-1">
-                                        <span class="avatar-title bg-primary-subtle text-primary rounded-circle">
-                                            <i class="ti ti-message-circle fs-18"></i>
-                                        </span>
-                                    </span>
-                                    <span class="align-middle fw-medium">Chat</span>
-                                </a>
-                            </div>
-
-                            <div class="col-4">
-                                <a href="javascript:void(0);" class="dropdown-item border border-dashed rounded text-center py-2">
-                                    <span class="avatar-sm d-block mx-auto mb-1">
-                                        <span class="avatar-title bg-primary-subtle text-primary rounded-circle">
-                                            <i class="ti ti-folder fs-18"></i>
-                                        </span>
-                                    </span>
-                                    <span class="align-middle fw-medium">Files</span>
-                                </a>
-                            </div>
-
-                            <div class="col-4">
-                                <a href="javascript:void(0);" class="dropdown-item border border-dashed rounded text-center py-2">
-                                    <span class="avatar-sm d-block mx-auto mb-1">
-                                        <span class="avatar-title bg-primary-subtle text-primary rounded-circle">
-                                            <i class="ti ti-users fs-18"></i>
-                                        </span>
-                                    </span>
-                                    <span class="align-middle fw-medium">Team</span>
-                                </a>
-                            </div>
-
-                        </div>
-                    </div>
-
-                </div> <!-- end dropdown-->
-            </div> <!-- end topbar item-->
-
-            <!-- Theme Mode Dropdown -->
-            <div class="topbar-item">
-                <div class="dropdown">
-                    <button class="topbar-link" data-bs-toggle="dropdown" data-bs-offset="0,24" type="button" aria-haspopup="false" aria-expanded="false">
                         <i data-lucide="sun" class="fs-xxl"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end thememode-dropdown">
@@ -367,7 +263,7 @@
             </div> <!-- end topbar item-->
 
             <!-- FullScreen -->
-            <div class="topbar-item d-none d-sm-flex">
+            <div class="topbar-item">
                 <button class="topbar-link" type="button" data-toggle="fullscreen">
                     <i data-lucide="maximize" class="fs-xxl fullscreen-off"></i>
                     <i data-lucide="minimize" class="fs-xxl fullscreen-on"></i>
@@ -382,7 +278,7 @@
             </div>
 
             <!-- Monocrome Mode Button -->
-            <div class="topbar-item d-none d-sm-flex">
+            <div class="topbar-item">
                 <button class="topbar-link" type="button" id="monochrome-mode">
                     <i data-lucide="palette" class="fs-xxl"></i>
                 </button>
@@ -395,10 +291,14 @@
                 $userLastName = $_SESSION['user']['apellido'] ?? '';
                 $userRole = $_SESSION['user']['rol'] ?? 'Sin rol';
                 $userFullName = trim($userName . ' ' . $userLastName);
+                $userAvatar = $_SESSION['user']['avatar_path'] ?? '';
+                if ($userAvatar === '') {
+                    $userAvatar = 'assets/images/users/user-1.jpg';
+                }
                 ?>
                 <div class="dropdown">
                     <a class="topbar-link dropdown-toggle drop-arrow-none px-2" data-bs-toggle="dropdown" data-bs-offset="0,19" href="#!" aria-haspopup="false" aria-expanded="false">
-                        <img src="assets/images/users/user-3.jpg" width="32" class="rounded-circle me-lg-2 d-flex" alt="user-image">
+                        <img src="<?php echo htmlspecialchars($userAvatar, ENT_QUOTES, 'UTF-8'); ?>" width="32" class="rounded-circle me-lg-2 d-flex" alt="user-image">
                         <div class="d-lg-flex align-items-center gap-1 d-none">
                             <h5 class="my-0"><?php echo htmlspecialchars($userFullName ?: 'Usuario', ENT_QUOTES, 'UTF-8'); ?></h5>
                             <i class="ti ti-chevron-down align-middle"></i>

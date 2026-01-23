@@ -12,6 +12,13 @@ $eventTypeMap = [];
 foreach ($eventTypes as $eventType) {
     $eventTypeMap[$eventType['nombre']] = $eventType['color_class'] ?? 'bg-primary-subtle text-primary';
 }
+$eventosListado = [];
+try {
+    $stmtListado = db()->query('SELECT e.id, e.titulo, e.fecha_inicio, e.tipo, e.estado, e.habilitado, u.nombre AS encargado_nombre, u.apellido AS encargado_apellido, COUNT(r.id) AS solicitudes_total, SUM(r.correo_enviado = 1) AS correos_enviados FROM events e LEFT JOIN users u ON u.id = e.encargado_id LEFT JOIN event_authority_requests r ON r.event_id = e.id GROUP BY e.id ORDER BY e.fecha_inicio DESC');
+    $eventosListado = $stmtListado->fetchAll();
+} catch (Exception $e) {
+} catch (Error $e) {
+}
 
 if ($id > 0) {
     $stmt = db()->prepare('SELECT * FROM events WHERE id = ?');
@@ -336,6 +343,62 @@ try {
                                     </div>
                                 </div>
                             </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Listado de eventos</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-centered mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Evento</th>
+                                                <th>Fecha</th>
+                                                <th>Tipo</th>
+                                                <th>Estado</th>
+                                                <th>Responsable</th>
+                                                <th>Notificación</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php if (empty($eventosListado)) : ?>
+                                                <tr>
+                                                    <td colspan="6" class="text-center text-muted">No hay eventos registrados.</td>
+                                                </tr>
+                                            <?php else : ?>
+                                                <?php foreach ($eventosListado as $eventoListado) : ?>
+                                                    <tr>
+                                                        <td><?php echo htmlspecialchars($eventoListado['titulo'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td><?php echo htmlspecialchars($eventoListado['fecha_inicio'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td><?php echo htmlspecialchars($eventoListado['tipo'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td>
+                                                            <span class="badge text-bg-<?php echo $eventoListado['estado'] === 'publicado' ? 'success' : ($eventoListado['estado'] === 'borrador' ? 'warning' : 'secondary'); ?>">
+                                                                <?php echo htmlspecialchars(ucfirst($eventoListado['estado']), ENT_QUOTES, 'UTF-8'); ?>
+                                                            </span>
+                                                        </td>
+                                                        <td><?php echo htmlspecialchars(trim(($eventoListado['encargado_nombre'] ?? '') . ' ' . ($eventoListado['encargado_apellido'] ?? '')), ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td>
+                                                            <?php if ((int) $eventoListado['correos_enviados'] > 0) : ?>
+                                                                <span class="badge text-bg-success">Enviada</span>
+                                                            <?php elseif ((int) $eventoListado['solicitudes_total'] > 0) : ?>
+                                                                <span class="badge text-bg-warning">Pendiente</span>
+                                                            <?php else : ?>
+                                                                <span class="badge text-bg-secondary">Sin enviar</span>
+                                                            <?php endif; ?>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
