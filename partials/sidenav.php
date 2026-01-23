@@ -67,24 +67,6 @@
             </li>
 
             <li class="side-nav-item">
-                <a href="#modulo-documental" class="side-nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="modulo-documental">
-                    <span class="menu-icon"><i data-lucide="folder-open"></i></span>
-                    <span class="menu-text">Gestión Documental</span>
-                    <span class="menu-arrow"></span>
-                </a>
-                <div class="collapse" id="modulo-documental">
-                    <ul class="side-nav sub-menu">
-                        <li class="side-nav-item">
-                            <a href="dms-documentos.php" class="side-nav-link">Documentos</a>
-                        </li>
-                        <li class="side-nav-item">
-                            <a href="dms-categorias.php" class="side-nav-link">Categorías y etiquetas</a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-
-            <li class="side-nav-item">
                 <a href="#modulo-autoridades" class="side-nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="modulo-autoridades">
                     <span class="menu-icon"><i data-lucide="landmark"></i></span>
                     <span class="menu-text">Autoridades</span>

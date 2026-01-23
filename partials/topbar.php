@@ -7,20 +7,20 @@
             <div class="logo-topbar">
                 <!-- Logo light -->
                 <a href="index.php" class="logo-light">
-                    <span class="logo-lg">
+                    <span class="logo-lg d-inline">
                         <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo">
                     </span>
-                    <span class="logo-sm">
+                    <span class="logo-sm d-none">
                         <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo">
                     </span>
                 </a>
 
                 <!-- Logo Dark -->
                 <a href="index.php" class="logo-dark">
-                    <span class="logo-lg">
+                    <span class="logo-lg d-inline">
                         <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo">
                     </span>
-                    <span class="logo-sm">
+                    <span class="logo-sm d-none">
                         <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo">
                     </span>
                 </a>
@@ -38,10 +38,10 @@
 
         </div> <!-- .d-flex-->
 
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
 
             <!-- Search -->
-            <div class="app-search d-flex me-2 flex-grow-1 flex-lg-grow-0">
+            <div class="app-search d-none d-md-flex me-2 flex-grow-1 flex-lg-grow-0">
                 <input type="search" class="form-control topbar-search rounded-pill" name="search" placeholder="Quick Search...">
                 <i data-lucide="search" class="app-search-icon text-muted"></i>
             </div>
