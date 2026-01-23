@@ -14,6 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
     $logoTopbarHeight = trim($_POST['logo_topbar_height'] ?? '');
     $logoSidenavHeight = trim($_POST['logo_sidenav_height'] ?? '');
     $logoSidenavHeightSm = trim($_POST['logo_sidenav_height_sm'] ?? '');
+    $logoAuthHeight = trim($_POST['logo_auth_height'] ?? '');
     $colorPrimary = trim($_POST['color_primary'] ?? '#6658dd');
     $colorSecondary = trim($_POST['color_secondary'] ?? '#4a81d4');
 
@@ -39,6 +40,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
 
     if ($logoSidenavHeightSm !== '' && (!ctype_digit($logoSidenavHeightSm) || (int) $logoSidenavHeightSm < 16 || (int) $logoSidenavHeightSm > 120)) {
         $errors[] = 'El alto del logo en el menú lateral compacto debe ser un número entre 16 y 120.';
+    }
+
+    if ($logoAuthHeight !== '' && (!ctype_digit($logoAuthHeight) || (int) $logoAuthHeight < 16 || (int) $logoAuthHeight > 120)) {
+        $errors[] = 'El alto del logo en las vistas de acceso debe ser un número entre 16 y 120.';
     }
 
     $logoPath = $municipalidad['logo_path'] ?? 'assets/images/logo.png';
@@ -85,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
         $id = $stmt->fetchColumn();
 
         if ($id) {
-            $stmtUpdate = db()->prepare('UPDATE municipalidad SET nombre = ?, rut = ?, direccion = ?, telefono = ?, correo = ?, logo_path = ?, logo_topbar_height = ?, logo_sidenav_height = ?, logo_sidenav_height_sm = ?, color_primary = ?, color_secondary = ? WHERE id = ?');
+            $stmtUpdate = db()->prepare('UPDATE municipalidad SET nombre = ?, rut = ?, direccion = ?, telefono = ?, correo = ?, logo_path = ?, logo_topbar_height = ?, logo_sidenav_height = ?, logo_sidenav_height_sm = ?, logo_auth_height = ?, color_primary = ?, color_secondary = ? WHERE id = ?');
             $stmtUpdate->execute([
                 $nombre,
                 $rut,
@@ -96,12 +101,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                 $logoTopbarHeight !== '' ? (int) $logoTopbarHeight : null,
                 $logoSidenavHeight !== '' ? (int) $logoSidenavHeight : null,
                 $logoSidenavHeightSm !== '' ? (int) $logoSidenavHeightSm : null,
+                $logoAuthHeight !== '' ? (int) $logoAuthHeight : null,
                 $colorPrimary,
                 $colorSecondary,
                 $id,
             ]);
         } else {
-            $stmtInsert = db()->prepare('INSERT INTO municipalidad (nombre, rut, direccion, telefono, correo, logo_path, logo_topbar_height, logo_sidenav_height, logo_sidenav_height_sm, color_primary, color_secondary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+            $stmtInsert = db()->prepare('INSERT INTO municipalidad (nombre, rut, direccion, telefono, correo, logo_path, logo_topbar_height, logo_sidenav_height, logo_sidenav_height_sm, logo_auth_height, color_primary, color_secondary) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
             $stmtInsert->execute([
                 $nombre,
                 $rut,
@@ -112,6 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                 $logoTopbarHeight !== '' ? (int) $logoTopbarHeight : null,
                 $logoSidenavHeight !== '' ? (int) $logoSidenavHeight : null,
                 $logoSidenavHeightSm !== '' ? (int) $logoSidenavHeightSm : null,
+                $logoAuthHeight !== '' ? (int) $logoAuthHeight : null,
                 $colorPrimary,
                 $colorSecondary,
             ]);
@@ -130,6 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
         'logo_topbar_height' => $logoTopbarHeight,
         'logo_sidenav_height' => $logoSidenavHeight,
         'logo_sidenav_height_sm' => $logoSidenavHeightSm,
+        'logo_auth_height' => $logoAuthHeight,
         'color_primary' => $colorPrimary !== '' ? $colorPrimary : '#6658dd',
         'color_secondary' => $colorSecondary !== '' ? $colorSecondary : '#4a81d4',
     ]);
@@ -250,6 +258,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                                             <div class="input-group">
                                                                 <span class="input-group-text">Menú lateral compacto (px)</span>
                                                                 <input type="number" min="16" max="120" id="muni-logo-sidenav-sm" name="logo_sidenav_height_sm" class="form-control" value="<?php echo htmlspecialchars($municipalidad['logo_sidenav_height_sm'] ?? '36', ENT_QUOTES, 'UTF-8'); ?>">
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <div class="input-group">
+                                                                <span class="input-group-text">Acceso y registro (px)</span>
+                                                                <input type="number" min="16" max="120" id="muni-logo-auth" name="logo_auth_height" class="form-control" value="<?php echo htmlspecialchars($municipalidad['logo_auth_height'] ?? '48', ENT_QUOTES, 'UTF-8'); ?>">
                                                             </div>
                                                         </div>
                                                     </div>
