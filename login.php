@@ -1,7 +1,7 @@
 <?php include('partials/html.php'); ?>
 
 <head>
-    <?php $title = "Login"; include('partials/title-meta.php'); ?>
+    <?php $title = "Iniciar sesión"; include('partials/title-meta.php'); ?>
 
     <?php include('partials/head-css.php'); ?>
 </head>
@@ -11,7 +11,10 @@
     <div class="wrapper">
 
         <?php include('partials/menu.php'); ?>
-        <?php $municipalidad = get_municipalidad(); ?>
+        <?php
+        $municipalidad = get_municipalidad();
+        $logoAuthHeight = (int) ($municipalidad['logo_auth_height'] ?? 48);
+        ?>
 
         <!-- ============================================================== -->
         <!-- Start Main Content -->
@@ -21,14 +24,14 @@
 
             <div class="container-fluid">
 
-                <?php $subtitle = "Seguridad y Acceso"; $title = "Login"; include('partials/page-title.php'); ?>
+                <?php $subtitle = "Seguridad y Acceso"; $title = "Iniciar sesión"; include('partials/page-title.php'); ?>
 
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
                             <div class="card-body">
                                 <div class="text-center mb-4">
-                                    <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo municipalidad" class="img-fluid" style="max-height: 48px;">
+                                    <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo municipalidad" class="img-fluid" style="max-height: <?php echo $logoAuthHeight; ?>px;">
                                 </div>
                                 <form>
                                     <div class="mb-3">

@@ -12,6 +12,7 @@ if (isset($_SESSION['user'])) {
 $errors = [];
 $rut = '';
 $municipalidad = get_municipalidad();
+$logoAuthHeight = (int) ($municipalidad['logo_auth_height'] ?? 48);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $rut = trim((string) ($_POST['rut'] ?? ''));
@@ -48,7 +49,7 @@ include('partials/html.php');
 ?>
 
 <head>
-    <?php $title = "Sign In"; include('partials/title-meta.php'); ?>
+    <?php $title = "Iniciar sesión"; include('partials/title-meta.php'); ?>
 
     <?php include('partials/head-css.php'); ?>
 </head>
@@ -102,10 +103,10 @@ include('partials/html.php');
                     <div class="card-body min-vh-100 d-flex flex-column justify-content-center">
                         <div class="auth-brand mb-0 text-center">
                             <a href="index.php" class="logo-dark">
-                                <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo" height="28">
+                                <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo" style="height: <?php echo $logoAuthHeight; ?>px;">
                             </a>
                             <a href="index.php" class="logo-light">
-                                <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo" height="28">
+                                <img src="<?php echo htmlspecialchars($municipalidad['logo_path'] ?? 'assets/images/logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="logo" style="height: <?php echo $logoAuthHeight; ?>px;">
                             </a>
                         </div>
 
@@ -146,7 +147,7 @@ include('partials/html.php');
                                         <label class="form-check-label" for="rememberMe">Mantener sesión</label>
                                     </div>
 
-                                    <a href="auth-2-reset-pass.php" class="text-decoration-underline link-offset-3 text-muted">Forgot Password?</a>
+                                    <a href="auth-2-reset-pass.php" class="text-decoration-underline link-offset-3 text-muted">¿Olvidaste tu contraseña?</a>
                                 </div>
 
                                 <div class="d-grid">
