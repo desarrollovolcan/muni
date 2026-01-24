@@ -490,6 +490,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
         }
     }
 
+    if ($action === 'update_request') {
+        $requestId = isset($_POST['request_id']) ? (int) $_POST['request_id'] : 0;
+        $eventId = isset($_POST['event_id']) ? (int) $_POST['event_id'] : 0;
+        $nombre = trim($_POST['destinatario_nombre'] ?? '');
+        $correo = trim($_POST['destinatario_correo'] ?? '');
+        $estado = $_POST['estado'] ?? 'pendiente';
+        $correoEnviado = isset($_POST['correo_enviado']) && (int) $_POST['correo_enviado'] === 1 ? 1 : 0;
+
+        if ($eventId === 0 || $requestId === 0) {
+            $validationErrors[] = 'Selecciona una solicitud válida para editar.';
+        }
+        if ($correo !== '' && !filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+            $validationErrors[] = 'El correo ingresado no es válido.';
+        }
+        if (!in_array($estado, ['pendiente', 'respondido'], true)) {
+            $validationErrors[] = 'El estado seleccionado no es válido.';
+        }
+
+        if (empty($validationErrors)) {
+            $respondedAt = null;
+            if ($estado === 'respondido') {
+                $respondedAt = date('Y-m-d H:i:s');
+            }
+            $stmt = db()->prepare(
+                'UPDATE event_authority_requests
+                 SET destinatario_nombre = ?, destinatario_correo = ?, estado = ?, correo_enviado = ?, responded_at = ?
+                 WHERE id = ? AND event_id = ?'
+            );
+            $stmt->execute([
+                $nombre !== '' ? $nombre : null,
+                $correo !== '' ? $correo : null,
+                $estado,
+                $correoEnviado,
+                $respondedAt,
+                $requestId,
+                $eventId,
+            ]);
+            redirect('eventos-autoridades.php?event_id=' . $eventId . '&updated=1');
+        }
+    }
+
     if ($action === 'send_validation') {
         $eventId = isset($_POST['event_id']) ? (int) $_POST['event_id'] : 0;
         $recipientUserIds = array_map('intval', $_POST['recipient_user_ids'] ?? []);
@@ -770,7 +811,14 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                     <h5 class="card-title mb-0">Autoridades asignadas</h5>
                                     <p class="text-muted mb-0">Define qué autoridades participan en cada evento.</p>
                                 </div>
-                                <button type="submit" form="evento-autoridades-form" class="btn btn-primary">Guardar cambios</button>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <?php if ($selectedEventId > 0) : ?>
+                                        <a class="btn btn-outline-primary" href="eventos-autoridades-pdf.php?event_id=<?php echo (int) $selectedEventId; ?>" target="_blank" rel="noopener">
+                                            Descargar PDF
+                                        </a>
+                                    <?php endif; ?>
+                                    <button type="submit" form="evento-autoridades-form" class="btn btn-primary">Guardar cambios</button>
+                                </div>
                             </div>
                             <div class="card-body">
                                 <?php if ($saveNotice) : ?>
