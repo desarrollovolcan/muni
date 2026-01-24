@@ -58,10 +58,7 @@
                                 </li>
                             <?php endif; ?>
                             <li class="side-nav-item">
-                                <a href="eventos-autoridades.php" class="side-nav-link">Autoridades por evento</a>
-                            </li>
-                            <li class="side-nav-item">
-                                <a href="eventos-autoridades-nueva.php" class="side-nav-link">Autoridades por evento (nuevo)</a>
+                                <a href="eventos-autoridades-nueva.php" class="side-nav-link">Autoridades por evento</a>
                             </li>
                             <li class="side-nav-item">
                                 <a href="eventos-autoridades-resumen.php" class="side-nav-link">Eventos / Autoridades</a>
@@ -83,9 +80,6 @@
                     </a>
                     <div class="collapse" id="modulo-autoridades">
                         <ul class="side-nav sub-menu">
-                            <li class="side-nav-item">
-                                <a href="autoridades-lista.php" class="side-nav-link">Listado de autoridades</a>
-                            </li>
                             <?php if (has_permission('autoridades', 'create')) : ?>
                                 <li class="side-nav-item">
                                     <a href="autoridades-editar.php" class="side-nav-link">Crear autoridad</a>
@@ -122,9 +116,6 @@
                                     <a href="usuarios-crear.php" class="side-nav-link">Crear usuario</a>
                                 </li>
                             <?php endif; ?>
-                            <li class="side-nav-item">
-                                <a href="usuarios-asignar-roles.php" class="side-nav-link">Asignar roles</a>
-                            </li>
                         </ul>
                     </div>
                 </li>
