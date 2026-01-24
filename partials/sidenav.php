@@ -58,10 +58,7 @@
                                 </li>
                             <?php endif; ?>
                             <li class="side-nav-item">
-                                <a href="eventos-autoridades.php" class="side-nav-link">Autoridades por evento</a>
-                            </li>
-                            <li class="side-nav-item">
-                                <a href="eventos-autoridades-nueva.php" class="side-nav-link">Autoridades por evento (nuevo)</a>
+                                <a href="eventos-autoridades-nueva.php" class="side-nav-link">Autoridades por evento</a>
                             </li>
                             <li class="side-nav-item">
                                 <a href="eventos-autoridades-resumen.php" class="side-nav-link">Eventos / Autoridades</a>
