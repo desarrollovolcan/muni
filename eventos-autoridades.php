@@ -38,6 +38,7 @@ $eventValidationLink = null;
 $selectedEvent = null;
 $authoritiesByGroup = [];
 <<<<<<< HEAD
+<<<<<<< HEAD
 $displayAuthoritiesByGroup = [];
 $saveNotice = null;
 $editRequestId = isset($_GET['edit_request_id']) ? (int) $_GET['edit_request_id'] : 0;
@@ -48,6 +49,8 @@ $editSelectionAuthoritiesByGroup = [];
 $editSelectionConfirmedIds = [];
 $selectedAuthoritiesCount = 0;
 $totalAuthoritiesCount = count($authorities);
+=======
+>>>>>>> parent of e57e2d6 (Merge pull request #71 from desarrollovolcan/codex/corrige-error-404-en-eventos-procesados.php-uky3u5)
 =======
 >>>>>>> parent of e57e2d6 (Merge pull request #71 from desarrollovolcan/codex/corrige-error-404-en-eventos-procesados.php-uky3u5)
 
@@ -122,6 +125,7 @@ if ($selectedEventId > 0 && empty($errors)) {
     }
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 foreach ($authoritiesByGroup as $groupId => $group) {
     $items = $group['items'];
@@ -236,6 +240,8 @@ if ($selectedEventId > 0 && $editSelectionRequestId > 0) {
     }
 }
 
+=======
+>>>>>>> parent of e57e2d6 (Merge pull request #71 from desarrollovolcan/codex/corrige-error-404-en-eventos-procesados.php-uky3u5)
 =======
 >>>>>>> parent of e57e2d6 (Merge pull request #71 from desarrollovolcan/codex/corrige-error-404-en-eventos-procesados.php-uky3u5)
 try {
@@ -489,6 +495,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
             }
 
             redirect('eventos-autoridades.php?event_id=' . $eventId);
+<<<<<<< HEAD
         }
     }
 
@@ -558,6 +565,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                 $eventId,
             ]);
             redirect('eventos-autoridades.php?event_id=' . $eventId . '&updated=1');
+=======
+>>>>>>> parent of e57e2d6 (Merge pull request #71 from desarrollovolcan/codex/corrige-error-404-en-eventos-procesados.php-uky3u5)
         }
     }
 
@@ -797,6 +806,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
     }
 }
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 if (isset($_GET['saved']) && $_GET['saved'] === '1') {
     $saveNotice = 'Autoridades actualizadas correctamente.';
@@ -808,6 +818,8 @@ if (!empty($_SESSION['selection_saved'])) {
 if (isset($_GET['updated']) && $_GET['updated'] === '1') {
     $validationNotice = 'La solicitud fue actualizada correctamente.';
 }
+=======
+>>>>>>> parent of e57e2d6 (Merge pull request #71 from desarrollovolcan/codex/corrige-error-404-en-eventos-procesados.php-uky3u5)
 =======
 >>>>>>> parent of e57e2d6 (Merge pull request #71 from desarrollovolcan/codex/corrige-error-404-en-eventos-procesados.php-uky3u5)
 ?>
@@ -1002,6 +1014,7 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                 <?php endif; ?>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
                                 <?php if ($editSelectionRequest) : ?>
                                     <div class="card border mb-4">
                                         <div class="card-body">
@@ -1090,6 +1103,8 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                     </div>
                                 <?php endif; ?>
 
+=======
+>>>>>>> parent of e57e2d6 (Merge pull request #71 from desarrollovolcan/codex/corrige-error-404-en-eventos-procesados.php-uky3u5)
 =======
 >>>>>>> parent of e57e2d6 (Merge pull request #71 from desarrollovolcan/codex/corrige-error-404-en-eventos-procesados.php-uky3u5)
                                 <form id="evento-validacion-form" method="post">
@@ -1203,10 +1218,13 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                                             <td><?php echo htmlspecialchars($request['created_at'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                             <td><?php echo htmlspecialchars($request['responded_at'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
 <<<<<<< HEAD
+<<<<<<< HEAD
                                                             <td class="text-end">
                                                                 <a class="btn btn-sm btn-outline-primary" href="eventos-autoridades.php?event_id=<?php echo (int) $selectedEventId; ?>&edit_request_id=<?php echo (int) $request['id']; ?>">Editar</a>
                                                                 <a class="btn btn-sm btn-outline-secondary" href="eventos-autoridades.php?event_id=<?php echo (int) $selectedEventId; ?>&edit_selection_id=<?php echo (int) $request['id']; ?>">Editar selección</a>
                                                             </td>
+=======
+>>>>>>> parent of e57e2d6 (Merge pull request #71 from desarrollovolcan/codex/corrige-error-404-en-eventos-procesados.php-uky3u5)
 =======
 >>>>>>> parent of e57e2d6 (Merge pull request #71 from desarrollovolcan/codex/corrige-error-404-en-eventos-procesados.php-uky3u5)
                                                         </tr>
