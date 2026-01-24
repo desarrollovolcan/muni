@@ -712,135 +712,112 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                     </div>
                                 <?php endif; ?>
 
-                                <div class="row g-3 mb-4">
-                                    <div class="col-md-4">
-                                        <div class="border rounded-3 p-3 h-100">
-                                            <div class="text-muted small">Evento seleccionado</div>
-                                            <div class="fw-semibold">
-                                                <?php if ($selectedEventId > 0) : ?>
-                                                    <?php echo htmlspecialchars($selectedEvent['titulo'] ?? 'Evento seleccionado', ENT_QUOTES, 'UTF-8'); ?>
-                                                <?php else : ?>
-                                                    Selecciona un evento
-                                                <?php endif; ?>
+                                <ul class="nav nav-pills mb-3" id="autoridades-tabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="tab-asignar-btn" data-bs-toggle="pill" data-bs-target="#tab-asignar" type="button" role="tab" aria-controls="tab-asignar" aria-selected="true">Asignar autoridades</button>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="tab-eventos-btn" data-bs-toggle="pill" data-bs-target="#tab-eventos" type="button" role="tab" aria-controls="tab-eventos" aria-selected="false">Eventos con autoridades</button>
+                                    </li>
+                                </ul>
+
+                                <div class="tab-content">
+                                    <div class="tab-pane fade show active" id="tab-asignar" role="tabpanel" aria-labelledby="tab-asignar-btn" tabindex="0">
+                                        <form id="evento-autoridades-form" method="post">
+                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                            <input type="hidden" name="action" value="save_authorities">
+                                            <div class="row g-3 align-items-end">
+                                                <div class="col-lg-7">
+                                                    <label class="form-label" for="evento-select">Evento</label>
+                                                    <?php if ($selectedEventId > 0 && in_array($selectedEventId, $assignedEventIds, true)) : ?>
+                                                        <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
+                                                        <div class="form-control-plaintext fw-semibold text-primary">
+                                                            <?php echo htmlspecialchars($selectedEvent['titulo'] ?? 'Evento seleccionado', ENT_QUOTES, 'UTF-8'); ?>
+                                                        </div>
+                                                        <div class="form-text">Autoridades marcadas: <?php echo $selectedAuthoritiesCount; ?>.</div>
+                                                    <?php else : ?>
+                                                        <select id="evento-select" name="event_id" class="form-select">
+                                                            <option value="">Selecciona un evento</option>
+                                                            <?php foreach ($availableEvents as $event) : ?>
+                                                                <option value="<?php echo (int) $event['id']; ?>" <?php echo $selectedEventId === (int) $event['id'] ? 'selected' : ''; ?>>
+                                                                    <?php echo htmlspecialchars($event['titulo'], ENT_QUOTES, 'UTF-8'); ?>
+                                                                </option>
+                                                            <?php endforeach; ?>
+                                                        </select>
+                                                        <div class="form-text">Solo se muestran eventos sin autoridades asignadas.</div>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <div class="col-lg-5 d-flex flex-wrap justify-content-lg-end gap-2">
+                                                    <div class="btn-group btn-group-sm" role="group" aria-label="Acciones de autoridades">
+                                                        <button type="button" class="btn btn-outline-primary" id="select-all-authorities">Seleccionar todas</button>
+                                                        <button type="button" class="btn btn-outline-primary" id="clear-all-authorities">Limpiar selección</button>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div class="text-muted small">Autoridades marcadas: <?php echo $selectedAuthoritiesCount; ?></div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="border rounded-3 p-3 h-100">
-                                            <div class="text-muted small">Eventos sin autoridades</div>
-                                            <div class="fw-semibold"><?php echo $availableEventsCount; ?> disponibles</div>
-                                            <div class="text-muted small">Usa el selector para comenzar.</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="border rounded-3 p-3 h-100">
-                                            <div class="text-muted small">Acciones rápidas</div>
-                                            <div class="d-flex flex-wrap gap-2 mt-2">
-                                                <button type="button" class="btn btn-sm btn-outline-secondary" id="select-all-authorities">Seleccionar todas</button>
-                                                <button type="button" class="btn btn-sm btn-outline-secondary" id="clear-all-authorities">Limpiar selección</button>
+
+                                            <div class="mt-4">
+                                                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                                    <label class="form-label mb-0">Autoridades disponibles</label>
+                                                    <span class="text-muted small">Selecciona las autoridades para el evento.</span>
+                                                </div>
+                                                <div class="row">
+                                                    <?php if (empty($displayAuthoritiesByGroup)) : ?>
+                                                        <div class="col-12 text-muted">No hay autoridades registradas.</div>
+                                                    <?php else : ?>
+                                                        <?php foreach ($displayAuthoritiesByGroup as $group) : ?>
+                                                            <?php if (empty($group['items'])) : ?>
+                                                                <?php continue; ?>
+                                                            <?php endif; ?>
+                                                            <div class="col-12 mt-3">
+                                                                <h6 class="text-uppercase text-muted small mb-2"><?php echo htmlspecialchars($group['name'], ENT_QUOTES, 'UTF-8'); ?></h6>
+                                                            </div>
+                                                            <?php foreach ($group['items'] as $authority) : ?>
+                                                                <?php $checked = in_array((int) $authority['id'], $linkedAuthorities, true); ?>
+                                                                <div class="col-md-4">
+                                                                    <div class="form-check mb-2">
+                                                                        <input class="form-check-input" type="checkbox" id="auth-<?php echo (int) $authority['id']; ?>" name="authorities[]" value="<?php echo (int) $authority['id']; ?>" <?php echo $checked ? 'checked' : ''; ?>>
+                                                                        <label class="form-check-label" for="auth-<?php echo (int) $authority['id']; ?>">
+                                                                            <?php echo htmlspecialchars($authority['nombre'], ENT_QUOTES, 'UTF-8'); ?>
+                                                                            <span class="text-muted">· <?php echo htmlspecialchars($authority['tipo'], ENT_QUOTES, 'UTF-8'); ?></span>
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                            <?php endforeach; ?>
+                                                        <?php endforeach; ?>
+                                                    <?php endif; ?>
+                                                </div>
                                             </div>
-                                        </div>
+                                        </form>
+                                    </div>
+                                    <div class="tab-pane fade" id="tab-eventos" role="tabpanel" aria-labelledby="tab-eventos-btn" tabindex="0">
+                                        <?php if (!empty($assignedEvents)) : ?>
+                                            <div class="table-responsive">
+                                                <table class="table table-sm align-middle">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Evento</th>
+                                                            <th class="text-center">Autoridades</th>
+                                                            <th class="text-end">Acciones</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php foreach ($assignedEvents as $assignedEvent) : ?>
+                                                            <tr>
+                                                                <td><?php echo htmlspecialchars($assignedEvent['titulo'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                                <td class="text-center"><?php echo (int) $assignedEvent['authority_count']; ?></td>
+                                                                <td class="text-end">
+                                                                    <a class="btn btn-sm btn-outline-primary" href="eventos-autoridades.php?event_id=<?php echo (int) $assignedEvent['id']; ?>">Editar</a>
+                                                                </td>
+                                                            </tr>
+                                                        <?php endforeach; ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        <?php else : ?>
+                                            <div class="text-muted">Todavía no hay eventos con autoridades asignadas.</div>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
-
-                                <form id="evento-autoridades-form" method="post">
-                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                    <input type="hidden" name="action" value="save_authorities">
-                                    <div class="row g-3 align-items-end">
-                                        <div class="col-md-6">
-                                            <label class="form-label" for="evento-select">Evento</label>
-                                            <?php if ($selectedEventId > 0 && in_array($selectedEventId, $assignedEventIds, true)) : ?>
-                                                <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
-                                                <div class="form-control-plaintext fw-semibold text-primary">
-                                                    <?php echo htmlspecialchars($selectedEvent['titulo'] ?? 'Evento seleccionado', ENT_QUOTES, 'UTF-8'); ?>
-                                                </div>
-                                                <div class="form-text">Autoridades marcadas: <?php echo $selectedAuthoritiesCount; ?>.</div>
-                                            <?php else : ?>
-                                                <select id="evento-select" name="event_id" class="form-select">
-                                                    <option value="">Selecciona un evento</option>
-                                                    <?php foreach ($availableEvents as $event) : ?>
-                                                        <option value="<?php echo (int) $event['id']; ?>" <?php echo $selectedEventId === (int) $event['id'] ? 'selected' : ''; ?>>
-                                                            <?php echo htmlspecialchars($event['titulo'], ENT_QUOTES, 'UTF-8'); ?>
-                                                        </option>
-                                                    <?php endforeach; ?>
-                                                </select>
-                                                <div class="form-text">Solo se muestran eventos sin autoridades asignadas.</div>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-
-                                    <div class="mt-4">
-                                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
-                                            <label class="form-label mb-0">Autoridades disponibles</label>
-                                            <div class="d-flex flex-wrap gap-2">
-                                                <span class="text-muted small d-none d-md-inline">Selecciona las autoridades para el evento.</span>
-                                                <div class="btn-group btn-group-sm" role="group" aria-label="Acciones de autoridades">
-                                                    <button type="button" class="btn btn-outline-primary" id="select-all-authorities">Seleccionar todas</button>
-                                                    <button type="button" class="btn btn-outline-primary" id="clear-all-authorities">Limpiar selección</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <?php if (empty($displayAuthoritiesByGroup)) : ?>
-                                                <div class="col-12 text-muted">No hay autoridades registradas.</div>
-                                            <?php else : ?>
-                                                <?php foreach ($displayAuthoritiesByGroup as $group) : ?>
-                                                    <?php if (empty($group['items'])) : ?>
-                                                        <?php continue; ?>
-                                                    <?php endif; ?>
-                                                    <div class="col-12 mt-3">
-                                                        <h6 class="text-uppercase text-muted small mb-2"><?php echo htmlspecialchars($group['name'], ENT_QUOTES, 'UTF-8'); ?></h6>
-                                                    </div>
-                                                    <?php foreach ($group['items'] as $authority) : ?>
-                                                        <?php $checked = in_array((int) $authority['id'], $linkedAuthorities, true); ?>
-                                                        <div class="col-md-4">
-                                                            <div class="form-check mb-2">
-                                                                <input class="form-check-input" type="checkbox" id="auth-<?php echo (int) $authority['id']; ?>" name="authorities[]" value="<?php echo (int) $authority['id']; ?>" <?php echo $checked ? 'checked' : ''; ?>>
-                                                                <label class="form-check-label" for="auth-<?php echo (int) $authority['id']; ?>">
-                                                                    <?php echo htmlspecialchars($authority['nombre'], ENT_QUOTES, 'UTF-8'); ?>
-                                                                    <span class="text-muted">· <?php echo htmlspecialchars($authority['tipo'], ENT_QUOTES, 'UTF-8'); ?></span>
-                                                                </label>
-                                                            </div>
-                                                        </div>
-                                                    <?php endforeach; ?>
-                                                <?php endforeach; ?>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                </form>
-                                <?php if (!empty($assignedEvents)) : ?>
-                                    <div class="mt-4">
-                                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-                                            <h6 class="mb-0">Eventos con autoridades asignadas</h6>
-                                            <span class="text-muted small">Listado compacto para edición rápida.</span>
-                                        </div>
-                                        <div class="table-responsive">
-                                            <table class="table table-sm align-middle">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Evento</th>
-                                                        <th class="text-center">Autoridades</th>
-                                                        <th class="text-end">Acciones</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <?php foreach ($assignedEvents as $assignedEvent) : ?>
-                                                        <tr>
-                                                            <td><?php echo htmlspecialchars($assignedEvent['titulo'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                                            <td class="text-center"><?php echo (int) $assignedEvent['authority_count']; ?></td>
-                                                            <td class="text-end">
-                                                                <a class="btn btn-sm btn-outline-primary" href="eventos-autoridades.php?event_id=<?php echo (int) $assignedEvent['id']; ?>">Editar</a>
-                                                            </td>
-                                                        </tr>
-                                                    <?php endforeach; ?>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                <?php else : ?>
-                                    <div class="mt-4 text-muted">Todavía no hay eventos con autoridades asignadas.</div>
-                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
