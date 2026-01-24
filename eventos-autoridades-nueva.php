@@ -11,7 +11,13 @@ $events = db()->query('SELECT id, titulo, fecha_inicio, fecha_fin FROM events WH
 $assignedEvents = db()->query(
     'SELECT e.id,
             e.titulo,
-            COUNT(ea.authority_id) AS authority_count
+            COUNT(ea.authority_id) AS authority_count,
+            (SELECT COUNT(*)
+             FROM event_authority_requests r
+             WHERE r.event_id = e.id AND r.correo_enviado = 1) AS sent_count,
+            (SELECT COUNT(*)
+             FROM event_authority_requests r
+             WHERE r.event_id = e.id AND r.estado = "respondido") AS validated_count
      FROM events e
      INNER JOIN event_authorities ea ON ea.event_id = e.id
      WHERE e.habilitado = 1
@@ -719,7 +725,7 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                     <div class="card-body">
                                         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
                                             <div>
-                                                <h6 class="text-uppercase text-muted small mb-1">Paso 1 · Selecciona un evento</h6>
+                                                <h6 class="text-uppercase text-muted small mb-1">Paso 1 · Seleccionar evento</h6>
                                                 <p class="text-muted mb-0">Elige un evento para asignar autoridades.</p>
                                             </div>
                                             <div class="form-check form-switch gm-switch">
@@ -772,7 +778,7 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                     <div class="card-body">
                                         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
                                             <div>
-                                                <h6 class="text-uppercase text-muted small mb-1">Paso 3 · Selecciona autoridades</h6>
+                                                <h6 class="text-uppercase text-muted small mb-1">Paso 2 · Seleccionar autoridades</h6>
                                                 <p class="text-muted mb-0">Filtra por cargo o grupo para asignar rápidamente.</p>
                                             </div>
                                             <div class="gm-count-badge">
@@ -812,7 +818,7 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                 <div class="card-body">
                                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
                                         <div>
-                                            <h5 class="card-title mb-1">Validación externa</h5>
+                                            <h5 class="card-title mb-1">Paso 3 · Enviar validación (link)</h5>
                                             <p class="text-muted mb-0">Envía enlace de validación a los responsables.</p>
                                         </div>
                                     </div>
@@ -987,7 +993,19 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                                 <div class="list-group-item d-flex align-items-center justify-content-between px-0" data-title="<?php echo htmlspecialchars($assignedEvent['titulo'], ENT_QUOTES, 'UTF-8'); ?>">
                                                     <div class="text-truncate">
                                                         <div class="fw-semibold"><?php echo htmlspecialchars($assignedEvent['titulo'], ENT_QUOTES, 'UTF-8'); ?></div>
-                                                        <span class="badge bg-secondary-subtle text-secondary"><?php echo (int) $assignedEvent['authority_count']; ?> autoridades</span>
+                                                        <div class="d-flex flex-wrap align-items-center gap-2 mt-1">
+                                                            <span class="badge bg-secondary-subtle text-secondary"><?php echo (int) $assignedEvent['authority_count']; ?> autoridades</span>
+                                                            <?php if ((int) $assignedEvent['sent_count'] > 0) : ?>
+                                                                <span class="badge bg-info-subtle text-info">Validación enviada</span>
+                                                            <?php else : ?>
+                                                                <span class="badge bg-light text-muted">Sin validación enviada</span>
+                                                            <?php endif; ?>
+                                                            <?php if ((int) $assignedEvent['validated_count'] > 0) : ?>
+                                                                <span class="badge bg-success-subtle text-success">Autoridades validadas</span>
+                                                            <?php else : ?>
+                                                                <span class="badge bg-warning-subtle text-warning">Validación pendiente</span>
+                                                            <?php endif; ?>
+                                                        </div>
                                                     </div>
                                                     <a class="btn btn-sm btn-outline-primary" href="eventos-autoridades-nueva.php?event_id=<?php echo (int) $assignedEvent['id']; ?>">Editar</a>
                                                 </div>
@@ -1005,46 +1023,6 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                 </div>
                             </div>
 
-                            <div class="card border shadow-none">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center justify-content-between mb-3">
-                                        <h6 class="mb-0">Solicitudes recientes</h6>
-                                        <span class="badge bg-light text-muted"><?php echo count($assignedEvents); ?></span>
-                                    </div>
-                                    <?php if (!empty($assignedEvents)) : ?>
-                                        <div class="table-responsive gm-table">
-                                            <table class="table table-sm align-middle">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Evento</th>
-                                                        <th>Autoridades asignadas</th>
-                                                        <th class="text-end">Acciones</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <?php foreach ($assignedEvents as $assignedEvent) : ?>
-                                                        <tr>
-                                                            <td><?php echo htmlspecialchars($assignedEvent['titulo'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                                            <td><?php echo (int) $assignedEvent['authority_count']; ?></td>
-                                                            <td class="text-end">
-                                                                <a class="btn btn-sm btn-outline-primary" href="eventos-autoridades.php?event_id=<?php echo (int) $assignedEvent['id']; ?>">Editar</a>
-                                                            </td>
-                                                        </tr>
-                                                    <?php endforeach; ?>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    <?php else : ?>
-                                        <div class="gm-empty-state">
-                                            <i class="ti ti-inbox"></i>
-                                            <div>
-                                                <div class="fw-semibold">Sin solicitudes recientes</div>
-                                                <div class="text-muted small">Las solicitudes aparecerán cuando se envíen validaciones.</div>
-                                            </div>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
                         </div>
                     </div>
 
