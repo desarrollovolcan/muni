@@ -8,7 +8,17 @@ $validationLink = null;
 $whatsappLinks = [];
 $emailPreview = null;
 $events = db()->query('SELECT id, titulo FROM events WHERE habilitado = 1 ORDER BY fecha_inicio DESC')->fetchAll();
-$authorities = db()->query('SELECT id, nombre, tipo FROM authorities WHERE estado = 1 ORDER BY nombre')->fetchAll();
+$authorities = db()->query(
+    'SELECT a.id,
+            a.nombre,
+            a.tipo,
+            g.id AS grupo_id,
+            g.nombre AS grupo_nombre
+     FROM authorities a
+     LEFT JOIN authority_groups g ON g.id = a.group_id
+     WHERE a.estado = 1
+     ORDER BY COALESCE(g.nombre, ""), a.nombre'
+)->fetchAll();
 $users = db()->query('SELECT id, nombre, apellido, correo, telefono FROM users WHERE estado = 1 ORDER BY nombre, apellido')->fetchAll();
 $selectedEventId = isset($_GET['event_id']) ? (int) $_GET['event_id'] : 0;
 $linkedAuthorities = [];
@@ -16,6 +26,19 @@ $validationRequests = [];
 $emailTemplate = null;
 $eventValidationLink = null;
 $selectedEvent = null;
+$authoritiesByGroup = [];
+
+foreach ($authorities as $authority) {
+    $groupId = $authority['grupo_id'] ? (int) $authority['grupo_id'] : 0;
+    $groupName = $authority['grupo_nombre'] ?: 'Sin grupo';
+    if (!isset($authoritiesByGroup[$groupId])) {
+        $authoritiesByGroup[$groupId] = [
+            'name' => $groupName,
+            'items' => [],
+        ];
+    }
+    $authoritiesByGroup[$groupId]['items'][] = $authority;
+}
 
 try {
     db()->exec(
@@ -93,8 +116,27 @@ function build_event_validation_email(array $municipalidad, array $event, array 
     $safeUrl = htmlspecialchars($validationUrl, ENT_QUOTES, 'UTF-8');
 
     $authorityItems = '';
+    $groupedAuthorities = [];
     foreach ($authorities as $authority) {
-        $authorityItems .= '<li>' . htmlspecialchars($authority['nombre'], ENT_QUOTES, 'UTF-8') . ' · ' . htmlspecialchars($authority['tipo'], ENT_QUOTES, 'UTF-8') . '</li>';
+        $groupId = $authority['grupo_id'] ? (int) $authority['grupo_id'] : 0;
+        $groupName = $authority['grupo_nombre'] ?: 'Sin grupo';
+        if (!isset($groupedAuthorities[$groupId])) {
+            $groupedAuthorities[$groupId] = [
+                'name' => $groupName,
+                'items' => [],
+            ];
+        }
+        $groupedAuthorities[$groupId]['items'][] = $authority;
+    }
+    foreach ($groupedAuthorities as $group) {
+        if (empty($group['items'])) {
+            continue;
+        }
+        $authorityItems .= '<li style="margin-top:8px;"><strong>' . htmlspecialchars($group['name'], ENT_QUOTES, 'UTF-8') . '</strong><ul style="margin:6px 0 0 16px;">';
+        foreach ($group['items'] as $authority) {
+            $authorityItems .= '<li>' . htmlspecialchars($authority['nombre'], ENT_QUOTES, 'UTF-8') . ' · ' . htmlspecialchars($authority['tipo'], ENT_QUOTES, 'UTF-8') . '</li>';
+        }
+        $authorityItems .= '</ul></li>';
     }
 
     return <<<HTML
@@ -353,7 +395,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
             $stmt->execute([$eventId]);
             $event = $stmt->fetch();
 
-            $stmt = db()->prepare('SELECT a.id, a.nombre, a.tipo FROM authorities a INNER JOIN event_authorities ea ON ea.authority_id = a.id WHERE ea.event_id = ? ORDER BY a.nombre');
+            $stmt = db()->prepare(
+                'SELECT a.id,
+                        a.nombre,
+                        a.tipo,
+                        g.id AS grupo_id,
+                        g.nombre AS grupo_nombre
+                 FROM authorities a
+                 INNER JOIN event_authorities ea ON ea.authority_id = a.id
+                 LEFT JOIN authority_groups g ON g.id = a.group_id
+                 WHERE ea.event_id = ?
+                 ORDER BY COALESCE(g.nombre, ""), a.nombre'
+            );
             $stmt->execute([$eventId]);
             $eventAuthorities = $stmt->fetchAll();
 
@@ -416,8 +469,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                     $emailPreview = build_event_validation_email($municipalidad, $event, $eventAuthorities, $validationUrl, $recipient['nombre'] ?? null);
                     if ($emailTemplate) {
                         $autoridadesLista = '';
+                        $groupedAuthorities = [];
                         foreach ($eventAuthorities as $authority) {
-                            $autoridadesLista .= '<li>' . htmlspecialchars($authority['nombre'], ENT_QUOTES, 'UTF-8') . ' · ' . htmlspecialchars($authority['tipo'], ENT_QUOTES, 'UTF-8') . '</li>';
+                            $groupId = $authority['grupo_id'] ? (int) $authority['grupo_id'] : 0;
+                            $groupName = $authority['grupo_nombre'] ?: 'Sin grupo';
+                            if (!isset($groupedAuthorities[$groupId])) {
+                                $groupedAuthorities[$groupId] = [
+                                    'name' => $groupName,
+                                    'items' => [],
+                                ];
+                            }
+                            $groupedAuthorities[$groupId]['items'][] = $authority;
+                        }
+                        foreach ($groupedAuthorities as $group) {
+                            if (empty($group['items'])) {
+                                continue;
+                            }
+                            $autoridadesLista .= '<p style="margin:16px 0 8px;"><strong>' . htmlspecialchars($group['name'], ENT_QUOTES, 'UTF-8') . '</strong></p><ul style="margin-top:0;">';
+                            foreach ($group['items'] as $authority) {
+                                $autoridadesLista .= '<li>' . htmlspecialchars($authority['nombre'], ENT_QUOTES, 'UTF-8') . ' · ' . htmlspecialchars($authority['tipo'], ENT_QUOTES, 'UTF-8') . '</li>';
+                            }
+                            $autoridadesLista .= '</ul>';
                         }
                         $logoPath = $municipalidad['logo_path'] ?? 'assets/images/logo.png';
                         $logoUrl = preg_match('/^https?:\\/\\//', $logoPath) ? $logoPath : base_url() . '/' . ltrim($logoPath, '/');
@@ -586,20 +658,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <?php if (empty($authorities)) : ?>
+                                            <?php if (empty($authoritiesByGroup)) : ?>
                                                 <div class="col-12 text-muted">No hay autoridades registradas.</div>
                                             <?php else : ?>
-                                                <?php foreach ($authorities as $authority) : ?>
-                                                    <?php $checked = in_array((int) $authority['id'], $linkedAuthorities, true); ?>
-                                                    <div class="col-md-4">
-                                                        <div class="form-check mb-2">
-                                                            <input class="form-check-input" type="checkbox" id="auth-<?php echo (int) $authority['id']; ?>" name="authorities[]" value="<?php echo (int) $authority['id']; ?>" <?php echo $checked ? 'checked' : ''; ?>>
-                                                            <label class="form-check-label" for="auth-<?php echo (int) $authority['id']; ?>">
-                                                                <?php echo htmlspecialchars($authority['nombre'], ENT_QUOTES, 'UTF-8'); ?>
-                                                                <span class="text-muted">· <?php echo htmlspecialchars($authority['tipo'], ENT_QUOTES, 'UTF-8'); ?></span>
-                                                            </label>
-                                                        </div>
+                                                <?php foreach ($authoritiesByGroup as $group) : ?>
+                                                    <?php if (empty($group['items'])) : ?>
+                                                        <?php continue; ?>
+                                                    <?php endif; ?>
+                                                    <div class="col-12 mt-3">
+                                                        <h6 class="text-uppercase text-muted small mb-2"><?php echo htmlspecialchars($group['name'], ENT_QUOTES, 'UTF-8'); ?></h6>
                                                     </div>
+                                                    <?php foreach ($group['items'] as $authority) : ?>
+                                                        <?php $checked = in_array((int) $authority['id'], $linkedAuthorities, true); ?>
+                                                        <div class="col-md-4">
+                                                            <div class="form-check mb-2">
+                                                                <input class="form-check-input" type="checkbox" id="auth-<?php echo (int) $authority['id']; ?>" name="authorities[]" value="<?php echo (int) $authority['id']; ?>" <?php echo $checked ? 'checked' : ''; ?>>
+                                                                <label class="form-check-label" for="auth-<?php echo (int) $authority['id']; ?>">
+                                                                    <?php echo htmlspecialchars($authority['nombre'], ENT_QUOTES, 'UTF-8'); ?>
+                                                                    <span class="text-muted">· <?php echo htmlspecialchars($authority['tipo'], ENT_QUOTES, 'UTF-8'); ?></span>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    <?php endforeach; ?>
                                                 <?php endforeach; ?>
                                             <?php endif; ?>
                                         </div>
