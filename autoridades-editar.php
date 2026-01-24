@@ -6,7 +6,22 @@ $autoridad = null;
 $errors = [];
 $errorMessage = '';
 $success = $_GET['success'] ?? '';
-$autoridades = db()->query('SELECT id, nombre, tipo, fecha_inicio, fecha_fin, correo, estado FROM authorities ORDER BY fecha_inicio DESC')->fetchAll();
+
+try {
+    db()->exec(
+        'CREATE TABLE IF NOT EXISTS authority_groups (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+            nombre VARCHAR(120) NOT NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY authority_groups_nombre_unique (nombre)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+    );
+} catch (Exception $e) {
+} catch (Error $e) {
+}
+
+$groups = db()->query('SELECT id, nombre FROM authority_groups ORDER BY nombre')->fetchAll();
 
 if ($id > 0) {
     $stmt = db()->prepare('SELECT * FROM authorities WHERE id = ?');
@@ -35,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_
     $fechaInicio = $_POST['fecha_inicio'] ?? '';
     $fechaFin = $_POST['fecha_fin'] ?? null;
     $estado = isset($_POST['estado']) && $_POST['estado'] === '0' ? 0 : 1;
+    $groupId = isset($_POST['group_id']) && $_POST['group_id'] !== '' ? (int) $_POST['group_id'] : null;
 
     if ($nombre === '' || $tipo === '' || $fechaInicio === '') {
         $errors[] = 'Completa los campos obligatorios.';
@@ -42,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_
 
     if (empty($errors)) {
         if ($id > 0) {
-            $stmt = db()->prepare('UPDATE authorities SET nombre = ?, tipo = ?, correo = ?, telefono = ?, fecha_inicio = ?, fecha_fin = ?, estado = ? WHERE id = ?');
+            $stmt = db()->prepare('UPDATE authorities SET nombre = ?, tipo = ?, correo = ?, telefono = ?, fecha_inicio = ?, fecha_fin = ?, estado = ?, group_id = ? WHERE id = ?');
             $stmt->execute([
                 $nombre,
                 $tipo,
@@ -51,11 +67,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_
                 $fechaInicio,
                 $fechaFin !== '' ? $fechaFin : null,
                 $estado,
+                $groupId,
                 $id,
             ]);
             redirect('autoridades-editar.php?id=' . $id . '&success=1');
         } else {
-            $stmt = db()->prepare('INSERT INTO authorities (nombre, tipo, correo, telefono, fecha_inicio, fecha_fin, estado) VALUES (?, ?, ?, ?, ?, ?, ?)');
+            $stmt = db()->prepare('INSERT INTO authorities (nombre, tipo, correo, telefono, fecha_inicio, fecha_fin, estado, group_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
             $stmt->execute([
                 $nombre,
                 $tipo,
@@ -64,6 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_
                 $fechaInicio,
                 $fechaFin !== '' ? $fechaFin : null,
                 $estado,
+                $groupId,
             ]);
             $newId = (int) db()->lastInsertId();
             redirect('autoridades-editar.php?id=' . $newId . '&success=1');
@@ -140,6 +158,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_
                                             <input type="tel" id="autoridad-telefono" name="telefono" class="form-control" value="<?php echo htmlspecialchars($autoridad['telefono'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                                         </div>
                                         <div class="col-md-6 mb-3">
+                                            <label class="form-label" for="autoridad-grupo">Grupo</label>
+                                            <select id="autoridad-grupo" name="group_id" class="form-select">
+                                                <option value="">Sin grupo</option>
+                                                <?php $grupoActual = $autoridad['group_id'] ?? null; ?>
+                                                <?php foreach ($groups as $group) : ?>
+                                                    <option value="<?php echo (int) $group['id']; ?>" <?php echo (int) $grupoActual === (int) $group['id'] ? 'selected' : ''; ?>>
+                                                        <?php echo htmlspecialchars($group['nombre'], ENT_QUOTES, 'UTF-8'); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
                                             <label class="form-label" for="autoridad-inicio">Fecha inicio</label>
                                             <input type="date" id="autoridad-inicio" name="fecha_inicio" class="form-control" value="<?php echo htmlspecialchars($autoridad['fecha_inicio'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                                         </div>
@@ -164,75 +194,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_
                         </div>
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Listado de autoridades</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-hover table-centered mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th>Autoridad</th>
-                                                <th>Tipo</th>
-                                                <th>Periodo</th>
-                                                <th>Contacto</th>
-                                                <th>Estado</th>
-                                                <th class="text-end">Acciones</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php if (empty($autoridades)) : ?>
-                                                <tr>
-                                                    <td colspan="6" class="text-center text-muted">No hay autoridades registradas.</td>
-                                                </tr>
-                                            <?php else : ?>
-                                                <?php foreach ($autoridades as $autoridadItem) : ?>
-                                                    <tr>
-                                                        <td><?php echo htmlspecialchars($autoridadItem['nombre'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                                        <td><?php echo htmlspecialchars($autoridadItem['tipo'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                                        <td><?php echo htmlspecialchars($autoridadItem['fecha_inicio'], ENT_QUOTES, 'UTF-8'); ?> - <?php echo htmlspecialchars($autoridadItem['fecha_fin'] ?? 'Vigente', ENT_QUOTES, 'UTF-8'); ?></td>
-                                                        <td><?php echo htmlspecialchars($autoridadItem['correo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
-                                                        <td>
-                                                            <?php if ((int) $autoridadItem['estado'] === 1) : ?>
-                                                                <span class="badge text-bg-success">Habilitado</span>
-                                                            <?php else : ?>
-                                                                <span class="badge text-bg-secondary">Deshabilitado</span>
-                                                            <?php endif; ?>
-                                                        </td>
-                                                        <td class="text-end">
-                                                            <div class="dropdown">
-                                                                <button class="btn btn-sm btn-soft-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                                    Acciones
-                                                                </button>
-                                                                <ul class="dropdown-menu dropdown-menu-end">
-                                                                    <li><a class="dropdown-item" href="autoridades-detalle.php?id=<?php echo (int) $autoridadItem['id']; ?>">Ver</a></li>
-                                                                    <li><a class="dropdown-item" href="autoridades-editar.php?id=<?php echo (int) $autoridadItem['id']; ?>">Editar</a></li>
-                                                                    <li><hr class="dropdown-divider"></li>
-                                                                    <li>
-                                                                        <form method="post" class="px-3 py-1" data-confirm="¿Estás seguro de eliminar esta autoridad?">
-                                                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                                                            <input type="hidden" name="action" value="delete">
-                                                                            <input type="hidden" name="id" value="<?php echo (int) $autoridadItem['id']; ?>">
-                                                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100">Eliminar</button>
-                                                                        </form>
-                                                                    </li>
-                                                                </ul>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                <?php endforeach; ?>
-                                            <?php endif; ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
             </div>
             <!-- container -->
 

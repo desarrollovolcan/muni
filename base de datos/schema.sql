@@ -149,8 +149,17 @@ CREATE TABLE `authorities` (
   `estado` TINYINT(1) NOT NULL DEFAULT 1,
   `aprobacion_estado` ENUM('propuesta', 'validacion', 'vigente') NOT NULL DEFAULT 'propuesta',
   `unidad_id` INT UNSIGNED DEFAULT NULL,
+  `group_id` INT UNSIGNED DEFAULT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `authority_groups` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `nombre` VARCHAR(120) NOT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `authority_groups_nombre_unique` (`nombre`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `event_authorities` (
