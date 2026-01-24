@@ -717,9 +717,9 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                     <input type="hidden" name="action" value="save_authorities">
                                     <div class="row g-4">
                                         <div class="col-lg-4">
-                                            <div class="card border shadow-none mb-3">
-                                                <div class="card-body">
-                                                    <h6 class="text-uppercase text-muted small mb-3">Paso 1 · Selecciona un evento</h6>
+                                            <div class="list-group">
+                                                <div class="list-group-item">
+                                                    <h6 class="text-uppercase text-muted small mb-2">Paso 1 · Selecciona un evento</h6>
                                                     <label class="form-label" for="evento-select">Evento</label>
                                                     <?php if ($selectedEventId > 0 && in_array($selectedEventId, $assignedEventIds, true)) : ?>
                                                         <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
@@ -739,21 +739,15 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                                         <div class="form-text">Solo se muestran eventos sin autoridades asignadas.</div>
                                                     <?php endif; ?>
                                                 </div>
-                                            </div>
-
-                                            <div class="card border shadow-none mb-3">
-                                                <div class="card-body">
-                                                    <h6 class="text-uppercase text-muted small mb-3">Paso 2 · Acciones rápidas</h6>
+                                                <div class="list-group-item">
+                                                    <h6 class="text-uppercase text-muted small mb-2">Paso 2 · Acciones rápidas</h6>
                                                     <div class="btn-group w-100" role="group" aria-label="Acciones de autoridades">
                                                         <button type="button" class="btn btn-outline-primary" id="select-all-authorities">Seleccionar todas</button>
                                                         <button type="button" class="btn btn-outline-primary" id="clear-all-authorities">Limpiar selección</button>
                                                     </div>
                                                     <div class="text-muted small mt-2">Seleccionadas: <?php echo $selectedAuthoritiesCount; ?> autoridades.</div>
                                                 </div>
-                                            </div>
-
-                                            <div class="card border shadow-none">
-                                                <div class="card-body">
+                                                <div class="list-group-item">
                                                     <div class="d-flex align-items-center justify-content-between mb-2">
                                                         <h6 class="mb-0">Eventos con autoridades</h6>
                                                         <span class="badge text-bg-light text-muted"><?php echo count($assignedEvents); ?></span>
@@ -775,8 +769,8 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                         </div>
 
                                         <div class="col-lg-8">
-                                            <div class="card border shadow-none">
-                                                <div class="card-body">
+                                            <div class="list-group">
+                                                <div class="list-group-item">
                                                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
                                                         <h6 class="mb-0">Paso 3 · Selecciona autoridades</h6>
                                                         <span class="text-muted small">Selecciona las autoridades para el evento.</span>
