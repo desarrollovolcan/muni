@@ -31,12 +31,12 @@ $displayAuthoritiesByGroup = [];
 $saveNotice = null;
 $editRequestId = isset($_GET['edit_request_id']) ? (int) $_GET['edit_request_id'] : 0;
 $editRequest = null;
-$eventsWithAuthorities = [];
-$eventIdsWithAuthorities = [];
 $editSelectionRequestId = isset($_GET['edit_selection_id']) ? (int) $_GET['edit_selection_id'] : 0;
 $editSelectionRequest = null;
 $editSelectionAuthoritiesByGroup = [];
 $editSelectionConfirmedIds = [];
+$selectedAuthoritiesCount = 0;
+$totalAuthoritiesCount = count($authorities);
 
 foreach ($authorities as $authority) {
     $groupId = $authority['grupo_id'] ? (int) $authority['grupo_id'] : 0;
@@ -96,22 +96,12 @@ if ($selectedEventId > 0) {
     $stmt = db()->prepare('SELECT authority_id FROM event_authorities WHERE event_id = ?');
     $stmt->execute([$selectedEventId]);
     $linkedAuthorities = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+    $selectedAuthoritiesCount = count($linkedAuthorities);
 
     $stmt = db()->prepare('SELECT id, destinatario_nombre, destinatario_correo, token, correo_enviado, estado, created_at, responded_at FROM event_authority_requests WHERE event_id = ? ORDER BY created_at DESC');
     $stmt->execute([$selectedEventId]);
     $validationRequests = $stmt->fetchAll();
 }
-
-$stmt = db()->query(
-    'SELECT e.id, e.titulo, COUNT(ea.authority_id) AS total
-     FROM events e
-     INNER JOIN event_authorities ea ON ea.event_id = e.id
-     WHERE e.habilitado = 1
-     GROUP BY e.id, e.titulo
-     ORDER BY e.fecha_inicio DESC'
-);
-$eventsWithAuthorities = $stmt->fetchAll();
-$eventIdsWithAuthorities = array_map('intval', array_column($eventsWithAuthorities, 'id'));
 
 foreach ($authoritiesByGroup as $groupId => $group) {
     if (!empty($group['items'])) {
@@ -417,6 +407,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
             }
 
             $_SESSION['authorities_saved'] = true;
+            redirect('eventos-autoridades.php?event_id=' . $eventId);
+        }
+    }
+
+    if ($action === 'update_request') {
+        $requestId = isset($_POST['request_id']) ? (int) $_POST['request_id'] : 0;
+        $eventId = isset($_POST['event_id']) ? (int) $_POST['event_id'] : 0;
+        $nombre = trim($_POST['destinatario_nombre'] ?? '');
+        $correo = trim($_POST['destinatario_correo'] ?? '');
+        $estado = $_POST['estado'] ?? 'pendiente';
+        $correoEnviado = isset($_POST['correo_enviado']) && (int) $_POST['correo_enviado'] === 1 ? 1 : 0;
+
+        if ($eventId === 0 || $requestId === 0) {
+            $validationErrors[] = 'Selecciona una solicitud válida para editar.';
+        }
+        if ($correo !== '' && !filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+            $validationErrors[] = 'El correo ingresado no es válido.';
+        }
+        if (!in_array($estado, ['pendiente', 'respondido'], true)) {
+            $validationErrors[] = 'El estado seleccionado no es válido.';
+        }
+
+        if (empty($validationErrors)) {
+            $respondedAt = null;
+            if ($estado === 'respondido') {
+                $respondedAt = date('Y-m-d H:i:s');
+            }
+            $stmt = db()->prepare(
+                'UPDATE event_authority_requests
+                 SET destinatario_nombre = ?, destinatario_correo = ?, estado = ?, correo_enviado = ?, responded_at = ?
+                 WHERE id = ? AND event_id = ?'
+            );
+            $stmt->execute([
+                $nombre !== '' ? $nombre : null,
+                $correo !== '' ? $correo : null,
+                $estado,
+                $correoEnviado,
+                $respondedAt,
+                $requestId,
+                $eventId,
+            ]);
+            redirect('eventos-autoridades.php?event_id=' . $eventId . '&updated=1');
+        }
+    }
+
+    if ($action === 'update_request_selection') {
+        $requestId = isset($_POST['request_id']) ? (int) $_POST['request_id'] : 0;
+        $eventId = isset($_POST['event_id']) ? (int) $_POST['event_id'] : 0;
+        $selectedAuthorities = array_map('intval', $_POST['authorities'] ?? []);
+
+        if ($eventId === 0 || $requestId === 0) {
+            $validationErrors[] = 'Selecciona una solicitud válida para editar.';
+        }
+
+        if (empty($validationErrors)) {
+            $stmt = db()->prepare('DELETE FROM event_authority_confirmations WHERE request_id = ?');
+            $stmt->execute([$requestId]);
+
+            if (!empty($selectedAuthorities)) {
+                $stmtInsert = db()->prepare('INSERT INTO event_authority_confirmations (request_id, authority_id) VALUES (?, ?)');
+                foreach ($selectedAuthorities as $authorityId) {
+                    $stmtInsert->execute([$requestId, $authorityId]);
+                }
+            }
+
+            $stmtUpdate = db()->prepare('UPDATE event_authority_requests SET estado = ?, responded_at = NOW() WHERE id = ? AND event_id = ?');
+            $stmtUpdate->execute(['respondido', $requestId, $eventId]);
+
+            $_SESSION['selection_saved'] = true;
             redirect('eventos-autoridades.php?event_id=' . $eventId);
         }
     }
@@ -857,7 +916,11 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                                     </option>
                                                 <?php endforeach; ?>
                                             </select>
-                                            <div class="form-text">Los eventos con autoridades asignadas se editan desde el listado inferior.</div>
+                                            <?php if ($selectedEventId > 0) : ?>
+                                                <div class="form-text">
+                                                    Autoridades seleccionadas: <?php echo $selectedAuthoritiesCount; ?> de <?php echo $totalAuthoritiesCount; ?>.
+                                                </div>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
 
@@ -868,6 +931,10 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                                 <button type="button" class="btn btn-sm btn-outline-secondary" id="select-all-authorities">Seleccionar todas</button>
                                                 <button type="button" class="btn btn-sm btn-outline-secondary" id="clear-all-authorities">Limpiar selección</button>
                                             </div>
+                                        </div>
+                                        <div class="form-check form-switch mt-2">
+                                            <input class="form-check-input" type="checkbox" id="toggle-selected-authorities">
+                                            <label class="form-check-label" for="toggle-selected-authorities">Mostrar solo seleccionadas</label>
                                         </div>
                                         <div class="row">
                                             <?php if (empty($displayAuthoritiesByGroup)) : ?>
@@ -880,18 +947,18 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                                     <div class="col-12 mt-3">
                                                         <h6 class="text-uppercase text-muted small mb-2"><?php echo htmlspecialchars($group['name'], ENT_QUOTES, 'UTF-8'); ?></h6>
                                                     </div>
-                                                    <?php foreach ($group['items'] as $authority) : ?>
-                                                        <?php $checked = in_array((int) $authority['id'], $linkedAuthorities, true); ?>
-                                                        <div class="col-md-4">
-                                                            <div class="form-check mb-2">
-                                                                <input class="form-check-input" type="checkbox" id="auth-<?php echo (int) $authority['id']; ?>" name="authorities[]" value="<?php echo (int) $authority['id']; ?>" <?php echo $checked ? 'checked' : ''; ?>>
-                                                                <label class="form-check-label" for="auth-<?php echo (int) $authority['id']; ?>">
-                                                                    <?php echo htmlspecialchars($authority['nombre'], ENT_QUOTES, 'UTF-8'); ?>
-                                                                    <span class="text-muted">· <?php echo htmlspecialchars($authority['tipo'], ENT_QUOTES, 'UTF-8'); ?></span>
-                                                                </label>
+                                                        <?php foreach ($group['items'] as $authority) : ?>
+                                                            <?php $checked = in_array((int) $authority['id'], $linkedAuthorities, true); ?>
+                                                            <div class="col-md-4 authority-item" data-selected="<?php echo $checked ? '1' : '0'; ?>">
+                                                                <div class="form-check mb-2">
+                                                                    <input class="form-check-input" type="checkbox" id="auth-<?php echo (int) $authority['id']; ?>" name="authorities[]" value="<?php echo (int) $authority['id']; ?>" <?php echo $checked ? 'checked' : ''; ?>>
+                                                                    <label class="form-check-label" for="auth-<?php echo (int) $authority['id']; ?>">
+                                                                        <?php echo htmlspecialchars($authority['nombre'], ENT_QUOTES, 'UTF-8'); ?>
+                                                                        <span class="text-muted">· <?php echo htmlspecialchars($authority['tipo'], ENT_QUOTES, 'UTF-8'); ?></span>
+                                                                    </label>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    <?php endforeach; ?>
+                                                        <?php endforeach; ?>
                                                 <?php endforeach; ?>
                                             <?php endif; ?>
                                         </div>
@@ -1201,8 +1268,10 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
         document.addEventListener('DOMContentLoaded', () => {
             const selectAllBtn = document.getElementById('select-all-authorities');
             const clearAllBtn = document.getElementById('clear-all-authorities');
+            const toggleSelected = document.getElementById('toggle-selected-authorities');
             const checkboxes = () => Array.from(document.querySelectorAll('input[name="authorities[]"]'));
             const pdfDownload = document.querySelector('a[href*="eventos-autoridades-pdf.php"], button[data-download="autoridades-pdf"]');
+            const authorityItems = () => Array.from(document.querySelectorAll('.authority-item'));
 
             if (pdfDownload) {
                 pdfDownload.remove();
@@ -1221,8 +1290,39 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                     checkboxes().forEach((checkbox) => {
                         checkbox.checked = false;
                     });
+                    authorityItems().forEach((item) => {
+                        item.dataset.selected = '0';
+                        item.classList.remove('d-none');
+                    });
+                    if (toggleSelected) {
+                        toggleSelected.checked = false;
+                    }
                 });
             }
+
+            if (toggleSelected) {
+                toggleSelected.addEventListener('change', (event) => {
+                    const onlySelected = event.target.checked;
+                    authorityItems().forEach((item) => {
+                        const isSelected = item.dataset.selected === '1';
+                        item.classList.toggle('d-none', onlySelected && !isSelected);
+                    });
+                });
+            }
+
+            checkboxes().forEach((checkbox) => {
+                checkbox.addEventListener('change', () => {
+                    const wrapper = checkbox.closest('.authority-item');
+                    if (wrapper) {
+                        wrapper.dataset.selected = checkbox.checked ? '1' : '0';
+                        if (toggleSelected && toggleSelected.checked && !checkbox.checked) {
+                            wrapper.classList.add('d-none');
+                        } else {
+                            wrapper.classList.remove('d-none');
+                        }
+                    }
+                });
+            });
         });
     </script>
 
