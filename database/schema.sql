@@ -238,12 +238,26 @@ CREATE TABLE `notificacion_correos` (
 
 CREATE TABLE `email_templates` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `template_key` VARCHAR(80) NOT NULL,
+  `template_key` VARCHAR(120) NOT NULL,
   `subject` VARCHAR(200) NOT NULL,
   `body_html` MEDIUMTEXT NOT NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email_templates_key_unique` (`template_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `event_authority_invitations` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `event_id` INT UNSIGNED NOT NULL,
+  `authority_id` INT UNSIGNED NOT NULL,
+  `destinatario_correo` VARCHAR(150) DEFAULT NULL,
+  `correo_enviado` TINYINT(1) NOT NULL DEFAULT 0,
+  `sent_at` TIMESTAMP NULL DEFAULT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `event_authority_invitations_unique` (`event_id`, `authority_id`),
+  CONSTRAINT `event_authority_invitations_event_id_fk` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `event_authority_invitations_authority_id_fk` FOREIGN KEY (`authority_id`) REFERENCES `authorities` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `notification_settings` (

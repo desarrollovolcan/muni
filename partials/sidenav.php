@@ -58,6 +58,9 @@
                                 </li>
                             <?php endif; ?>
                             <li class="side-nav-item">
+                                <a href="eventos-invitacion-autoridades.php" class="side-nav-link">Invitación autoridades</a>
+                            </li>
+                            <li class="side-nav-item">
                                 <a href="eventos-autoridades-nueva.php" class="side-nav-link">Autoridades por evento</a>
                             </li>
                             <li class="side-nav-item">
@@ -163,6 +166,9 @@
                             </li>
                             <li class="side-nav-item">
                                 <a href="notificaciones-correo.php" class="side-nav-link">Correo de notificaciones</a>
+                            </li>
+                            <li class="side-nav-item">
+                                <a href="invitacion-correo.php" class="side-nav-link">Invitación correo</a>
                             </li>
                             <li class="side-nav-item">
                                 <a href="notificaciones-whatsapp.php" class="side-nav-link">WhatsApp de notificaciones</a>
