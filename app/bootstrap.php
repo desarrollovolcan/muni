@@ -176,9 +176,23 @@ function current_role_id(): ?int
     return $roleIdCache[$roleName];
 }
 
+function is_superuser(): bool
+{
+    if (!isset($_SESSION['user']['rol'])) {
+        return false;
+    }
+
+    $roleName = strtolower((string) $_SESSION['user']['rol']);
+    return $roleName !== '' && (str_contains($roleName, 'super') || str_contains($roleName, 'admin'));
+}
+
 function has_permission(string $module, string $action = 'view'): bool
 {
     if (!isset($_SESSION['user'])) {
+        return true;
+    }
+
+    if (is_superuser()) {
         return true;
     }
 
