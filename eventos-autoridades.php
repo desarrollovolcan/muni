@@ -475,8 +475,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                 }
             }
 
-            $_SESSION['authorities_saved'] = true;
-            redirect('eventos-autoridades.php?event_id=' . $eventId);
+            redirect('eventos-autoridades.php?event_id=' . $eventId . '&saved=1');
         }
     }
 
@@ -826,9 +825,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
     }
 }
 
-if (!empty($_SESSION['authorities_saved'])) {
+if (isset($_GET['saved']) && $_GET['saved'] === '1') {
     $saveNotice = 'Autoridades actualizadas correctamente.';
-    unset($_SESSION['authorities_saved']);
 }
 if (!empty($_SESSION['selection_saved'])) {
     $validationNotice = 'Selección actualizada correctamente.';
