@@ -5,7 +5,8 @@ $modules = [
     ['key' => 'usuarios', 'label' => 'Usuarios', 'permisos' => ['view', 'create', 'edit', 'delete']],
     ['key' => 'roles', 'label' => 'Roles', 'permisos' => ['view', 'create', 'edit', 'delete']],
     ['key' => 'eventos', 'label' => 'Eventos', 'permisos' => ['view', 'create', 'edit', 'delete', 'publish']],
-    ['key' => 'autoridades', 'label' => 'Autoridades', 'permisos' => ['view', 'create', 'edit', 'delete']],
+    ['key' => 'autoridades', 'label' => 'Autoridades', 'permisos' => ['view', 'create', 'edit', 'delete', 'export']],
+    ['key' => 'mantenedores', 'label' => 'Mantenedores', 'permisos' => ['view', 'edit']],
     ['key' => 'adjuntos', 'label' => 'Adjuntos', 'permisos' => ['view', 'create', 'delete']],
 ];
 
@@ -176,35 +177,33 @@ $updated = isset($_GET['updated']) && $_GET['updated'] === '1';
                                     <form id="permisos-form" method="post">
                                         <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
                                         <input type="hidden" name="role_id" value="<?php echo (int) $selectedRoleId; ?>">
-                                        <div class="table-responsive">
-                                            <table class="table table-bordered table-centered mb-0">
-                                                <thead class="table-light">
-                                                    <tr>
-                                                        <th>Módulo</th>
-                                                        <?php foreach ($permisosDisponibles as $permisoLabel) : ?>
-                                                            <th><?php echo htmlspecialchars($permisoLabel, ENT_QUOTES, 'UTF-8'); ?></th>
-                                                        <?php endforeach; ?>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <?php foreach ($modules as $module) : ?>
-                                                        <?php $moduleKey = $module['key']; ?>
-                                                        <tr>
-                                                            <td><?php echo htmlspecialchars($module['label'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                                            <?php foreach ($permisosDisponibles as $permisoKey => $permisoLabel) : ?>
-                                                                <?php if (in_array($permisoKey, $module['permisos'], true)) : ?>
+                                        <div class="row g-3">
+                                            <?php foreach ($modules as $module) : ?>
+                                                <?php $moduleKey = $module['key']; ?>
+                                                <div class="col-md-6 col-xl-4">
+                                                    <div class="card h-100 border">
+                                                        <div class="card-body">
+                                                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                                                <h6 class="mb-0"><?php echo htmlspecialchars($module['label'], ENT_QUOTES, 'UTF-8'); ?></h6>
+                                                                <span class="badge text-bg-light"><?php echo htmlspecialchars($moduleKey, ENT_QUOTES, 'UTF-8'); ?></span>
+                                                            </div>
+                                                            <p class="text-muted small mb-3">Define qué acciones puede ejecutar este rol en el módulo.</p>
+                                                            <div class="d-flex flex-column gap-2">
+                                                                <?php foreach ($module['permisos'] as $permisoKey) : ?>
+                                                                    <?php $permisoLabel = $permisosDisponibles[$permisoKey] ?? $permisoKey; ?>
                                                                     <?php $checked = !empty($permisosRol[$moduleKey][$permisoKey]); ?>
-                                                                    <td>
-                                                                        <input type="checkbox" class="form-check-input" name="permisos[<?php echo htmlspecialchars($moduleKey, ENT_QUOTES, 'UTF-8'); ?>][<?php echo htmlspecialchars($permisoKey, ENT_QUOTES, 'UTF-8'); ?>]" value="1" <?php echo $checked ? 'checked' : ''; ?>>
-                                                                    </td>
-                                                                <?php else : ?>
-                                                                    <td class="text-muted">-</td>
-                                                                <?php endif; ?>
-                                                            <?php endforeach; ?>
-                                                        </tr>
-                                                    <?php endforeach; ?>
-                                                </tbody>
-                                            </table>
+                                                                    <div class="form-check form-switch">
+                                                                        <input class="form-check-input" type="checkbox" role="switch" id="perm-<?php echo htmlspecialchars($moduleKey . '-' . $permisoKey, ENT_QUOTES, 'UTF-8'); ?>" name="permisos[<?php echo htmlspecialchars($moduleKey, ENT_QUOTES, 'UTF-8'); ?>][<?php echo htmlspecialchars($permisoKey, ENT_QUOTES, 'UTF-8'); ?>]" value="1" <?php echo $checked ? 'checked' : ''; ?>>
+                                                                        <label class="form-check-label" for="perm-<?php echo htmlspecialchars($moduleKey . '-' . $permisoKey, ENT_QUOTES, 'UTF-8'); ?>">
+                                                                            <?php echo htmlspecialchars($permisoLabel, ENT_QUOTES, 'UTF-8'); ?>
+                                                                        </label>
+                                                                    </div>
+                                                                <?php endforeach; ?>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
                                         </div>
                                     </form>
                                 <?php endif; ?>
