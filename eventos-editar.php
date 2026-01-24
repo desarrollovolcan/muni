@@ -173,7 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['list_action']) && ve
                     </div>
                 <?php endif; ?>
 
-                <div class="row">
+                <div class="row evento-formal">
                     <div class="col-12">
                         <div class="card mb-3">
                             <div class="card-header">
@@ -271,10 +271,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['list_action']) && ve
                                     </div>
 
                                     <div class="d-flex flex-wrap align-items-center gap-2">
-                                        <button type="submit" class="btn btn-outline-danger" name="event_action" value="delete" data-confirm="¿Estás seguro de eliminar este evento?">
-                                            Eliminar
-                                        </button>
-
                                         <?php if ($id > 0) : ?>
                                             <a href="eventos-autoridades.php?event_id=<?php echo (int) $id; ?>" class="btn btn-outline-primary">
                                                 Enviar confirmación de invitados
@@ -387,6 +383,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['list_action']) && ve
     <!-- END wrapper -->
 
     <?php include('partials/customizer.php'); ?>
+
+    <style>
+        .evento-formal .card-header {
+            background: #f8fafc;
+        }
+
+        .evento-formal .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .evento-formal .form-label {
+            font-size: 0.82rem;
+            color: #475569;
+            margin-bottom: 0.35rem;
+        }
+
+        .evento-formal .form-control,
+        .evento-formal .form-select {
+            min-height: 36px;
+            padding: 0.4rem 0.65rem;
+            font-size: 0.9rem;
+        }
+
+        .evento-formal textarea.form-control {
+            min-height: 92px;
+        }
+
+        .evento-formal .card-body {
+            padding: 1.25rem;
+        }
+
+        .evento-formal .table-responsive {
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+        }
+
+        .evento-formal .table > :not(caption) > * > * {
+            padding: 0.65rem 0.75rem;
+        }
+
+        .evento-formal .badge {
+            font-weight: 600;
+        }
+
+        .evento-formal .form-text {
+            font-size: 0.78rem;
+        }
+    </style>
 
     <?php include('partials/footer-scripts.php'); ?>
 
