@@ -43,41 +43,55 @@
         <ul class="side-nav">
             <li class="side-nav-title mt-2" data-lang="menu-title">Gestión</li>
 
-            <li class="side-nav-item">
-                <a href="#modulo-eventos" class="side-nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="modulo-eventos">
-                    <span class="menu-icon"><i data-lucide="calendar-check"></i></span>
-                    <span class="menu-text">Eventos Municipales</span>
-                    <span class="menu-arrow"></span>
-                </a>
-                <div class="collapse" id="modulo-eventos">
-                    <ul class="side-nav sub-menu">
-                        <li class="side-nav-item">
-                            <a href="eventos-editar.php" class="side-nav-link">Crear evento</a>
-                        </li>
-                        <li class="side-nav-item">
-                            <a href="eventos-autoridades.php" class="side-nav-link">Autoridades por evento</a>
-                        </li>
-                        <li class="side-nav-item">
-                            <a href="eventos-procesados.php" class="side-nav-link">Eventos procesados</a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
+            <?php if (has_permission('eventos', 'view')) : ?>
+                <li class="side-nav-item">
+                    <a href="#modulo-eventos" class="side-nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="modulo-eventos">
+                        <span class="menu-icon"><i data-lucide="calendar-check"></i></span>
+                        <span class="menu-text">Eventos Municipales</span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <div class="collapse" id="modulo-eventos">
+                        <ul class="side-nav sub-menu">
+                            <?php if (has_permission('eventos', 'create')) : ?>
+                                <li class="side-nav-item">
+                                    <a href="eventos-editar.php" class="side-nav-link">Crear evento</a>
+                                </li>
+                            <?php endif; ?>
+                            <li class="side-nav-item">
+                                <a href="eventos-autoridades.php" class="side-nav-link">Autoridades por evento</a>
+                            </li>
+                            <li class="side-nav-item">
+                                <a href="eventos-procesados.php" class="side-nav-link">Eventos procesados</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+            <?php endif; ?>
 
-            <li class="side-nav-item">
-                <a href="#modulo-autoridades" class="side-nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="modulo-autoridades">
-                    <span class="menu-icon"><i data-lucide="landmark"></i></span>
-                    <span class="menu-text">Autoridades</span>
-                    <span class="menu-arrow"></span>
-                </a>
-                <div class="collapse" id="modulo-autoridades">
-                    <ul class="side-nav sub-menu">
-                        <li class="side-nav-item">
-                            <a href="autoridades-editar.php" class="side-nav-link">Crear autoridad</a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
+            <?php if (has_permission('autoridades', 'view')) : ?>
+                <li class="side-nav-item">
+                    <a href="#modulo-autoridades" class="side-nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="modulo-autoridades">
+                        <span class="menu-icon"><i data-lucide="landmark"></i></span>
+                        <span class="menu-text">Autoridades</span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <div class="collapse" id="modulo-autoridades">
+                        <ul class="side-nav sub-menu">
+                            <li class="side-nav-item">
+                                <a href="autoridades-lista.php" class="side-nav-link">Listado de autoridades</a>
+                            </li>
+                            <?php if (has_permission('autoridades', 'create')) : ?>
+                                <li class="side-nav-item">
+                                    <a href="autoridades-editar.php" class="side-nav-link">Crear autoridad</a>
+                                </li>
+                                <li class="side-nav-item">
+                                    <a href="autoridades-carga-masiva.php" class="side-nav-link">Carga masiva</a>
+                                </li>
+                            <?php endif; ?>
+                        </ul>
+                    </div>
+                </li>
+            <?php endif; ?>
 
             <li class="side-nav-item">
                 <a href="calendar.php" class="side-nav-link">
@@ -88,68 +102,81 @@
 
             <li class="side-nav-title" data-lang="settings-title">Administración</li>
 
-            <li class="side-nav-item">
-                <a href="#modulo-usuarios" class="side-nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="modulo-usuarios">
-                    <span class="menu-icon"><i data-lucide="users"></i></span>
-                    <span class="menu-text">Usuarios</span>
-                    <span class="menu-arrow"></span>
-                </a>
-                <div class="collapse" id="modulo-usuarios">
-                    <ul class="side-nav sub-menu">
-                        <li class="side-nav-item">
-                            <a href="usuarios-crear.php" class="side-nav-link">Crear usuario</a>
-                        </li>
-                        <li class="side-nav-item">
-                            <a href="usuarios-asignar-roles.php" class="side-nav-link">Asignar roles</a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
+            <?php if (has_permission('usuarios', 'view')) : ?>
+                <li class="side-nav-item">
+                    <a href="#modulo-usuarios" class="side-nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="modulo-usuarios">
+                        <span class="menu-icon"><i data-lucide="users"></i></span>
+                        <span class="menu-text">Usuarios</span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <div class="collapse" id="modulo-usuarios">
+                        <ul class="side-nav sub-menu">
+                            <?php if (has_permission('usuarios', 'create')) : ?>
+                                <li class="side-nav-item">
+                                    <a href="usuarios-crear.php" class="side-nav-link">Crear usuario</a>
+                                </li>
+                            <?php endif; ?>
+                            <li class="side-nav-item">
+                                <a href="usuarios-asignar-roles.php" class="side-nav-link">Asignar roles</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+            <?php endif; ?>
 
-            <li class="side-nav-item">
-                <a href="#modulo-roles" class="side-nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="modulo-roles">
-                    <span class="menu-icon"><i data-lucide="key-round"></i></span>
-                    <span class="menu-text">Roles y Permisos</span>
-                    <span class="menu-arrow"></span>
-                </a>
-                <div class="collapse" id="modulo-roles">
-                    <ul class="side-nav sub-menu">
-                        <li class="side-nav-item">
-                            <a href="roles-editar.php" class="side-nav-link">Crear rol</a>
-                        </li>
-                        <li class="side-nav-item">
-                            <a href="roles-permisos.php" class="side-nav-link">Matriz de permisos</a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
+            <?php if (has_permission('roles', 'view')) : ?>
+                <li class="side-nav-item">
+                    <a href="#modulo-roles" class="side-nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="modulo-roles">
+                        <span class="menu-icon"><i data-lucide="key-round"></i></span>
+                        <span class="menu-text">Roles y Permisos</span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <div class="collapse" id="modulo-roles">
+                        <ul class="side-nav sub-menu">
+                            <?php if (has_permission('roles', 'create')) : ?>
+                                <li class="side-nav-item">
+                                    <a href="roles-editar.php" class="side-nav-link">Crear rol</a>
+                                </li>
+                            <?php endif; ?>
+                            <li class="side-nav-item">
+                                <a href="roles-permisos.php" class="side-nav-link">Matriz de permisos</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+            <?php endif; ?>
 
-            <li class="side-nav-item">
-                <a href="#modulo-mantenedores" class="side-nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="modulo-mantenedores">
-                    <span class="menu-icon"><i data-lucide="settings-2"></i></span>
-                    <span class="menu-text">Mantenedores</span>
-                    <span class="menu-arrow"></span>
-                </a>
-                <div class="collapse" id="modulo-mantenedores">
-                    <ul class="side-nav sub-menu">
-                        <li class="side-nav-item">
-                            <a href="municipalidad.php" class="side-nav-link">Municipalidad</a>
-                        </li>
-                        <li class="side-nav-item">
-                            <a href="eventos-tipos.php" class="side-nav-link">Tipos de evento</a>
-                        </li>
-                        <li class="side-nav-item">
-                            <a href="notificaciones-correo.php" class="side-nav-link">Correo de notificaciones</a>
-                        </li>
-                        <li class="side-nav-item">
-                            <a href="notificaciones-whatsapp.php" class="side-nav-link">WhatsApp de notificaciones</a>
-                        </li>
-                        <li class="side-nav-item">
-                            <a href="configuracion-email.php" class="side-nav-link">Configuración Email</a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
+            <?php if (has_permission('mantenedores', 'view')) : ?>
+                <li class="side-nav-item">
+                    <a href="#modulo-mantenedores" class="side-nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="modulo-mantenedores">
+                        <span class="menu-icon"><i data-lucide="settings-2"></i></span>
+                        <span class="menu-text">Mantenedores</span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <div class="collapse" id="modulo-mantenedores">
+                        <ul class="side-nav sub-menu">
+                            <li class="side-nav-item">
+                                <a href="municipalidad.php" class="side-nav-link">Municipalidad</a>
+                            </li>
+                            <li class="side-nav-item">
+                                <a href="eventos-tipos.php" class="side-nav-link">Tipos de evento</a>
+                            </li>
+                            <li class="side-nav-item">
+                                <a href="grupos-autoridades.php" class="side-nav-link">Grupos de autoridades</a>
+                            </li>
+                            <li class="side-nav-item">
+                                <a href="notificaciones-correo.php" class="side-nav-link">Correo de notificaciones</a>
+                            </li>
+                            <li class="side-nav-item">
+                                <a href="notificaciones-whatsapp.php" class="side-nav-link">WhatsApp de notificaciones</a>
+                            </li>
+                            <li class="side-nav-item">
+                                <a href="configuracion-email.php" class="side-nav-link">Configuración Email</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+            <?php endif; ?>
         </ul>
     </div>
 </div>
