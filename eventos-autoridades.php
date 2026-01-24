@@ -718,6 +718,38 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                     </div>
                                 <?php endif; ?>
 
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-4">
+                                        <div class="border rounded-3 p-3 h-100">
+                                            <div class="text-muted small">Evento seleccionado</div>
+                                            <div class="fw-semibold">
+                                                <?php if ($selectedEventId > 0) : ?>
+                                                    <?php echo htmlspecialchars($selectedEvent['titulo'] ?? 'Evento seleccionado', ENT_QUOTES, 'UTF-8'); ?>
+                                                <?php else : ?>
+                                                    Selecciona un evento
+                                                <?php endif; ?>
+                                            </div>
+                                            <div class="text-muted small">Autoridades marcadas: <?php echo $selectedAuthoritiesCount; ?></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="border rounded-3 p-3 h-100">
+                                            <div class="text-muted small">Eventos sin autoridades</div>
+                                            <div class="fw-semibold"><?php echo $availableEventsCount; ?> disponibles</div>
+                                            <div class="text-muted small">Usa el selector para comenzar.</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="border rounded-3 p-3 h-100">
+                                            <div class="text-muted small">Acciones rápidas</div>
+                                            <div class="d-flex flex-wrap gap-2 mt-2">
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" id="select-all-authorities">Seleccionar todas</button>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" id="clear-all-authorities">Limpiar selección</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <form id="evento-autoridades-form" method="post">
                                     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
                                     <input type="hidden" name="action" value="save_authorities">
