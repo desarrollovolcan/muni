@@ -146,3 +146,82 @@ function ensure_event_types(): array
 
     return $defaults;
 }
+
+function current_role_id(): ?int
+{
+    if (!isset($_SESSION['user']['rol'])) {
+        return null;
+    }
+
+    static $roleIdCache = [];
+    $roleName = (string) $_SESSION['user']['rol'];
+    if ($roleName === '') {
+        return null;
+    }
+    if (array_key_exists($roleName, $roleIdCache)) {
+        return $roleIdCache[$roleName];
+    }
+
+    try {
+        $stmt = db()->prepare('SELECT id FROM roles WHERE nombre = ? LIMIT 1');
+        $stmt->execute([$roleName]);
+        $roleId = $stmt->fetchColumn();
+        $roleIdCache[$roleName] = $roleId ? (int) $roleId : null;
+    } catch (Exception $e) {
+        $roleIdCache[$roleName] = null;
+    } catch (Error $e) {
+        $roleIdCache[$roleName] = null;
+    }
+
+    return $roleIdCache[$roleName];
+}
+
+function is_superuser(): bool
+{
+    if (!isset($_SESSION['user']['rol'])) {
+        return false;
+    }
+
+    $roleName = strtolower((string) $_SESSION['user']['rol']);
+    return $roleName !== '' && (str_contains($roleName, 'super') || str_contains($roleName, 'admin'));
+}
+
+function has_permission(string $module, string $action = 'view'): bool
+{
+    if (!isset($_SESSION['user'])) {
+        return true;
+    }
+
+    if (is_superuser()) {
+        return true;
+    }
+
+    $roleId = current_role_id();
+    if (!$roleId) {
+        return true;
+    }
+
+    try {
+        $stmt = db()->prepare('SELECT COUNT(*) FROM role_permissions WHERE role_id = ?');
+        $stmt->execute([$roleId]);
+        $hasAssignments = (int) $stmt->fetchColumn() > 0;
+        if (!$hasAssignments) {
+            return true;
+        }
+
+        $stmt = db()->prepare('SELECT id FROM permissions WHERE modulo = ? AND accion = ? LIMIT 1');
+        $stmt->execute([$module, $action]);
+        $permissionId = $stmt->fetchColumn();
+        if (!$permissionId) {
+            return true;
+        }
+
+        $stmt = db()->prepare('SELECT 1 FROM role_permissions WHERE role_id = ? AND permission_id = ?');
+        $stmt->execute([$roleId, (int) $permissionId]);
+        return (bool) $stmt->fetchColumn();
+    } catch (Exception $e) {
+        return true;
+    } catch (Error $e) {
+        return true;
+    }
+}

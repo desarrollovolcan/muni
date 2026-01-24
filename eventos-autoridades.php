@@ -5,16 +5,40 @@ $errors = [];
 $validationErrors = [];
 $validationNotice = null;
 $validationLink = null;
+$whatsappLinks = [];
 $emailPreview = null;
 $events = db()->query('SELECT id, titulo FROM events WHERE habilitado = 1 ORDER BY fecha_inicio DESC')->fetchAll();
-$authorities = db()->query('SELECT id, nombre, tipo FROM authorities WHERE estado = 1 ORDER BY nombre')->fetchAll();
-$users = db()->query('SELECT id, nombre, apellido, correo FROM users WHERE estado = 1 ORDER BY nombre, apellido')->fetchAll();
+$authorities = db()->query(
+    'SELECT a.id,
+            a.nombre,
+            a.tipo,
+            g.id AS grupo_id,
+            g.nombre AS grupo_nombre
+     FROM authorities a
+     LEFT JOIN authority_groups g ON g.id = a.group_id
+     WHERE a.estado = 1
+     ORDER BY COALESCE(g.nombre, ""), a.nombre'
+)->fetchAll();
+$users = db()->query('SELECT id, nombre, apellido, correo, telefono FROM users WHERE estado = 1 ORDER BY nombre, apellido')->fetchAll();
 $selectedEventId = isset($_GET['event_id']) ? (int) $_GET['event_id'] : 0;
 $linkedAuthorities = [];
 $validationRequests = [];
 $emailTemplate = null;
 $eventValidationLink = null;
 $selectedEvent = null;
+$authoritiesByGroup = [];
+
+foreach ($authorities as $authority) {
+    $groupId = $authority['grupo_id'] ? (int) $authority['grupo_id'] : 0;
+    $groupName = $authority['grupo_nombre'] ?: 'Sin grupo';
+    if (!isset($authoritiesByGroup[$groupId])) {
+        $authoritiesByGroup[$groupId] = [
+            'name' => $groupName,
+            'items' => [],
+        ];
+    }
+    $authoritiesByGroup[$groupId]['items'][] = $authority;
+}
 
 try {
     db()->exec(
@@ -26,6 +50,24 @@ try {
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
             UNIQUE KEY email_templates_key_unique (template_key)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+    );
+} catch (Exception $e) {
+} catch (Error $e) {
+}
+
+try {
+    db()->exec(
+        'CREATE TABLE IF NOT EXISTS notificacion_whatsapp (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+            phone_number_id VARCHAR(80) NOT NULL,
+            access_token TEXT NOT NULL,
+            numero_envio VARCHAR(30) DEFAULT NULL,
+            country_code VARCHAR(6) DEFAULT NULL,
+            template_name VARCHAR(120) DEFAULT NULL,
+            template_language VARCHAR(10) DEFAULT NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
     );
 } catch (Exception $e) {
@@ -74,8 +116,27 @@ function build_event_validation_email(array $municipalidad, array $event, array 
     $safeUrl = htmlspecialchars($validationUrl, ENT_QUOTES, 'UTF-8');
 
     $authorityItems = '';
+    $groupedAuthorities = [];
     foreach ($authorities as $authority) {
-        $authorityItems .= '<li>' . htmlspecialchars($authority['nombre'], ENT_QUOTES, 'UTF-8') . ' · ' . htmlspecialchars($authority['tipo'], ENT_QUOTES, 'UTF-8') . '</li>';
+        $groupId = $authority['grupo_id'] ? (int) $authority['grupo_id'] : 0;
+        $groupName = $authority['grupo_nombre'] ?: 'Sin grupo';
+        if (!isset($groupedAuthorities[$groupId])) {
+            $groupedAuthorities[$groupId] = [
+                'name' => $groupName,
+                'items' => [],
+            ];
+        }
+        $groupedAuthorities[$groupId]['items'][] = $authority;
+    }
+    foreach ($groupedAuthorities as $group) {
+        if (empty($group['items'])) {
+            continue;
+        }
+        $authorityItems .= '<li style="margin-top:8px;"><strong>' . htmlspecialchars($group['name'], ENT_QUOTES, 'UTF-8') . '</strong><ul style="margin:6px 0 0 16px;">';
+        foreach ($group['items'] as $authority) {
+            $authorityItems .= '<li>' . htmlspecialchars($authority['nombre'], ENT_QUOTES, 'UTF-8') . ' · ' . htmlspecialchars($authority['tipo'], ENT_QUOTES, 'UTF-8') . '</li>';
+        }
+        $authorityItems .= '</ul></li>';
     }
 
     return <<<HTML
@@ -170,6 +231,95 @@ function render_event_email_subject(string $subject, array $data): string
     return strtr($subject, $replacements);
 }
 
+function normalize_whatsapp_phone(?string $phone, ?string $countryCode): ?string
+{
+    if ($phone === null) {
+        return null;
+    }
+    $digits = preg_replace('/\D+/', '', $phone);
+    if ($digits === '') {
+        return null;
+    }
+    $countryCode = $countryCode ? preg_replace('/\D+/', '', $countryCode) : '';
+    if ($countryCode !== '' && strpos($digits, $countryCode) !== 0) {
+        $digits = ltrim($digits, '0');
+        $digits = $countryCode . $digits;
+    }
+    return $digits;
+}
+
+function send_whatsapp_message(array $config, string $to, string $message, ?string &$error = null): bool
+{
+    $phoneNumberId = $config['phone_number_id'] ?? '';
+    $accessToken = $config['access_token'] ?? '';
+    if ($phoneNumberId === '' || $accessToken === '') {
+        $error = 'Configuración de WhatsApp incompleta.';
+        return false;
+    }
+
+    $url = 'https://graph.facebook.com/v17.0/' . $phoneNumberId . '/messages';
+    $payload = [
+        'messaging_product' => 'whatsapp',
+        'to' => $to,
+        'type' => 'text',
+        'text' => [
+            'preview_url' => true,
+            'body' => $message,
+        ],
+    ];
+
+    if (!empty($config['template_name']) && !empty($config['template_language'])) {
+        $payload = [
+            'messaging_product' => 'whatsapp',
+            'to' => $to,
+            'type' => 'template',
+            'template' => [
+                'name' => $config['template_name'],
+                'language' => [
+                    'code' => $config['template_language'],
+                ],
+                'components' => [
+                    [
+                        'type' => 'body',
+                        'parameters' => [
+                            [
+                                'type' => 'text',
+                                'text' => $message,
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Authorization: Bearer ' . $accessToken,
+        'Content-Type: application/json',
+    ]);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+    $response = curl_exec($ch);
+    $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
+    curl_close($ch);
+
+    if ($response === false || $httpCode >= 400) {
+        $error = $curlError !== '' ? $curlError : 'Respuesta inválida de WhatsApp.';
+        return false;
+    }
+
+    return true;
+}
+
+function build_whatsapp_link(string $phone, string $message): string
+{
+    return 'https://wa.me/' . $phone . '?text=' . urlencode($message);
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ?? null)) {
     $action = $_POST['action'] ?? 'save_authorities';
 
@@ -199,15 +349,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
     if ($action === 'send_validation') {
         $eventId = isset($_POST['event_id']) ? (int) $_POST['event_id'] : 0;
         $recipientUserIds = array_map('intval', $_POST['recipient_user_ids'] ?? []);
+        $deliveryChannel = $_POST['delivery_channel'] ?? 'email';
 
         if ($eventId === 0) {
             $validationErrors[] = 'Selecciona un evento válido.';
         }
 
         $recipients = [];
+        $whatsappRecipients = [];
         if (!empty($recipientUserIds)) {
             $placeholders = implode(',', array_fill(0, count($recipientUserIds), '?'));
-            $stmt = db()->prepare("SELECT nombre, apellido, correo FROM users WHERE id IN ($placeholders)");
+            $stmt = db()->prepare("SELECT nombre, apellido, correo, telefono FROM users WHERE id IN ($placeholders)");
             $stmt->execute($recipientUserIds);
             foreach ($stmt->fetchAll() as $user) {
                 if (!empty($user['correo'])) {
@@ -216,11 +368,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                         'correo' => $user['correo'],
                     ];
                 }
+                if (!empty($user['telefono'])) {
+                    $whatsappRecipients[] = [
+                        'nombre' => trim(($user['nombre'] ?? '') . ' ' . ($user['apellido'] ?? '')),
+                        'telefono' => $user['telefono'],
+                    ];
+                }
             }
         }
 
-        if (empty($recipients)) {
-            $validationErrors[] = 'Selecciona al menos un usuario para validar las autoridades.';
+        $needsEmail = in_array($deliveryChannel, ['email', 'both'], true);
+        $needsWhatsapp = in_array($deliveryChannel, ['whatsapp', 'both'], true);
+        $needsWhatsappLink = $deliveryChannel === 'whatsapp_link';
+
+        if ($needsEmail && empty($recipients)) {
+            $validationErrors[] = 'Selecciona al menos un usuario con correo válido para enviar la validación.';
+        }
+        if (($needsWhatsapp || $needsWhatsappLink) && empty($whatsappRecipients)) {
+            $validationErrors[] = 'Selecciona al menos un usuario con teléfono para enviar WhatsApp.';
         }
 
         $event = null;
@@ -230,7 +395,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
             $stmt->execute([$eventId]);
             $event = $stmt->fetch();
 
-            $stmt = db()->prepare('SELECT a.id, a.nombre, a.tipo FROM authorities a INNER JOIN event_authorities ea ON ea.authority_id = a.id WHERE ea.event_id = ? ORDER BY a.nombre');
+            $stmt = db()->prepare(
+                'SELECT a.id,
+                        a.nombre,
+                        a.tipo,
+                        g.id AS grupo_id,
+                        g.nombre AS grupo_nombre
+                 FROM authorities a
+                 INNER JOIN event_authorities ea ON ea.authority_id = a.id
+                 LEFT JOIN authority_groups g ON g.id = a.group_id
+                 WHERE ea.event_id = ?
+                 ORDER BY COALESCE(g.nombre, ""), a.nombre'
+            );
             $stmt->execute([$eventId]);
             $eventAuthorities = $stmt->fetchAll();
 
@@ -277,56 +453,130 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
 
             $allSent = true;
             $anySent = false;
+            $whatsappSent = true;
+            $whatsappAny = false;
 
-            foreach ($recipients as $recipient) {
-                $emailPreview = build_event_validation_email($municipalidad, $event, $eventAuthorities, $validationUrl, $recipient['nombre'] ?? null);
-                if ($emailTemplate) {
-                    $autoridadesLista = '';
-                    foreach ($eventAuthorities as $authority) {
-                        $autoridadesLista .= '<li>' . htmlspecialchars($authority['nombre'], ENT_QUOTES, 'UTF-8') . ' · ' . htmlspecialchars($authority['tipo'], ENT_QUOTES, 'UTF-8') . '</li>';
-                    }
-                    $logoPath = $municipalidad['logo_path'] ?? 'assets/images/logo.png';
-                    $logoUrl = preg_match('/^https?:\\/\\//', $logoPath) ? $logoPath : base_url() . '/' . ltrim($logoPath, '/');
-                    $templateData = [
-                        'municipalidad_nombre' => htmlspecialchars($municipalidad['nombre'] ?? 'Municipalidad', ENT_QUOTES, 'UTF-8'),
-                        'municipalidad_logo' => htmlspecialchars($logoUrl, ENT_QUOTES, 'UTF-8'),
-                        'destinatario_nombre' => htmlspecialchars($recipient['nombre'] ?? 'Equipo municipal', ENT_QUOTES, 'UTF-8'),
-                        'evento_titulo' => htmlspecialchars($event['titulo'], ENT_QUOTES, 'UTF-8'),
-                        'evento_descripcion' => nl2br(htmlspecialchars($event['descripcion'], ENT_QUOTES, 'UTF-8')),
-                        'evento_fecha_inicio' => htmlspecialchars($event['fecha_inicio'], ENT_QUOTES, 'UTF-8'),
-                        'evento_fecha_fin' => htmlspecialchars($event['fecha_fin'], ENT_QUOTES, 'UTF-8'),
-                        'evento_ubicacion' => htmlspecialchars($event['ubicacion'], ENT_QUOTES, 'UTF-8'),
-                        'evento_tipo' => htmlspecialchars($event['tipo'], ENT_QUOTES, 'UTF-8'),
-                        'autoridades_lista' => $autoridadesLista,
-                        'validation_link' => htmlspecialchars($validationUrl, ENT_QUOTES, 'UTF-8'),
-                    ];
-                    $subjectData = [
-                        'municipalidad_nombre' => $municipalidad['nombre'] ?? 'Municipalidad',
-                        'destinatario_nombre' => $recipient['nombre'] ?? 'Equipo municipal',
-                        'evento_titulo' => $event['titulo'] ?? '',
-                        'evento_fecha_inicio' => $event['fecha_inicio'] ?? '',
-                        'evento_fecha_fin' => $event['fecha_fin'] ?? '',
-                        'evento_ubicacion' => $event['ubicacion'] ?? '',
-                        'evento_tipo' => $event['tipo'] ?? '',
-                    ];
-                    $emailPreview = render_event_email_template($emailTemplate, $templateData);
-                    if (!empty($emailTemplate['subject'])) {
-                        $subject = render_event_email_subject($emailTemplate['subject'], $subjectData);
-                    }
+            $whatsappConfig = null;
+            if ($needsWhatsapp || $needsWhatsappLink) {
+                $whatsappConfig = db()->query('SELECT * FROM notificacion_whatsapp LIMIT 1')->fetch();
+                if ($needsWhatsapp && (!$whatsappConfig || empty($whatsappConfig['phone_number_id']) || empty($whatsappConfig['access_token']))) {
+                    $validationErrors[] = 'Configura WhatsApp Business API antes de enviar mensajes.';
                 }
-                $mailSent = mail($recipient['correo'], $subject, $emailPreview, $headers);
-                $anySent = $anySent || $mailSent;
-                $allSent = $allSent && $mailSent;
+            }
+
+            if (empty($validationErrors) && $needsEmail) {
+                foreach ($recipients as $recipient) {
+                    $emailPreview = build_event_validation_email($municipalidad, $event, $eventAuthorities, $validationUrl, $recipient['nombre'] ?? null);
+                    if ($emailTemplate) {
+                        $autoridadesLista = '';
+                        $groupedAuthorities = [];
+                        foreach ($eventAuthorities as $authority) {
+                            $groupId = $authority['grupo_id'] ? (int) $authority['grupo_id'] : 0;
+                            $groupName = $authority['grupo_nombre'] ?: 'Sin grupo';
+                            if (!isset($groupedAuthorities[$groupId])) {
+                                $groupedAuthorities[$groupId] = [
+                                    'name' => $groupName,
+                                    'items' => [],
+                                ];
+                            }
+                            $groupedAuthorities[$groupId]['items'][] = $authority;
+                        }
+                        foreach ($groupedAuthorities as $group) {
+                            if (empty($group['items'])) {
+                                continue;
+                            }
+                            $autoridadesLista .= '<p style="margin:16px 0 8px;"><strong>' . htmlspecialchars($group['name'], ENT_QUOTES, 'UTF-8') . '</strong></p><ul style="margin-top:0;">';
+                            foreach ($group['items'] as $authority) {
+                                $autoridadesLista .= '<li>' . htmlspecialchars($authority['nombre'], ENT_QUOTES, 'UTF-8') . ' · ' . htmlspecialchars($authority['tipo'], ENT_QUOTES, 'UTF-8') . '</li>';
+                            }
+                            $autoridadesLista .= '</ul>';
+                        }
+                        $logoPath = $municipalidad['logo_path'] ?? 'assets/images/logo.png';
+                        $logoUrl = preg_match('/^https?:\\/\\//', $logoPath) ? $logoPath : base_url() . '/' . ltrim($logoPath, '/');
+                        $templateData = [
+                            'municipalidad_nombre' => htmlspecialchars($municipalidad['nombre'] ?? 'Municipalidad', ENT_QUOTES, 'UTF-8'),
+                            'municipalidad_logo' => htmlspecialchars($logoUrl, ENT_QUOTES, 'UTF-8'),
+                            'destinatario_nombre' => htmlspecialchars($recipient['nombre'] ?? 'Equipo municipal', ENT_QUOTES, 'UTF-8'),
+                            'evento_titulo' => htmlspecialchars($event['titulo'], ENT_QUOTES, 'UTF-8'),
+                            'evento_descripcion' => nl2br(htmlspecialchars($event['descripcion'], ENT_QUOTES, 'UTF-8')),
+                            'evento_fecha_inicio' => htmlspecialchars($event['fecha_inicio'], ENT_QUOTES, 'UTF-8'),
+                            'evento_fecha_fin' => htmlspecialchars($event['fecha_fin'], ENT_QUOTES, 'UTF-8'),
+                            'evento_ubicacion' => htmlspecialchars($event['ubicacion'], ENT_QUOTES, 'UTF-8'),
+                            'evento_tipo' => htmlspecialchars($event['tipo'], ENT_QUOTES, 'UTF-8'),
+                            'autoridades_lista' => $autoridadesLista,
+                            'validation_link' => htmlspecialchars($validationUrl, ENT_QUOTES, 'UTF-8'),
+                        ];
+                        $subjectData = [
+                            'municipalidad_nombre' => $municipalidad['nombre'] ?? 'Municipalidad',
+                            'destinatario_nombre' => $recipient['nombre'] ?? 'Equipo municipal',
+                            'evento_titulo' => $event['titulo'] ?? '',
+                            'evento_fecha_inicio' => $event['fecha_inicio'] ?? '',
+                            'evento_fecha_fin' => $event['fecha_fin'] ?? '',
+                            'evento_ubicacion' => $event['ubicacion'] ?? '',
+                            'evento_tipo' => $event['tipo'] ?? '',
+                        ];
+                        $emailPreview = render_event_email_template($emailTemplate, $templateData);
+                        if (!empty($emailTemplate['subject'])) {
+                            $subject = render_event_email_subject($emailTemplate['subject'], $subjectData);
+                        }
+                    }
+                    $mailSent = mail($recipient['correo'], $subject, $emailPreview, $headers);
+                    $anySent = $anySent || $mailSent;
+                    $allSent = $allSent && $mailSent;
+                }
+            }
+
+            if (empty($validationErrors) && $needsWhatsapp && $whatsappConfig) {
+                foreach ($whatsappRecipients as $recipient) {
+                    $normalizedPhone = normalize_whatsapp_phone($recipient['telefono'] ?? null, $whatsappConfig['country_code'] ?? null);
+                    if ($normalizedPhone === null) {
+                        $whatsappSent = false;
+                        continue;
+                    }
+                    $message = 'Hola ' . ($recipient['nombre'] ?: 'equipo municipal') . '. '
+                        . 'Por favor valida las autoridades del evento "' . ($event['titulo'] ?? '') . '". '
+                        . 'Link: ' . $validationUrl;
+                    $sendError = null;
+                    $sent = send_whatsapp_message($whatsappConfig, $normalizedPhone, $message, $sendError);
+                    $whatsappAny = $whatsappAny || $sent;
+                    $whatsappSent = $whatsappSent && $sent;
+                }
+            }
+
+            if (empty($validationErrors) && $needsWhatsappLink) {
+                foreach ($whatsappRecipients as $recipient) {
+                    $normalizedPhone = normalize_whatsapp_phone(
+                        $recipient['telefono'] ?? null,
+                        $whatsappConfig['country_code'] ?? null
+                    );
+                    if ($normalizedPhone === null) {
+                        continue;
+                    }
+                    $message = 'Hola ' . ($recipient['nombre'] ?: 'equipo municipal') . '. '
+                        . 'Por favor valida las autoridades del evento "' . ($event['titulo'] ?? '') . '". '
+                        . 'Link: ' . $validationUrl;
+                    $whatsappLinks[] = [
+                        'nombre' => $recipient['nombre'] ?: 'Equipo municipal',
+                        'telefono' => $normalizedPhone,
+                        'link' => build_whatsapp_link($normalizedPhone, $message),
+                    ];
+                }
             }
 
             $stmtUpdate = db()->prepare('UPDATE event_authority_requests SET correo_enviado = ? WHERE event_id = ? AND token = ?');
             $stmtUpdate->execute([$anySent ? 1 : 0, $eventId, $event['validation_token']]);
 
             $validationLink = $validationUrl;
-            if ($allSent) {
+            if ($needsWhatsappLink && !empty($whatsappLinks)) {
+                $validationNotice = 'Links de WhatsApp generados correctamente.';
+            } elseif ($needsEmail && $allSent && !$needsWhatsapp) {
                 $validationNotice = 'Correos de validación enviados correctamente.';
+            } elseif ($needsWhatsapp && $whatsappSent && !$needsEmail) {
+                $validationNotice = 'Mensajes de WhatsApp enviados correctamente.';
+            } elseif ($needsEmail && $needsWhatsapp && $allSent && $whatsappSent) {
+                $validationNotice = 'Correos y WhatsApp enviados correctamente.';
             } else {
-                $validationErrors[] = 'Algunos correos no se pudieron enviar automáticamente. Comparte los enlaces de validación manualmente si es necesario.';
+                $validationErrors[] = 'Algunos envíos no se pudieron completar automáticamente. Comparte el enlace de validación manualmente si es necesario.';
             }
         }
     }
@@ -393,22 +643,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                     </div>
 
                                     <div class="mt-4">
-                                        <label class="form-label">Autoridades disponibles</label>
+                                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                            <label class="form-label mb-0">Autoridades disponibles</label>
+                                            <div class="d-flex gap-2">
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" id="select-all-authorities">Seleccionar todas</button>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" id="clear-all-authorities">Limpiar selección</button>
+                                            </div>
+                                        </div>
                                         <div class="row">
-                                            <?php if (empty($authorities)) : ?>
+                                            <?php if (empty($authoritiesByGroup)) : ?>
                                                 <div class="col-12 text-muted">No hay autoridades registradas.</div>
                                             <?php else : ?>
-                                                <?php foreach ($authorities as $authority) : ?>
-                                                    <?php $checked = in_array((int) $authority['id'], $linkedAuthorities, true); ?>
-                                                    <div class="col-md-4">
-                                                        <div class="form-check mb-2">
-                                                            <input class="form-check-input" type="checkbox" id="auth-<?php echo (int) $authority['id']; ?>" name="authorities[]" value="<?php echo (int) $authority['id']; ?>" <?php echo $checked ? 'checked' : ''; ?>>
-                                                            <label class="form-check-label" for="auth-<?php echo (int) $authority['id']; ?>">
-                                                                <?php echo htmlspecialchars($authority['nombre'], ENT_QUOTES, 'UTF-8'); ?>
-                                                                <span class="text-muted">· <?php echo htmlspecialchars($authority['tipo'], ENT_QUOTES, 'UTF-8'); ?></span>
-                                                            </label>
-                                                        </div>
+                                                <?php foreach ($authoritiesByGroup as $group) : ?>
+                                                    <?php if (empty($group['items'])) : ?>
+                                                        <?php continue; ?>
+                                                    <?php endif; ?>
+                                                    <div class="col-12 mt-3">
+                                                        <h6 class="text-uppercase text-muted small mb-2"><?php echo htmlspecialchars($group['name'], ENT_QUOTES, 'UTF-8'); ?></h6>
                                                     </div>
+                                                    <?php foreach ($group['items'] as $authority) : ?>
+                                                        <?php $checked = in_array((int) $authority['id'], $linkedAuthorities, true); ?>
+                                                        <div class="col-md-4">
+                                                            <div class="form-check mb-2">
+                                                                <input class="form-check-input" type="checkbox" id="auth-<?php echo (int) $authority['id']; ?>" name="authorities[]" value="<?php echo (int) $authority['id']; ?>" <?php echo $checked ? 'checked' : ''; ?>>
+                                                                <label class="form-check-label" for="auth-<?php echo (int) $authority['id']; ?>">
+                                                                    <?php echo htmlspecialchars($authority['nombre'], ENT_QUOTES, 'UTF-8'); ?>
+                                                                    <span class="text-muted">· <?php echo htmlspecialchars($authority['tipo'], ENT_QUOTES, 'UTF-8'); ?></span>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    <?php endforeach; ?>
                                                 <?php endforeach; ?>
                                             <?php endif; ?>
                                         </div>
@@ -425,9 +689,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                             <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
                                 <div>
                                     <h5 class="card-title mb-0">Validación externa de autoridades</h5>
-                                    <p class="text-muted mb-0">Envía un correo para que un usuario confirme qué autoridades asistirán.</p>
+                                    <p class="text-muted mb-0">Envía el enlace de validación por correo, WhatsApp o ambos.</p>
                                 </div>
-                                <button type="submit" form="evento-validacion-form" class="btn btn-outline-primary">Enviar correo</button>
+                                <button type="submit" form="evento-validacion-form" class="btn btn-outline-primary">Enviar enlace</button>
                             </div>
                             <div class="card-body">
                                 <?php if (!empty($validationErrors)) : ?>
@@ -480,6 +744,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                             </select>
                                             <div class="form-text">Selecciona uno o más usuarios para enviar el enlace público del evento.</div>
                                         </div>
+                                        <div class="col-lg-4">
+                                            <label class="form-label" for="delivery-channel">Canal de envío</label>
+                                            <select id="delivery-channel" name="delivery_channel" class="form-select">
+                                                <option value="email">Correo</option>
+                                                <option value="whatsapp">WhatsApp</option>
+                                                <option value="both">Correo y WhatsApp</option>
+                                                <option value="whatsapp_link">WhatsApp (link directo)</option>
+                                            </select>
+                                            <div class="form-text">WhatsApp requiere teléfono en usuarios y configuración previa.</div>
+                                        </div>
                                     </div>
                                 </form>
 
@@ -487,6 +761,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                     <div class="mt-4">
                                         <label class="form-label">Enlace de validación</label>
                                         <input type="text" class="form-control" value="<?php echo htmlspecialchars($validationLink ?: $eventValidationLink, ENT_QUOTES, 'UTF-8'); ?>" readonly>
+                                    </div>
+                                <?php endif; ?>
+
+                                <?php if (!empty($whatsappLinks)) : ?>
+                                    <div class="mt-4">
+                                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                                            <label class="form-label mb-0">Links de WhatsApp</label>
+                                            <span class="badge text-bg-success">Link directo</span>
+                                        </div>
+                                        <div class="list-group">
+                                            <?php foreach ($whatsappLinks as $linkData) : ?>
+                                                <a class="list-group-item list-group-item-action d-flex align-items-center gap-3" href="<?php echo htmlspecialchars($linkData['link'], ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener">
+                                                    <span class="badge rounded-pill text-bg-success"><i class="ti ti-brand-whatsapp"></i></span>
+                                                    <div class="flex-grow-1">
+                                                        <div class="fw-semibold"><?php echo htmlspecialchars($linkData['nombre'], ENT_QUOTES, 'UTF-8'); ?></div>
+                                                        <div class="text-muted small"><?php echo htmlspecialchars($linkData['telefono'], ENT_QUOTES, 'UTF-8'); ?></div>
+                                                    </div>
+                                                    <span class="btn btn-sm btn-success">Abrir WhatsApp</span>
+                                                </a>
+                                            <?php endforeach; ?>
+                                        </div>
+                                        <div class="form-text mt-2">Los enlaces abren WhatsApp Web o la app instalada con el mensaje prellenado.</div>
                                     </div>
                                 <?php endif; ?>
 
@@ -549,6 +845,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
     <!-- END wrapper -->
 
     <?php include('partials/customizer.php'); ?>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const selectAllBtn = document.getElementById('select-all-authorities');
+            const clearAllBtn = document.getElementById('clear-all-authorities');
+            const checkboxes = () => Array.from(document.querySelectorAll('input[name="authorities[]"]'));
+
+            if (selectAllBtn) {
+                selectAllBtn.addEventListener('click', () => {
+                    checkboxes().forEach((checkbox) => {
+                        checkbox.checked = true;
+                    });
+                });
+            }
+
+            if (clearAllBtn) {
+                clearAllBtn.addEventListener('click', () => {
+                    checkboxes().forEach((checkbox) => {
+                        checkbox.checked = false;
+                    });
+                });
+            }
+        });
+    </script>
 
     <?php include('partials/footer-scripts.php'); ?>
 
