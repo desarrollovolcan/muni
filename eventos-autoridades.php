@@ -32,7 +32,6 @@ $authorities = db()->query(
 $users = db()->query('SELECT id, nombre, apellido, correo, telefono FROM users WHERE estado = 1 ORDER BY nombre, apellido')->fetchAll();
 $selectedEventId = isset($_GET['event_id']) ? (int) $_GET['event_id'] : 0;
 $linkedAuthorities = [];
-$validationRequests = [];
 $emailTemplate = null;
 $eventValidationLink = null;
 $selectedEvent = null;
@@ -107,9 +106,6 @@ if ($selectedEventId > 0) {
     $stmt->execute([$selectedEventId]);
     $linkedAuthorities = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
 
-    $stmt = db()->prepare('SELECT id, destinatario_nombre, destinatario_correo, token, correo_enviado, estado, created_at, responded_at FROM event_authority_requests WHERE event_id = ? ORDER BY created_at DESC');
-    $stmt->execute([$selectedEventId]);
-    $validationRequests = $stmt->fetchAll();
 }
 
 foreach ($authoritiesByGroup as $groupId => $group) {
@@ -945,41 +941,25 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                     </div>
                                 <?php endif; ?>
 
-                                <?php if (!empty($validationRequests)) : ?>
+                                <?php if (!empty($assignedEvents)) : ?>
                                     <div class="mt-4">
                                         <h6 class="mb-3">Solicitudes recientes</h6>
                                         <div class="table-responsive">
                                             <table class="table table-sm align-middle">
                                                 <thead>
                                                     <tr>
-                                                        <th>Destinatario</th>
-                                                        <th>Correo</th>
-                                                        <th>Estado</th>
-                                                        <th>Estado correo</th>
-                                                        <th>Enviado</th>
-                                                        <th>Respondido</th>
+                                                        <th>Evento</th>
+                                                        <th>Autoridades asignadas</th>
                                                         <th class="text-end">Acciones</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    <?php foreach ($validationRequests as $request) : ?>
+                                                    <?php foreach ($assignedEvents as $assignedEvent) : ?>
                                                         <tr>
-                                                            <td><?php echo htmlspecialchars($request['destinatario_nombre'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
-                                                            <td><?php echo htmlspecialchars($request['destinatario_correo'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                                            <td>
-                                                                <span class="badge text-bg-<?php echo $request['estado'] === 'respondido' ? 'success' : 'warning'; ?>">
-                                                                    <?php echo htmlspecialchars(ucfirst($request['estado']), ENT_QUOTES, 'UTF-8'); ?>
-                                                                </span>
-                                                            </td>
-                                                            <td>
-                                                                <span class="badge text-bg-<?php echo (int) $request['correo_enviado'] === 1 ? 'success' : 'secondary'; ?>">
-                                                                    <?php echo (int) $request['correo_enviado'] === 1 ? 'Enviado' : 'Pendiente'; ?>
-                                                                </span>
-                                                            </td>
-                                                            <td><?php echo htmlspecialchars($request['created_at'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                                            <td><?php echo htmlspecialchars($request['responded_at'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                            <td><?php echo htmlspecialchars($assignedEvent['titulo'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                            <td><?php echo (int) $assignedEvent['authority_count']; ?></td>
                                                             <td class="text-end">
-                                                                <a class="btn btn-sm btn-outline-primary" href="eventos-autoridades.php?event_id=<?php echo (int) $selectedEventId; ?>&edit_request_id=<?php echo (int) $request['id']; ?>">Editar</a>
+                                                                <a class="btn btn-sm btn-outline-primary" href="eventos-autoridades.php?event_id=<?php echo (int) $assignedEvent['id']; ?>">Editar</a>
                                                             </td>
                                                         </tr>
                                                     <?php endforeach; ?>
