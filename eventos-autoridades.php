@@ -46,8 +46,6 @@ $assignedEventIds = array_map(static function ($event) {
 $availableEvents = array_filter($events, static function ($event) use ($assignedEventIds) {
     return !in_array((int) $event['id'], $assignedEventIds, true);
 });
-$assignedEventsCount = count($assignedEvents);
-$availableEventsCount = count($availableEvents);
 $selectedAuthoritiesCount = 0;
 
 foreach ($authorities as $authority) {
@@ -698,11 +696,7 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                     <h5 class="card-title mb-0">Autoridades asignadas</h5>
                                     <p class="text-muted mb-0">Define qué autoridades participan en cada evento.</p>
                                 </div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="badge text-bg-light text-muted"><?php echo $assignedEventsCount; ?> con autoridades</span>
-                                    <span class="badge text-bg-light text-muted"><?php echo $availableEventsCount; ?> disponibles</span>
-                                    <button type="submit" form="evento-autoridades-form" name="save_authorities" value="1" class="btn btn-primary">Guardar cambios</button>
-                                </div>
+                                <button type="submit" form="evento-autoridades-form" name="save_authorities" value="1" class="btn btn-primary">Guardar cambios</button>
                             </div>
                             <div class="card-body">
                                 <?php if ($saveNotice) : ?>
@@ -774,16 +768,18 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                                 <div class="form-text">Solo se muestran eventos sin autoridades asignadas.</div>
                                             <?php endif; ?>
                                         </div>
-                                        <div class="col-md-6 d-flex flex-wrap align-items-end justify-content-md-end gap-2">
-                                            <button type="button" class="btn btn-sm btn-outline-secondary" id="select-all-authorities">Seleccionar todas</button>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary" id="clear-all-authorities">Limpiar selección</button>
-                                        </div>
                                     </div>
 
                                     <div class="mt-4">
                                         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
                                             <label class="form-label mb-0">Autoridades disponibles</label>
-                                            <span class="text-muted small">Selecciona las autoridades para el evento.</span>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                <span class="text-muted small d-none d-md-inline">Selecciona las autoridades para el evento.</span>
+                                                <div class="btn-group btn-group-sm" role="group" aria-label="Acciones de autoridades">
+                                                    <button type="button" class="btn btn-outline-primary" id="select-all-authorities">Seleccionar todas</button>
+                                                    <button type="button" class="btn btn-outline-primary" id="clear-all-authorities">Limpiar selección</button>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="row">
                                             <?php if (empty($displayAuthoritiesByGroup)) : ?>
