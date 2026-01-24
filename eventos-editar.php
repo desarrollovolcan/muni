@@ -394,34 +394,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['list_action']) && ve
             font-weight: 600;
         }
 
-        .evento-formal .form-label {
-            font-size: 0.78rem;
-            color: #475569;
-            margin-bottom: 0.25rem;
-        }
-
-        .evento-formal .form-control,
-        .evento-formal .form-select {
-            min-height: 32px;
-            padding: 0.3rem 0.55rem;
-            font-size: 0.85rem;
-            line-height: 1.2;
-        }
-
-        .evento-formal textarea.form-control {
-            min-height: 72px;
-        }
-
         .evento-formal .card-body {
             padding: 1rem;
-        }
-
-        .evento-formal .mb-3 {
-            margin-bottom: 0.6rem !important;
-        }
-
-        .evento-formal .row {
-            --bs-gutter-y: 0.6rem;
         }
 
         .evento-formal .table-responsive {
@@ -437,9 +411,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['list_action']) && ve
             font-weight: 600;
         }
 
-        .evento-formal .form-text {
-            font-size: 0.74rem;
-        }
     </style>
 
     <?php include('partials/footer-scripts.php'); ?>

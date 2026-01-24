@@ -139,4 +139,34 @@ $secondaryRgb = hex_to_rgb($secondaryColor) ?? [74, 129, 212];
             height: 28px;
         }
     }
+
+    .form-label {
+        font-size: 0.78rem;
+        color: #475569;
+        margin-bottom: 0.25rem;
+    }
+
+    .form-control,
+    .form-select {
+        min-height: 32px;
+        padding: 0.3rem 0.55rem;
+        font-size: 0.85rem;
+        line-height: 1.2;
+    }
+
+    textarea.form-control {
+        min-height: 72px;
+    }
+
+    .form-text {
+        font-size: 0.74rem;
+    }
+
+    .mb-3 {
+        margin-bottom: 0.6rem !important;
+    }
+
+    .row {
+        --bs-gutter-y: 0.6rem;
+    }
 </style>
