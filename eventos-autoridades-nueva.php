@@ -7,7 +7,7 @@ $validationNotice = null;
 $validationLink = null;
 $whatsappLinks = [];
 $emailPreview = null;
-$events = db()->query('SELECT id, titulo FROM events WHERE habilitado = 1 ORDER BY fecha_inicio DESC')->fetchAll();
+$events = db()->query('SELECT id, titulo, fecha_inicio, fecha_fin FROM events WHERE habilitado = 1 ORDER BY fecha_inicio DESC')->fetchAll();
 $assignedEvents = db()->query(
     'SELECT e.id,
             e.titulo,
@@ -688,212 +688,202 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
 
                 <?php $subtitle = "Eventos Municipales"; $title = "Autoridades por evento · Nueva vista"; include('partials/page-title.php'); ?>
 
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
-                                <div>
-                                    <h5 class="card-title mb-0">Autoridades asignadas</h5>
-                                    <p class="text-muted mb-0">Define qué autoridades participan en cada evento.</p>
-                                </div>
-                                <button type="submit" form="evento-autoridades-form" name="save_authorities" value="1" class="btn btn-primary">Guardar cambios</button>
+                <div class="go-muni-authorities">
+                    <div class="gm-page-head card border-0 shadow-sm mb-4">
+                        <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
+                            <div>
+                                <h4 class="mb-1">Autoridades por evento</h4>
+                                <p class="text-muted mb-0">Gestiona la asignación de autoridades y coordina validaciones externas.</p>
                             </div>
-                            <div class="card-body">
-                                <?php if ($saveNotice) : ?>
-                                    <div class="alert alert-success" id="save-notice">
-                                        <?php echo htmlspecialchars($saveNotice, ENT_QUOTES, 'UTF-8'); ?>
-                                    </div>
-                                <?php endif; ?>
-                                <?php if (!empty($errors)) : ?>
-                                    <div class="alert alert-danger">
-                                        <?php foreach ($errors as $error) : ?>
-                                            <div><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
-                                        <?php endforeach; ?>
-                                    </div>
-                                <?php endif; ?>
-
-                                <form id="evento-autoridades-form" method="post">
-                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                    <input type="hidden" name="action" value="save_authorities">
-                                    <div class="row g-4">
-                                        <div class="col-lg-4">
-                                            <div class="card border shadow-none mb-3">
-                                                <div class="card-body">
-                                                    <h6 class="text-uppercase text-muted small mb-3">Paso 1 · Selecciona un evento</h6>
-                                                    <label class="form-label" for="evento-select">Evento</label>
-                                                    <?php if ($selectedEventId > 0 && in_array($selectedEventId, $assignedEventIds, true)) : ?>
-                                                        <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
-                                                        <div class="form-control-plaintext fw-semibold text-primary">
-                                                            <?php echo htmlspecialchars($selectedEvent['titulo'] ?? 'Evento seleccionado', ENT_QUOTES, 'UTF-8'); ?>
-                                                        </div>
-                                                        <div class="form-text">Autoridades marcadas: <?php echo $selectedAuthoritiesCount; ?>.</div>
-                                                    <?php else : ?>
-                                                        <select id="evento-select" name="event_id" class="form-select">
-                                                            <option value="">Selecciona un evento</option>
-                                                            <?php foreach ($availableEvents as $event) : ?>
-                                                                <option value="<?php echo (int) $event['id']; ?>" <?php echo $selectedEventId === (int) $event['id'] ? 'selected' : ''; ?>>
-                                                                    <?php echo htmlspecialchars($event['titulo'], ENT_QUOTES, 'UTF-8'); ?>
-                                                                </option>
-                                                            <?php endforeach; ?>
-                                                        </select>
-                                                        <div class="form-text">Solo se muestran eventos sin autoridades asignadas.</div>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </div>
-
-                                            <div class="card border shadow-none mb-3">
-                                                <div class="card-body">
-                                                    <h6 class="text-uppercase text-muted small mb-3">Paso 2 · Acciones rápidas</h6>
-                                                    <div class="btn-group w-100" role="group" aria-label="Acciones de autoridades">
-                                                        <button type="button" class="btn btn-outline-primary" id="select-all-authorities">Seleccionar todas</button>
-                                                        <button type="button" class="btn btn-outline-primary" id="clear-all-authorities">Limpiar selección</button>
-                                                    </div>
-                                                    <div class="text-muted small mt-2">Seleccionadas: <?php echo $selectedAuthoritiesCount; ?> autoridades.</div>
-                                                </div>
-                                            </div>
-
-                                            <div class="card border shadow-none">
-                                                <div class="card-body">
-                                                    <div class="d-flex align-items-center justify-content-between mb-2">
-                                                        <h6 class="mb-0">Eventos con autoridades</h6>
-                                                        <span class="badge text-bg-light text-muted"><?php echo count($assignedEvents); ?></span>
-                                                    </div>
-                                                    <?php if (!empty($assignedEvents)) : ?>
-                                                        <div class="list-group list-group-flush" style="max-height: 320px; overflow:auto;">
-                                                            <?php foreach ($assignedEvents as $assignedEvent) : ?>
-                                                                <div class="list-group-item d-flex align-items-center justify-content-between px-0">
-                                                                    <span class="text-truncate"><?php echo htmlspecialchars($assignedEvent['titulo'], ENT_QUOTES, 'UTF-8'); ?></span>
-                                                                    <a class="btn btn-sm btn-outline-primary" href="eventos-autoridades-nueva.php?event_id=<?php echo (int) $assignedEvent['id']; ?>">Editar</a>
-                                                                </div>
-                                                            <?php endforeach; ?>
-                                                        </div>
-                                                    <?php else : ?>
-                                                        <div class="text-muted">Todavía no hay eventos con autoridades asignadas.</div>
-                                                    <?php endif; ?>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-lg-8">
-                                            <div class="card border shadow-none">
-                                                <div class="card-body">
-                                                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
-                                                        <h6 class="mb-0">Paso 3 · Selecciona autoridades</h6>
-                                                        <span class="text-muted small">Selecciona las autoridades para el evento.</span>
-                                                    </div>
-                                                    <div class="row">
-                                                        <?php if (empty($displayAuthoritiesByGroup)) : ?>
-                                                            <div class="col-12 text-muted">No hay autoridades registradas.</div>
-                                                        <?php else : ?>
-                                                            <?php foreach ($displayAuthoritiesByGroup as $group) : ?>
-                                                                <?php if (empty($group['items'])) : ?>
-                                                                    <?php continue; ?>
-                                                                <?php endif; ?>
-                                                                <div class="col-12 mt-3">
-                                                                    <h6 class="text-uppercase text-muted small mb-2"><?php echo htmlspecialchars($group['name'], ENT_QUOTES, 'UTF-8'); ?></h6>
-                                                                </div>
-                                                                <?php foreach ($group['items'] as $authority) : ?>
-                                                                    <?php $checked = in_array((int) $authority['id'], $linkedAuthorities, true); ?>
-                                                                    <div class="col-md-4">
-                                                                        <div class="form-check mb-2">
-                                                                            <input class="form-check-input" type="checkbox" id="auth-<?php echo (int) $authority['id']; ?>" name="authorities[]" value="<?php echo (int) $authority['id']; ?>" <?php echo $checked ? 'checked' : ''; ?>>
-                                                                            <label class="form-check-label" for="auth-<?php echo (int) $authority['id']; ?>">
-                                                                                <?php echo htmlspecialchars($authority['nombre'], ENT_QUOTES, 'UTF-8'); ?>
-                                                                                <span class="text-muted">· <?php echo htmlspecialchars($authority['tipo'], ENT_QUOTES, 'UTF-8'); ?></span>
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
-                                                                <?php endforeach; ?>
-                                                            <?php endforeach; ?>
-                                                        <?php endif; ?>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </form>
+                            <div class="d-flex flex-wrap align-items-center gap-2">
+                                <span class="gm-dirty-indicator text-muted small" id="dirty-indicator">Sin cambios pendientes</span>
+                                <button type="submit" form="evento-autoridades-form" name="save_authorities" value="1" class="btn btn-primary" id="save-authorities-btn" disabled>Guardar cambios</button>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
-                                <div>
-                                    <h5 class="card-title mb-0">Validación externa de autoridades</h5>
-                                    <p class="text-muted mb-0">Envía el enlace de validación por correo, WhatsApp o ambos.</p>
-                                </div>
-                                <button type="submit" form="evento-validacion-form" class="btn btn-outline-primary">Enviar enlace</button>
-                            </div>
-                            <div class="card-body">
-                                <?php if (!empty($validationErrors)) : ?>
-                                    <div class="alert alert-danger">
-                                        <?php foreach ($validationErrors as $error) : ?>
-                                            <div><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
-                                        <?php endforeach; ?>
-                                    </div>
-                                <?php endif; ?>
+                    <?php if (!empty($errors)) : ?>
+                        <div class="alert alert-danger gm-alert">
+                            <?php foreach ($errors as $error) : ?>
+                                <div><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
 
-                                <?php if ($validationNotice) : ?>
-                                    <div class="alert alert-success">
-                                        <?php echo htmlspecialchars($validationNotice, ENT_QUOTES, 'UTF-8'); ?>
-                                    </div>
-                                <?php endif; ?>
-
-                                <?php if ($editRequest) : ?>
-                                    <div class="card border mb-4">
-                                        <div class="card-body">
-                                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-                                                <h6 class="mb-0">Editar solicitud reciente</h6>
-                                                <a class="btn btn-sm btn-outline-secondary" href="eventos-autoridades.php?event_id=<?php echo (int) $selectedEventId; ?>">Cancelar</a>
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <form id="evento-autoridades-form" method="post">
+                                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                <input type="hidden" name="action" value="save_authorities">
+                                <div class="card border shadow-none mb-4">
+                                    <div class="card-body">
+                                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                                            <div>
+                                                <h6 class="text-uppercase text-muted small mb-1">Paso 1 · Selecciona un evento</h6>
+                                                <p class="text-muted mb-0">Elige un evento para asignar autoridades.</p>
                                             </div>
-                                            <form method="post" class="row g-3">
-                                                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                                <input type="hidden" name="action" value="update_request">
-                                                <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
-                                                <input type="hidden" name="request_id" value="<?php echo (int) $editRequest['id']; ?>">
-                                                <div class="col-md-4">
-                                                    <label class="form-label" for="edit-destinatario">Destinatario</label>
-                                                    <input id="edit-destinatario" type="text" name="destinatario_nombre" class="form-control" value="<?php echo htmlspecialchars($editRequest['destinatario_nombre'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                                            <div class="form-check form-switch gm-switch">
+                                                <input class="form-check-input" type="checkbox" id="toggle-assigned-events" <?php echo empty($assignedEvents) ? 'disabled' : ''; ?>>
+                                                <label class="form-check-label" for="toggle-assigned-events">Mostrar también eventos con autoridades</label>
+                                                <?php if (empty($assignedEvents)) : ?>
+                                                    <span class="gm-switch-help" data-bs-toggle="tooltip" title="Requiere endpoint para mostrar eventos con autoridades.">Requiere endpoint</span>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                        <label class="form-label" for="evento-select">Evento</label>
+                                        <?php if ($selectedEventId > 0 && in_array($selectedEventId, $assignedEventIds, true)) : ?>
+                                            <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
+                                            <div class="gm-selected-event">
+                                                <div class="fw-semibold text-primary">
+                                                    <?php echo htmlspecialchars($selectedEvent['titulo'] ?? 'Evento seleccionado', ENT_QUOTES, 'UTF-8'); ?>
                                                 </div>
-                                                <div class="col-md-4">
-                                                    <label class="form-label" for="edit-correo">Correo</label>
-                                                    <input id="edit-correo" type="email" name="destinatario_correo" class="form-control" value="<?php echo htmlspecialchars($editRequest['destinatario_correo'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
-                                                </div>
-                                                <div class="col-md-2">
-                                                    <label class="form-label" for="edit-estado">Estado</label>
-                                                    <select id="edit-estado" name="estado" class="form-select">
-                                                        <option value="pendiente" <?php echo ($editRequest['estado'] ?? '') === 'pendiente' ? 'selected' : ''; ?>>Pendiente</option>
-                                                        <option value="respondido" <?php echo ($editRequest['estado'] ?? '') === 'respondido' ? 'selected' : ''; ?>>Respondido</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-2">
-                                                    <label class="form-label" for="edit-correo-enviado">Correo enviado</label>
-                                                    <select id="edit-correo-enviado" name="correo_enviado" class="form-select">
-                                                        <option value="0" <?php echo (int) ($editRequest['correo_enviado'] ?? 0) === 0 ? 'selected' : ''; ?>>Pendiente</option>
-                                                        <option value="1" <?php echo (int) ($editRequest['correo_enviado'] ?? 0) === 1 ? 'selected' : ''; ?>>Enviado</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-12">
-                                                    <button type="submit" class="btn btn-primary">Guardar cambios</button>
-                                                </div>
-                                            </form>
+                                                <span class="badge bg-warning-subtle text-warning">Con autoridades asignadas</span>
+                                                <div class="text-muted small mt-1">Autoridades marcadas: <?php echo $selectedAuthoritiesCount; ?>.</div>
+                                            </div>
+                                        <?php else : ?>
+                                            <select id="evento-select" name="event_id" class="form-select" aria-describedby="evento-help">
+                                                <option value="">Selecciona un evento</option>
+                                                <?php foreach ($availableEvents as $event) : ?>
+                                                    <option value="<?php echo (int) $event['id']; ?>" data-start="<?php echo htmlspecialchars($event['fecha_inicio'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" data-end="<?php echo htmlspecialchars($event['fecha_fin'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" <?php echo $selectedEventId === (int) $event['id'] ? 'selected' : ''; ?>>
+                                                        <?php echo htmlspecialchars($event['titulo'], ENT_QUOTES, 'UTF-8'); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <div class="form-text" id="evento-help">Solo se muestran eventos sin autoridades asignadas.</div>
+                                        <?php endif; ?>
+                                        <div class="gm-event-status mt-3">
+                                            <span class="badge bg-secondary-subtle text-secondary" id="event-status-badge">Sin autoridades asignadas</span>
+                                            <div class="gm-event-summary mt-2" id="event-summary">
+                                                <div class="gm-event-title">Selecciona un evento para ver el resumen.</div>
+                                                <div class="gm-event-meta text-muted small">Fecha pendiente</div>
+                                            </div>
+                                        </div>
+                                        <div class="gm-empty-state mt-3" id="event-empty-state">
+                                            <i class="ti ti-calendar-event"></i>
+                                            <div>
+                                                <div class="fw-semibold">Aún no hay evento seleccionado</div>
+                                                <div class="text-muted small">Selecciona un evento para comenzar la asignación.</div>
+                                            </div>
                                         </div>
                                     </div>
-                                <?php endif; ?>
+                                </div>
 
-                                <form id="evento-validacion-form" method="post">
-                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                    <input type="hidden" name="action" value="send_validation">
-                                    <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
-                                    <div class="row g-3">
-                                        <div class="col-lg-4">
-                                            <label class="form-label">Evento seleccionado</label>
-                                            <div class="form-control-plaintext fw-semibold text-primary">
+                                <div class="card border shadow-none">
+                                    <div class="card-body">
+                                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                                            <div>
+                                                <h6 class="text-uppercase text-muted small mb-1">Paso 3 · Selecciona autoridades</h6>
+                                                <p class="text-muted mb-0">Filtra por cargo o grupo para asignar rápidamente.</p>
+                                            </div>
+                                            <div class="gm-count-badge">
+                                                Seleccionadas: <span id="selected-count"><?php echo $selectedAuthoritiesCount; ?></span>
+                                            </div>
+                                        </div>
+                                        <div class="row g-3 align-items-end">
+                                            <div class="col-lg-6">
+                                                <label class="form-label" for="authority-search">Buscar autoridad</label>
+                                                <input type="search" class="form-control" id="authority-search" placeholder="Buscar por nombre o cargo">
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <label class="form-label">Filtros rápidos</label>
+                                                <div class="gm-chip-group" id="authority-filters"></div>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mt-3">
+                                            <button type="button" class="btn btn-outline-primary" id="select-all-authorities">Seleccionar todas (filtradas)</button>
+                                            <button type="button" class="btn btn-outline-secondary" id="clear-all-authorities">Limpiar selección (filtradas)</button>
+                                            <span class="text-muted small" id="filtered-count"></span>
+                                        </div>
+                                        <div class="gm-authorities-list mt-4" id="authority-list"></div>
+                                        <div class="gm-empty-state d-none" id="authority-empty-state">
+                                            <i class="ti ti-users-off"></i>
+                                            <div>
+                                                <div class="fw-semibold">No hay resultados</div>
+                                                <div class="text-muted small">Ajusta los filtros o la búsqueda.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="card border shadow-none mb-4">
+                                <div class="card-body">
+                                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                                        <div>
+                                            <h5 class="card-title mb-1">Validación externa</h5>
+                                            <p class="text-muted mb-0">Envía enlace de validación a los responsables.</p>
+                                        </div>
+                                    </div>
+
+                                    <?php if (!empty($validationErrors)) : ?>
+                                        <div class="alert alert-danger gm-alert">
+                                            <?php foreach ($validationErrors as $error) : ?>
+                                                <div><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <?php if ($validationNotice) : ?>
+                                        <div class="alert alert-success gm-alert">
+                                            <?php echo htmlspecialchars($validationNotice, ENT_QUOTES, 'UTF-8'); ?>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <?php if ($editRequest) : ?>
+                                        <div class="card border gm-inner-card mb-4">
+                                            <div class="card-body">
+                                                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                                                    <h6 class="mb-0">Editar solicitud reciente</h6>
+                                                    <a class="btn btn-sm btn-outline-secondary" href="eventos-autoridades.php?event_id=<?php echo (int) $selectedEventId; ?>">Cancelar</a>
+                                                </div>
+                                                <form method="post" class="row g-3">
+                                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                    <input type="hidden" name="action" value="update_request">
+                                                    <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
+                                                    <input type="hidden" name="request_id" value="<?php echo (int) $editRequest['id']; ?>">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label" for="edit-destinatario">Destinatario</label>
+                                                        <input id="edit-destinatario" type="text" name="destinatario_nombre" class="form-control" value="<?php echo htmlspecialchars($editRequest['destinatario_nombre'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label" for="edit-correo">Correo</label>
+                                                        <input id="edit-correo" type="email" name="destinatario_correo" class="form-control" value="<?php echo htmlspecialchars($editRequest['destinatario_correo'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label" for="edit-estado">Estado</label>
+                                                        <select id="edit-estado" name="estado" class="form-select">
+                                                            <option value="pendiente" <?php echo ($editRequest['estado'] ?? '') === 'pendiente' ? 'selected' : ''; ?>>Pendiente</option>
+                                                            <option value="respondido" <?php echo ($editRequest['estado'] ?? '') === 'respondido' ? 'selected' : ''; ?>>Respondido</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label" for="edit-correo-enviado">Correo enviado</label>
+                                                        <select id="edit-correo-enviado" name="correo_enviado" class="form-select">
+                                                            <option value="0" <?php echo (int) ($editRequest['correo_enviado'] ?? 0) === 0 ? 'selected' : ''; ?>>Pendiente</option>
+                                                            <option value="1" <?php echo (int) ($editRequest['correo_enviado'] ?? 0) === 1 ? 'selected' : ''; ?>>Enviado</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <form id="evento-validacion-form" method="post">
+                                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                        <input type="hidden" name="action" value="send_validation">
+                                        <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
+
+                                        <div class="gm-validation-step mb-3">
+                                            <div class="gm-step-title">1. Evento seleccionado</div>
+                                            <div class="gm-event-pill <?php echo $selectedEventId === 0 ? 'gm-warning' : ''; ?>" id="validation-event-pill">
                                                 <?php if ($selectedEventId === 0) : ?>
-                                                    Selecciona un evento arriba
+                                                    <i class="ti ti-alert-circle"></i>
+                                                    Selecciona un evento para habilitar el envío.
                                                 <?php else : ?>
                                                     <?php
                                                     $selectedEventTitle = '';
@@ -904,13 +894,15 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                                         }
                                                     }
                                                     ?>
+                                                    <i class="ti ti-check"></i>
                                                     <?php echo htmlspecialchars($selectedEventTitle, ENT_QUOTES, 'UTF-8'); ?>
                                                 <?php endif; ?>
                                             </div>
                                         </div>
-                                        <div class="col-lg-8">
-                                            <label class="form-label" for="recipient-users">Usuarios destinatarios</label>
-                                            <select id="recipient-users" name="recipient_user_ids[]" class="form-select" multiple size="6">
+
+                                        <div class="gm-validation-step mb-3">
+                                            <label class="gm-step-title" for="recipient-users">2. Destinatarios</label>
+                                            <select id="recipient-users" name="recipient_user_ids[]" class="form-select" multiple size="6" aria-describedby="recipient-help">
                                                 <?php foreach ($users as $user) : ?>
                                                     <option value="<?php echo (int) $user['id']; ?>">
                                                         <?php echo htmlspecialchars(trim($user['nombre'] . ' ' . $user['apellido']), ENT_QUOTES, 'UTF-8'); ?>
@@ -918,54 +910,109 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                                     </option>
                                                 <?php endforeach; ?>
                                             </select>
-                                            <div class="form-text">Selecciona uno o más usuarios para enviar el enlace público del evento.</div>
+                                            <div class="form-text" id="recipient-help">Selecciona uno o más usuarios para enviar el enlace público del evento.</div>
+                                            <div class="gm-selected-users mt-2" id="selected-recipients"></div>
                                         </div>
-                                        <div class="col-lg-4">
-                                            <label class="form-label" for="delivery-channel">Canal de envío</label>
-                                            <select id="delivery-channel" name="delivery_channel" class="form-select">
-                                                <option value="email">Correo</option>
-                                                <option value="whatsapp">WhatsApp</option>
-                                                <option value="both">Correo y WhatsApp</option>
-                                                <option value="whatsapp_link">WhatsApp (link directo)</option>
-                                            </select>
+
+                                        <div class="gm-validation-step mb-3">
+                                            <div class="gm-step-title mb-2">3. Canal de envío</div>
+                                            <div class="gm-segmented-control" role="radiogroup" aria-label="Canal de envío">
+                                                <input type="radio" class="btn-check" name="delivery_channel" id="channel-email" value="email" checked>
+                                                <label class="btn btn-outline-primary" for="channel-email">Correo</label>
+
+                                                <input type="radio" class="btn-check" name="delivery_channel" id="channel-whatsapp" value="whatsapp">
+                                                <label class="btn btn-outline-primary" for="channel-whatsapp">WhatsApp</label>
+
+                                                <input type="radio" class="btn-check" name="delivery_channel" id="channel-both" value="both">
+                                                <label class="btn btn-outline-primary" for="channel-both">Ambos</label>
+
+                                                <input type="radio" class="btn-check" name="delivery_channel" id="channel-whatsapp-link" value="whatsapp_link">
+                                                <label class="btn btn-outline-primary" for="channel-whatsapp-link">WhatsApp link directo</label>
+                                            </div>
                                             <div class="form-text">WhatsApp requiere teléfono en usuarios y configuración previa.</div>
                                         </div>
-                                    </div>
-                                </form>
 
-                                <?php if ($validationLink || $eventValidationLink) : ?>
-                                    <div class="mt-4">
-                                        <label class="form-label">Enlace de validación</label>
-                                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($validationLink ?: $eventValidationLink, ENT_QUOTES, 'UTF-8'); ?>" readonly>
-                                    </div>
-                                <?php endif; ?>
-
-                                <?php if (!empty($whatsappLinks)) : ?>
-                                    <div class="mt-4">
-                                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
-                                            <label class="form-label mb-0">Links de WhatsApp</label>
-                                            <span class="badge text-bg-success">Link directo</span>
+                                        <div class="gm-validation-step">
+                                            <button type="submit" class="btn btn-primary w-100" id="send-validation-btn" disabled>
+                                                <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
+                                                <span class="gm-send-label">Enviar enlace</span>
+                                            </button>
+                                            <div class="gm-inline-note mt-2" id="send-validation-note">Selecciona un evento y destinatarios para continuar.</div>
                                         </div>
-                                        <div class="list-group">
-                                            <?php foreach ($whatsappLinks as $linkData) : ?>
-                                                <a class="list-group-item list-group-item-action d-flex align-items-center gap-3" href="<?php echo htmlspecialchars($linkData['link'], ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener">
-                                                    <span class="badge rounded-pill text-bg-success"><i class="ti ti-brand-whatsapp"></i></span>
-                                                    <div class="flex-grow-1">
-                                                        <div class="fw-semibold"><?php echo htmlspecialchars($linkData['nombre'], ENT_QUOTES, 'UTF-8'); ?></div>
-                                                        <div class="text-muted small"><?php echo htmlspecialchars($linkData['telefono'], ENT_QUOTES, 'UTF-8'); ?></div>
+                                    </form>
+
+                                    <?php if ($validationLink || $eventValidationLink) : ?>
+                                        <div class="mt-4">
+                                            <label class="form-label">Enlace de validación</label>
+                                            <input type="text" class="form-control" value="<?php echo htmlspecialchars($validationLink ?: $eventValidationLink, ENT_QUOTES, 'UTF-8'); ?>" readonly>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <?php if (!empty($whatsappLinks)) : ?>
+                                        <div class="mt-4">
+                                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                                                <label class="form-label mb-0">Links de WhatsApp</label>
+                                                <span class="badge text-bg-success">Link directo</span>
+                                            </div>
+                                            <div class="list-group">
+                                                <?php foreach ($whatsappLinks as $linkData) : ?>
+                                                    <a class="list-group-item list-group-item-action d-flex align-items-center gap-3" href="<?php echo htmlspecialchars($linkData['link'], ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener">
+                                                        <span class="badge rounded-pill text-bg-success"><i class="ti ti-brand-whatsapp"></i></span>
+                                                        <div class="flex-grow-1">
+                                                            <div class="fw-semibold"><?php echo htmlspecialchars($linkData['nombre'], ENT_QUOTES, 'UTF-8'); ?></div>
+                                                            <div class="text-muted small"><?php echo htmlspecialchars($linkData['telefono'], ENT_QUOTES, 'UTF-8'); ?></div>
+                                                        </div>
+                                                        <span class="btn btn-sm btn-success">Abrir WhatsApp</span>
+                                                    </a>
+                                                <?php endforeach; ?>
+                                            </div>
+                                            <div class="form-text mt-2">Los enlaces abren WhatsApp Web o la app instalada con el mensaje prellenado.</div>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+
+                            <div class="card border shadow-none mb-4 gm-accordion-card">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between mb-3">
+                                        <h6 class="mb-0">Eventos con autoridades</h6>
+                                        <span class="badge bg-light text-muted" id="assigned-events-count"><?php echo count($assignedEvents); ?></span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <input type="search" class="form-control" id="assigned-events-search" placeholder="Buscar evento">
+                                    </div>
+                                    <?php if (!empty($assignedEvents)) : ?>
+                                        <div class="list-group list-group-flush gm-scroll" id="assigned-events-list">
+                                            <?php foreach ($assignedEvents as $assignedEvent) : ?>
+                                                <div class="list-group-item d-flex align-items-center justify-content-between px-0" data-title="<?php echo htmlspecialchars($assignedEvent['titulo'], ENT_QUOTES, 'UTF-8'); ?>">
+                                                    <div class="text-truncate">
+                                                        <div class="fw-semibold"><?php echo htmlspecialchars($assignedEvent['titulo'], ENT_QUOTES, 'UTF-8'); ?></div>
+                                                        <span class="badge bg-secondary-subtle text-secondary"><?php echo (int) $assignedEvent['authority_count']; ?> autoridades</span>
                                                     </div>
-                                                    <span class="btn btn-sm btn-success">Abrir WhatsApp</span>
-                                                </a>
+                                                    <a class="btn btn-sm btn-outline-primary" href="eventos-autoridades-nueva.php?event_id=<?php echo (int) $assignedEvent['id']; ?>">Editar</a>
+                                                </div>
                                             <?php endforeach; ?>
                                         </div>
-                                        <div class="form-text mt-2">Los enlaces abren WhatsApp Web o la app instalada con el mensaje prellenado.</div>
-                                    </div>
-                                <?php endif; ?>
+                                    <?php else : ?>
+                                        <div class="gm-empty-state">
+                                            <i class="ti ti-calendar-off"></i>
+                                            <div>
+                                                <div class="fw-semibold">Sin eventos asignados</div>
+                                                <div class="text-muted small">Crea la primera asignación desde la columna principal.</div>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
 
-                                <?php if (!empty($assignedEvents)) : ?>
-                                    <div class="mt-4">
-                                        <h6 class="mb-3">Solicitudes recientes</h6>
-                                        <div class="table-responsive">
+                            <div class="card border shadow-none">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between mb-3">
+                                        <h6 class="mb-0">Solicitudes recientes</h6>
+                                        <span class="badge bg-light text-muted"><?php echo count($assignedEvents); ?></span>
+                                    </div>
+                                    <?php if (!empty($assignedEvents)) : ?>
+                                        <div class="table-responsive gm-table">
                                             <table class="table table-sm align-middle">
                                                 <thead>
                                                     <tr>
@@ -987,12 +1034,67 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                                 </tbody>
                                             </table>
                                         </div>
-                                    </div>
-                                <?php endif; ?>
+                                    <?php else : ?>
+                                        <div class="gm-empty-state">
+                                            <i class="ti ti-inbox"></i>
+                                            <div>
+                                                <div class="fw-semibold">Sin solicitudes recientes</div>
+                                                <div class="text-muted small">Las solicitudes aparecerán cuando se envíen validaciones.</div>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
                             </div>
                         </div>
                     </div>
+
+                    <div class="gm-mobile-save d-lg-none">
+                        <button type="submit" form="evento-autoridades-form" name="save_authorities" value="1" class="btn btn-primary w-100" id="save-authorities-btn-mobile" disabled>Guardar cambios</button>
+                    </div>
+
+                    <?php if ($saveNotice) : ?>
+                        <div class="toast-container position-fixed bottom-0 end-0 p-3">
+                            <div class="toast align-items-center text-bg-success border-0" id="save-toast" role="alert" aria-live="assertive" aria-atomic="true">
+                                <div class="d-flex">
+                                    <div class="toast-body">
+                                        <?php echo htmlspecialchars($saveNotice, ENT_QUOTES, 'UTF-8'); ?>
+                                    </div>
+                                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 </div>
+
+                <?php
+                $authoritiesPayload = [];
+                foreach ($displayAuthoritiesByGroup as $groupId => $group) {
+                    foreach ($group['items'] as $authority) {
+                        $authorityId = (int) $authority['id'];
+                        $authoritiesPayload[] = [
+                            'id' => $authorityId,
+                            'name' => $authority['nombre'],
+                            'role' => $authority['tipo'],
+                            'groupId' => (int) $groupId,
+                            'groupName' => $group['name'],
+                            'checked' => in_array($authorityId, $linkedAuthorities, true),
+                        ];
+                    }
+                }
+                $eventsPayload = [];
+                foreach ($events as $event) {
+                    $eventId = (int) $event['id'];
+                    $eventsPayload[] = [
+                        'id' => $eventId,
+                        'title' => $event['titulo'],
+                        'start' => $event['fecha_inicio'] ?? null,
+                        'end' => $event['fecha_fin'] ?? null,
+                        'hasAuthorities' => in_array($eventId, $assignedEventIds, true),
+                    ];
+                }
+                ?>
+                <script type="application/json" id="authorities-data"><?php echo json_encode($authoritiesPayload, JSON_UNESCAPED_UNICODE); ?></script>
+                <script type="application/json" id="events-data"><?php echo json_encode($eventsPayload, JSON_UNESCAPED_UNICODE); ?></script>
 
             </div>
             <!-- container -->
@@ -1008,46 +1110,708 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
     </div>
     <!-- END wrapper -->
 
+    <div class="modal fade" id="event-change-modal" tabindex="-1" aria-labelledby="event-change-title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="event-change-title">Cambiar evento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    Perderás los cambios no guardados en las autoridades actuales. ¿Deseas continuar?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="confirm-event-change">Continuar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <?php include('partials/customizer.php'); ?>
+
+    <style>
+        .go-muni-authorities {
+            --gm-border: #e2e8f0;
+            --gm-muted: #64748b;
+            --gm-bg: #f8fafc;
+            --gm-primary: #0d6efd;
+        }
+
+        .go-muni-authorities .gm-page-head {
+            position: sticky;
+            top: 76px;
+            z-index: 10;
+        }
+
+        .go-muni-authorities .gm-dirty-indicator {
+            background: #eef2ff;
+            color: #4338ca;
+            padding: 6px 10px;
+            border-radius: 999px;
+        }
+
+        .go-muni-authorities .gm-switch {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .go-muni-authorities .gm-switch-help {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .go-muni-authorities .gm-selected-event,
+        .go-muni-authorities .gm-event-summary {
+            background: var(--gm-bg);
+            border-radius: 12px;
+            padding: 12px 16px;
+        }
+
+        .go-muni-authorities .gm-event-status .badge {
+            font-weight: 600;
+        }
+
+        .go-muni-authorities .gm-empty-state {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 16px;
+            border: 1px dashed var(--gm-border);
+            border-radius: 12px;
+            color: var(--gm-muted);
+        }
+
+        .go-muni-authorities .gm-empty-state i {
+            font-size: 20px;
+        }
+
+        .go-muni-authorities .gm-count-badge {
+            background: #e0f2fe;
+            color: #0369a1;
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-weight: 600;
+        }
+
+        .go-muni-authorities .gm-chip-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .go-muni-authorities .gm-chip {
+            border: 1px solid var(--gm-border);
+            background: #fff;
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: 13px;
+            color: #1f2937;
+        }
+
+        .go-muni-authorities .gm-chip.active {
+            border-color: var(--gm-primary);
+            color: var(--gm-primary);
+            background: #eff6ff;
+        }
+
+        .go-muni-authorities .gm-authority-group {
+            margin-bottom: 24px;
+        }
+
+        .go-muni-authorities .gm-group-title {
+            font-size: 13px;
+            text-transform: uppercase;
+            color: var(--gm-muted);
+            letter-spacing: 0.04em;
+        }
+
+        .go-muni-authorities .gm-group-count {
+            font-size: 12px;
+            color: var(--gm-muted);
+        }
+
+        .go-muni-authorities .gm-authority-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 12px;
+        }
+
+        .go-muni-authorities .gm-authority-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border: 1px solid var(--gm-border);
+            border-radius: 12px;
+            background: #fff;
+            cursor: pointer;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .go-muni-authorities .gm-authority-item:hover {
+            border-color: #cbd5f5;
+            box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+        }
+
+        .go-muni-authorities .gm-authority-item:focus-within {
+            outline: 2px solid #93c5fd;
+            outline-offset: 2px;
+        }
+
+        .go-muni-authorities .gm-authority-name {
+            font-weight: 600;
+        }
+
+        .go-muni-authorities .gm-authority-role {
+            font-size: 12px;
+            color: var(--gm-muted);
+        }
+
+        .go-muni-authorities .gm-segmented-control {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .go-muni-authorities .gm-selected-users {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .go-muni-authorities .gm-selected-users .gm-pill {
+            background: #f1f5f9;
+            color: #1e293b;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+        }
+
+        .go-muni-authorities .gm-validation-step {
+            border-bottom: 1px solid var(--gm-border);
+            padding-bottom: 16px;
+        }
+
+        .go-muni-authorities .gm-validation-step:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .go-muni-authorities .gm-step-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 6px;
+        }
+
+        .go-muni-authorities .gm-event-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #ecfdf5;
+            color: #047857;
+            padding: 10px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+        }
+
+        .go-muni-authorities .gm-event-pill.gm-warning {
+            background: #fff7ed;
+            color: #b45309;
+        }
+
+        .go-muni-authorities .gm-inline-note {
+            font-size: 12px;
+            color: var(--gm-muted);
+        }
+
+        .go-muni-authorities .gm-scroll {
+            max-height: 320px;
+            overflow: auto;
+        }
+
+        .go-muni-authorities .gm-table thead th {
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 1;
+        }
+
+        .go-muni-authorities .gm-mobile-save {
+            position: sticky;
+            bottom: 0;
+            background: #fff;
+            padding: 12px;
+            border-top: 1px solid var(--gm-border);
+            margin-top: 24px;
+        }
+
+        @media (max-width: 991px) {
+            .go-muni-authorities .gm-page-head {
+                position: static;
+            }
+        }
+    </style>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const authoritiesData = JSON.parse(document.getElementById('authorities-data')?.textContent || '[]');
+            const eventsData = JSON.parse(document.getElementById('events-data')?.textContent || '[]');
+            const authorityList = document.getElementById('authority-list');
+            const authorityFilters = document.getElementById('authority-filters');
+            const authoritySearch = document.getElementById('authority-search');
+            const selectedCountEl = document.getElementById('selected-count');
+            const filteredCountEl = document.getElementById('filtered-count');
+            const emptyStateEl = document.getElementById('authority-empty-state');
             const selectAllBtn = document.getElementById('select-all-authorities');
             const clearAllBtn = document.getElementById('clear-all-authorities');
-            const checkboxes = () => Array.from(document.querySelectorAll('input[name="authorities[]"]'));
             const eventSelect = document.getElementById('evento-select');
+            const toggleAssigned = document.getElementById('toggle-assigned-events');
+            const eventBadge = document.getElementById('event-status-badge');
+            const eventSummary = document.getElementById('event-summary');
+            const eventEmptyState = document.getElementById('event-empty-state');
+            const saveButton = document.getElementById('save-authorities-btn');
+            const saveButtonMobile = document.getElementById('save-authorities-btn-mobile');
+            const dirtyIndicator = document.getElementById('dirty-indicator');
+            const assignedSearch = document.getElementById('assigned-events-search');
+            const assignedList = document.getElementById('assigned-events-list');
+            const assignedCount = document.getElementById('assigned-events-count');
+            const recipientSelect = document.getElementById('recipient-users');
+            const recipientsContainer = document.getElementById('selected-recipients');
+            const sendValidationBtn = document.getElementById('send-validation-btn');
+            const sendValidationNote = document.getElementById('send-validation-note');
+            const validationForm = document.getElementById('evento-validacion-form');
+            const eventIdInput = validationForm?.querySelector('input[name="event_id"]');
+            const confirmEventChange = document.getElementById('confirm-event-change');
+            const changeModalEl = document.getElementById('event-change-modal');
+            const saveToastEl = document.getElementById('save-toast');
+
+            let searchTerm = '';
+            let activeGroup = 'all';
+            let pendingEventId = null;
+            let previousEventId = eventSelect?.value || '';
+
+            const selectedIds = new Set(
+                authoritiesData.filter((authority) => authority.checked).map((authority) => String(authority.id))
+            );
+            const initialSelected = new Set(selectedIds);
+
+            const normalize = (value) => value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+            const groupMap = new Map();
+            authoritiesData.forEach((authority) => {
+                if (!groupMap.has(authority.groupId)) {
+                    groupMap.set(authority.groupId, { id: authority.groupId, name: authority.groupName });
+                }
+            });
+
+            const updateDirtyState = () => {
+                const isDirty =
+                    initialSelected.size !== selectedIds.size ||
+                    Array.from(initialSelected).some((id) => !selectedIds.has(id));
+                if (saveButton) {
+                    saveButton.disabled = !isDirty || !(eventSelect?.value || eventIdInput?.value);
+                }
+                if (saveButtonMobile) {
+                    saveButtonMobile.disabled = !isDirty || !(eventSelect?.value || eventIdInput?.value);
+                }
+                if (dirtyIndicator) {
+                    dirtyIndicator.textContent = isDirty ? 'Cambios pendientes' : 'Sin cambios pendientes';
+                    dirtyIndicator.classList.toggle('text-muted', !isDirty);
+                }
+                return isDirty;
+            };
+
+            const updateSelectedCount = () => {
+                if (selectedCountEl) {
+                    selectedCountEl.textContent = selectedIds.size;
+                }
+            };
+
+            const getFilteredAuthorities = () => {
+                const term = searchTerm ? normalize(searchTerm) : '';
+                return authoritiesData.filter((authority) => {
+                    const matchesGroup = activeGroup === 'all' || authority.groupId === activeGroup;
+                    const matchesTerm =
+                        !term ||
+                        normalize(authority.name).includes(term) ||
+                        normalize(authority.role).includes(term);
+                    return matchesGroup && matchesTerm;
+                });
+            };
+
+            const renderFilters = () => {
+                if (!authorityFilters) {
+                    return;
+                }
+                const fragment = document.createDocumentFragment();
+                const allButton = document.createElement('button');
+                allButton.type = 'button';
+                allButton.className = `gm-chip ${activeGroup === 'all' ? 'active' : ''}`;
+                allButton.textContent = 'Todos';
+                allButton.dataset.group = 'all';
+                fragment.appendChild(allButton);
+
+                groupMap.forEach((group) => {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = `gm-chip ${activeGroup === group.id ? 'active' : ''}`;
+                    button.textContent = group.name;
+                    button.dataset.group = String(group.id);
+                    fragment.appendChild(button);
+                });
+
+                authorityFilters.innerHTML = '';
+                authorityFilters.appendChild(fragment);
+            };
+
+            const renderAuthorities = () => {
+                if (!authorityList) {
+                    return;
+                }
+                const filtered = getFilteredAuthorities();
+                const grouped = new Map();
+
+                filtered.forEach((authority) => {
+                    if (!grouped.has(authority.groupId)) {
+                        grouped.set(authority.groupId, []);
+                    }
+                    grouped.get(authority.groupId).push(authority);
+                });
+
+                const fragment = document.createDocumentFragment();
+                grouped.forEach((items, groupId) => {
+                    const groupInfo = groupMap.get(groupId);
+                    if (!groupInfo) {
+                        return;
+                    }
+                    const groupWrapper = document.createElement('div');
+                    groupWrapper.className = 'gm-authority-group';
+
+                    const header = document.createElement('div');
+                    header.className = 'd-flex align-items-center justify-content-between mb-2';
+
+                    const title = document.createElement('div');
+                    title.className = 'gm-group-title';
+                    title.textContent = groupInfo.name;
+
+                    const totalGroup = authoritiesData.filter((authority) => authority.groupId === groupId).length;
+                    const selectedGroup = authoritiesData.filter(
+                        (authority) => authority.groupId === groupId && selectedIds.has(String(authority.id))
+                    ).length;
+                    const counter = document.createElement('div');
+                    counter.className = 'gm-group-count';
+                    counter.textContent = `${selectedGroup}/${totalGroup}`;
+
+                    header.appendChild(title);
+                    header.appendChild(counter);
+                    groupWrapper.appendChild(header);
+
+                    const grid = document.createElement('div');
+                    grid.className = 'gm-authority-grid';
+
+                    items.forEach((authority) => {
+                        const label = document.createElement('label');
+                        label.className = 'gm-authority-item';
+                        label.setAttribute('for', `auth-${authority.id}`);
+
+                        const input = document.createElement('input');
+                        input.type = 'checkbox';
+                        input.name = 'authorities[]';
+                        input.value = authority.id;
+                        input.id = `auth-${authority.id}`;
+                        input.className = 'form-check-input m-0';
+                        input.checked = selectedIds.has(String(authority.id));
+
+                        const info = document.createElement('div');
+                        info.className = 'd-flex flex-column';
+
+                        const name = document.createElement('span');
+                        name.className = 'gm-authority-name';
+                        name.textContent = authority.name;
+
+                        const role = document.createElement('span');
+                        role.className = 'gm-authority-role';
+                        role.textContent = authority.role;
+
+                        info.appendChild(name);
+                        info.appendChild(role);
+
+                        label.appendChild(input);
+                        label.appendChild(info);
+                        grid.appendChild(label);
+                    });
+
+                    groupWrapper.appendChild(grid);
+                    fragment.appendChild(groupWrapper);
+                });
+
+                authorityList.innerHTML = '';
+                authorityList.appendChild(fragment);
+
+                if (filteredCountEl) {
+                    filteredCountEl.textContent = `Mostrando ${filtered.length} de ${authoritiesData.length} autoridades`;
+                }
+
+                if (emptyStateEl) {
+                    emptyStateEl.classList.toggle('d-none', filtered.length > 0);
+                }
+            };
+
+            const updateEventSummary = (eventId) => {
+                if (!eventSummary || !eventBadge) {
+                    return;
+                }
+                const selectedEvent = eventsData.find((event) => String(event.id) === String(eventId));
+                if (!selectedEvent || !eventId) {
+                    eventBadge.textContent = 'Sin autoridades asignadas';
+                    eventBadge.className = 'badge bg-secondary-subtle text-secondary';
+                    eventSummary.querySelector('.gm-event-title').textContent = 'Selecciona un evento para ver el resumen.';
+                    eventSummary.querySelector('.gm-event-meta').textContent = 'Fecha pendiente';
+                    if (eventEmptyState) {
+                        eventEmptyState.classList.remove('d-none');
+                    }
+                    return;
+                }
+                const hasAuthorities = selectedEvent.hasAuthorities;
+                eventBadge.textContent = hasAuthorities ? 'Con autoridades asignadas' : 'Sin autoridades asignadas';
+                eventBadge.className = hasAuthorities ? 'badge bg-warning-subtle text-warning' : 'badge bg-secondary-subtle text-secondary';
+                eventSummary.querySelector('.gm-event-title').textContent = selectedEvent.title;
+                const dateText = selectedEvent.start ? `${selectedEvent.start}${selectedEvent.end ? ` · ${selectedEvent.end}` : ''}` : 'Fecha pendiente';
+                eventSummary.querySelector('.gm-event-meta').textContent = dateText;
+                if (eventEmptyState) {
+                    eventEmptyState.classList.add('d-none');
+                }
+            };
+
+            const rebuildEventOptions = (showAssigned) => {
+                if (!eventSelect) {
+                    return;
+                }
+                const fragment = document.createDocumentFragment();
+                const placeholder = document.createElement('option');
+                placeholder.value = '';
+                placeholder.textContent = 'Selecciona un evento';
+                fragment.appendChild(placeholder);
+
+                eventsData.forEach((event) => {
+                    if (!showAssigned && event.hasAuthorities) {
+                        return;
+                    }
+                    const option = document.createElement('option');
+                    option.value = event.id;
+                    option.textContent = event.title;
+                    option.dataset.start = event.start || '';
+                    option.dataset.end = event.end || '';
+                    option.dataset.hasAuthorities = event.hasAuthorities ? '1' : '0';
+                    if (String(event.id) === String(eventSelect.value)) {
+                        option.selected = true;
+                    }
+                    fragment.appendChild(option);
+                });
+
+                eventSelect.innerHTML = '';
+                eventSelect.appendChild(fragment);
+                updateEventSummary(eventSelect.value);
+            };
+
+            const updateRecipients = () => {
+                if (!recipientSelect || !recipientsContainer) {
+                    return [];
+                }
+                const selectedOptions = Array.from(recipientSelect.selectedOptions).map((option) => option.textContent.trim());
+                const fragment = document.createDocumentFragment();
+                selectedOptions.forEach((name) => {
+                    const pill = document.createElement('span');
+                    pill.className = 'gm-pill';
+                    pill.textContent = name;
+                    fragment.appendChild(pill);
+                });
+                recipientsContainer.innerHTML = '';
+                recipientsContainer.appendChild(fragment);
+                return selectedOptions;
+            };
+
+            const updateSendButton = () => {
+                if (!sendValidationBtn || !eventIdInput || !recipientSelect) {
+                    return;
+                }
+                const hasEvent = Number(eventIdInput.value) > 0;
+                const hasRecipients = recipientSelect.selectedOptions.length > 0;
+                sendValidationBtn.disabled = !(hasEvent && hasRecipients);
+                if (sendValidationNote) {
+                    sendValidationNote.textContent = hasEvent && hasRecipients
+                        ? 'Listo para enviar la validación.'
+                        : 'Selecciona un evento y destinatarios para continuar.';
+                }
+            };
+
+            const updateAssignedEvents = () => {
+                if (!assignedList || !assignedSearch) {
+                    return;
+                }
+                const term = normalize(assignedSearch.value || '');
+                let visible = 0;
+                assignedList.querySelectorAll('.list-group-item').forEach((item) => {
+                    const title = normalize(item.dataset.title || '');
+                    const matches = !term || title.includes(term);
+                    item.classList.toggle('d-none', !matches);
+                    if (matches) {
+                        visible += 1;
+                    }
+                });
+                if (assignedCount) {
+                    assignedCount.textContent = visible;
+                }
+            };
+
+            if (authorityFilters) {
+                authorityFilters.addEventListener('click', (event) => {
+                    const button = event.target.closest('button[data-group]');
+                    if (!button) {
+                        return;
+                    }
+                    const groupValue = button.dataset.group;
+                    activeGroup = groupValue === 'all' ? 'all' : Number(groupValue);
+                    renderFilters();
+                    renderAuthorities();
+                });
+            }
+
+            if (authoritySearch) {
+                let searchTimeout;
+                authoritySearch.addEventListener('input', (event) => {
+                    const value = event.target.value;
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        searchTerm = value;
+                        renderAuthorities();
+                    }, 150);
+                });
+            }
+
+            if (authorityList) {
+                authorityList.addEventListener('change', (event) => {
+                    if (event.target instanceof HTMLInputElement && event.target.name === 'authorities[]') {
+                        const id = event.target.value;
+                        if (event.target.checked) {
+                            selectedIds.add(id);
+                        } else {
+                            selectedIds.delete(id);
+                        }
+                        updateSelectedCount();
+                        updateDirtyState();
+                        renderAuthorities();
+                    }
+                });
+            }
 
             if (selectAllBtn) {
                 selectAllBtn.addEventListener('click', () => {
-                    checkboxes().forEach((checkbox) => {
-                        checkbox.checked = true;
+                    getFilteredAuthorities().forEach((authority) => {
+                        selectedIds.add(String(authority.id));
                     });
+                    updateSelectedCount();
+                    updateDirtyState();
+                    renderAuthorities();
                 });
             }
 
             if (clearAllBtn) {
                 clearAllBtn.addEventListener('click', () => {
-                    checkboxes().forEach((checkbox) => {
-                        checkbox.checked = false;
+                    getFilteredAuthorities().forEach((authority) => {
+                        selectedIds.delete(String(authority.id));
                     });
+                    updateSelectedCount();
+                    updateDirtyState();
+                    renderAuthorities();
                 });
             }
 
             if (eventSelect) {
                 eventSelect.addEventListener('change', () => {
                     const selectedId = eventSelect.value;
-                    if (selectedId) {
-                        window.location.href = `eventos-autoridades.php?event_id=${encodeURIComponent(selectedId)}`;
+                    const isDirty = updateDirtyState();
+                    if (!selectedId) {
+                        updateEventSummary('');
+                        return;
+                    }
+                    if (isDirty && changeModalEl && confirmEventChange) {
+                        pendingEventId = selectedId;
+                        eventSelect.value = previousEventId;
+                        const modal = bootstrap.Modal.getOrCreateInstance(changeModalEl);
+                        modal.show();
+                        return;
+                    }
+                    window.location.href = `eventos-autoridades.php?event_id=${encodeURIComponent(selectedId)}`;
+                });
+            }
+
+            if (confirmEventChange) {
+                confirmEventChange.addEventListener('click', () => {
+                    if (pendingEventId) {
+                        window.location.href = `eventos-autoridades.php?event_id=${encodeURIComponent(pendingEventId)}`;
                     }
                 });
             }
 
-            const saveNotice = document.getElementById('save-notice');
-            if (saveNotice) {
-                setTimeout(() => {
-                    saveNotice.classList.add('d-none');
-                }, 5000);
+            if (toggleAssigned) {
+                toggleAssigned.addEventListener('change', () => {
+                    rebuildEventOptions(toggleAssigned.checked);
+                });
             }
+
+            if (recipientSelect) {
+                recipientSelect.addEventListener('change', () => {
+                    updateRecipients();
+                    updateSendButton();
+                });
+            }
+
+            if (validationForm) {
+                validationForm.addEventListener('submit', () => {
+                    if (!sendValidationBtn) {
+                        return;
+                    }
+                    const spinner = sendValidationBtn.querySelector('.spinner-border');
+                    const label = sendValidationBtn.querySelector('.gm-send-label');
+                    sendValidationBtn.disabled = true;
+                    if (spinner) {
+                        spinner.classList.remove('d-none');
+                    }
+                    if (label) {
+                        label.textContent = 'Enviando...';
+                    }
+                });
+            }
+
+            if (assignedSearch) {
+                assignedSearch.addEventListener('input', updateAssignedEvents);
+            }
+
+            if (saveToastEl) {
+                const toast = bootstrap.Toast.getOrCreateInstance(saveToastEl);
+                toast.show();
+            }
+
+            if (toggleAssigned && toggleAssigned.disabled) {
+                toggleAssigned.closest('.gm-switch')?.classList.add('text-muted');
+            }
+
+            document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((trigger) => {
+                new bootstrap.Tooltip(trigger);
+            });
+
+            updateSelectedCount();
+            renderFilters();
+            renderAuthorities();
+            updateEventSummary(eventSelect?.value || eventIdInput?.value || '');
+            updateDirtyState();
+            updateRecipients();
+            updateSendButton();
+            updateAssignedEvents();
         });
     </script>
 
