@@ -7,6 +7,7 @@ $success = false;
 $request = null;
 $event = null;
 $authorities = [];
+$authoritiesByGroup = [];
 $confirmedAuthorityIds = [];
 
 if ($token === '') {
@@ -45,9 +46,32 @@ if ($request && !$event) {
     $stmt->execute([(int) $request['event_id']]);
     $event = $stmt->fetch();
 
-    $stmt = db()->prepare('SELECT a.id, a.nombre, a.tipo FROM authorities a INNER JOIN event_authorities ea ON ea.authority_id = a.id WHERE ea.event_id = ? ORDER BY a.nombre');
+    $stmt = db()->prepare(
+        'SELECT a.id,
+                a.nombre,
+                a.tipo,
+                g.id AS grupo_id,
+                g.nombre AS grupo_nombre
+         FROM authorities a
+         INNER JOIN event_authorities ea ON ea.authority_id = a.id
+         LEFT JOIN authority_groups g ON g.id = a.group_id
+         WHERE ea.event_id = ?
+         ORDER BY COALESCE(g.nombre, ""), a.nombre'
+    );
     $stmt->execute([(int) $request['event_id']]);
     $authorities = $stmt->fetchAll();
+
+    foreach ($authorities as $authority) {
+        $groupId = $authority['grupo_id'] ? (int) $authority['grupo_id'] : 0;
+        $groupName = $authority['grupo_nombre'] ?: 'Sin grupo';
+        if (!isset($authoritiesByGroup[$groupId])) {
+            $authoritiesByGroup[$groupId] = [
+                'name' => $groupName,
+                'items' => [],
+            ];
+        }
+        $authoritiesByGroup[$groupId]['items'][] = $authority;
+    }
 
     $stmt = db()->prepare('SELECT authority_id FROM event_authority_confirmations WHERE request_id = ?');
     $stmt->execute([(int) $request['id']]);
@@ -144,24 +168,32 @@ $municipalidad = get_municipalidad();
                             <p class="mt-3 mb-4"><?php echo nl2br(htmlspecialchars($event['descripcion'], ENT_QUOTES, 'UTF-8')); ?></p>
 
                             <h6 class="mb-3">Selecciona las autoridades que asistirán</h6>
-                            <?php if (empty($authorities)) : ?>
+                            <?php if (empty($authoritiesByGroup)) : ?>
                                 <div class="text-muted">No hay autoridades preseleccionadas para este evento.</div>
                             <?php else : ?>
                                 <form method="post">
                                     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
                                     <input type="hidden" name="token" value="<?php echo htmlspecialchars($token, ENT_QUOTES, 'UTF-8'); ?>">
                                     <div class="row">
-                                        <?php foreach ($authorities as $authority) : ?>
-                                            <?php $checked = in_array((int) $authority['id'], $confirmedAuthorityIds, true); ?>
-                                            <div class="col-md-6">
-                                                <div class="form-check mb-2">
-                                                    <input class="form-check-input" type="checkbox" id="auth-<?php echo (int) $authority['id']; ?>" name="authorities[]" value="<?php echo (int) $authority['id']; ?>" <?php echo $checked ? 'checked' : ''; ?>>
-                                                    <label class="form-check-label" for="auth-<?php echo (int) $authority['id']; ?>">
-                                                        <?php echo htmlspecialchars($authority['nombre'], ENT_QUOTES, 'UTF-8'); ?>
-                                                        <span class="text-muted">· <?php echo htmlspecialchars($authority['tipo'], ENT_QUOTES, 'UTF-8'); ?></span>
-                                                    </label>
-                                                </div>
+                                        <?php foreach ($authoritiesByGroup as $group) : ?>
+                                            <?php if (empty($group['items'])) : ?>
+                                                <?php continue; ?>
+                                            <?php endif; ?>
+                                            <div class="col-12 mt-3">
+                                                <h6 class="text-uppercase text-muted small mb-2"><?php echo htmlspecialchars($group['name'], ENT_QUOTES, 'UTF-8'); ?></h6>
                                             </div>
+                                            <?php foreach ($group['items'] as $authority) : ?>
+                                                <?php $checked = in_array((int) $authority['id'], $confirmedAuthorityIds, true); ?>
+                                                <div class="col-md-6">
+                                                    <div class="form-check mb-2">
+                                                        <input class="form-check-input" type="checkbox" id="auth-<?php echo (int) $authority['id']; ?>" name="authorities[]" value="<?php echo (int) $authority['id']; ?>" <?php echo $checked ? 'checked' : ''; ?>>
+                                                        <label class="form-check-label" for="auth-<?php echo (int) $authority['id']; ?>">
+                                                            <?php echo htmlspecialchars($authority['nombre'], ENT_QUOTES, 'UTF-8'); ?>
+                                                            <span class="text-muted">· <?php echo htmlspecialchars($authority['tipo'], ENT_QUOTES, 'UTF-8'); ?></span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
                                         <?php endforeach; ?>
                                     </div>
                                     <div class="d-flex flex-wrap align-items-center gap-2 mt-4">
