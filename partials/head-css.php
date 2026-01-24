@@ -75,6 +75,7 @@ $secondaryRgb = hex_to_rgb($secondaryColor) ?? [74, 129, 212];
         .app-topbar .topbar-menu {
             flex-wrap: wrap;
             row-gap: 0.35rem;
+            padding: 0.5rem 0.75rem;
         }
 
         .app-topbar .topbar-menu > .d-flex:first-child,
@@ -92,6 +93,40 @@ $secondaryRgb = hex_to_rgb($secondaryColor) ?? [74, 129, 212];
 
         .app-topbar .topnav-toggle-button {
             margin-left: auto;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .app-topbar .topbar-menu > .d-flex:last-child {
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 0.25rem;
+        }
+
+        .app-topbar .topbar-item .topbar-link {
+            padding: 0.25rem;
+        }
+
+        .app-topbar .topbar-item .fs-xxl {
+            font-size: 1.1rem;
+        }
+
+        .app-topbar [data-toggle="fullscreen"],
+        .app-topbar #monochrome-mode {
+            display: none;
+        }
+
+        .app-topbar .logo-topbar {
+            max-width: calc(100vw - 170px);
+        }
+
+        .app-topbar .logo-topbar img {
+            max-height: 32px;
+        }
+
+        .app-topbar .nav-user img {
+            width: 28px;
+            height: 28px;
         }
     }
 </style>
