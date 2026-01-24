@@ -695,7 +695,7 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                 <?php $subtitle = "Eventos Municipales"; $title = "Autoridades por evento · Nueva vista"; include('partials/page-title.php'); ?>
 
                 <div class="go-muni-authorities">
-                    <div class="gm-page-head card border-0 shadow-sm mb-4">
+                    <div class="gm-page-head card border-0 shadow-sm mb-3">
                         <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
                             <div>
                                 <h4 class="mb-1">Autoridades por evento</h4>
@@ -716,16 +716,16 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                         </div>
                     <?php endif; ?>
 
-                    <div class="row g-4">
+                    <div class="row g-3">
                         <div class="col-12">
                             <form id="evento-autoridades-form" method="post">
                                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
                                 <input type="hidden" name="action" value="save_authorities">
-                                <div class="card border shadow-none mb-4">
+                                <div class="card border shadow-none mb-4 gm-card-compact">
                                     <div class="card-body">
                                         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
                                             <div>
-                                                <h6 class="text-uppercase text-muted small mb-1">Paso 1 · Seleccionar evento</h6>
+                                                <div class="gm-step-label">Paso 1 · Seleccionar evento</div>
                                                 <p class="text-muted mb-0">Elige un evento para asignar autoridades.</p>
                                             </div>
                                             <div class="form-check form-switch gm-switch">
@@ -757,14 +757,14 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                             </select>
                                             <div class="form-text" id="evento-help">Solo se muestran eventos sin autoridades asignadas.</div>
                                         <?php endif; ?>
-                                        <div class="gm-event-status mt-3">
+                                        <div class="gm-event-status mt-2">
                                             <span class="badge bg-secondary-subtle text-secondary" id="event-status-badge">Sin autoridades asignadas</span>
                                             <div class="gm-event-summary mt-2" id="event-summary">
                                                 <div class="gm-event-title">Selecciona un evento para ver el resumen.</div>
                                                 <div class="gm-event-meta text-muted small">Fecha pendiente</div>
                                             </div>
                                         </div>
-                                        <div class="gm-empty-state mt-3" id="event-empty-state">
+                                        <div class="gm-empty-state mt-2" id="event-empty-state">
                                             <i class="ti ti-calendar-event"></i>
                                             <div>
                                                 <div class="fw-semibold">Aún no hay evento seleccionado</div>
@@ -774,11 +774,11 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                     </div>
                                 </div>
 
-                                <div class="card border shadow-none">
+                                <div class="card border shadow-none gm-card-compact">
                                     <div class="card-body">
                                         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
                                             <div>
-                                                <h6 class="text-uppercase text-muted small mb-1">Paso 2 · Seleccionar autoridades</h6>
+                                                <div class="gm-step-label">Paso 2 · Seleccionar autoridades</div>
                                                 <p class="text-muted mb-0">Filtra por cargo o grupo para asignar rápidamente.</p>
                                             </div>
                                             <div class="gm-count-badge">
@@ -795,12 +795,12 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                                 <div class="gm-chip-group" id="authority-filters"></div>
                                             </div>
                                         </div>
-                                        <div class="d-flex flex-wrap align-items-center gap-2 mt-3">
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mt-2">
                                             <button type="button" class="btn btn-outline-primary" id="select-all-authorities">Seleccionar todas (filtradas)</button>
                                             <button type="button" class="btn btn-outline-secondary" id="clear-all-authorities">Limpiar selección (filtradas)</button>
                                             <span class="text-muted small" id="filtered-count"></span>
                                         </div>
-                                        <div class="gm-authorities-list mt-4" id="authority-list"></div>
+                                        <div class="gm-authorities-list" id="authority-list"></div>
                                         <div class="gm-empty-state d-none" id="authority-empty-state">
                                             <i class="ti ti-users-off"></i>
                                             <div>
@@ -814,11 +814,11 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                         </div>
 
                         <div class="col-12">
-                            <div class="card border shadow-none mb-4">
+                            <div class="card border shadow-none mb-4 gm-card-compact">
                                 <div class="card-body">
                                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
                                         <div>
-                                            <h5 class="card-title mb-1">Paso 3 · Enviar validación (link)</h5>
+                                            <div class="gm-step-label">Paso 3 · Enviar validación (link)</div>
                                             <p class="text-muted mb-0">Envía enlace de validación a los responsables.</p>
                                         </div>
                                     </div>
@@ -978,7 +978,7 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                 </div>
                             </div>
 
-                            <div class="card border shadow-none mb-4 gm-accordion-card">
+                            <div class="card border shadow-none mb-4 gm-accordion-card gm-card-compact">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center justify-content-between mb-3">
                                         <h6 class="mb-0">Eventos con autoridades</h6>
@@ -1116,6 +1116,29 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
             --gm-primary: #0d6efd;
         }
 
+        .go-muni-authorities .gm-card-compact .card-body {
+            padding: 18px;
+        }
+
+        .go-muni-authorities .gm-step-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: #eef2ff;
+            color: #4338ca;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 6px;
+        }
+
+        .go-muni-authorities .gm-step-label + p {
+            margin-bottom: 0;
+        }
+
         .go-muni-authorities .gm-page-head {
             position: sticky;
             top: 76px;
@@ -1196,6 +1219,10 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
 
         .go-muni-authorities .gm-authority-group {
             margin-bottom: 24px;
+        }
+
+        .go-muni-authorities .gm-authorities-list {
+            margin-top: 16px;
         }
 
         .go-muni-authorities .gm-group-title {
