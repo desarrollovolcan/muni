@@ -120,10 +120,17 @@ if ($selectedEventId > 0 && empty($errors)) {
 }
 
 foreach ($authoritiesByGroup as $groupId => $group) {
-    if (!empty($group['items'])) {
+    $items = $group['items'];
+    if ($selectedEventId > 0) {
+        $items = array_values(array_filter(
+            $group['items'],
+            static fn(array $authority): bool => in_array((int) $authority['id'], $linkedAuthorities, true)
+        ));
+    }
+    if (!empty($items)) {
         $displayAuthoritiesByGroup[$groupId] = [
             'name' => $group['name'],
-            'items' => $group['items'],
+            'items' => $items,
         ];
     }
 }
@@ -924,7 +931,7 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
 
                                     <div class="mt-4">
                                         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
-                                            <label class="form-label mb-0">Autoridades disponibles</label>
+                                            <label class="form-label mb-0">Autoridades asociadas</label>
                                             <div class="d-flex gap-2">
                                                 <button type="button" class="btn btn-sm btn-outline-secondary" id="select-all-authorities">Seleccionar todas</button>
                                                 <button type="button" class="btn btn-sm btn-outline-secondary" id="clear-all-authorities">Limpiar selección</button>
@@ -936,7 +943,9 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                         </div>
                                         <div class="row">
                                             <?php if (empty($displayAuthoritiesByGroup)) : ?>
-                                                <div class="col-12 text-muted">No hay autoridades registradas.</div>
+                                                <div class="col-12 text-muted">
+                                                    <?php echo $selectedEventId > 0 ? 'No hay autoridades asociadas a este evento.' : 'No hay autoridades registradas.'; ?>
+                                                </div>
                                             <?php else : ?>
                                                 <?php foreach ($displayAuthoritiesByGroup as $group) : ?>
                                                     <?php if (empty($group['items'])) : ?>
