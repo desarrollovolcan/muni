@@ -976,6 +976,11 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
             const selectAllBtn = document.getElementById('select-all-authorities');
             const clearAllBtn = document.getElementById('clear-all-authorities');
             const checkboxes = () => Array.from(document.querySelectorAll('input[name="authorities[]"]'));
+            const pdfDownload = document.querySelector('a[href*="eventos-autoridades-pdf.php"], button[data-download="autoridades-pdf"]');
+
+            if (pdfDownload) {
+                pdfDownload.remove();
+            }
 
             if (selectAllBtn) {
                 selectAllBtn.addEventListener('click', () => {
