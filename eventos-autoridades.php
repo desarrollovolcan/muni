@@ -31,6 +31,12 @@ $displayAuthoritiesByGroup = [];
 $saveNotice = null;
 $editRequestId = isset($_GET['edit_request_id']) ? (int) $_GET['edit_request_id'] : 0;
 $editRequest = null;
+$eventsWithAuthorities = [];
+$eventIdsWithAuthorities = [];
+$editSelectionRequestId = isset($_GET['edit_selection_id']) ? (int) $_GET['edit_selection_id'] : 0;
+$editSelectionRequest = null;
+$editSelectionAuthoritiesByGroup = [];
+$editSelectionConfirmedIds = [];
 
 foreach ($authorities as $authority) {
     $groupId = $authority['grupo_id'] ? (int) $authority['grupo_id'] : 0;
@@ -96,6 +102,17 @@ if ($selectedEventId > 0) {
     $validationRequests = $stmt->fetchAll();
 }
 
+$stmt = db()->query(
+    'SELECT e.id, e.titulo, COUNT(ea.authority_id) AS total
+     FROM events e
+     INNER JOIN event_authorities ea ON ea.event_id = e.id
+     WHERE e.habilitado = 1
+     GROUP BY e.id, e.titulo
+     ORDER BY e.fecha_inicio DESC'
+);
+$eventsWithAuthorities = $stmt->fetchAll();
+$eventIdsWithAuthorities = array_map('intval', array_column($eventsWithAuthorities, 'id'));
+
 foreach ($authoritiesByGroup as $groupId => $group) {
     if (!empty($group['items'])) {
         $displayAuthoritiesByGroup[$groupId] = [
@@ -109,6 +126,44 @@ if ($selectedEventId > 0 && $editRequestId > 0) {
     $stmt = db()->prepare('SELECT * FROM event_authority_requests WHERE id = ? AND event_id = ?');
     $stmt->execute([$editRequestId, $selectedEventId]);
     $editRequest = $stmt->fetch() ?: null;
+}
+
+if ($selectedEventId > 0 && $editSelectionRequestId > 0) {
+    $stmt = db()->prepare('SELECT * FROM event_authority_requests WHERE id = ? AND event_id = ?');
+    $stmt->execute([$editSelectionRequestId, $selectedEventId]);
+    $editSelectionRequest = $stmt->fetch() ?: null;
+    if ($editSelectionRequest) {
+        $stmt = db()->prepare(
+            'SELECT a.id,
+                    a.nombre,
+                    a.tipo,
+                    g.id AS grupo_id,
+                    g.nombre AS grupo_nombre
+             FROM authorities a
+             INNER JOIN event_authorities ea ON ea.authority_id = a.id
+             LEFT JOIN authority_groups g ON g.id = a.group_id
+             WHERE ea.event_id = ?
+             ORDER BY COALESCE(g.nombre, ""), a.nombre'
+        );
+        $stmt->execute([$selectedEventId]);
+        $authoritiesForSelection = $stmt->fetchAll();
+
+        foreach ($authoritiesForSelection as $authority) {
+            $groupId = $authority['grupo_id'] ? (int) $authority['grupo_id'] : 0;
+            $groupName = $authority['grupo_nombre'] ?: 'Sin grupo';
+            if (!isset($editSelectionAuthoritiesByGroup[$groupId])) {
+                $editSelectionAuthoritiesByGroup[$groupId] = [
+                    'name' => $groupName,
+                    'items' => [],
+                ];
+            }
+            $editSelectionAuthoritiesByGroup[$groupId]['items'][] = $authority;
+        }
+
+        $stmt = db()->prepare('SELECT authority_id FROM event_authority_confirmations WHERE request_id = ?');
+        $stmt->execute([(int) $editSelectionRequest['id']]);
+        $editSelectionConfirmedIds = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+    }
 }
 
 try {
@@ -407,6 +462,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
         }
     }
 
+    if ($action === 'update_request_selection') {
+        $requestId = isset($_POST['request_id']) ? (int) $_POST['request_id'] : 0;
+        $eventId = isset($_POST['event_id']) ? (int) $_POST['event_id'] : 0;
+        $selectedAuthorities = array_map('intval', $_POST['authorities'] ?? []);
+
+        if ($eventId === 0 || $requestId === 0) {
+            $validationErrors[] = 'Selecciona una solicitud válida para editar.';
+        }
+
+        if (empty($validationErrors)) {
+            $stmt = db()->prepare('DELETE FROM event_authority_confirmations WHERE request_id = ?');
+            $stmt->execute([$requestId]);
+
+            if (!empty($selectedAuthorities)) {
+                $stmtInsert = db()->prepare('INSERT INTO event_authority_confirmations (request_id, authority_id) VALUES (?, ?)');
+                foreach ($selectedAuthorities as $authorityId) {
+                    $stmtInsert->execute([$requestId, $authorityId]);
+                }
+            }
+
+            $stmtUpdate = db()->prepare('UPDATE event_authority_requests SET estado = ?, responded_at = NOW() WHERE id = ? AND event_id = ?');
+            $stmtUpdate->execute(['respondido', $requestId, $eventId]);
+
+            $_SESSION['selection_saved'] = true;
+            redirect('eventos-autoridades.php?event_id=' . $eventId);
+        }
+    }
+
+    if ($action === 'update_request') {
+        $requestId = isset($_POST['request_id']) ? (int) $_POST['request_id'] : 0;
+        $eventId = isset($_POST['event_id']) ? (int) $_POST['event_id'] : 0;
+        $nombre = trim($_POST['destinatario_nombre'] ?? '');
+        $correo = trim($_POST['destinatario_correo'] ?? '');
+        $estado = $_POST['estado'] ?? 'pendiente';
+        $correoEnviado = isset($_POST['correo_enviado']) && (int) $_POST['correo_enviado'] === 1 ? 1 : 0;
+
+        if ($eventId === 0 || $requestId === 0) {
+            $validationErrors[] = 'Selecciona una solicitud válida para editar.';
+        }
+        if ($correo !== '' && !filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+            $validationErrors[] = 'El correo ingresado no es válido.';
+        }
+        if (!in_array($estado, ['pendiente', 'respondido'], true)) {
+            $validationErrors[] = 'El estado seleccionado no es válido.';
+        }
+
+        if (empty($validationErrors)) {
+            $respondedAt = null;
+            if ($estado === 'respondido') {
+                $respondedAt = date('Y-m-d H:i:s');
+            }
+            $stmt = db()->prepare(
+                'UPDATE event_authority_requests
+                 SET destinatario_nombre = ?, destinatario_correo = ?, estado = ?, correo_enviado = ?, responded_at = ?
+                 WHERE id = ? AND event_id = ?'
+            );
+            $stmt->execute([
+                $nombre !== '' ? $nombre : null,
+                $correo !== '' ? $correo : null,
+                $estado,
+                $correoEnviado,
+                $respondedAt,
+                $requestId,
+                $eventId,
+            ]);
+            redirect('eventos-autoridades.php?event_id=' . $eventId . '&updated=1');
+        }
+    }
+
     if ($action === 'send_validation') {
         $eventId = isset($_POST['event_id']) ? (int) $_POST['event_id'] : 0;
         $recipientUserIds = array_map('intval', $_POST['recipient_user_ids'] ?? []);
@@ -647,6 +771,10 @@ if (!empty($_SESSION['authorities_saved'])) {
     $saveNotice = 'Autoridades actualizadas correctamente.';
     unset($_SESSION['authorities_saved']);
 }
+if (!empty($_SESSION['selection_saved'])) {
+    $validationNotice = 'Selección actualizada correctamente.';
+    unset($_SESSION['selection_saved']);
+}
 if (isset($_GET['updated']) && $_GET['updated'] === '1') {
     $validationNotice = 'La solicitud fue actualizada correctamente.';
 }
@@ -715,11 +843,21 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                             <select id="evento-select" name="event_id" class="form-select" onchange="this.form.submit()">
                                                 <option value="">Selecciona un evento</option>
                                                 <?php foreach ($events as $event) : ?>
-                                                    <option value="<?php echo (int) $event['id']; ?>" <?php echo $selectedEventId === (int) $event['id'] ? 'selected' : ''; ?>>
+                                                    <?php
+                                                    $eventId = (int) $event['id'];
+                                                    $hasAuthorities = in_array($eventId, $eventIdsWithAuthorities, true);
+                                                    if ($hasAuthorities && $selectedEventId !== $eventId) {
+                                                        continue;
+                                                    }
+                                                    $labelSuffix = $hasAuthorities ? ' (con autoridades)' : '';
+                                                    ?>
+                                                    <option value="<?php echo $eventId; ?>" <?php echo $selectedEventId === $eventId ? 'selected' : ''; ?>>
                                                         <?php echo htmlspecialchars($event['titulo'], ENT_QUOTES, 'UTF-8'); ?>
+                                                        <?php echo htmlspecialchars($labelSuffix, ENT_QUOTES, 'UTF-8'); ?>
                                                     </option>
                                                 <?php endforeach; ?>
                                             </select>
+                                            <div class="form-text">Los eventos con autoridades asignadas se editan desde el listado inferior.</div>
                                         </div>
                                     </div>
 
@@ -767,6 +905,45 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Eventos con autoridades asignadas</h5>
+                                <p class="text-muted mb-0">Edita las autoridades ya asociadas desde este listado.</p>
+                            </div>
+                            <div class="card-body">
+                                <?php if (empty($eventsWithAuthorities)) : ?>
+                                    <div class="text-muted">No hay eventos con autoridades asignadas.</div>
+                                <?php else : ?>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm align-middle">
+                                            <thead>
+                                                <tr>
+                                                    <th>Evento</th>
+                                                    <th>Total autoridades</th>
+                                                    <th class="text-end">Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach ($eventsWithAuthorities as $eventRow) : ?>
+                                                    <tr>
+                                                        <td><?php echo htmlspecialchars($eventRow['titulo'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td><?php echo (int) $eventRow['total']; ?></td>
+                                                        <td class="text-end">
+                                                            <a class="btn btn-sm btn-outline-primary" href="eventos-autoridades.php?event_id=<?php echo (int) $eventRow['id']; ?>">Editar autoridades</a>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
                             <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
                                 <div>
                                     <h5 class="card-title mb-0">Validación externa de autoridades</h5>
@@ -786,6 +963,52 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                 <?php if ($validationNotice) : ?>
                                     <div class="alert alert-success">
                                         <?php echo htmlspecialchars($validationNotice, ENT_QUOTES, 'UTF-8'); ?>
+                                    </div>
+                                <?php endif; ?>
+
+                                <?php if ($editSelectionRequest) : ?>
+                                    <div class="card border mb-4">
+                                        <div class="card-body">
+                                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                                                <h6 class="mb-0">Editar selección de autoridades</h6>
+                                                <a class="btn btn-sm btn-outline-secondary" href="eventos-autoridades.php?event_id=<?php echo (int) $selectedEventId; ?>">Cancelar</a>
+                                            </div>
+                                            <?php if (empty($editSelectionAuthoritiesByGroup)) : ?>
+                                                <div class="text-muted">El evento no tiene autoridades asociadas para editar.</div>
+                                            <?php else : ?>
+                                                <form method="post">
+                                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                    <input type="hidden" name="action" value="update_request_selection">
+                                                    <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
+                                                    <input type="hidden" name="request_id" value="<?php echo (int) $editSelectionRequest['id']; ?>">
+                                                    <div class="row">
+                                                        <?php foreach ($editSelectionAuthoritiesByGroup as $group) : ?>
+                                                            <?php if (empty($group['items'])) : ?>
+                                                                <?php continue; ?>
+                                                            <?php endif; ?>
+                                                            <div class="col-12 mt-3">
+                                                                <h6 class="text-uppercase text-muted small mb-2"><?php echo htmlspecialchars($group['name'], ENT_QUOTES, 'UTF-8'); ?></h6>
+                                                            </div>
+                                                            <?php foreach ($group['items'] as $authority) : ?>
+                                                                <?php $checked = in_array((int) $authority['id'], $editSelectionConfirmedIds, true); ?>
+                                                                <div class="col-md-6">
+                                                                    <div class="form-check mb-2">
+                                                                        <input class="form-check-input" type="checkbox" id="edit-auth-<?php echo (int) $authority['id']; ?>" name="authorities[]" value="<?php echo (int) $authority['id']; ?>" <?php echo $checked ? 'checked' : ''; ?>>
+                                                                        <label class="form-check-label" for="edit-auth-<?php echo (int) $authority['id']; ?>">
+                                                                            <?php echo htmlspecialchars($authority['nombre'], ENT_QUOTES, 'UTF-8'); ?>
+                                                                            <span class="text-muted">· <?php echo htmlspecialchars($authority['tipo'], ENT_QUOTES, 'UTF-8'); ?></span>
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+                                                            <?php endforeach; ?>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                    <div class="d-flex flex-wrap align-items-center gap-2 mt-4">
+                                                        <button type="submit" class="btn btn-primary">Guardar selección</button>
+                                                    </div>
+                                                </form>
+                                            <?php endif; ?>
+                                        </div>
                                     </div>
                                 <?php endif; ?>
 
@@ -944,6 +1167,7 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                                             <td><?php echo htmlspecialchars($request['responded_at'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
                                                             <td class="text-end">
                                                                 <a class="btn btn-sm btn-outline-primary" href="eventos-autoridades.php?event_id=<?php echo (int) $selectedEventId; ?>&edit_request_id=<?php echo (int) $request['id']; ?>">Editar</a>
+                                                                <a class="btn btn-sm btn-outline-secondary" href="eventos-autoridades.php?event_id=<?php echo (int) $selectedEventId; ?>&edit_selection_id=<?php echo (int) $request['id']; ?>">Editar selección</a>
                                                             </td>
                                                         </tr>
                                                     <?php endforeach; ?>
