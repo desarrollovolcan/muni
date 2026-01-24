@@ -5,6 +5,8 @@ $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $autoridad = null;
 $errors = [];
 $errorMessage = '';
+$bulkErrors = [];
+$bulkSuccess = '';
 $success = $_GET['success'] ?? '';
 
 try {
@@ -38,6 +40,99 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             redirect('autoridades-editar.php');
         } catch (Exception $e) {
             $errorMessage = 'No se pudo eliminar la autoridad. Verifica dependencias asociadas.';
+        }
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'bulk_upload' && verify_csrf($_POST['csrf_token'] ?? null)) {
+    if (!isset($_FILES['autoridades_excel']) || $_FILES['autoridades_excel']['error'] !== UPLOAD_ERR_OK) {
+        $bulkErrors[] = 'Selecciona un archivo Excel válido.';
+    } else {
+        $extension = strtolower(pathinfo($_FILES['autoridades_excel']['name'], PATHINFO_EXTENSION));
+        if ($extension !== 'xlsx') {
+            $bulkErrors[] = 'El archivo debe estar en formato Excel (.xlsx).';
+        } else {
+            $rows = parse_excel_sheet($_FILES['autoridades_excel']['tmp_name']);
+            if (empty($rows)) {
+                $bulkErrors[] = 'El archivo está vacío o no tiene una hoja válida.';
+            } else {
+                $expected = ['nombre', 'tipo', 'correo', 'telefono', 'fecha_inicio', 'fecha_fin', 'estado'];
+                $header = array_map('trim', $rows[0]);
+                $normalizedHeader = array_map('strtolower', $header);
+                $columnMap = [];
+                foreach ($normalizedHeader as $index => $column) {
+                    if ($column !== '') {
+                        $columnMap[$column] = $index;
+                    }
+                }
+                $missing = array_diff($expected, array_keys($columnMap));
+                if (!empty($missing)) {
+                    $bulkErrors[] = 'Faltan columnas requeridas: ' . implode(', ', $missing) . '. Descarga la plantilla para usar el formato correcto.';
+                } else {
+                    $validRows = [];
+                    for ($i = 1; $i < count($rows); $i++) {
+                        $rowNumber = $i + 1;
+                        $row = $rows[$i];
+                        $nombre = trim((string) ($row[$columnMap['nombre']] ?? ''));
+                        $tipo = trim((string) ($row[$columnMap['tipo']] ?? ''));
+                        $correo = trim((string) ($row[$columnMap['correo']] ?? ''));
+                        $telefono = trim((string) ($row[$columnMap['telefono']] ?? ''));
+                        $fechaInicio = trim((string) ($row[$columnMap['fecha_inicio']] ?? ''));
+                        $fechaFin = trim((string) ($row[$columnMap['fecha_fin']] ?? ''));
+                        $estadoRaw = trim((string) ($row[$columnMap['estado']] ?? ''));
+
+                        if ($nombre === '' && $tipo === '' && $fechaInicio === '' && $correo === '' && $telefono === '' && $fechaFin === '' && $estadoRaw === '') {
+                            continue;
+                        }
+                        if ($nombre === '' || $tipo === '' || $fechaInicio === '') {
+                            $bulkErrors[] = "Fila {$rowNumber}: faltan campos obligatorios (nombre, tipo o fecha_inicio).";
+                            continue;
+                        }
+                        if ($fechaInicio !== '' && is_numeric($fechaInicio)) {
+                            $fechaInicio = excel_serial_to_date($fechaInicio) ?? $fechaInicio;
+                        }
+                        $inicio = DateTime::createFromFormat('Y-m-d', $fechaInicio);
+                        if (!$inicio || $inicio->format('Y-m-d') !== $fechaInicio) {
+                            $bulkErrors[] = "Fila {$rowNumber}: fecha_inicio inválida (usa YYYY-MM-DD).";
+                            continue;
+                        }
+                        if ($fechaFin !== '' && is_numeric($fechaFin)) {
+                            $fechaFin = excel_serial_to_date($fechaFin) ?? $fechaFin;
+                        }
+                        $fechaFin = $fechaFin !== '' ? $fechaFin : null;
+                        if ($fechaFin !== null) {
+                            $fin = DateTime::createFromFormat('Y-m-d', $fechaFin);
+                            if (!$fin || $fin->format('Y-m-d') !== $fechaFin) {
+                                $bulkErrors[] = "Fila {$rowNumber}: fecha_fin inválida (usa YYYY-MM-DD).";
+                                continue;
+                            }
+                        }
+                        $estado = in_array(strtolower($estadoRaw), ['0', 'deshabilitado', 'inactivo'], true) ? 0 : 1;
+                        $validRows[] = [
+                            $nombre,
+                            $tipo,
+                            $correo !== '' ? $correo : null,
+                            $telefono !== '' ? $telefono : null,
+                            $fechaInicio,
+                            $fechaFin,
+                            $estado,
+                        ];
+                    }
+                    if (!empty($bulkErrors)) {
+                        $bulkErrors[] = 'Corrige los errores en el archivo antes de cargar.';
+                    } elseif (!empty($validRows)) {
+                        $stmtInsert = db()->prepare(
+                            'INSERT INTO authorities (nombre, tipo, correo, telefono, fecha_inicio, fecha_fin, estado) VALUES (?, ?, ?, ?, ?, ?, ?)'
+                        );
+                        foreach ($validRows as $data) {
+                            $stmtInsert->execute($data);
+                        }
+                        $bulkSuccess = "Se cargaron " . count($validRows) . " autoridades correctamente.";
+                    } else {
+                        $bulkErrors[] = 'No se encontraron filas válidas para importar.';
+                    }
+                }
+            }
         }
     }
 }
@@ -88,6 +183,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_
         }
     }
 }
+
+$autoridades = db()->query('SELECT id, nombre, tipo, fecha_inicio, fecha_fin, correo, estado FROM authorities ORDER BY fecha_inicio DESC')->fetchAll();
 ?>
 <?php include('partials/html.php'); ?>
 
