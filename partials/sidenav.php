@@ -116,9 +116,6 @@
                                     <a href="usuarios-crear.php" class="side-nav-link">Crear usuario</a>
                                 </li>
                             <?php endif; ?>
-                            <li class="side-nav-item">
-                                <a href="usuarios-asignar-roles.php" class="side-nav-link">Asignar roles</a>
-                            </li>
                         </ul>
                     </div>
                 </li>
