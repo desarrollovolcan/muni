@@ -614,7 +614,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                     <h5 class="card-title mb-0">Autoridades asignadas</h5>
                                     <p class="text-muted mb-0">Define qué autoridades participan en cada evento.</p>
                                 </div>
-                                <button type="submit" form="evento-autoridades-form" class="btn btn-primary">Guardar cambios</button>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <?php if ($selectedEventId > 0) : ?>
+                                        <a class="btn btn-outline-primary" href="eventos-autoridades-pdf.php?event_id=<?php echo (int) $selectedEventId; ?>" target="_blank" rel="noopener">
+                                            Descargar PDF
+                                        </a>
+                                    <?php endif; ?>
+                                    <button type="submit" form="evento-autoridades-form" class="btn btn-primary">Guardar cambios</button>
+                                </div>
                             </div>
                             <div class="card-body">
                                 <?php if (!empty($errors)) : ?>
