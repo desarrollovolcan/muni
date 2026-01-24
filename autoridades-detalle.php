@@ -4,8 +4,27 @@ require __DIR__ . '/app/bootstrap.php';
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $autoridad = null;
 
+try {
+    db()->exec(
+        'CREATE TABLE IF NOT EXISTS authority_groups (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+            nombre VARCHAR(120) NOT NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY authority_groups_nombre_unique (nombre)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+    );
+} catch (Exception $e) {
+} catch (Error $e) {
+}
+
 if ($id > 0) {
-    $stmt = db()->prepare('SELECT * FROM authorities WHERE id = ?');
+    $stmt = db()->prepare(
+        'SELECT a.*, g.nombre AS grupo
+         FROM authorities a
+         LEFT JOIN authority_groups g ON g.id = a.group_id
+         WHERE a.id = ?'
+    );
     $stmt->execute([$id]);
     $autoridad = $stmt->fetch();
 }
@@ -49,6 +68,10 @@ if ($id > 0) {
                                         <div class="col-md-6">
                                             <label class="form-label text-muted">Tipo</label>
                                             <div class="fw-semibold"><?php echo htmlspecialchars($autoridad['tipo'], ENT_QUOTES, 'UTF-8'); ?></div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted">Grupo</label>
+                                            <div class="fw-semibold"><?php echo htmlspecialchars($autoridad['grupo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></div>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label text-muted">Periodo</label>
