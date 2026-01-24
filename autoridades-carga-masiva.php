@@ -113,23 +113,21 @@ if (isset($_GET['action']) && $_GET['action'] === 'download-template') {
   <sheetData>
     <row r="1">
       <c r="A1" t="inlineStr"><is><t>nombre</t></is></c>
-      <c r="B1" t="inlineStr"><is><t>tipo</t></is></c>
-      <c r="C1" t="inlineStr"><is><t>grupo</t></is></c>
-      <c r="D1" t="inlineStr"><is><t>correo</t></is></c>
-      <c r="E1" t="inlineStr"><is><t>telefono</t></is></c>
-      <c r="F1" t="inlineStr"><is><t>fecha_inicio</t></is></c>
-      <c r="G1" t="inlineStr"><is><t>fecha_fin</t></is></c>
-      <c r="H1" t="inlineStr"><is><t>estado</t></is></c>
+      <c r="B1" t="inlineStr"><is><t>grupo</t></is></c>
+      <c r="C1" t="inlineStr"><is><t>correo</t></is></c>
+      <c r="D1" t="inlineStr"><is><t>telefono</t></is></c>
+      <c r="E1" t="inlineStr"><is><t>fecha_inicio</t></is></c>
+      <c r="F1" t="inlineStr"><is><t>fecha_fin</t></is></c>
+      <c r="G1" t="inlineStr"><is><t>estado</t></is></c>
     </row>
     <row r="2">
       <c r="A2" t="inlineStr"><is><t>Juan Perez</t></is></c>
-      <c r="B2" t="inlineStr"><is><t>Concejal</t></is></c>
-      <c r="C2" t="inlineStr"><is><t>Concejo Municipal</t></is></c>
-      <c r="D2" t="inlineStr"><is><t>juan.perez@municipalidad.cl</t></is></c>
-      <c r="E2" t="inlineStr"><is><t>+56 9 1234 5678</t></is></c>
-      <c r="F2" t="inlineStr"><is><t>2024-01-01</t></is></c>
-      <c r="G2" t="inlineStr"><is><t></t></is></c>
-      <c r="H2" t="inlineStr"><is><t>1</t></is></c>
+      <c r="B2" t="inlineStr"><is><t>Concejo Municipal</t></is></c>
+      <c r="C2" t="inlineStr"><is><t>juan.perez@municipalidad.cl</t></is></c>
+      <c r="D2" t="inlineStr"><is><t>+56 9 1234 5678</t></is></c>
+      <c r="E2" t="inlineStr"><is><t>2024-01-01</t></is></c>
+      <c r="F2" t="inlineStr"><is><t></t></is></c>
+      <c r="G2" t="inlineStr"><is><t>1</t></is></c>
     </row>
   </sheetData>
 </worksheet>
@@ -184,7 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             if (empty($rows)) {
                 $bulkErrors[] = 'El archivo está vacío o no tiene una hoja válida.';
             } else {
-                $expected = ['nombre', 'tipo', 'grupo', 'correo', 'telefono', 'fecha_inicio', 'fecha_fin', 'estado'];
+                $expected = ['nombre', 'grupo', 'correo', 'telefono', 'fecha_inicio', 'fecha_fin', 'estado'];
                 $header = array_map('trim', $rows[0]);
                 $normalizedHeader = array_map('strtolower', $header);
                 $columnMap = [];
@@ -208,7 +206,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         $rowNumber = $i + 1;
                         $row = $rows[$i];
                         $nombre = trim((string) ($row[$columnMap['nombre']] ?? ''));
-                        $tipo = trim((string) ($row[$columnMap['tipo']] ?? ''));
                         $grupo = trim((string) ($row[$columnMap['grupo']] ?? ''));
                         $correo = trim((string) ($row[$columnMap['correo']] ?? ''));
                         $telefono = trim((string) ($row[$columnMap['telefono']] ?? ''));
@@ -216,11 +213,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         $fechaFin = trim((string) ($row[$columnMap['fecha_fin']] ?? ''));
                         $estadoRaw = trim((string) ($row[$columnMap['estado']] ?? ''));
 
-                        if ($nombre === '' && $tipo === '' && $fechaInicio === '' && $correo === '' && $telefono === '' && $fechaFin === '' && $estadoRaw === '') {
+                        if ($nombre === '' && $fechaInicio === '' && $correo === '' && $telefono === '' && $fechaFin === '' && $estadoRaw === '') {
                             continue;
                         }
-                        if ($nombre === '' || $tipo === '' || $fechaInicio === '') {
-                            $bulkErrors[] = "Fila {$rowNumber}: faltan campos obligatorios (nombre, tipo o fecha_inicio).";
+                        if ($nombre === '' || $fechaInicio === '') {
+                            $bulkErrors[] = "Fila {$rowNumber}: faltan campos obligatorios (nombre o fecha_inicio).";
                             continue;
                         }
                         $groupId = null;
@@ -232,6 +229,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                                 continue;
                             }
                         }
+                        $tipo = $groupId ? $grupo : 'Sin grupo';
                         if ($fechaInicio !== '' && is_numeric($fechaInicio)) {
                             $fechaInicio = excel_serial_to_date($fechaInicio) ?? $fechaInicio;
                         }
@@ -285,11 +283,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 $autoridades = db()->query(
     'SELECT a.id, a.nombre, a.tipo, a.fecha_inicio, a.fecha_fin, a.correo, a.estado,
-            g.nombre AS grupo
+            g.nombre AS grupo, g.id AS grupo_id
      FROM authorities a
      LEFT JOIN authority_groups g ON g.id = a.group_id
      ORDER BY a.fecha_inicio DESC'
 )->fetchAll();
+
+$groupPalette = [
+    'bg-primary-subtle text-primary',
+    'bg-success-subtle text-success',
+    'bg-warning-subtle text-warning',
+    'bg-info-subtle text-info',
+    'bg-danger-subtle text-danger',
+    'bg-secondary-subtle text-secondary',
+];
+
+function group_badge_class(?int $groupId, array $palette): string
+{
+    if (!$groupId) {
+        return 'bg-light text-muted';
+    }
+    $index = $groupId % count($palette);
+    return $palette[$index];
+}
 ?>
 <?php include('partials/html.php'); ?>
 
@@ -321,7 +337,7 @@ $autoridades = db()->query(
                             <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
                                 <div>
                                     <h5 class="card-title mb-0">Carga masiva de autoridades</h5>
-                                    <p class="text-muted mb-0">Sube un archivo Excel con el formato indicado para crear autoridades en bloque.</p>
+                                    <p class="text-muted mb-0">Importa autoridades asignando el grupo o tipo desde la plantilla.</p>
                                 </div>
                                 <a class="btn btn-sm btn-outline-primary" href="autoridades-carga-masiva.php?action=download-template">Descargar plantilla</a>
                             </div>
@@ -342,7 +358,7 @@ $autoridades = db()->query(
                                     <div class="col-md-8">
                                         <label class="form-label" for="autoridades-excel">Archivo Excel (.xlsx)</label>
                                         <input type="file" id="autoridades-excel" name="autoridades_excel" class="form-control" accept=".xlsx">
-                                        <div class="form-text">Columnas requeridas: nombre, tipo, grupo, correo, telefono, fecha_inicio, fecha_fin, estado.</div>
+                                        <div class="form-text">Columnas requeridas: nombre, grupo, correo, telefono, fecha_inicio, fecha_fin, estado.</div>
                                     </div>
                                     <div class="col-md-4 d-flex gap-2">
                                         <button type="submit" class="btn btn-primary">Subir masivamente</button>
@@ -365,8 +381,7 @@ $autoridades = db()->query(
                                         <thead>
                                             <tr>
                                                 <th>Autoridad</th>
-                                                <th>Tipo</th>
-                                                <th>Grupo</th>
+                                                <th>Grupo / Tipo</th>
                                                 <th>Periodo</th>
                                                 <th>Contacto</th>
                                                 <th>Estado</th>
@@ -375,14 +390,21 @@ $autoridades = db()->query(
                                         <tbody>
                                             <?php if (empty($autoridades)) : ?>
                                                 <tr>
-                                                    <td colspan="6" class="text-center text-muted">No hay autoridades registradas.</td>
+                                                    <td colspan="5" class="text-center text-muted">No hay autoridades registradas.</td>
                                                 </tr>
                                             <?php else : ?>
                                                 <?php foreach ($autoridades as $autoridad) : ?>
+                                                    <?php
+                                                    $badgeClass = group_badge_class(isset($autoridad['grupo_id']) ? (int) $autoridad['grupo_id'] : null, $groupPalette);
+                                                    $grupoLabel = $autoridad['grupo'] ?? 'Sin grupo';
+                                                    ?>
                                                     <tr>
                                                         <td><?php echo htmlspecialchars($autoridad['nombre'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                                        <td><?php echo htmlspecialchars($autoridad['tipo'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                                        <td><?php echo htmlspecialchars($autoridad['grupo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td>
+                                                            <span class="badge <?php echo $badgeClass; ?>">
+                                                                <?php echo htmlspecialchars($grupoLabel, ENT_QUOTES, 'UTF-8'); ?>
+                                                            </span>
+                                                        </td>
                                                         <td><?php echo htmlspecialchars($autoridad['fecha_inicio'], ENT_QUOTES, 'UTF-8'); ?> - <?php echo htmlspecialchars($autoridad['fecha_fin'] ?? 'Vigente', ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td><?php echo htmlspecialchars($autoridad['correo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td>
