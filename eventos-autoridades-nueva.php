@@ -739,13 +739,6 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                         <label class="form-label" for="evento-select">Evento</label>
                                         <?php if ($selectedEventId > 0 && in_array($selectedEventId, $assignedEventIds, true)) : ?>
                                             <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
-                                            <div class="gm-selected-event">
-                                                <div class="fw-semibold text-primary">
-                                                    <?php echo htmlspecialchars($selectedEvent['titulo'] ?? 'Evento seleccionado', ENT_QUOTES, 'UTF-8'); ?>
-                                                </div>
-                                                <span class="badge bg-warning-subtle text-warning">Con autoridades asignadas</span>
-                                                <div class="text-muted small mt-1">Autoridades marcadas: <?php echo $selectedAuthoritiesCount; ?>.</div>
-                                            </div>
                                         <?php else : ?>
                                             <select id="evento-select" name="event_id" class="form-select" aria-describedby="evento-help">
                                                 <option value="">Selecciona un evento</option>
@@ -758,13 +751,33 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                             <div class="form-text" id="evento-help">Solo se muestran eventos sin autoridades asignadas.</div>
                                         <?php endif; ?>
                                         <div class="gm-event-status mt-2">
-                                            <span class="badge bg-secondary-subtle text-secondary" id="event-status-badge">Sin autoridades asignadas</span>
+                                            <?php
+                                            $eventAssigned = $selectedEventId > 0 && in_array($selectedEventId, $assignedEventIds, true);
+                                            $eventBadgeClass = $eventAssigned ? 'bg-warning-subtle text-warning' : 'bg-secondary-subtle text-secondary';
+                                            $eventBadgeText = $eventAssigned ? 'Con autoridades asignadas' : 'Sin autoridades asignadas';
+                                            ?>
+                                            <span class="badge <?php echo $eventBadgeClass; ?>" id="event-status-badge"><?php echo $eventBadgeText; ?></span>
                                             <div class="gm-event-summary mt-2" id="event-summary">
-                                                <div class="gm-event-title">Selecciona un evento para ver el resumen.</div>
-                                                <div class="gm-event-meta text-muted small">Fecha pendiente</div>
+                                                <?php if ($selectedEventId > 0 && $selectedEvent) : ?>
+                                                    <div class="gm-event-title"><?php echo htmlspecialchars($selectedEvent['titulo'] ?? 'Evento seleccionado', ENT_QUOTES, 'UTF-8'); ?></div>
+                                                    <div class="gm-event-meta text-muted small">
+                                                        <?php if (!empty($selectedEvent['fecha_inicio'])) : ?>
+                                                            <?php echo htmlspecialchars($selectedEvent['fecha_inicio'], ENT_QUOTES, 'UTF-8'); ?>
+                                                            <?php if (!empty($selectedEvent['fecha_fin'])) : ?>
+                                                                · <?php echo htmlspecialchars($selectedEvent['fecha_fin'], ENT_QUOTES, 'UTF-8'); ?>
+                                                            <?php endif; ?>
+                                                        <?php else : ?>
+                                                            Fecha pendiente
+                                                        <?php endif; ?>
+                                                        · Autoridades marcadas: <?php echo $selectedAuthoritiesCount; ?>
+                                                    </div>
+                                                <?php else : ?>
+                                                    <div class="gm-event-title">Selecciona un evento para ver el resumen.</div>
+                                                    <div class="gm-event-meta text-muted small">Fecha pendiente</div>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
-                                        <div class="gm-empty-state mt-2" id="event-empty-state">
+                                        <div class="gm-empty-state mt-2 <?php echo $selectedEventId > 0 ? 'd-none' : ''; ?>" id="event-empty-state">
                                             <i class="ti ti-calendar-event"></i>
                                             <div>
                                                 <div class="fw-semibold">Aún no hay evento seleccionado</div>
@@ -1163,7 +1176,6 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
             color: #94a3b8;
         }
 
-        .go-muni-authorities .gm-selected-event,
         .go-muni-authorities .gm-event-summary {
             background: var(--gm-bg);
             border-radius: 12px;
