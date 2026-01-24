@@ -9,10 +9,6 @@ $validationLink = null;
 
 $usuarios = db()->query('SELECT id, nombre, apellido FROM users WHERE estado = 1 ORDER BY nombre')->fetchAll();
 $eventTypes = ensure_event_types();
-$eventTypeMap = [];
-foreach ($eventTypes as $eventType) {
-    $eventTypeMap[$eventType['nombre']] = $eventType['color_class'] ?? 'bg-primary-subtle text-primary';
-}
 $eventosListado = [];
 try {
     $stmtListado = db()->query('SELECT e.id, e.titulo, e.fecha_inicio, e.tipo, e.estado, e.habilitado, u.nombre AS encargado_nombre, u.apellido AS encargado_apellido, COUNT(r.id) AS solicitudes_total, SUM(r.correo_enviado = 1) AS correos_enviados FROM events e LEFT JOIN users u ON u.id = e.encargado_id LEFT JOIN event_authority_requests r ON r.event_id = e.id GROUP BY e.id ORDER BY e.fecha_inicio DESC');
@@ -58,18 +54,6 @@ function format_datetime_local(?string $value): string
         $date = DateTime::createFromFormat('Y-m-d H:i', $value);
     }
     return $date ? $date->format('Y-m-d\\TH:i') : '';
-}
-
-function format_datetime_iso(?string $value): ?string
-{
-    if (!$value) {
-        return null;
-    }
-    $date = DateTime::createFromFormat('Y-m-d H:i:s', $value);
-    if (!$date) {
-        $date = DateTime::createFromFormat('Y-m-d H:i', $value);
-    }
-    return $date ? $date->format('Y-m-d\\TH:i:s') : null;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['list_action']) && $_POST['list_action'] === 'delete' && verify_csrf($_POST['csrf_token'] ?? null)) {
@@ -152,38 +136,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['list_action']) && ve
     }
 }
 
-$calendarEvents = [];
-try {
-    $stmt = db()->query('SELECT id, titulo, descripcion, ubicacion, fecha_inicio, fecha_fin, tipo, cupos, publico_objetivo, estado, creado_por, encargado_id FROM events ORDER BY fecha_inicio');
-    $events = $stmt->fetchAll();
-    foreach ($events as $event) {
-        $tipo = $event['tipo'] ?? '';
-        $calendarEvents[] = [
-            'id' => (string) $event['id'],
-            'title' => $event['titulo'],
-            'start' => format_datetime_iso($event['fecha_inicio'] ?? null),
-            'end' => format_datetime_iso($event['fecha_fin'] ?? null),
-            'className' => $eventTypeMap[$tipo] ?? 'bg-primary-subtle text-primary',
-            'extendedProps' => [
-                'tipo' => $tipo,
-                'descripcion' => $event['descripcion'] ?? '',
-                'ubicacion' => $event['ubicacion'] ?? '',
-                'estado' => $event['estado'] ?? 'borrador',
-                'cupos' => $event['cupos'],
-                'publico_objetivo' => $event['publico_objetivo'] ?? '',
-                'creado_por' => $event['creado_por'] ?? null,
-                'encargado_id' => $event['encargado_id'] ?? null,
-            ],
-        ];
-    }
-} catch (Exception $e) {
-} catch (Error $e) {
-}
 ?>
 <?php include('partials/html.php'); ?>
 
 <head>
-    <?php $title = "Crear/editar evento"; include('partials/title-meta.php'); ?>
+    <?php $title = "Nuevo evento"; include('partials/title-meta.php'); ?>
 
     <?php include('partials/head-css.php'); ?>
 </head>
@@ -202,7 +159,7 @@ try {
 
             <div class="container-fluid">
 
-                <?php $subtitle = "Eventos Municipales"; $title = "Crear/editar evento"; include('partials/page-title.php'); ?>
+                <?php $subtitle = "Eventos Municipales"; $title = "Nuevo evento"; include('partials/page-title.php'); ?>
 
                 <?php if ($success === '1') : ?>
                     <div class="alert alert-success">Evento actualizado correctamente.</div>
@@ -216,55 +173,16 @@ try {
                     </div>
                 <?php endif; ?>
 
-                <div class="d-flex mb-3 gap-1">
-                    <div class="card h-100 mb-0 d-none d-lg-flex rounded-end-0">
-                        <div class="card-body">
-                            <button class="btn btn-primary w-100 btn-new-event">
-                                <i class="ti ti-plus me-2 align-middle"></i>
-                                <?php echo $id > 0 ? 'Editar evento' : 'Crear evento'; ?>
-                            </button>
-
-                            <div id="external-events">
-                                <p class="text-muted mt-2 fst-italic fs-xs mb-3">Arrastra un tipo de evento al calendario o haz clic en la fecha.</p>
-
-                                <?php foreach ($eventTypes as $eventType) : ?>
-                                    <div class="external-event fc-event <?php echo htmlspecialchars($eventType['color_class'], ENT_QUOTES, 'UTF-8'); ?> fw-semibold" data-class="<?php echo htmlspecialchars($eventType['color_class'], ENT_QUOTES, 'UTF-8'); ?>" data-tipo="<?php echo htmlspecialchars($eventType['nombre'], ENT_QUOTES, 'UTF-8'); ?>">
-                                        <i class="ti ti-circle-filled me-2"></i><?php echo htmlspecialchars($eventType['nombre'], ENT_QUOTES, 'UTF-8'); ?>
-                                    </div>
-                                <?php endforeach; ?>
+                <div class="row evento-formal">
+                    <div class="col-12">
+                        <div class="card mb-3">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0"><?php echo $id > 0 ? 'Editar evento' : 'Crear evento'; ?></h5>
                             </div>
-
-                        </div>
-                    </div>
-
-                    <div class="card h-100 mb-0 rounded-start-0 flex-grow-1 border-start-0">
-                        <div class="d-lg-none d-inline-flex card-header">
-                            <button class="btn btn-primary btn-new-event">
-                                <i class="ti ti-plus me-2 align-middle"></i>
-                                <?php echo $id > 0 ? 'Editar evento' : 'Crear evento'; ?>
-                            </button>
-                        </div>
-
-                        <div class="card-body" style="height: calc(100% - 350px);" data-simplebar data-simplebar-md>
-                            <div id="calendar"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal fade" id="event-modal" tabindex="-1">
-                    <div class="modal-dialog modal-dialog-centered modal-lg">
-                        <div class="modal-content">
-                            <form class="needs-validation" name="event-form" id="forms-event" data-submit="server" method="post" novalidate>
-                                <div class="modal-header">
-                                    <h4 class="modal-title" id="modal-title">
-                                        <?php echo $id > 0 ? 'Editar evento' : 'Crear evento'; ?>
-                                    </h4>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
+                            <div class="card-body">
+                                <form class="needs-validation" name="event-form" id="forms-event" data-submit="server" method="post" novalidate>
                                     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
                                     <input type="hidden" name="event_id" id="event-id" value="<?php echo (int) ($evento['id'] ?? 0); ?>">
-                                    <input type="hidden" name="event_action" id="event-action" value="save">
                                     <div class="row">
                                         <div class="col-md-8 mb-3">
                                             <label class="control-label form-label" for="event-title">Título</label>
@@ -353,26 +271,22 @@ try {
                                     </div>
 
                                     <div class="d-flex flex-wrap align-items-center gap-2">
-                                        <button type="button" class="btn btn-outline-danger" id="btn-delete-event">
-                                            Eliminar
-                                        </button>
-
                                         <?php if ($id > 0) : ?>
                                             <a href="eventos-autoridades.php?event_id=<?php echo (int) $id; ?>" class="btn btn-outline-primary">
                                                 Enviar confirmación de invitados
                                             </a>
                                         <?php endif; ?>
 
-                                        <button type="button" class="btn btn-light ms-auto" data-bs-dismiss="modal">
-                                            Cancelar
+                                        <button type="reset" class="btn btn-light ms-auto">
+                                            Limpiar
                                         </button>
 
-                                        <button type="submit" class="btn btn-primary" id="btn-save-event">
+                                        <button type="submit" class="btn btn-primary" id="btn-save-event" name="event_action" value="save">
                                             Guardar evento
                                         </button>
                                     </div>
-                                </div>
-                            </form>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -470,18 +384,56 @@ try {
 
     <?php include('partials/customizer.php'); ?>
 
+    <style>
+        .evento-formal .card-header {
+            background: #f8fafc;
+        }
+
+        .evento-formal .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .evento-formal .form-label {
+            font-size: 0.82rem;
+            color: #475569;
+            margin-bottom: 0.35rem;
+        }
+
+        .evento-formal .form-control,
+        .evento-formal .form-select {
+            min-height: 36px;
+            padding: 0.4rem 0.65rem;
+            font-size: 0.9rem;
+        }
+
+        .evento-formal textarea.form-control {
+            min-height: 92px;
+        }
+
+        .evento-formal .card-body {
+            padding: 1.25rem;
+        }
+
+        .evento-formal .table-responsive {
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+        }
+
+        .evento-formal .table > :not(caption) > * > * {
+            padding: 0.65rem 0.75rem;
+        }
+
+        .evento-formal .badge {
+            font-weight: 600;
+        }
+
+        .evento-formal .form-text {
+            font-size: 0.78rem;
+        }
+    </style>
+
     <?php include('partials/footer-scripts.php'); ?>
-
-    <!-- Fullcalendar js -->
-    <script src="assets/plugins/fullcalendar/index.global.min.js"></script>
-
-    <!-- Calendar App Demo js -->
-    <script src="assets/js/pages/apps-calendar.js"></script>
-
-    <script>
-        window.calendarLocale = 'es';
-        window.calendarEvents = <?php echo json_encode($calendarEvents, JSON_UNESCAPED_UNICODE); ?>;
-    </script>
 
 </body>
 
