@@ -80,9 +80,6 @@
                     </a>
                     <div class="collapse" id="modulo-autoridades">
                         <ul class="side-nav sub-menu">
-                            <li class="side-nav-item">
-                                <a href="autoridades-lista.php" class="side-nav-link">Listado de autoridades</a>
-                            </li>
                             <?php if (has_permission('autoridades', 'create')) : ?>
                                 <li class="side-nav-item">
                                     <a href="autoridades-editar.php" class="side-nav-link">Crear autoridad</a>
