@@ -54,7 +54,7 @@
                         <ul class="side-nav sub-menu">
                             <?php if (has_permission('eventos', 'create')) : ?>
                                 <li class="side-nav-item">
-                                    <a href="eventos-editar.php" class="side-nav-link">Crear evento</a>
+                                    <a href="eventos-editar.php" class="side-nav-link">Nuevo evento</a>
                                 </li>
                             <?php endif; ?>
                             <li class="side-nav-item">
