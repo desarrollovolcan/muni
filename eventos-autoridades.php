@@ -7,19 +7,29 @@ $validationNotice = null;
 $validationLink = null;
 $whatsappLinks = [];
 $emailPreview = null;
-$events = db()->query('SELECT id, titulo FROM events WHERE habilitado = 1 ORDER BY fecha_inicio DESC')->fetchAll();
-$authorities = db()->query(
-    'SELECT a.id,
-            a.nombre,
-            a.tipo,
-            g.id AS grupo_id,
-            g.nombre AS grupo_nombre
-     FROM authorities a
-     LEFT JOIN authority_groups g ON g.id = a.group_id
-     WHERE a.estado = 1
-     ORDER BY COALESCE(g.nombre, ""), a.nombre'
-)->fetchAll();
-$users = db()->query('SELECT id, nombre, apellido, correo, telefono FROM users WHERE estado = 1 ORDER BY nombre, apellido')->fetchAll();
+$events = [];
+$authorities = [];
+$users = [];
+
+try {
+    $events = db()->query('SELECT id, titulo FROM events WHERE habilitado = 1 ORDER BY fecha_inicio DESC')->fetchAll();
+    $authorities = db()->query(
+        'SELECT a.id,
+                a.nombre,
+                a.tipo,
+                g.id AS grupo_id,
+                g.nombre AS grupo_nombre
+         FROM authorities a
+         LEFT JOIN authority_groups g ON g.id = a.group_id
+         WHERE a.estado = 1
+         ORDER BY COALESCE(g.nombre, ""), a.nombre'
+    )->fetchAll();
+    $users = db()->query('SELECT id, nombre, apellido, correo, telefono FROM users WHERE estado = 1 ORDER BY nombre, apellido')->fetchAll();
+} catch (Exception $e) {
+    $errors[] = 'No se pudo cargar la información base. Verifica la conexión y la estructura de la base de datos.';
+} catch (Error $e) {
+    $errors[] = 'No se pudo cargar la información base. Verifica la conexión y la estructura de la base de datos.';
+}
 $selectedEventId = isset($_GET['event_id']) ? (int) $_GET['event_id'] : 0;
 $linkedAuthorities = [];
 $validationRequests = [];
@@ -84,23 +94,82 @@ try {
 } catch (Error $e) {
 }
 
-if ($selectedEventId > 0) {
-    $stmt = db()->prepare('SELECT * FROM events WHERE id = ?');
-    $stmt->execute([$selectedEventId]);
-    $selectedEvent = $stmt->fetch();
-    if ($selectedEvent) {
-        $selectedEvent['validation_token'] = ensure_event_validation_token($selectedEventId, $selectedEvent['validation_token'] ?? null);
-        $eventValidationLink = base_url() . '/eventos-validacion.php?token=' . urlencode($selectedEvent['validation_token']);
+if ($selectedEventId > 0 && empty($errors)) {
+    try {
+        $stmt = db()->prepare('SELECT * FROM events WHERE id = ?');
+        $stmt->execute([$selectedEventId]);
+        $selectedEvent = $stmt->fetch();
+        if ($selectedEvent) {
+            $selectedEvent['validation_token'] = ensure_event_validation_token($selectedEventId, $selectedEvent['validation_token'] ?? null);
+            $eventValidationLink = base_url() . '/eventos-validacion.php?token=' . urlencode($selectedEvent['validation_token']);
+        }
+
+        $stmt = db()->prepare('SELECT authority_id FROM event_authorities WHERE event_id = ?');
+        $stmt->execute([$selectedEventId]);
+        $linkedAuthorities = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+        $selectedAuthoritiesCount = count($linkedAuthorities);
+
+        $stmt = db()->prepare('SELECT id, destinatario_nombre, destinatario_correo, token, correo_enviado, estado, created_at, responded_at FROM event_authority_requests WHERE event_id = ? ORDER BY created_at DESC');
+        $stmt->execute([$selectedEventId]);
+        $validationRequests = $stmt->fetchAll();
+    } catch (Exception $e) {
+        $errors[] = 'No se pudo cargar la información del evento seleccionado.';
+    } catch (Error $e) {
+        $errors[] = 'No se pudo cargar la información del evento seleccionado.';
     }
+}
 
-    $stmt = db()->prepare('SELECT authority_id FROM event_authorities WHERE event_id = ?');
-    $stmt->execute([$selectedEventId]);
-    $linkedAuthorities = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
-    $selectedAuthoritiesCount = count($linkedAuthorities);
+foreach ($authoritiesByGroup as $groupId => $group) {
+    if (!empty($group['items'])) {
+        $displayAuthoritiesByGroup[$groupId] = [
+            'name' => $group['name'],
+            'items' => $group['items'],
+        ];
+    }
+}
 
-    $stmt = db()->prepare('SELECT id, destinatario_nombre, destinatario_correo, token, correo_enviado, estado, created_at, responded_at FROM event_authority_requests WHERE event_id = ? ORDER BY created_at DESC');
-    $stmt->execute([$selectedEventId]);
-    $validationRequests = $stmt->fetchAll();
+if ($selectedEventId > 0 && $editRequestId > 0) {
+    $stmt = db()->prepare('SELECT * FROM event_authority_requests WHERE id = ? AND event_id = ?');
+    $stmt->execute([$editRequestId, $selectedEventId]);
+    $editRequest = $stmt->fetch() ?: null;
+}
+
+if ($selectedEventId > 0 && $editSelectionRequestId > 0) {
+    $stmt = db()->prepare('SELECT * FROM event_authority_requests WHERE id = ? AND event_id = ?');
+    $stmt->execute([$editSelectionRequestId, $selectedEventId]);
+    $editSelectionRequest = $stmt->fetch() ?: null;
+    if ($editSelectionRequest) {
+        $stmt = db()->prepare(
+            'SELECT a.id,
+                    a.nombre,
+                    a.tipo,
+                    g.id AS grupo_id,
+                    g.nombre AS grupo_nombre
+             FROM authorities a
+             INNER JOIN event_authorities ea ON ea.authority_id = a.id
+             LEFT JOIN authority_groups g ON g.id = a.group_id
+             WHERE ea.event_id = ?
+             ORDER BY COALESCE(g.nombre, ""), a.nombre'
+        );
+        $stmt->execute([$selectedEventId]);
+        $authoritiesForSelection = $stmt->fetchAll();
+
+        foreach ($authoritiesForSelection as $authority) {
+            $groupId = $authority['grupo_id'] ? (int) $authority['grupo_id'] : 0;
+            $groupName = $authority['grupo_nombre'] ?: 'Sin grupo';
+            if (!isset($editSelectionAuthoritiesByGroup[$groupId])) {
+                $editSelectionAuthoritiesByGroup[$groupId] = [
+                    'name' => $groupName,
+                    'items' => [],
+                ];
+            }
+            $editSelectionAuthoritiesByGroup[$groupId]['items'][] = $authority;
+        }
+
+        $stmt = db()->prepare('SELECT authority_id FROM event_authority_confirmations WHERE request_id = ?');
+        $stmt->execute([(int) $editSelectionRequest['id']]);
+        $editSelectionConfirmedIds = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+    }
 }
 
 foreach ($authoritiesByGroup as $groupId => $group) {
@@ -407,75 +476,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
             }
 
             $_SESSION['authorities_saved'] = true;
-            redirect('eventos-autoridades.php?event_id=' . $eventId);
-        }
-    }
-
-    if ($action === 'update_request') {
-        $requestId = isset($_POST['request_id']) ? (int) $_POST['request_id'] : 0;
-        $eventId = isset($_POST['event_id']) ? (int) $_POST['event_id'] : 0;
-        $nombre = trim($_POST['destinatario_nombre'] ?? '');
-        $correo = trim($_POST['destinatario_correo'] ?? '');
-        $estado = $_POST['estado'] ?? 'pendiente';
-        $correoEnviado = isset($_POST['correo_enviado']) && (int) $_POST['correo_enviado'] === 1 ? 1 : 0;
-
-        if ($eventId === 0 || $requestId === 0) {
-            $validationErrors[] = 'Selecciona una solicitud válida para editar.';
-        }
-        if ($correo !== '' && !filter_var($correo, FILTER_VALIDATE_EMAIL)) {
-            $validationErrors[] = 'El correo ingresado no es válido.';
-        }
-        if (!in_array($estado, ['pendiente', 'respondido'], true)) {
-            $validationErrors[] = 'El estado seleccionado no es válido.';
-        }
-
-        if (empty($validationErrors)) {
-            $respondedAt = null;
-            if ($estado === 'respondido') {
-                $respondedAt = date('Y-m-d H:i:s');
-            }
-            $stmt = db()->prepare(
-                'UPDATE event_authority_requests
-                 SET destinatario_nombre = ?, destinatario_correo = ?, estado = ?, correo_enviado = ?, responded_at = ?
-                 WHERE id = ? AND event_id = ?'
-            );
-            $stmt->execute([
-                $nombre !== '' ? $nombre : null,
-                $correo !== '' ? $correo : null,
-                $estado,
-                $correoEnviado,
-                $respondedAt,
-                $requestId,
-                $eventId,
-            ]);
-            redirect('eventos-autoridades.php?event_id=' . $eventId . '&updated=1');
-        }
-    }
-
-    if ($action === 'update_request_selection') {
-        $requestId = isset($_POST['request_id']) ? (int) $_POST['request_id'] : 0;
-        $eventId = isset($_POST['event_id']) ? (int) $_POST['event_id'] : 0;
-        $selectedAuthorities = array_map('intval', $_POST['authorities'] ?? []);
-
-        if ($eventId === 0 || $requestId === 0) {
-            $validationErrors[] = 'Selecciona una solicitud válida para editar.';
-        }
-
-        if (empty($validationErrors)) {
-            $stmt = db()->prepare('DELETE FROM event_authority_confirmations WHERE request_id = ?');
-            $stmt->execute([$requestId]);
-
-            if (!empty($selectedAuthorities)) {
-                $stmtInsert = db()->prepare('INSERT INTO event_authority_confirmations (request_id, authority_id) VALUES (?, ?)');
-                foreach ($selectedAuthorities as $authorityId) {
-                    $stmtInsert->execute([$requestId, $authorityId]);
-                }
-            }
-
-            $stmtUpdate = db()->prepare('UPDATE event_authority_requests SET estado = ?, responded_at = NOW() WHERE id = ? AND event_id = ?');
-            $stmtUpdate->execute(['respondido', $requestId, $eventId]);
-
-            $_SESSION['selection_saved'] = true;
             redirect('eventos-autoridades.php?event_id=' . $eventId);
         }
     }
