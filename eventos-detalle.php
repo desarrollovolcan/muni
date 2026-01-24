@@ -81,7 +81,6 @@ if ($id > 0) {
                                         </div>
                                     </div>
                                     <div class="d-flex flex-wrap gap-2 mt-3">
-                                        <a href="eventos-editar.php?id=<?php echo (int) $evento['id']; ?>" class="btn btn-primary">Editar evento</a>
                                         <a href="eventos-lista.php" class="btn btn-link">Volver al listado</a>
                                     </div>
                                 <?php endif; ?>
