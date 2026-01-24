@@ -22,6 +22,9 @@ $secondaryRgb = hex_to_rgb($secondaryColor) ?? [74, 129, 212];
 
 <!-- Favicon -->
 <link rel="icon" href="<?php echo htmlspecialchars($logoPath, ENT_QUOTES, 'UTF-8'); ?>" type="image/png">
+<link rel="apple-touch-icon" href="<?php echo htmlspecialchars($logoPath, ENT_QUOTES, 'UTF-8'); ?>">
+<meta name="theme-color" content="<?php echo htmlspecialchars($primaryColor, ENT_QUOTES, 'UTF-8'); ?>">
+<meta name="apple-mobile-web-app-capable" content="yes">
 
 <style>
     :root {

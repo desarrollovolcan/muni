@@ -22,6 +22,10 @@ try {
 }
 
 $groups = db()->query('SELECT id, nombre FROM authority_groups ORDER BY nombre')->fetchAll();
+$groupOptions = [];
+foreach ($groups as $group) {
+    $groupOptions[(int) $group['id']] = $group['nombre'];
+}
 
 if ($id > 0) {
     $stmt = db()->prepare('SELECT * FROM authorities WHERE id = ?');
@@ -44,15 +48,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_csrf($_POST['csrf_token'] ?? null)) {
     $nombre = trim($_POST['nombre'] ?? '');
-    $tipo = trim($_POST['tipo'] ?? '');
     $correo = trim($_POST['correo'] ?? '');
     $telefono = trim($_POST['telefono'] ?? '');
     $fechaInicio = $_POST['fecha_inicio'] ?? '';
     $fechaFin = $_POST['fecha_fin'] ?? null;
     $estado = isset($_POST['estado']) && $_POST['estado'] === '0' ? 0 : 1;
     $groupId = isset($_POST['group_id']) && $_POST['group_id'] !== '' ? (int) $_POST['group_id'] : null;
+    $tipo = $groupId && isset($groupOptions[$groupId]) ? $groupOptions[$groupId] : 'Sin grupo';
 
-    if ($nombre === '' || $tipo === '' || $fechaInicio === '') {
+    if ($nombre === '' || $fechaInicio === '') {
         $errors[] = 'Completa los campos obligatorios.';
     }
 
@@ -87,6 +91,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_
             redirect('autoridades-editar.php?id=' . $newId . '&success=1');
         }
     }
+}
+
+$autoridades = db()->query(
+    'SELECT a.id, a.nombre, a.fecha_inicio, a.fecha_fin, a.correo, a.estado,
+            g.nombre AS grupo, g.id AS grupo_id
+     FROM authorities a
+     LEFT JOIN authority_groups g ON g.id = a.group_id
+     ORDER BY a.fecha_inicio DESC'
+)->fetchAll();
+
+$groupPalette = [
+    'bg-primary-subtle text-primary',
+    'bg-success-subtle text-success',
+    'bg-warning-subtle text-warning',
+    'bg-info-subtle text-info',
+    'bg-danger-subtle text-danger',
+    'bg-secondary-subtle text-secondary',
+];
+
+function group_badge_class(?int $groupId, array $palette): string
+{
+    if (!$groupId) {
+        return 'bg-light text-muted';
+    }
+    $index = $groupId % count($palette);
+    return $palette[$index];
 }
 ?>
 <?php include('partials/html.php'); ?>
@@ -137,32 +167,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_
                                             <label class="form-label" for="autoridad-nombre">Nombre completo</label>
                                             <input type="text" id="autoridad-nombre" name="nombre" class="form-control" value="<?php echo htmlspecialchars($autoridad['nombre'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                                         </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label" for="autoridad-tipo">Tipo</label>
-                                            <select id="autoridad-tipo" name="tipo" class="form-select">
-                                                <?php $tipoActual = $autoridad['tipo'] ?? ''; ?>
-                                                <option value="Alcalde" <?php echo $tipoActual === 'Alcalde' ? 'selected' : ''; ?>>Alcalde</option>
-                                                <option value="Alcaldesa" <?php echo $tipoActual === 'Alcaldesa' ? 'selected' : ''; ?>>Alcaldesa</option>
-                                                <option value="Concejal" <?php echo $tipoActual === 'Concejal' ? 'selected' : ''; ?>>Concejal</option>
-                                                <option value="Administrador Municipal" <?php echo $tipoActual === 'Administrador Municipal' ? 'selected' : ''; ?>>Administrador Municipal</option>
-                                                <option value="Secplan" <?php echo $tipoActual === 'Secplan' ? 'selected' : ''; ?>>Secplan</option>
-                                                <option value="Dideco" <?php echo $tipoActual === 'Dideco' ? 'selected' : ''; ?>>Dideco</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label" for="autoridad-correo">Correo</label>
-                                            <input type="email" id="autoridad-correo" name="correo" class="form-control" value="<?php echo htmlspecialchars($autoridad['correo'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
-                                        </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label" for="autoridad-correo">Correo</label>
+                                        <input type="email" id="autoridad-correo" name="correo" class="form-control" value="<?php echo htmlspecialchars($autoridad['correo'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                                    </div>
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label" for="autoridad-telefono">Teléfono</label>
                                             <input type="tel" id="autoridad-telefono" name="telefono" class="form-control" value="<?php echo htmlspecialchars($autoridad['telefono'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label class="form-label" for="autoridad-grupo">Grupo</label>
-                                            <select id="autoridad-grupo" name="group_id" class="form-select">
-                                                <option value="">Sin grupo</option>
-                                                <?php $grupoActual = $autoridad['group_id'] ?? null; ?>
-                                                <?php foreach ($groups as $group) : ?>
+                                        <label class="form-label" for="autoridad-grupo">Grupo o tipo de autoridad</label>
+                                        <select id="autoridad-grupo" name="group_id" class="form-select">
+                                            <option value="">Sin grupo</option>
+                                            <?php $grupoActual = $autoridad['group_id'] ?? null; ?>
+                                            <?php foreach ($groups as $group) : ?>
                                                     <option value="<?php echo (int) $group['id']; ?>" <?php echo (int) $grupoActual === (int) $group['id'] ? 'selected' : ''; ?>>
                                                         <?php echo htmlspecialchars($group['nombre'], ENT_QUOTES, 'UTF-8'); ?>
                                                     </option>
@@ -190,6 +208,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_
                                         <a href="autoridades-lista.php" class="btn btn-outline-secondary">Volver</a>
                                     </div>
                                 </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                <div>
+                                    <h5 class="card-title mb-0">Listado de autoridades</h5>
+                                    <p class="text-muted mb-0">Autoridades registradas con su grupo/tipo asociado.</p>
+                                </div>
+                                <a href="autoridades-editar.php" class="btn btn-outline-primary">Nueva autoridad</a>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-centered mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Autoridad</th>
+                                                <th>Grupo / Tipo</th>
+                                                <th>Periodo</th>
+                                                <th>Contacto</th>
+                                                <th class="text-end">Acciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php if (empty($autoridades)) : ?>
+                                                <tr>
+                                                    <td colspan="5" class="text-center text-muted">No hay autoridades registradas.</td>
+                                                </tr>
+                                            <?php else : ?>
+                                                <?php foreach ($autoridades as $autoridadItem) : ?>
+                                                    <?php
+                                                    $badgeClass = group_badge_class(isset($autoridadItem['grupo_id']) ? (int) $autoridadItem['grupo_id'] : null, $groupPalette);
+                                                    $grupoLabel = $autoridadItem['grupo'] ?? 'Sin grupo';
+                                                    ?>
+                                                    <tr>
+                                                        <td><?php echo htmlspecialchars($autoridadItem['nombre'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td>
+                                                            <span class="badge <?php echo $badgeClass; ?>">
+                                                                <?php echo htmlspecialchars($grupoLabel, ENT_QUOTES, 'UTF-8'); ?>
+                                                            </span>
+                                                        </td>
+                                                        <td><?php echo htmlspecialchars($autoridadItem['fecha_inicio'], ENT_QUOTES, 'UTF-8'); ?> - <?php echo htmlspecialchars($autoridadItem['fecha_fin'] ?? 'Vigente', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td><?php echo htmlspecialchars($autoridadItem['correo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td class="text-end">
+                                                            <a class="btn btn-sm btn-outline-primary" href="autoridades-editar.php?id=<?php echo (int) $autoridadItem['id']; ?>">Editar</a>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
