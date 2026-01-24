@@ -27,6 +27,10 @@ $emailTemplate = null;
 $eventValidationLink = null;
 $selectedEvent = null;
 $authoritiesByGroup = [];
+$displayAuthoritiesByGroup = [];
+$saveNotice = null;
+$editRequestId = isset($_GET['edit_request_id']) ? (int) $_GET['edit_request_id'] : 0;
+$editRequest = null;
 
 foreach ($authorities as $authority) {
     $groupId = $authority['grupo_id'] ? (int) $authority['grupo_id'] : 0;
@@ -90,6 +94,28 @@ if ($selectedEventId > 0) {
     $stmt = db()->prepare('SELECT id, destinatario_nombre, destinatario_correo, token, correo_enviado, estado, created_at, responded_at FROM event_authority_requests WHERE event_id = ? ORDER BY created_at DESC');
     $stmt->execute([$selectedEventId]);
     $validationRequests = $stmt->fetchAll();
+}
+
+foreach ($authoritiesByGroup as $groupId => $group) {
+    $items = $group['items'];
+    if ($selectedEventId > 0) {
+        $items = array_values(array_filter(
+            $group['items'],
+            static fn(array $authority): bool => in_array((int) $authority['id'], $linkedAuthorities, true)
+        ));
+    }
+    if (!empty($items)) {
+        $displayAuthoritiesByGroup[$groupId] = [
+            'name' => $group['name'],
+            'items' => $items,
+        ];
+    }
+}
+
+if ($selectedEventId > 0 && $editRequestId > 0) {
+    $stmt = db()->prepare('SELECT * FROM event_authority_requests WHERE id = ? AND event_id = ?');
+    $stmt->execute([$editRequestId, $selectedEventId]);
+    $editRequest = $stmt->fetch() ?: null;
 }
 
 try {
@@ -342,7 +368,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                 }
             }
 
-            redirect('eventos-autoridades.php?event_id=' . $eventId);
+            redirect('eventos-autoridades.php?event_id=' . $eventId . '&saved=1');
+        }
+    }
+
+    if ($action === 'update_request') {
+        $requestId = isset($_POST['request_id']) ? (int) $_POST['request_id'] : 0;
+        $eventId = isset($_POST['event_id']) ? (int) $_POST['event_id'] : 0;
+        $nombre = trim($_POST['destinatario_nombre'] ?? '');
+        $correo = trim($_POST['destinatario_correo'] ?? '');
+        $estado = $_POST['estado'] ?? 'pendiente';
+        $correoEnviado = isset($_POST['correo_enviado']) && (int) $_POST['correo_enviado'] === 1 ? 1 : 0;
+
+        if ($eventId === 0 || $requestId === 0) {
+            $validationErrors[] = 'Selecciona una solicitud válida para editar.';
+        }
+        if ($correo !== '' && !filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+            $validationErrors[] = 'El correo ingresado no es válido.';
+        }
+        if (!in_array($estado, ['pendiente', 'respondido'], true)) {
+            $validationErrors[] = 'El estado seleccionado no es válido.';
+        }
+
+        if (empty($validationErrors)) {
+            $respondedAt = null;
+            if ($estado === 'respondido') {
+                $respondedAt = date('Y-m-d H:i:s');
+            }
+            $stmt = db()->prepare(
+                'UPDATE event_authority_requests
+                 SET destinatario_nombre = ?, destinatario_correo = ?, estado = ?, correo_enviado = ?, responded_at = ?
+                 WHERE id = ? AND event_id = ?'
+            );
+            $stmt->execute([
+                $nombre !== '' ? $nombre : null,
+                $correo !== '' ? $correo : null,
+                $estado,
+                $correoEnviado,
+                $respondedAt,
+                $requestId,
+                $eventId,
+            ]);
+            redirect('eventos-autoridades.php?event_id=' . $eventId . '&updated=1');
         }
     }
 
@@ -581,6 +648,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
         }
     }
 }
+
+if (isset($_GET['saved']) && $_GET['saved'] === '1') {
+    $saveNotice = 'Autoridades actualizadas correctamente.';
+}
+if (isset($_GET['updated']) && $_GET['updated'] === '1') {
+    $validationNotice = 'La solicitud fue actualizada correctamente.';
+}
 ?>
 <?php include('partials/html.php'); ?>
 
@@ -624,6 +698,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                 </div>
                             </div>
                             <div class="card-body">
+                                <?php if ($saveNotice) : ?>
+                                    <div class="alert alert-success">
+                                        <?php echo htmlspecialchars($saveNotice, ENT_QUOTES, 'UTF-8'); ?>
+                                    </div>
+                                <?php endif; ?>
                                 <?php if (!empty($errors)) : ?>
                                     <div class="alert alert-danger">
                                         <?php foreach ($errors as $error) : ?>
@@ -651,17 +730,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
 
                                     <div class="mt-4">
                                         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
-                                            <label class="form-label mb-0">Autoridades disponibles</label>
+                                            <label class="form-label mb-0">Autoridades asociadas</label>
                                             <div class="d-flex gap-2">
                                                 <button type="button" class="btn btn-sm btn-outline-secondary" id="select-all-authorities">Seleccionar todas</button>
                                                 <button type="button" class="btn btn-sm btn-outline-secondary" id="clear-all-authorities">Limpiar selección</button>
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <?php if (empty($authoritiesByGroup)) : ?>
-                                                <div class="col-12 text-muted">No hay autoridades registradas.</div>
+                                            <?php if (empty($displayAuthoritiesByGroup)) : ?>
+                                                <div class="col-12 text-muted">
+                                                    <?php echo $selectedEventId > 0 ? 'No hay autoridades asociadas a este evento.' : 'No hay autoridades registradas.'; ?>
+                                                </div>
                                             <?php else : ?>
-                                                <?php foreach ($authoritiesByGroup as $group) : ?>
+                                                <?php foreach ($displayAuthoritiesByGroup as $group) : ?>
                                                     <?php if (empty($group['items'])) : ?>
                                                         <?php continue; ?>
                                                     <?php endif; ?>
@@ -712,6 +793,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                 <?php if ($validationNotice) : ?>
                                     <div class="alert alert-success">
                                         <?php echo htmlspecialchars($validationNotice, ENT_QUOTES, 'UTF-8'); ?>
+                                    </div>
+                                <?php endif; ?>
+
+                                <?php if ($editRequest) : ?>
+                                    <div class="card border mb-4">
+                                        <div class="card-body">
+                                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                                                <h6 class="mb-0">Editar solicitud reciente</h6>
+                                                <a class="btn btn-sm btn-outline-secondary" href="eventos-autoridades.php?event_id=<?php echo (int) $selectedEventId; ?>">Cancelar</a>
+                                            </div>
+                                            <form method="post" class="row g-3">
+                                                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                <input type="hidden" name="action" value="update_request">
+                                                <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
+                                                <input type="hidden" name="request_id" value="<?php echo (int) $editRequest['id']; ?>">
+                                                <div class="col-md-4">
+                                                    <label class="form-label" for="edit-destinatario">Destinatario</label>
+                                                    <input id="edit-destinatario" type="text" name="destinatario_nombre" class="form-control" value="<?php echo htmlspecialchars($editRequest['destinatario_nombre'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label" for="edit-correo">Correo</label>
+                                                    <input id="edit-correo" type="email" name="destinatario_correo" class="form-control" value="<?php echo htmlspecialchars($editRequest['destinatario_correo'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="form-label" for="edit-estado">Estado</label>
+                                                    <select id="edit-estado" name="estado" class="form-select">
+                                                        <option value="pendiente" <?php echo ($editRequest['estado'] ?? '') === 'pendiente' ? 'selected' : ''; ?>>Pendiente</option>
+                                                        <option value="respondido" <?php echo ($editRequest['estado'] ?? '') === 'respondido' ? 'selected' : ''; ?>>Respondido</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <label class="form-label" for="edit-correo-enviado">Correo enviado</label>
+                                                    <select id="edit-correo-enviado" name="correo_enviado" class="form-select">
+                                                        <option value="0" <?php echo (int) ($editRequest['correo_enviado'] ?? 0) === 0 ? 'selected' : ''; ?>>Pendiente</option>
+                                                        <option value="1" <?php echo (int) ($editRequest['correo_enviado'] ?? 0) === 1 ? 'selected' : ''; ?>>Enviado</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-12">
+                                                    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                                                </div>
+                                            </form>
+                                        </div>
                                     </div>
                                 <?php endif; ?>
 
@@ -806,6 +929,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                                         <th>Estado correo</th>
                                                         <th>Enviado</th>
                                                         <th>Respondido</th>
+                                                        <th class="text-end">Acciones</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -825,6 +949,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                                             </td>
                                                             <td><?php echo htmlspecialchars($request['created_at'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                             <td><?php echo htmlspecialchars($request['responded_at'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                            <td class="text-end">
+                                                                <a class="btn btn-sm btn-outline-primary" href="eventos-autoridades.php?event_id=<?php echo (int) $selectedEventId; ?>&edit_request_id=<?php echo (int) $request['id']; ?>">Editar</a>
+                                                            </td>
                                                         </tr>
                                                     <?php endforeach; ?>
                                                 </tbody>
