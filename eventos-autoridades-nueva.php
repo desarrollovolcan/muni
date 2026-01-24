@@ -1239,15 +1239,15 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
 
         .go-muni-authorities .gm-authority-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 8px;
         }
 
         .go-muni-authorities .gm-authority-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
+            gap: 8px;
+            padding: 6px 10px;
             border: 1px solid var(--gm-border);
             border-radius: 12px;
             background: #fff;
@@ -1267,10 +1267,11 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
 
         .go-muni-authorities .gm-authority-name {
             font-weight: 600;
+            font-size: 13px;
         }
 
         .go-muni-authorities .gm-authority-role {
-            font-size: 12px;
+            font-size: 11px;
             color: var(--gm-muted);
         }
 
