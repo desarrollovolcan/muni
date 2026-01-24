@@ -3,6 +3,20 @@ require __DIR__ . '/app/bootstrap.php';
 
 $errorMessage = '';
 
+try {
+    db()->exec(
+        'CREATE TABLE IF NOT EXISTS authority_groups (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+            nombre VARCHAR(120) NOT NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY authority_groups_nombre_unique (nombre)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+    );
+} catch (Exception $e) {
+} catch (Error $e) {
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && verify_csrf($_POST['csrf_token'] ?? null)) {
     $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
 
@@ -17,7 +31,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && verify_c
     }
 }
 
-$autoridades = db()->query('SELECT id, nombre, tipo, fecha_inicio, fecha_fin, correo, estado FROM authorities ORDER BY fecha_inicio DESC')->fetchAll();
+$autoridades = db()->query(
+    'SELECT a.id, a.nombre, a.tipo, a.fecha_inicio, a.fecha_fin, a.correo, a.estado,
+            g.nombre AS grupo
+     FROM authorities a
+     LEFT JOIN authority_groups g ON g.id = a.group_id
+     ORDER BY a.fecha_inicio DESC'
+)->fetchAll();
 ?>
 <?php include('partials/html.php'); ?>
 
@@ -76,6 +96,7 @@ $autoridades = db()->query('SELECT id, nombre, tipo, fecha_inicio, fecha_fin, co
                                             <tr>
                                                 <th>Autoridad</th>
                                                 <th>Tipo</th>
+                                                <th>Grupo</th>
                                                 <th>Periodo</th>
                                                 <th>Contacto</th>
                                                 <th class="text-end">Acciones</th>
@@ -84,13 +105,14 @@ $autoridades = db()->query('SELECT id, nombre, tipo, fecha_inicio, fecha_fin, co
                                         <tbody>
                                             <?php if (empty($autoridades)) : ?>
                                                 <tr>
-                                                    <td colspan="5" class="text-center text-muted">No hay autoridades registradas.</td>
+                                                    <td colspan="6" class="text-center text-muted">No hay autoridades registradas.</td>
                                                 </tr>
                                             <?php else : ?>
                                                 <?php foreach ($autoridades as $autoridad) : ?>
                                                     <tr>
                                                         <td><?php echo htmlspecialchars($autoridad['nombre'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td><?php echo htmlspecialchars($autoridad['tipo'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td><?php echo htmlspecialchars($autoridad['grupo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td><?php echo htmlspecialchars($autoridad['fecha_inicio'], ENT_QUOTES, 'UTF-8'); ?> - <?php echo htmlspecialchars($autoridad['fecha_fin'] ?? 'Vigente', ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td><?php echo htmlspecialchars($autoridad['correo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td class="text-end">
