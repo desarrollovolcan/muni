@@ -1268,12 +1268,15 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
             const clearAllBtn = document.getElementById('clear-all-authorities');
             const toggleSelected = document.getElementById('toggle-selected-authorities');
             const checkboxes = () => Array.from(document.querySelectorAll('input[name="authorities[]"]'));
+<<<<<<< HEAD
             const pdfDownload = document.querySelector('a[href*="eventos-autoridades-pdf.php"], button[data-download="autoridades-pdf"]');
             const authorityItems = () => Array.from(document.querySelectorAll('.authority-item'));
 
             if (pdfDownload) {
                 pdfDownload.remove();
             }
+=======
+>>>>>>> parent of 2745611 (Merge pull request #73 from desarrollovolcan/codex/corrige-error-404-en-eventos-procesados.php-08txdd)
 
             if (selectAllBtn) {
                 selectAllBtn.addEventListener('click', () => {
