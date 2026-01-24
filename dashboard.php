@@ -137,7 +137,7 @@ include('partials/html.php');
                 </div>
 
                 <div class="row g-3">
-                    <div class="col-md-6 col-xl-3">
+                    <div class="col-md-6 col-xl-3 dashboard-stat-col">
                         <div class="card border-0 shadow-sm dashboard-stat">
                             <div class="card-body">
                                 <div class="d-flex align-items-center justify-content-between">
@@ -153,7 +153,7 @@ include('partials/html.php');
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6 col-xl-3">
+                    <div class="col-md-6 col-xl-3 dashboard-stat-col">
                         <div class="card border-0 shadow-sm dashboard-stat">
                             <div class="card-body">
                                 <div class="d-flex align-items-center justify-content-between">
@@ -169,7 +169,7 @@ include('partials/html.php');
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6 col-xl-3">
+                    <div class="col-md-6 col-xl-3 dashboard-stat-col">
                         <div class="card border-0 shadow-sm dashboard-stat">
                             <div class="card-body">
                                 <div class="d-flex align-items-center justify-content-between">
@@ -185,7 +185,7 @@ include('partials/html.php');
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6 col-xl-3">
+                    <div class="col-md-6 col-xl-3 dashboard-stat-col">
                         <div class="card border-0 shadow-sm dashboard-stat">
                             <div class="card-body">
                                 <div class="d-flex align-items-center justify-content-between">
@@ -211,7 +211,9 @@ include('partials/html.php');
                                 <span class="text-muted small">Últimos 6 meses</span>
                             </div>
                             <div class="card-body">
-                                <canvas id="eventsMonthlyChart" height="120" aria-label="Eventos por mes" role="img"></canvas>
+                                <div class="chart-fixed chart-sm">
+                                    <canvas id="eventsMonthlyChart" aria-label="Eventos por mes" role="img"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -222,7 +224,9 @@ include('partials/html.php');
                                 <span class="text-muted small">Solicitudes</span>
                             </div>
                             <div class="card-body">
-                                <canvas id="validationStatusChart" height="180" aria-label="Estado de validaciones" role="img"></canvas>
+                                <div class="chart-fixed chart-md">
+                                    <canvas id="validationStatusChart" aria-label="Estado de validaciones" role="img"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -236,7 +240,9 @@ include('partials/html.php');
                                 <span class="text-muted small">Distribución</span>
                             </div>
                             <div class="card-body">
-                                <canvas id="authoritiesGroupChart" height="220" aria-label="Autoridades por grupo" role="img"></canvas>
+                                <div class="chart-fixed chart-lg">
+                                    <canvas id="authoritiesGroupChart" aria-label="Autoridades por grupo" role="img"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -344,6 +350,40 @@ include('partials/html.php');
 
         .dashboard-stat .avatar-sm i {
             font-size: 20px;
+        }
+
+        .chart-fixed {
+            position: relative;
+            width: 100%;
+        }
+
+        .chart-sm {
+            height: 220px;
+        }
+
+        .chart-md {
+            height: 260px;
+        }
+
+        .chart-lg {
+            height: 280px;
+        }
+
+        @media (max-width: 767.98px) {
+            .dashboard-stat {
+                margin-bottom: 0;
+            }
+
+            .dashboard-stat-col {
+                flex: 0 0 auto;
+                width: 50%;
+            }
+
+            .chart-sm,
+            .chart-md,
+            .chart-lg {
+                height: 220px;
+            }
         }
     </style>
 
