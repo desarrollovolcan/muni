@@ -6,6 +6,34 @@ session_start();
 
 $config = require __DIR__ . '/../config/database.php';
 
+if (!isset($_SESSION['user'])) {
+    $currentScript = basename($_SERVER['SCRIPT_NAME'] ?? '');
+    $publicScripts = [
+        'auth-2-sign-in.php',
+        'auth-2-login-pin.php',
+        'auth-2-new-pass.php',
+        'auth-2-reset-pass.php',
+        'auth-2-sign-up.php',
+        'auth-2-success-mail.php',
+        'auth-2-two-factor.php',
+        'auth-login-pin.php',
+        'auth-sign-in.php',
+        'auth-sign-up.php',
+        'auth-new-pass.php',
+        'auth-reset-pass.php',
+        'auth-success-mail.php',
+        'auth-two-factor.php',
+        'login.php',
+        'logout.php',
+        'eventos-validacion.php',
+    ];
+
+    if (!in_array($currentScript, $publicScripts, true) && strncmp($currentScript, 'auth-', 5) !== 0) {
+        header('Location: auth-2-sign-in.php');
+        exit;
+    }
+}
+
 function db(): PDO
 {
     static $pdo = null;
