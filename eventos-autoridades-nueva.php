@@ -711,7 +711,7 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                     <?php endif; ?>
 
                     <div class="row g-4">
-                        <div class="col-lg-8 order-2 order-lg-1">
+                        <div class="col-12">
                             <form id="evento-autoridades-form" method="post">
                                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
                                 <input type="hidden" name="action" value="save_authorities">
@@ -807,7 +807,7 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                             </form>
                         </div>
 
-                        <div class="col-lg-4 order-3 order-lg-2">
+                        <div class="col-12">
                             <div class="card border shadow-none mb-4">
                                 <div class="card-body">
                                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
