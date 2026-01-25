@@ -25,6 +25,7 @@ if (!isset($_SESSION['user'])) {
         'auth-two-factor.php',
         'login.php',
         'logout.php',
+        'confirmar-asistencia.php',
         'eventos-validacion.php',
     ];
 
