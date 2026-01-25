@@ -54,14 +54,14 @@
                         <ul class="side-nav sub-menu">
                             <?php if (has_permission('eventos', 'create')) : ?>
                                 <li class="side-nav-item">
-                                    <a href="eventos-editar.php" class="side-nav-link">Crear evento</a>
+                                    <a href="eventos-editar.php" class="side-nav-link">Nuevo evento</a>
                                 </li>
                             <?php endif; ?>
                             <li class="side-nav-item">
-                                <a href="eventos-autoridades.php" class="side-nav-link">Autoridades por evento</a>
+                                <a href="eventos-invitacion-autoridades.php" class="side-nav-link">Invitación autoridades</a>
                             </li>
                             <li class="side-nav-item">
-                                <a href="eventos-autoridades-nueva.php" class="side-nav-link">Autoridades por evento (nuevo)</a>
+                                <a href="eventos-autoridades-nueva.php" class="side-nav-link">Autoridades por evento</a>
                             </li>
                             <li class="side-nav-item">
                                 <a href="eventos-autoridades-resumen.php" class="side-nav-link">Eventos / Autoridades</a>
@@ -83,9 +83,6 @@
                     </a>
                     <div class="collapse" id="modulo-autoridades">
                         <ul class="side-nav sub-menu">
-                            <li class="side-nav-item">
-                                <a href="autoridades-lista.php" class="side-nav-link">Listado de autoridades</a>
-                            </li>
                             <?php if (has_permission('autoridades', 'create')) : ?>
                                 <li class="side-nav-item">
                                     <a href="autoridades-editar.php" class="side-nav-link">Crear autoridad</a>
@@ -122,9 +119,6 @@
                                     <a href="usuarios-crear.php" class="side-nav-link">Crear usuario</a>
                                 </li>
                             <?php endif; ?>
-                            <li class="side-nav-item">
-                                <a href="usuarios-asignar-roles.php" class="side-nav-link">Asignar roles</a>
-                            </li>
                         </ul>
                     </div>
                 </li>
@@ -172,6 +166,9 @@
                             </li>
                             <li class="side-nav-item">
                                 <a href="notificaciones-correo.php" class="side-nav-link">Correo de notificaciones</a>
+                            </li>
+                            <li class="side-nav-item">
+                                <a href="invitacion-correo.php" class="side-nav-link">Invitación correo</a>
                             </li>
                             <li class="side-nav-item">
                                 <a href="notificaciones-whatsapp.php" class="side-nav-link">WhatsApp de notificaciones</a>
