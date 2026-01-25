@@ -36,8 +36,13 @@ $defaultBody = <<<HTML
                   <p style="margin:0;font-size:15px;font-weight:bold;color:#0f172a;">{{evento_titulo}}</p>
                   <p style="margin:6px 0 0;font-size:13px;color:#475569;">{{evento_ubicacion}} · {{evento_tipo}}</p>
                   <p style="margin:6px 0 0;font-size:13px;color:#475569;">{{evento_fecha_inicio}} - {{evento_fecha_fin}}</p>
+                  <p style="margin:6px 0 0;font-size:13px;color:#475569;">Público objetivo: {{evento_publico_objetivo}}</p>
+                  <p style="margin:6px 0 0;font-size:13px;color:#475569;">Cupos disponibles: {{evento_cupos}}</p>
                   <p style="margin:10px 0 0;font-size:13px;color:#475569;">{{evento_descripcion}}</p>
                 </div>
+                <p style="margin:0 0 12px;font-size:13px;color:#475569;">
+                  Contacto del evento: {{evento_encargado_nombre}} · {{evento_encargado_correo}} · {{evento_encargado_telefono}}
+                </p>
                 <p style="margin:0 0 12px;font-size:13px;color:#475569;">
                   Agradecemos confirmar su disponibilidad con su equipo de coordinación. Si tiene observaciones o requiere apoyo logístico,
                   puede responder directamente a este correo.
@@ -98,6 +103,11 @@ function render_invitation_template(string $template, array $data): string
         '{{evento_fecha_fin}}' => $data['evento_fecha_fin'] ?? '',
         '{{evento_ubicacion}}' => $data['evento_ubicacion'] ?? '',
         '{{evento_tipo}}' => $data['evento_tipo'] ?? '',
+        '{{evento_publico_objetivo}}' => $data['evento_publico_objetivo'] ?? '',
+        '{{evento_cupos}}' => $data['evento_cupos'] ?? '',
+        '{{evento_encargado_nombre}}' => $data['evento_encargado_nombre'] ?? '',
+        '{{evento_encargado_correo}}' => $data['evento_encargado_correo'] ?? '',
+        '{{evento_encargado_telefono}}' => $data['evento_encargado_telefono'] ?? '',
         '{{confirmacion_link}}' => $data['confirmacion_link'] ?? '',
     ];
 
@@ -167,6 +177,11 @@ $previewData = [
     'evento_fecha_fin' => '2024-04-10 12:00',
     'evento_ubicacion' => 'Teatro Municipal',
     'evento_tipo' => 'Ceremonia institucional',
+    'evento_publico_objetivo' => 'Equipo directivo y ciudadanía invitada',
+    'evento_cupos' => '150',
+    'evento_encargado_nombre' => 'María López',
+    'evento_encargado_correo' => 'maria.lopez@municipalidad.cl',
+    'evento_encargado_telefono' => '+56 9 1234 5678',
     'confirmacion_link' => base_url() . '/confirmar-asistencia.php?token=ABC123',
 ];
 $subjectPreview = render_invitation_template($correoTemplate['subject'] ?? $defaultSubject, $previewData);
@@ -252,7 +267,7 @@ $bodyPreview = render_invitation_template($correoTemplate['body_html'] ?? $defau
                                             <div class="mb-3">
                                                 <label class="form-label" for="body-html">HTML del correo</label>
                                                 <textarea id="body-html" name="body_html" class="form-control code-editor" rows="18"><?php echo htmlspecialchars($correoTemplate['body_html'] ?? $defaultBody, ENT_QUOTES, 'UTF-8'); ?></textarea>
-                                                <div class="form-text">Variables disponibles: {{municipalidad_nombre}}, {{municipalidad_logo}}, {{destinatario_nombre}}, {{destinatario_cargo}}, {{evento_titulo}}, {{evento_descripcion}}, {{evento_fecha_inicio}}, {{evento_fecha_fin}}, {{evento_ubicacion}}, {{evento_tipo}}, {{confirmacion_link}}</div>
+                                                <div class="form-text">Variables disponibles: {{municipalidad_nombre}}, {{municipalidad_logo}}, {{destinatario_nombre}}, {{destinatario_cargo}}, {{evento_titulo}}, {{evento_descripcion}}, {{evento_fecha_inicio}}, {{evento_fecha_fin}}, {{evento_ubicacion}}, {{evento_tipo}}, {{evento_publico_objetivo}}, {{evento_cupos}}, {{evento_encargado_nombre}}, {{evento_encargado_correo}}, {{evento_encargado_telefono}}, {{confirmacion_link}}</div>
                                             </div>
                                         </form>
                                         <form id="correo-invitacion-restore-form" method="post">
