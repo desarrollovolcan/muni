@@ -122,14 +122,14 @@ if ($hasQuery) {
                                     <?php if (empty($results['vistas'])) : ?>
                                         <div class="text-muted">Sin coincidencias en vistas.</div>
                                     <?php else : ?>
-                                        <ul class="list-group list-group-flush">
+                                        <div class="list-group list-group-flush">
                                             <?php foreach ($results['vistas'] as $view) : ?>
-                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <a class="list-group-item list-group-item-action d-flex align-items-center justify-content-between" href="<?php echo htmlspecialchars($view['url'], ENT_QUOTES, 'UTF-8'); ?>">
                                                     <span><?php echo htmlspecialchars($view['label'], ENT_QUOTES, 'UTF-8'); ?></span>
-                                                    <a class="btn btn-sm btn-outline-primary" href="<?php echo htmlspecialchars($view['url'], ENT_QUOTES, 'UTF-8'); ?>">Abrir</a>
-                                                </li>
+                                                    <i class="ti ti-chevron-right text-muted"></i>
+                                                </a>
                                             <?php endforeach; ?>
-                                        </ul>
+                                        </div>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -144,14 +144,14 @@ if ($hasQuery) {
                                     <?php if (empty($results['eventos'])) : ?>
                                         <div class="text-muted">Sin coincidencias en eventos.</div>
                                     <?php else : ?>
-                                        <ul class="list-group list-group-flush">
+                                        <div class="list-group list-group-flush">
                                             <?php foreach ($results['eventos'] as $event) : ?>
-                                                <li class="list-group-item">
+                                                <a class="list-group-item list-group-item-action" href="eventos-editar.php?id=<?php echo (int) $event['id']; ?>">
                                                     <div class="fw-semibold"><?php echo htmlspecialchars($event['titulo'], ENT_QUOTES, 'UTF-8'); ?></div>
                                                     <div class="text-muted small"><?php echo htmlspecialchars($event['fecha_inicio'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></div>
-                                                </li>
+                                                </a>
                                             <?php endforeach; ?>
-                                        </ul>
+                                        </div>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -166,14 +166,14 @@ if ($hasQuery) {
                                     <?php if (empty($results['autoridades'])) : ?>
                                         <div class="text-muted">Sin coincidencias en autoridades.</div>
                                     <?php else : ?>
-                                        <ul class="list-group list-group-flush">
+                                        <div class="list-group list-group-flush">
                                             <?php foreach ($results['autoridades'] as $authority) : ?>
-                                                <li class="list-group-item">
+                                                <a class="list-group-item list-group-item-action" href="autoridades-editar.php?id=<?php echo (int) $authority['id']; ?>">
                                                     <div class="fw-semibold"><?php echo htmlspecialchars($authority['nombre'], ENT_QUOTES, 'UTF-8'); ?></div>
                                                     <div class="text-muted small"><?php echo htmlspecialchars($authority['tipo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?> · <?php echo htmlspecialchars($authority['correo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></div>
-                                                </li>
+                                                </a>
                                             <?php endforeach; ?>
-                                        </ul>
+                                        </div>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -188,14 +188,14 @@ if ($hasQuery) {
                                     <?php if (empty($results['usuarios'])) : ?>
                                         <div class="text-muted">Sin coincidencias en usuarios.</div>
                                     <?php else : ?>
-                                        <ul class="list-group list-group-flush">
+                                        <div class="list-group list-group-flush">
                                             <?php foreach ($results['usuarios'] as $user) : ?>
-                                                <li class="list-group-item">
+                                                <a class="list-group-item list-group-item-action" href="usuarios-editar.php?id=<?php echo (int) $user['id']; ?>">
                                                     <div class="fw-semibold"><?php echo htmlspecialchars(trim(($user['nombre'] ?? '') . ' ' . ($user['apellido'] ?? '')), ENT_QUOTES, 'UTF-8'); ?></div>
                                                     <div class="text-muted small"><?php echo htmlspecialchars($user['correo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></div>
-                                                </li>
+                                                </a>
                                             <?php endforeach; ?>
-                                        </ul>
+                                        </div>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -210,11 +210,11 @@ if ($hasQuery) {
                                     <?php if (empty($results['tipos_evento'])) : ?>
                                         <div class="text-muted">Sin coincidencias en tipos de evento.</div>
                                     <?php else : ?>
-                                        <ul class="list-group list-group-flush">
+                                        <div class="list-group list-group-flush">
                                             <?php foreach ($results['tipos_evento'] as $tipo) : ?>
-                                                <li class="list-group-item"><?php echo htmlspecialchars($tipo['nombre'], ENT_QUOTES, 'UTF-8'); ?></li>
+                                                <a class="list-group-item list-group-item-action" href="eventos-tipos.php"><?php echo htmlspecialchars($tipo['nombre'], ENT_QUOTES, 'UTF-8'); ?></a>
                                             <?php endforeach; ?>
-                                        </ul>
+                                        </div>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -229,11 +229,11 @@ if ($hasQuery) {
                                     <?php if (empty($results['grupos_autoridades'])) : ?>
                                         <div class="text-muted">Sin coincidencias en grupos.</div>
                                     <?php else : ?>
-                                        <ul class="list-group list-group-flush">
+                                        <div class="list-group list-group-flush">
                                             <?php foreach ($results['grupos_autoridades'] as $group) : ?>
-                                                <li class="list-group-item"><?php echo htmlspecialchars($group['nombre'], ENT_QUOTES, 'UTF-8'); ?></li>
+                                                <a class="list-group-item list-group-item-action" href="grupos-autoridades.php"><?php echo htmlspecialchars($group['nombre'], ENT_QUOTES, 'UTF-8'); ?></a>
                                             <?php endforeach; ?>
-                                        </ul>
+                                        </div>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -248,11 +248,11 @@ if ($hasQuery) {
                                     <?php if (empty($results['roles'])) : ?>
                                         <div class="text-muted">Sin coincidencias en roles.</div>
                                     <?php else : ?>
-                                        <ul class="list-group list-group-flush">
+                                        <div class="list-group list-group-flush">
                                             <?php foreach ($results['roles'] as $role) : ?>
-                                                <li class="list-group-item"><?php echo htmlspecialchars($role['nombre'], ENT_QUOTES, 'UTF-8'); ?></li>
+                                                <a class="list-group-item list-group-item-action" href="roles-editar.php?id=<?php echo (int) $role['id']; ?>"><?php echo htmlspecialchars($role['nombre'], ENT_QUOTES, 'UTF-8'); ?></a>
                                             <?php endforeach; ?>
-                                        </ul>
+                                        </div>
                                     <?php endif; ?>
                                 </div>
                             </div>
