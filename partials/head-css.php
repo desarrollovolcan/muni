@@ -251,4 +251,20 @@ $secondaryRgb = hex_to_rgb($secondaryColor) ?? [74, 129, 212];
     .wrapper .badge {
         border-radius: 999px;
     }
+
+    .app-topbar .app-search {
+        position: relative;
+    }
+
+    .app-topbar .topbar-search {
+        padding-left: 2.2rem;
+    }
+
+    .app-topbar .app-search-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
 </style>
