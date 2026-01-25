@@ -114,7 +114,7 @@ function get_municipalidad(): array
     }
 
     return [
-        'nombre' => 'Municipalidad',
+        'nombre' => 'Go Muni',
         'logo_path' => 'assets/images/logo.png',
         'logo_topbar_height' => 56,
         'logo_sidenav_height' => 48,

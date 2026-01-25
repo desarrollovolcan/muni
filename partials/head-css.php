@@ -19,6 +19,7 @@ $secondaryRgb = hex_to_rgb($secondaryColor) ?? [74, 129, 212];
 
 <!-- App css -->
 <link href="assets/css/app.min.css" rel="stylesheet" type="text/css">
+<link href="assets/css/custom.css" rel="stylesheet" type="text/css">
 
 <!-- Favicon -->
 <link rel="icon" href="<?php echo htmlspecialchars($logoPath, ENT_QUOTES, 'UTF-8'); ?>" type="image/png">
