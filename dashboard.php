@@ -264,7 +264,7 @@ include('partials/html.php');
                 </div>
 
                 <div class="row g-2">
-                    <div class="col-xl-4">
+                    <div class="col-xl-3">
                         <div class="card border-0 shadow-sm h-100 dashboard-card">
                             <div class="card-header d-flex align-items-center justify-content-between bg-transparent border-0">
                                 <h5 class="card-title mb-0">Autoridades por grupo</h5>
@@ -278,7 +278,7 @@ include('partials/html.php');
                             </div>
                         </div>
                     </div>
-                    <div class="col-xl-8">
+                    <div class="col-xl-9">
                         <div class="card border-0 shadow-sm h-100 dashboard-card">
                             <div class="card-header d-flex align-items-center justify-content-between bg-transparent border-0">
                                 <h5 class="card-title mb-0">Eventos recientes</h5>
