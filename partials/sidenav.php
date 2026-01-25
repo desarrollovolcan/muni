@@ -61,13 +61,13 @@
                                 <a href="eventos-invitacion-autoridades.php" class="side-nav-link">Invitar autoridades</a>
                             </li>
                             <li class="side-nav-item">
-                                <a href="eventos-autoridades-nueva.php" class="side-nav-link">Autoridades por evento</a>
+                                <a href="eventos-autoridades-nueva.php" class="side-nav-link">Autoridades evento</a>
                             </li>
                             <li class="side-nav-item">
                                 <a href="eventos-autoridades-resumen.php" class="side-nav-link">Resumen eventos</a>
                             </li>
                             <li class="side-nav-item">
-                                <a href="eventos-procesados.php" class="side-nav-link">Eventos procesados</a>
+                                <a href="eventos-procesados.php" class="side-nav-link">Procesados</a>
                             </li>
                         </ul>
                     </div>
@@ -139,7 +139,7 @@
                                 </li>
                             <?php endif; ?>
                             <li class="side-nav-item">
-                                <a href="roles-permisos.php" class="side-nav-link">Matriz de permisos</a>
+                                <a href="roles-permisos.php" class="side-nav-link">Matriz permisos</a>
                             </li>
                         </ul>
                     </div>
@@ -159,10 +159,10 @@
                                 <a href="municipalidad.php" class="side-nav-link">Municipalidad</a>
                             </li>
                             <li class="side-nav-item">
-                                <a href="eventos-tipos.php" class="side-nav-link">Tipos de evento</a>
+                                <a href="eventos-tipos.php" class="side-nav-link">Tipos evento</a>
                             </li>
                             <li class="side-nav-item">
-                                <a href="grupos-autoridades.php" class="side-nav-link">Grupos de autoridades</a>
+                                <a href="grupos-autoridades.php" class="side-nav-link">Grupos autoridades</a>
                             </li>
                             <li class="side-nav-item">
                                 <a href="notificaciones-correo.php" class="side-nav-link">Correo de envío</a>
