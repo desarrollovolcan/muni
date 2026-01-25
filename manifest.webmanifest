@@ -1,7 +1,7 @@
 {
-  "name": "Administración Municipal",
-  "short_name": "Muni",
-  "description": "Plataforma municipal para la gestión de eventos, autoridades y validaciones ciudadanas.",
+  "name": "Go Muni",
+  "short_name": "Go Muni",
+  "description": "Go Muni · tecnologia escalable para la gestión de eventos, autoridades y validaciones ciudadanas.",
   "start_url": "/index.php",
   "scope": "/",
   "display": "standalone",

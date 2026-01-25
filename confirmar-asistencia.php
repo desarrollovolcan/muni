@@ -152,7 +152,7 @@ $logoUrl = preg_match('/^https?:\/\//', $logoPath) ? $logoPath : base_url() . '/
                         </p>
                     </div>
                     <p class="text-center text-muted mt-4 mb-0">
-                        © <script>document.write(new Date().getFullYear())</script> Municipalidad - Plataforma de eventos
+                        © <script>document.write(new Date().getFullYear())</script> Go Muni - tecnologia escalable
                     </p>
                 </div>
             </div>

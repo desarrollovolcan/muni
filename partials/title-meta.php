@@ -1,8 +1,8 @@
 <?php
-$municipalidadName = $municipalidad['nombre'] ?? 'Municipalidad';
+$municipalidadName = $municipalidad['nombre'] ?? 'Go Muni';
 $logoPath = $municipalidad['logo_path'] ?? 'assets/images/logo.png';
-$pageTitle = isset($title) ? $title : 'Plataforma Municipal';
-$metaDescription = 'Plataforma municipal para la gestión de eventos, autoridades y validaciones ciudadanas.';
+$pageTitle = isset($title) ? $title : 'Go Muni';
+$metaDescription = 'Go Muni · tecnologia escalable para la gestión de eventos, autoridades y validaciones ciudadanas.';
 $metaKeywords = 'municipalidad, gestión municipal, eventos municipales, autoridades, validación ciudadana, administración pública, gobierno local';
 ?>
 <meta charset="utf-8">

@@ -3,7 +3,7 @@
     <?php $municipalidad = get_municipalidad(); ?>
     <?php
     $logoTopbarHeight = (int) ($municipalidad['logo_topbar_height'] ?? 56);
-    $logoTopbarHeightSm = min($logoTopbarHeight, 40);
+    $logoTopbarHeightSm = min($logoTopbarHeight, 56);
     ?>
     <div class="container-fluid topbar-menu">
         <div class="d-flex align-items-center gap-2">
