@@ -47,7 +47,7 @@
                 <li class="side-nav-item">
                     <a href="#modulo-eventos" class="side-nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="modulo-eventos">
                         <span class="menu-icon"><i data-lucide="calendar-check"></i></span>
-                        <span class="menu-text">Eventos Municipales</span>
+                        <span class="menu-text">Gestión eventos</span>
                         <span class="menu-arrow"></span>
                     </a>
                     <div class="collapse" id="modulo-eventos">
@@ -58,13 +58,13 @@
                                 </li>
                             <?php endif; ?>
                             <li class="side-nav-item">
-                                <a href="eventos-invitacion-autoridades.php" class="side-nav-link">Invitación autoridades</a>
+                                <a href="eventos-invitacion-autoridades.php" class="side-nav-link">Invitar autoridades</a>
                             </li>
                             <li class="side-nav-item">
                                 <a href="eventos-autoridades-nueva.php" class="side-nav-link">Autoridades por evento</a>
                             </li>
                             <li class="side-nav-item">
-                                <a href="eventos-autoridades-resumen.php" class="side-nav-link">Eventos / Autoridades</a>
+                                <a href="eventos-autoridades-resumen.php" class="side-nav-link">Resumen eventos</a>
                             </li>
                             <li class="side-nav-item">
                                 <a href="eventos-procesados.php" class="side-nav-link">Eventos procesados</a>
@@ -128,7 +128,7 @@
                 <li class="side-nav-item">
                     <a href="#modulo-roles" class="side-nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="modulo-roles">
                         <span class="menu-icon"><i data-lucide="key-round"></i></span>
-                        <span class="menu-text">Roles y Permisos</span>
+                        <span class="menu-text">Roles y permisos</span>
                         <span class="menu-arrow"></span>
                     </a>
                     <div class="collapse" id="modulo-roles">
@@ -165,16 +165,16 @@
                                 <a href="grupos-autoridades.php" class="side-nav-link">Grupos de autoridades</a>
                             </li>
                             <li class="side-nav-item">
-                                <a href="notificaciones-correo.php" class="side-nav-link">Correo de notificaciones</a>
+                                <a href="notificaciones-correo.php" class="side-nav-link">Correo notificaciones</a>
                             </li>
                             <li class="side-nav-item">
-                                <a href="invitacion-correo.php" class="side-nav-link">Invitación correo</a>
+                                <a href="invitacion-correo.php" class="side-nav-link">Correo invitaciones</a>
                             </li>
                             <li class="side-nav-item">
-                                <a href="notificaciones-whatsapp.php" class="side-nav-link">WhatsApp de notificaciones</a>
+                                <a href="notificaciones-whatsapp.php" class="side-nav-link">WhatsApp notificaciones</a>
                             </li>
                             <li class="side-nav-item">
-                                <a href="configuracion-email.php" class="side-nav-link">Configuración Email</a>
+                                <a href="configuracion-email.php" class="side-nav-link">Config. correos</a>
                             </li>
                         </ul>
                     </div>
