@@ -175,7 +175,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['list_action']) && ve
 
                 <div class="row evento-formal">
                     <div class="col-12">
-                        <div class="card mb-3">
+                        <div class="card gm-section mb-3">
                             <div class="card-header">
                                 <h5 class="card-title mb-0"><?php echo $id > 0 ? 'Editar evento' : 'Crear evento'; ?></h5>
                             </div>
@@ -293,7 +293,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['list_action']) && ve
 
                 <div class="row">
                     <div class="col-12">
-                        <div class="card">
+                        <div class="card gm-section">
                             <div class="card-header">
                                 <h5 class="card-title mb-0">Listado de eventos</h5>
                             </div>

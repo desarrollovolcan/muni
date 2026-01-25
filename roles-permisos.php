@@ -149,7 +149,7 @@ $updated = isset($_GET['updated']) && $_GET['updated'] === '1';
 
                 <div class="row">
                     <div class="col-12">
-                        <div class="card">
+                        <div class="card gm-section">
                             <div class="card-body">
                                 <?php if ($updated) : ?>
                                     <div class="alert alert-success">Los permisos se actualizaron correctamente.</div>
