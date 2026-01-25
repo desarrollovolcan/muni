@@ -5,13 +5,39 @@ $errors = [];
 $notice = '';
 $eventId = isset($_GET['event_id']) ? (int) $_GET['event_id'] : 0;
 
+try {
+    db()->exec(
+        'CREATE TABLE IF NOT EXISTS event_authority_attendance (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+            event_id INT UNSIGNED NOT NULL,
+            authority_id INT UNSIGNED NOT NULL,
+            token VARCHAR(64) NOT NULL,
+            status ENUM("pendiente", "confirmado", "rechazado") NOT NULL DEFAULT "pendiente",
+            responded_at TIMESTAMP NULL DEFAULT NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY event_authority_attendance_unique (event_id, authority_id),
+            UNIQUE KEY event_authority_attendance_token_unique (token),
+            CONSTRAINT event_authority_attendance_event_id_fk FOREIGN KEY (event_id) REFERENCES events (id) ON DELETE CASCADE,
+            CONSTRAINT event_authority_attendance_authority_id_fk FOREIGN KEY (authority_id) REFERENCES authorities (id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+    );
+} catch (Exception $e) {
+} catch (Error $e) {
+}
+
 $events = db()->query('SELECT id, titulo, descripcion, ubicacion, fecha_inicio, fecha_fin, tipo, estado FROM events ORDER BY fecha_inicio DESC')->fetchAll();
 $selectedEvent = null;
 $authorities = [];
 $sentMap = [];
 
 if ($eventId > 0) {
-    $stmtEvent = db()->prepare('SELECT * FROM events WHERE id = ?');
+    $stmtEvent = db()->prepare(
+        'SELECT e.*, u.nombre AS encargado_nombre, u.apellido AS encargado_apellido, u.correo AS encargado_correo, u.telefono AS encargado_telefono
+         FROM events e
+         LEFT JOIN users u ON u.id = e.encargado_id
+         WHERE e.id = ?'
+    );
     $stmtEvent->execute([$eventId]);
     $selectedEvent = $stmtEvent->fetch() ?: null;
 
@@ -66,8 +92,13 @@ $defaultBody = <<<HTML
                   <p style="margin:0;font-size:15px;font-weight:bold;color:#0f172a;">{{evento_titulo}}</p>
                   <p style="margin:6px 0 0;font-size:13px;color:#475569;">{{evento_ubicacion}} · {{evento_tipo}}</p>
                   <p style="margin:6px 0 0;font-size:13px;color:#475569;">{{evento_fecha_inicio}} - {{evento_fecha_fin}}</p>
+                  <p style="margin:6px 0 0;font-size:13px;color:#475569;">Público objetivo: {{evento_publico_objetivo}}</p>
+                  <p style="margin:6px 0 0;font-size:13px;color:#475569;">Cupos disponibles: {{evento_cupos}}</p>
                   <p style="margin:10px 0 0;font-size:13px;color:#475569;">{{evento_descripcion}}</p>
                 </div>
+                <p style="margin:0 0 12px;font-size:13px;color:#475569;">
+                  Contacto del evento: {{evento_encargado_nombre}} · {{evento_encargado_correo}} · {{evento_encargado_telefono}}
+                </p>
                 <table width="100%" cellpadding="0" cellspacing="0" style="margin:18px 0 10px 0;">
                   <tr>
                     <td align="center">
@@ -124,6 +155,11 @@ function render_invitation_template(string $template, array $data): string
         '{{evento_fecha_fin}}' => $data['evento_fecha_fin'] ?? '',
         '{{evento_ubicacion}}' => $data['evento_ubicacion'] ?? '',
         '{{evento_tipo}}' => $data['evento_tipo'] ?? '',
+        '{{evento_publico_objetivo}}' => $data['evento_publico_objetivo'] ?? '',
+        '{{evento_cupos}}' => $data['evento_cupos'] ?? '',
+        '{{evento_encargado_nombre}}' => $data['evento_encargado_nombre'] ?? '',
+        '{{evento_encargado_correo}}' => $data['evento_encargado_correo'] ?? '',
+        '{{evento_encargado_telefono}}' => $data['evento_encargado_telefono'] ?? '',
         '{{confirmacion_link}}' => $data['confirmacion_link'] ?? '',
     ];
 
@@ -154,7 +190,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 
     if (empty($errors)) {
-        $stmtEvent = db()->prepare('SELECT * FROM events WHERE id = ?');
+        $stmtEvent = db()->prepare(
+            'SELECT e.*, u.nombre AS encargado_nombre, u.apellido AS encargado_apellido, u.correo AS encargado_correo, u.telefono AS encargado_telefono
+             FROM events e
+             LEFT JOIN users u ON u.id = e.encargado_id
+             WHERE e.id = ?'
+        );
         $stmtEvent->execute([$eventId]);
         $selectedEvent = $stmtEvent->fetch() ?: null;
 
@@ -204,6 +245,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 continue;
             }
 
+            $encargadoNombre = trim(($selectedEvent['encargado_nombre'] ?? '') . ' ' . ($selectedEvent['encargado_apellido'] ?? ''));
+            $confirmToken = hash('sha256', $eventId . '|' . $authority['id'] . '|' . $correo);
             $templateData = [
                 'municipalidad_nombre' => htmlspecialchars($municipalidad['nombre'] ?? 'Municipalidad', ENT_QUOTES, 'UTF-8'),
                 'municipalidad_logo' => htmlspecialchars($logoUrl, ENT_QUOTES, 'UTF-8'),
@@ -215,7 +258,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 'evento_fecha_fin' => htmlspecialchars($selectedEvent['fecha_fin'] ?? '', ENT_QUOTES, 'UTF-8'),
                 'evento_ubicacion' => htmlspecialchars($selectedEvent['ubicacion'] ?? '', ENT_QUOTES, 'UTF-8'),
                 'evento_tipo' => htmlspecialchars($selectedEvent['tipo'] ?? '', ENT_QUOTES, 'UTF-8'),
-                'confirmacion_link' => base_url() . '/confirmar-asistencia.php?token=' . hash('sha256', $eventId . '|' . $authority['id'] . '|' . $correo),
+                'evento_publico_objetivo' => htmlspecialchars($selectedEvent['publico_objetivo'] ?? 'Sin información', ENT_QUOTES, 'UTF-8'),
+                'evento_cupos' => htmlspecialchars($selectedEvent['cupos'] ?? 'Sin cupos definidos', ENT_QUOTES, 'UTF-8'),
+                'evento_encargado_nombre' => htmlspecialchars($encargadoNombre !== '' ? $encargadoNombre : 'Sin asignar', ENT_QUOTES, 'UTF-8'),
+                'evento_encargado_correo' => htmlspecialchars($selectedEvent['encargado_correo'] ?? 'Sin correo', ENT_QUOTES, 'UTF-8'),
+                'evento_encargado_telefono' => htmlspecialchars($selectedEvent['encargado_telefono'] ?? 'Sin teléfono', ENT_QUOTES, 'UTF-8'),
+                'confirmacion_link' => base_url() . '/confirmar-asistencia.php?token=' . $confirmToken,
             ];
 
             $bodyHtml = render_invitation_template($emailTemplate['body_html'] ?? $defaultBody, $templateData);
@@ -232,6 +280,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             $mailSent = mail($correo, $subject, $bodyHtml, $headers);
             if ($mailSent) {
                 $sentCount++;
+                $stmtAttendance = db()->prepare(
+                    'INSERT INTO event_authority_attendance (event_id, authority_id, token)
+                     VALUES (?, ?, ?)
+                     ON DUPLICATE KEY UPDATE token = VALUES(token)'
+                );
+                $stmtAttendance->execute([$eventId, $authority['id'], $confirmToken]);
                 $stmtFind = db()->prepare('SELECT id FROM event_authority_invitations WHERE event_id = ? AND authority_id = ? LIMIT 1');
                 $stmtFind->execute([$eventId, $authority['id']]);
                 $existingId = $stmtFind->fetchColumn();
