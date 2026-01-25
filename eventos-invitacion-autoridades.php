@@ -68,6 +68,31 @@ $defaultBody = <<<HTML
                   <p style="margin:6px 0 0;font-size:13px;color:#475569;">{{evento_fecha_inicio}} - {{evento_fecha_fin}}</p>
                   <p style="margin:10px 0 0;font-size:13px;color:#475569;">{{evento_descripcion}}</p>
                 </div>
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin:18px 0 10px 0;">
+                  <tr>
+                    <td align="center">
+                      <a href="{{confirmacion_link}}"
+                         style="background:#0f4c81;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:12px;font-weight:bold;display:inline-block;">
+                        Confirmar participación
+                      </a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td align="center" style="font-size:12px;color:#64748b;padding-top:10px;">
+                      Este enlace es personal y válido únicamente para su invitación.
+                    </td>
+                  </tr>
+                </table>
+                <div style="margin:16px 0 0 0;padding:12px 14px;border:1px dashed #cbd5f5;border-radius:12px;background:#ffffff;">
+                  <p style="margin:0 0 6px;font-size:12px;color:#64748b;">
+                    Si el botón no funciona, copie y pegue este enlace en su navegador:
+                  </p>
+                  <p style="margin:0;word-break:break-all;font-size:13px;">
+                    <a href="{{confirmacion_link}}" style="color:#0f4c81;text-decoration:underline;">
+                      {{confirmacion_link}}
+                    </a>
+                  </p>
+                </div>
                 <p style="margin:0;font-size:12px;color:#94a3b8;">
                   Este mensaje fue generado automáticamente por el sistema municipal.
                 </p>
@@ -99,6 +124,7 @@ function render_invitation_template(string $template, array $data): string
         '{{evento_fecha_fin}}' => $data['evento_fecha_fin'] ?? '',
         '{{evento_ubicacion}}' => $data['evento_ubicacion'] ?? '',
         '{{evento_tipo}}' => $data['evento_tipo'] ?? '',
+        '{{confirmacion_link}}' => $data['confirmacion_link'] ?? '',
     ];
 
     return strtr($template, $replacements);
@@ -189,6 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 'evento_fecha_fin' => htmlspecialchars($selectedEvent['fecha_fin'] ?? '', ENT_QUOTES, 'UTF-8'),
                 'evento_ubicacion' => htmlspecialchars($selectedEvent['ubicacion'] ?? '', ENT_QUOTES, 'UTF-8'),
                 'evento_tipo' => htmlspecialchars($selectedEvent['tipo'] ?? '', ENT_QUOTES, 'UTF-8'),
+                'confirmacion_link' => base_url() . '/confirmar-asistencia.php?token=' . hash('sha256', $eventId . '|' . $authority['id'] . '|' . $correo),
             ];
 
             $bodyHtml = render_invitation_template($emailTemplate['body_html'] ?? $defaultBody, $templateData);
