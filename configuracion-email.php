@@ -212,6 +212,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
     <?php $title = "Configuración Email"; include('partials/title-meta.php'); ?>
 
     <?php include('partials/head-css.php'); ?>
+    <style>
+        .code-editor {
+            font-family: "Fira Code", "Consolas", "Courier New", monospace;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            border: 1px solid #2d2d2d;
+            border-radius: 12px;
+            padding: 14px 16px;
+            line-height: 1.55;
+            min-height: 320px;
+        }
+
+        .code-editor:focus {
+            background-color: #1e1e1e;
+            color: #ffffff;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+    </style>
 </head>
 
 <body>
@@ -249,54 +267,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                     <div class="alert alert-success">Configuración guardada correctamente.</div>
                                 <?php endif; ?>
 
-                                <form id="template-form" method="post">
-                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                    <input type="hidden" name="action" value="save">
-                                    <div class="mb-3">
-                                        <label class="form-label" for="email-subject">Asunto del correo</label>
-                                        <input type="text" id="email-subject" name="subject" class="form-control" value="<?php echo htmlspecialchars($template['subject'], ENT_QUOTES, 'UTF-8'); ?>">
+                                <div class="row g-4">
+                                    <div class="col-lg-7">
+                                        <form id="template-form" method="post">
+                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                            <input type="hidden" name="action" value="save">
+                                            <div class="mb-3">
+                                                <label class="form-label" for="email-subject">Asunto del correo</label>
+                                                <input type="text" id="email-subject" name="subject" class="form-control" value="<?php echo htmlspecialchars($template['subject'], ENT_QUOTES, 'UTF-8'); ?>">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label" for="email-body">Cuerpo HTML</label>
+                                                <textarea id="email-body" name="body_html" class="form-control code-editor" rows="16"><?php echo htmlspecialchars($template['body_html'], ENT_QUOTES, 'UTF-8'); ?></textarea>
+                                                <div class="form-text">Puedes usar HTML completo con estilos en línea.</div>
+                                            </div>
+                                        </form>
+                                        <form id="restore-template-form" method="post">
+                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                            <input type="hidden" name="action" value="restore">
+                                        </form>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label" for="email-body">Cuerpo HTML</label>
-                                        <textarea id="email-body" name="body_html" class="form-control" rows="14"><?php echo htmlspecialchars($template['body_html'], ENT_QUOTES, 'UTF-8'); ?></textarea>
-                                        <div class="form-text">Puedes usar HTML completo con estilos en línea.</div>
-                                    </div>
-                                </form>
-                                <form id="restore-template-form" method="post">
-                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                    <input type="hidden" name="action" value="restore">
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Variables disponibles</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <ul class="list-group">
-                                            <li class="list-group-item"><strong>{{municipalidad_nombre}}</strong> · Nombre de la municipalidad</li>
-                                            <li class="list-group-item"><strong>{{municipalidad_logo}}</strong> · URL del logo municipal</li>
-                                            <li class="list-group-item"><strong>{{destinatario_nombre}}</strong> · Nombre del destinatario</li>
-                                            <li class="list-group-item"><strong>{{evento_titulo}}</strong> · Título del evento</li>
-                                            <li class="list-group-item"><strong>{{evento_descripcion}}</strong> · Descripción del evento</li>
-                                            <li class="list-group-item"><strong>{{evento_fecha_inicio}}</strong> · Fecha de inicio</li>
-                                        </ul>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <ul class="list-group">
-                                            <li class="list-group-item"><strong>{{evento_fecha_fin}}</strong> · Fecha de término</li>
-                                            <li class="list-group-item"><strong>{{evento_ubicacion}}</strong> · Ubicación del evento</li>
-                                            <li class="list-group-item"><strong>{{evento_tipo}}</strong> · Tipo de evento</li>
-                                            <li class="list-group-item"><strong>{{autoridades_lista}}</strong> · Lista HTML &lt;li&gt; de autoridades</li>
-                                            <li class="list-group-item"><strong>{{validation_link}}</strong> · Enlace público de validación</li>
-                                        </ul>
+                                    <div class="col-lg-5">
+                                        <div class="card border-0 shadow-sm h-100">
+                                            <div class="card-header bg-transparent">
+                                                <h5 class="card-title mb-0">Variables disponibles</h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row g-3">
+                                                    <div class="col-md-6 col-lg-12">
+                                                        <ul class="list-group">
+                                                            <li class="list-group-item"><strong>{{municipalidad_nombre}}</strong> · Nombre de la municipalidad</li>
+                                                            <li class="list-group-item"><strong>{{municipalidad_logo}}</strong> · URL del logo municipal</li>
+                                                            <li class="list-group-item"><strong>{{destinatario_nombre}}</strong> · Nombre del destinatario</li>
+                                                            <li class="list-group-item"><strong>{{evento_titulo}}</strong> · Título del evento</li>
+                                                            <li class="list-group-item"><strong>{{evento_descripcion}}</strong> · Descripción del evento</li>
+                                                            <li class="list-group-item"><strong>{{evento_fecha_inicio}}</strong> · Fecha de inicio</li>
+                                                        </ul>
+                                                    </div>
+                                                    <div class="col-md-6 col-lg-12">
+                                                        <ul class="list-group">
+                                                            <li class="list-group-item"><strong>{{evento_fecha_fin}}</strong> · Fecha de término</li>
+                                                            <li class="list-group-item"><strong>{{evento_ubicacion}}</strong> · Ubicación del evento</li>
+                                                            <li class="list-group-item"><strong>{{evento_tipo}}</strong> · Tipo de evento</li>
+                                                            <li class="list-group-item"><strong>{{autoridades_lista}}</strong> · Lista HTML &lt;li&gt; de autoridades</li>
+                                                            <li class="list-group-item"><strong>{{validation_link}}</strong> · Enlace público de validación</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
