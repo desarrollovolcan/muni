@@ -84,7 +84,7 @@ $eventTypes = ensure_event_types();
 
                 <div class="row">
                     <div class="col-lg-4">
-                        <div class="card">
+                        <div class="card gm-section">
                             <div class="card-header">
                                 <h5 class="card-title mb-0">Crear tipo de evento</h5>
                             </div>
@@ -114,7 +114,7 @@ $eventTypes = ensure_event_types();
                     </div>
 
                     <div class="col-lg-8">
-                        <div class="card">
+                        <div class="card gm-section">
                             <div class="card-header">
                                 <h5 class="card-title mb-0">Listado de tipos</h5>
                             </div>
