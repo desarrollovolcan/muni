@@ -333,7 +333,7 @@ function group_badge_class(?int $groupId, array $palette): string
 
                 <div class="row">
                     <div class="col-12">
-                        <div class="card">
+                        <div class="card gm-section">
                             <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
                                 <div>
                                     <h5 class="card-title mb-0">Carga masiva de autoridades</h5>
@@ -371,7 +371,7 @@ function group_badge_class(?int $groupId, array $palette): string
 
                 <div class="row">
                     <div class="col-12">
-                        <div class="card">
+                        <div class="card gm-section">
                             <div class="card-header">
                                 <h5 class="card-title mb-0">Listado de autoridades</h5>
                             </div>

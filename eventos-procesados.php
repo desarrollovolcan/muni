@@ -54,7 +54,7 @@ $procesados = $stmt->fetchAll();
 
                 <div class="row">
                     <div class="col-12">
-                        <div class="card">
+                        <div class="card gm-section">
                             <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
                                 <div>
                                     <h5 class="card-title mb-0">Eventos con validación confirmada</h5>

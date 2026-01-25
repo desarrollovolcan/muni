@@ -4,16 +4,67 @@ require __DIR__ . '/app/bootstrap.php';
 $token = trim($_GET['token'] ?? '');
 $errors = [];
 $notice = '';
+$attendance = null;
+$attendanceStatus = null;
+
+try {
+    db()->exec(
+        'CREATE TABLE IF NOT EXISTS event_authority_attendance (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+            event_id INT UNSIGNED NOT NULL,
+            authority_id INT UNSIGNED NOT NULL,
+            token VARCHAR(64) NOT NULL,
+            status ENUM("pendiente", "confirmado", "rechazado") NOT NULL DEFAULT "pendiente",
+            responded_at TIMESTAMP NULL DEFAULT NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY event_authority_attendance_unique (event_id, authority_id),
+            UNIQUE KEY event_authority_attendance_token_unique (token),
+            CONSTRAINT event_authority_attendance_event_id_fk FOREIGN KEY (event_id) REFERENCES events (id) ON DELETE CASCADE,
+            CONSTRAINT event_authority_attendance_authority_id_fk FOREIGN KEY (authority_id) REFERENCES authorities (id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+    );
+} catch (Exception $e) {
+} catch (Error $e) {
+}
+
+if ($token !== '') {
+    $stmtAttendance = db()->prepare(
+        'SELECT ea.id, ea.status, e.titulo, e.ubicacion, e.fecha_inicio, e.fecha_fin
+         FROM event_authority_attendance ea
+         INNER JOIN events e ON e.id = ea.event_id
+         WHERE ea.token = ?'
+    );
+    $stmtAttendance->execute([$token]);
+    $attendance = $stmtAttendance->fetch() ?: null;
+    $attendanceStatus = $attendance['status'] ?? null;
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ?? null)) {
     $action = $_POST['action'] ?? '';
     $token = trim($_POST['token'] ?? $token);
 
-    if ($token === '') {
+    if ($token !== '' && !$attendance) {
+        $stmtAttendance = db()->prepare(
+            'SELECT ea.id, ea.status, e.titulo, e.ubicacion, e.fecha_inicio, e.fecha_fin
+             FROM event_authority_attendance ea
+             INNER JOIN events e ON e.id = ea.event_id
+             WHERE ea.token = ?'
+        );
+        $stmtAttendance->execute([$token]);
+        $attendance = $stmtAttendance->fetch() ?: null;
+        $attendanceStatus = $attendance['status'] ?? null;
+    }
+
+    if ($token === '' || !$attendance) {
         $errors[] = 'El enlace de confirmación no es válido.';
     } elseif (!in_array($action, ['confirm', 'decline'], true)) {
         $errors[] = 'Selecciona una respuesta válida.';
     } else {
+        $newStatus = $action === 'confirm' ? 'confirmado' : 'rechazado';
+        $stmtUpdate = db()->prepare('UPDATE event_authority_attendance SET status = ?, responded_at = NOW() WHERE id = ?');
+        $stmtUpdate->execute([$newStatus, (int) $attendance['id']]);
+        $attendanceStatus = $newStatus;
         $notice = $action === 'confirm'
             ? 'Tu participación ha sido confirmada. ¡Gracias por tu respuesta!'
             : 'Tu respuesta ha sido registrada. Gracias por informarnos.';
@@ -54,6 +105,28 @@ $logoUrl = preg_match('/^https?:\/\//', $logoPath) ? $logoPath : base_url() . '/
 
                         <?php if ($notice !== '') : ?>
                             <div class="alert alert-success"><?php echo htmlspecialchars($notice, ENT_QUOTES, 'UTF-8'); ?></div>
+                        <?php endif; ?>
+
+                        <?php if ($attendance) : ?>
+                            <div class="border rounded-3 p-3 bg-light mb-3">
+                                <div class="fw-semibold"><?php echo htmlspecialchars($attendance['titulo'] ?? 'Evento', ENT_QUOTES, 'UTF-8'); ?></div>
+                                <div class="text-muted small">
+                                    <?php echo htmlspecialchars($attendance['ubicacion'] ?? '-', ENT_QUOTES, 'UTF-8'); ?> ·
+                                    <?php echo htmlspecialchars($attendance['fecha_inicio'] ?? '-', ENT_QUOTES, 'UTF-8'); ?>
+                                    <?php if (!empty($attendance['fecha_fin'])) : ?>
+                                        - <?php echo htmlspecialchars($attendance['fecha_fin'], ENT_QUOTES, 'UTF-8'); ?>
+                                    <?php endif; ?>
+                                </div>
+                                <?php if ($attendanceStatus && $attendanceStatus !== 'pendiente') : ?>
+                                    <div class="mt-2">
+                                        <?php if ($attendanceStatus === 'confirmado') : ?>
+                                            <span class="badge text-bg-success">Confirmada</span>
+                                        <?php elseif ($attendanceStatus === 'rechazado') : ?>
+                                            <span class="badge text-bg-danger">Rechazada</span>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
                         <?php endif; ?>
 
                         <p class="text-muted mb-4">
