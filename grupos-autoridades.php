@@ -105,7 +105,7 @@ $groups = db()->query('SELECT id, nombre, created_at FROM authority_groups ORDER
 
                 <div class="row g-3">
                     <div class="col-xl-5">
-                        <div class="card">
+                        <div class="card gm-section">
                             <div class="card-header">
                                 <h5 class="card-title mb-0"><?php echo $editingGroup ? 'Editar grupo' : 'Crear grupo'; ?></h5>
                             </div>
@@ -143,7 +143,7 @@ $groups = db()->query('SELECT id, nombre, created_at FROM authority_groups ORDER
                         </div>
                     </div>
                     <div class="col-xl-7">
-                        <div class="card">
+                        <div class="card gm-section">
                             <div class="card-header">
                                 <h5 class="card-title mb-0">Listado de grupos</h5>
                             </div>

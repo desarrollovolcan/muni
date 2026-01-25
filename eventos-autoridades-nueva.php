@@ -695,7 +695,7 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                 <?php $subtitle = "Eventos Municipales"; $title = "Autoridades por evento · Nueva vista"; include('partials/page-title.php'); ?>
 
                 <div class="go-muni-authorities">
-                    <div class="gm-page-head card border-0 shadow-sm mb-3">
+                    <div class="gm-page-head card border-0 shadow-sm mb-3 gm-section">
                         <div class="card-body d-flex flex-wrap align-items-center justify-content-between gap-3">
                             <div>
                                 <h4 class="mb-1">Autoridades por evento</h4>
@@ -721,7 +721,7 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                             <form id="evento-autoridades-form" method="post">
                                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
                                 <input type="hidden" name="action" value="save_authorities">
-                                <div class="card border shadow-none mb-4 gm-card-compact">
+                                <div class="card border shadow-none mb-4 gm-card-compact gm-section">
                                     <div class="card-body">
                                         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
                                             <div>
@@ -787,7 +787,7 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                     </div>
                                 </div>
 
-                                <div class="card border shadow-none gm-card-compact">
+                                <div class="card border shadow-none gm-card-compact gm-section">
                                     <div class="card-body">
                                         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
                                             <div>
@@ -827,7 +827,7 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                         </div>
 
                         <div class="col-12">
-                            <div class="card border shadow-none mb-4 gm-card-compact">
+                            <div class="card border shadow-none mb-4 gm-card-compact gm-section">
                                 <div class="card-body">
                                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
                                         <div>
@@ -851,7 +851,7 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                     <?php endif; ?>
 
                                     <?php if ($editRequest) : ?>
-                                        <div class="card border gm-inner-card mb-4">
+                                        <div class="card border gm-inner-card mb-4 gm-section">
                                             <div class="card-body">
                                                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
                                                     <h6 class="mb-0">Editar solicitud reciente</h6>
@@ -991,7 +991,7 @@ if (isset($_GET['updated']) && $_GET['updated'] === '1') {
                                 </div>
                             </div>
 
-                            <div class="card border shadow-none mb-4 gm-accordion-card gm-card-compact">
+                            <div class="card border shadow-none mb-4 gm-accordion-card gm-card-compact gm-section">
                                 <div class="card-body">
                                     <div class="d-flex align-items-center justify-content-between mb-3">
                                         <h6 class="mb-0">Eventos con autoridades</h6>
