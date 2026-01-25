@@ -260,6 +260,21 @@ CREATE TABLE `event_authority_invitations` (
   CONSTRAINT `event_authority_invitations_authority_id_fk` FOREIGN KEY (`authority_id`) REFERENCES `authorities` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `event_authority_attendance` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `event_id` INT UNSIGNED NOT NULL,
+  `authority_id` INT UNSIGNED NOT NULL,
+  `token` VARCHAR(64) NOT NULL,
+  `status` ENUM('pendiente', 'confirmado', 'rechazado') NOT NULL DEFAULT 'pendiente',
+  `responded_at` TIMESTAMP NULL DEFAULT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `event_authority_attendance_unique` (`event_id`, `authority_id`),
+  UNIQUE KEY `event_authority_attendance_token_unique` (`token`),
+  CONSTRAINT `event_authority_attendance_event_id_fk` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `event_authority_attendance_authority_id_fk` FOREIGN KEY (`authority_id`) REFERENCES `authorities` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `notification_settings` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `canal_email` TINYINT(1) NOT NULL DEFAULT 1,

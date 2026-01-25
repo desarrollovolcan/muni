@@ -45,10 +45,10 @@
         <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
 
             <!-- Search -->
-            <div class="app-search d-none d-md-flex me-2 flex-grow-1 flex-lg-grow-0">
-                <input type="search" class="form-control topbar-search rounded-pill" name="search" placeholder="Quick Search...">
+            <form class="app-search d-none d-md-flex me-2 flex-grow-1 flex-lg-grow-0" action="busqueda.php" method="get">
+                <input type="search" class="form-control topbar-search rounded-pill" name="q" placeholder="Buscar en el sistema" aria-label="Buscar en el sistema">
                 <i data-lucide="search" class="app-search-icon text-muted"></i>
-            </div>
+            </form>
 
             <!-- Theme Mode Dropdown -->
             <div class="topbar-item">

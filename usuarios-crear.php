@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_
 
                 <div class="row">
                     <div class="col-12">
-                        <div class="card">
+                        <div class="card gm-section">
                             <div class="card-body">
                                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
                                     <div>
@@ -263,7 +263,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_
                 </div>
                 <div class="row">
                     <div class="col-12">
-                        <div class="card">
+                        <div class="card gm-section">
                             <div class="card-header">
                                 <h5 class="card-title mb-0">Listado de usuarios</h5>
                             </div>
