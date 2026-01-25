@@ -142,6 +142,24 @@ $bodyPreview = render_invitation_template($correoTemplate['body_html'] ?? $defau
     <?php $title = "Invitación correo"; include('partials/title-meta.php'); ?>
 
     <?php include('partials/head-css.php'); ?>
+    <style>
+        .code-editor {
+            font-family: "Fira Code", "Consolas", "Courier New", monospace;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            border: 1px solid #2d2d2d;
+            border-radius: 12px;
+            padding: 14px 16px;
+            line-height: 1.55;
+            min-height: 360px;
+        }
+
+        .code-editor:focus {
+            background-color: #1e1e1e;
+            color: #ffffff;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+    </style>
 </head>
 
 <body>
@@ -183,28 +201,29 @@ $bodyPreview = render_invitation_template($correoTemplate['body_html'] ?? $defau
                                     <div class="alert alert-success"><?php echo htmlspecialchars($notice, ENT_QUOTES, 'UTF-8'); ?></div>
                                 <?php endif; ?>
 
-                                <form id="correo-invitacion-form" method="post">
-                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                    <div class="row">
-                                        <div class="col-lg-4 mb-3">
-                                            <label class="form-label" for="subject">Asunto del correo</label>
-                                            <input type="text" id="subject" name="subject" class="form-control" value="<?php echo htmlspecialchars($correoTemplate['subject'] ?? $defaultSubject, ENT_QUOTES, 'UTF-8'); ?>">
-                                            <div class="form-text">Variables: {{municipalidad_nombre}}, {{destinatario_nombre}}, {{evento_titulo}}</div>
-                                        </div>
-                                        <div class="col-lg-8 mb-3">
-                                            <label class="form-label" for="body-html">HTML del correo</label>
-                                            <textarea id="body-html" name="body_html" class="form-control" rows="16"><?php echo htmlspecialchars($correoTemplate['body_html'] ?? $defaultBody, ENT_QUOTES, 'UTF-8'); ?></textarea>
-                                            <div class="form-text">Variables disponibles: {{municipalidad_nombre}}, {{municipalidad_logo}}, {{destinatario_nombre}}, {{destinatario_cargo}}, {{evento_titulo}}, {{evento_descripcion}}, {{evento_fecha_inicio}}, {{evento_fecha_fin}}, {{evento_ubicacion}}, {{evento_tipo}}</div>
-                                        </div>
+                                <div class="row g-4">
+                                    <div class="col-lg-6">
+                                        <form id="correo-invitacion-form" method="post">
+                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                            <div class="mb-3">
+                                                <label class="form-label" for="subject">Asunto del correo</label>
+                                                <input type="text" id="subject" name="subject" class="form-control" value="<?php echo htmlspecialchars($correoTemplate['subject'] ?? $defaultSubject, ENT_QUOTES, 'UTF-8'); ?>">
+                                                <div class="form-text">Variables: {{municipalidad_nombre}}, {{destinatario_nombre}}, {{evento_titulo}}</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label" for="body-html">HTML del correo</label>
+                                                <textarea id="body-html" name="body_html" class="form-control code-editor" rows="18"><?php echo htmlspecialchars($correoTemplate['body_html'] ?? $defaultBody, ENT_QUOTES, 'UTF-8'); ?></textarea>
+                                                <div class="form-text">Variables disponibles: {{municipalidad_nombre}}, {{municipalidad_logo}}, {{destinatario_nombre}}, {{destinatario_cargo}}, {{evento_titulo}}, {{evento_descripcion}}, {{evento_fecha_inicio}}, {{evento_fecha_fin}}, {{evento_ubicacion}}, {{evento_tipo}}</div>
+                                            </div>
+                                        </form>
                                     </div>
-                                </form>
-
-                                <div class="mt-3">
-                                    <h6 class="text-muted text-uppercase fs-12">Vista previa</h6>
-                                    <div class="border rounded-3 p-3 bg-light">
-                                        <div class="mb-2"><strong>Asunto:</strong> <?php echo htmlspecialchars($subjectPreview, ENT_QUOTES, 'UTF-8'); ?></div>
-                                        <div class="bg-white rounded-3 p-3" style="max-height:480px;overflow:auto;">
-                                            <?php echo $bodyPreview; ?>
+                                    <div class="col-lg-6">
+                                        <h6 class="text-muted text-uppercase fs-12">Vista previa</h6>
+                                        <div class="border rounded-3 p-3 bg-light">
+                                            <div class="mb-2"><strong>Asunto:</strong> <?php echo htmlspecialchars($subjectPreview, ENT_QUOTES, 'UTF-8'); ?></div>
+                                            <div class="bg-white rounded-3 p-3" style="max-height:480px;overflow:auto;">
+                                                <?php echo $bodyPreview; ?>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
