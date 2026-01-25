@@ -1,11 +1,33 @@
 <?php
 require __DIR__ . '/app/bootstrap.php';
 
+try {
+    db()->exec(
+        'CREATE TABLE IF NOT EXISTS event_authority_attendance (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+            event_id INT UNSIGNED NOT NULL,
+            authority_id INT UNSIGNED NOT NULL,
+            token VARCHAR(64) NOT NULL,
+            status ENUM("pendiente", "confirmado", "rechazado") NOT NULL DEFAULT "pendiente",
+            responded_at TIMESTAMP NULL DEFAULT NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY event_authority_attendance_unique (event_id, authority_id),
+            UNIQUE KEY event_authority_attendance_token_unique (token),
+            CONSTRAINT event_authority_attendance_event_id_fk FOREIGN KEY (event_id) REFERENCES events (id) ON DELETE CASCADE,
+            CONSTRAINT event_authority_attendance_authority_id_fk FOREIGN KEY (authority_id) REFERENCES authorities (id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+    );
+} catch (Exception $e) {
+} catch (Error $e) {
+}
+
 $events = db()->query('SELECT id, titulo, fecha_inicio FROM events WHERE habilitado = 1 ORDER BY fecha_inicio DESC')->fetchAll();
 $selectedEventId = isset($_GET['event_id']) ? (int) $_GET['event_id'] : 0;
 $selectedEvent = null;
 $authorities = [];
 $confirmedIds = [];
+$attendanceMap = [];
 
 if ($selectedEventId > 0) {
     foreach ($events as $event) {
@@ -33,12 +55,23 @@ if ($selectedEventId > 0) {
     );
     $stmtConfirmed->execute([$selectedEventId]);
     $confirmedIds = $stmtConfirmed->fetchAll(PDO::FETCH_COLUMN);
+
+    $stmtAttendance = db()->prepare(
+        'SELECT authority_id, status
+         FROM event_authority_attendance
+         WHERE event_id = ?'
+    );
+    $stmtAttendance->execute([$selectedEventId]);
+    foreach ($stmtAttendance->fetchAll() as $attendance) {
+        $attendanceMap[(int) $attendance['authority_id']] = $attendance['status'] ?? 'pendiente';
+    }
 }
 
 $totalAssigned = count($authorities);
 $totalConfirmed = 0;
 foreach ($authorities as $authority) {
-    if (in_array((int) $authority['id'], $confirmedIds, true)) {
+    $attendanceStatus = $attendanceMap[(int) $authority['id']] ?? 'pendiente';
+    if ($attendanceStatus === 'confirmado') {
         $totalConfirmed++;
     }
 }
@@ -64,11 +97,11 @@ $totalPending = max(0, $totalAssigned - $totalConfirmed);
 
                 <div class="row">
                     <div class="col-12">
-                        <div class="card">
+                        <div class="card gm-section">
                             <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
                                 <div>
                                     <h5 class="card-title mb-0">Autoridades asociadas por evento</h5>
-                                    <p class="text-muted mb-0">Revisa qué autoridades fueron confirmadas y cuáles siguen pendientes.</p>
+                                    <p class="text-muted mb-0">Revisa confirmaciones de asistencia y aprobación externa por autoridad.</p>
                                 </div>
                             </div>
                             <div class="card-body">
@@ -88,8 +121,8 @@ $totalPending = max(0, $totalAssigned - $totalConfirmed);
                                         <?php if ($selectedEvent) : ?>
                                             <div class="d-flex flex-wrap gap-2 justify-content-md-end">
                                                 <span class="badge text-bg-primary">Total: <?php echo $totalAssigned; ?></span>
-                                                <span class="badge text-bg-success">Confirmadas: <?php echo $totalConfirmed; ?></span>
-                                                <span class="badge text-bg-warning">Pendientes: <?php echo $totalPending; ?></span>
+                                                <span class="badge text-bg-success">Asistencia confirmada: <?php echo $totalConfirmed; ?></span>
+                                                <span class="badge text-bg-warning">Asistencia pendiente: <?php echo $totalPending; ?></span>
                                             </div>
                                         <?php endif; ?>
                                     </div>
@@ -101,29 +134,43 @@ $totalPending = max(0, $totalAssigned - $totalConfirmed);
                                             <tr>
                                                 <th>Autoridad</th>
                                                 <th>Tipo</th>
-                                                <th>Estado</th>
+                                                <th>Confirmación de asistencia</th>
+                                                <th>Aprobado por autoridad</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <?php if ($selectedEventId === 0) : ?>
                                                 <tr>
-                                                    <td colspan="3" class="text-muted">Selecciona un evento para ver sus autoridades.</td>
+                                                    <td colspan="4" class="text-muted">Selecciona un evento para ver sus autoridades.</td>
                                                 </tr>
                                             <?php elseif (empty($authorities)) : ?>
                                                 <tr>
-                                                    <td colspan="3" class="text-muted">No hay autoridades asociadas a este evento.</td>
+                                                    <td colspan="4" class="text-muted">No hay autoridades asociadas a este evento.</td>
                                                 </tr>
                                             <?php else : ?>
                                                 <?php foreach ($authorities as $authority) : ?>
-                                                    <?php $isConfirmed = in_array((int) $authority['id'], $confirmedIds, true); ?>
+                                                    <?php
+                                                    $authorityId = (int) $authority['id'];
+                                                    $attendanceStatus = $attendanceMap[$authorityId] ?? 'pendiente';
+                                                    $isExternallyApproved = in_array($authorityId, $confirmedIds, true);
+                                                    ?>
                                                     <tr>
                                                         <td><?php echo htmlspecialchars($authority['nombre'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td><?php echo htmlspecialchars($authority['tipo'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td>
-                                                            <?php if ($isConfirmed) : ?>
+                                                            <?php if ($attendanceStatus === 'confirmado') : ?>
                                                                 <span class="badge text-bg-success">Confirmada</span>
+                                                            <?php elseif ($attendanceStatus === 'rechazado') : ?>
+                                                                <span class="badge text-bg-danger">Rechazada</span>
                                                             <?php else : ?>
                                                                 <span class="badge text-bg-warning">Pendiente</span>
+                                                            <?php endif; ?>
+                                                        </td>
+                                                        <td>
+                                                            <?php if ($isExternallyApproved) : ?>
+                                                                <span class="badge text-bg-success">Aprobada</span>
+                                                            <?php else : ?>
+                                                                <span class="badge text-bg-secondary">Pendiente</span>
                                                             <?php endif; ?>
                                                         </td>
                                                     </tr>
