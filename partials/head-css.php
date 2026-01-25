@@ -257,7 +257,7 @@ $secondaryRgb = hex_to_rgb($secondaryColor) ?? [74, 129, 212];
     }
 
     .app-topbar .topbar-search {
-        padding-left: 2.2rem;
+        padding-left: 2.6rem;
     }
 
     .app-topbar .app-search-icon {
