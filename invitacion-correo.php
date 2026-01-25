@@ -42,6 +42,31 @@ $defaultBody = <<<HTML
                   Agradecemos confirmar su disponibilidad con su equipo de coordinación. Si tiene observaciones o requiere apoyo logístico,
                   puede responder directamente a este correo.
                 </p>
+                <table width="100%" cellpadding="0" cellspacing="0" style="margin:18px 0 10px 0;">
+                  <tr>
+                    <td align="center">
+                      <a href="{{confirmacion_link}}"
+                         style="background:#0f4c81;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:12px;font-weight:bold;display:inline-block;">
+                        Confirmar participación
+                      </a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td align="center" style="font-size:12px;color:#64748b;padding-top:10px;">
+                      Este enlace es personal y válido únicamente para su invitación.
+                    </td>
+                  </tr>
+                </table>
+                <div style="margin:16px 0 0 0;padding:12px 14px;border:1px dashed #cbd5f5;border-radius:12px;background:#ffffff;">
+                  <p style="margin:0 0 6px;font-size:12px;color:#64748b;">
+                    Si el botón no funciona, copie y pegue este enlace en su navegador:
+                  </p>
+                  <p style="margin:0;word-break:break-all;font-size:13px;">
+                    <a href="{{confirmacion_link}}" style="color:#0f4c81;text-decoration:underline;">
+                      {{confirmacion_link}}
+                    </a>
+                  </p>
+                </div>
                 <p style="margin:0;font-size:12px;color:#94a3b8;">
                   Este mensaje fue generado automáticamente por el sistema municipal.
                 </p>
@@ -73,6 +98,7 @@ function render_invitation_template(string $template, array $data): string
         '{{evento_fecha_fin}}' => $data['evento_fecha_fin'] ?? '',
         '{{evento_ubicacion}}' => $data['evento_ubicacion'] ?? '',
         '{{evento_tipo}}' => $data['evento_tipo'] ?? '',
+        '{{confirmacion_link}}' => $data['confirmacion_link'] ?? '',
     ];
 
     return strtr($template, $replacements);
@@ -89,11 +115,18 @@ try {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ?? null)) {
-    $subject = trim($_POST['subject'] ?? '');
-    $bodyHtml = trim($_POST['body_html'] ?? '');
+    $action = $_POST['action'] ?? 'save';
 
-    if ($subject === '' || $bodyHtml === '') {
-        $errors[] = 'Completa el asunto y el HTML del correo de invitación.';
+    if ($action === 'restore') {
+        $subject = $defaultSubject;
+        $bodyHtml = $defaultBody;
+    } else {
+        $subject = trim($_POST['subject'] ?? '');
+        $bodyHtml = trim($_POST['body_html'] ?? '');
+
+        if ($subject === '' || $bodyHtml === '') {
+            $errors[] = 'Completa el asunto y el HTML del correo de invitación.';
+        }
     }
 
     if (empty($errors)) {
@@ -109,7 +142,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
             $stmtInsert->execute([$templateKey, $subject, $bodyHtml]);
         }
 
-        $notice = 'Plantilla guardada correctamente.';
+        $notice = $action === 'restore'
+            ? 'Plantilla restaurada correctamente.'
+            : 'Plantilla guardada correctamente.';
     }
 
     $correoTemplate = [
@@ -132,6 +167,7 @@ $previewData = [
     'evento_fecha_fin' => '2024-04-10 12:00',
     'evento_ubicacion' => 'Teatro Municipal',
     'evento_tipo' => 'Ceremonia institucional',
+    'confirmacion_link' => base_url() . '/confirmar-asistencia.php?token=ABC123',
 ];
 $subjectPreview = render_invitation_template($correoTemplate['subject'] ?? $defaultSubject, $previewData);
 $bodyPreview = render_invitation_template($correoTemplate['body_html'] ?? $defaultBody, $previewData);
@@ -142,6 +178,24 @@ $bodyPreview = render_invitation_template($correoTemplate['body_html'] ?? $defau
     <?php $title = "Invitación correo"; include('partials/title-meta.php'); ?>
 
     <?php include('partials/head-css.php'); ?>
+    <style>
+        .code-editor {
+            font-family: "Fira Code", "Consolas", "Courier New", monospace;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            border: 1px solid #2d2d2d;
+            border-radius: 12px;
+            padding: 14px 16px;
+            line-height: 1.55;
+            min-height: 360px;
+        }
+
+        .code-editor:focus {
+            background-color: #1e1e1e;
+            color: #ffffff;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+    </style>
 </head>
 
 <body>
@@ -168,7 +222,10 @@ $bodyPreview = render_invitation_template($correoTemplate['body_html'] ?? $defau
                                     <h5 class="card-title mb-0">Correo de invitación institucional</h5>
                                     <p class="text-muted mb-0">Configura el HTML y el asunto del correo que se enviará a cada autoridad.</p>
                                 </div>
-                                <button type="submit" form="correo-invitacion-form" class="btn btn-primary">Guardar plantilla</button>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="submit" form="correo-invitacion-restore-form" class="btn btn-outline-secondary">Restaurar plantilla</button>
+                                    <button type="submit" form="correo-invitacion-form" class="btn btn-primary">Guardar plantilla</button>
+                                </div>
                             </div>
                             <div class="card-body">
                                 <?php if (!empty($errors)) : ?>
@@ -183,28 +240,33 @@ $bodyPreview = render_invitation_template($correoTemplate['body_html'] ?? $defau
                                     <div class="alert alert-success"><?php echo htmlspecialchars($notice, ENT_QUOTES, 'UTF-8'); ?></div>
                                 <?php endif; ?>
 
-                                <form id="correo-invitacion-form" method="post">
-                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                    <div class="row">
-                                        <div class="col-lg-4 mb-3">
-                                            <label class="form-label" for="subject">Asunto del correo</label>
-                                            <input type="text" id="subject" name="subject" class="form-control" value="<?php echo htmlspecialchars($correoTemplate['subject'] ?? $defaultSubject, ENT_QUOTES, 'UTF-8'); ?>">
-                                            <div class="form-text">Variables: {{municipalidad_nombre}}, {{destinatario_nombre}}, {{evento_titulo}}</div>
-                                        </div>
-                                        <div class="col-lg-8 mb-3">
-                                            <label class="form-label" for="body-html">HTML del correo</label>
-                                            <textarea id="body-html" name="body_html" class="form-control" rows="16"><?php echo htmlspecialchars($correoTemplate['body_html'] ?? $defaultBody, ENT_QUOTES, 'UTF-8'); ?></textarea>
-                                            <div class="form-text">Variables disponibles: {{municipalidad_nombre}}, {{municipalidad_logo}}, {{destinatario_nombre}}, {{destinatario_cargo}}, {{evento_titulo}}, {{evento_descripcion}}, {{evento_fecha_inicio}}, {{evento_fecha_fin}}, {{evento_ubicacion}}, {{evento_tipo}}</div>
-                                        </div>
+                                <div class="row g-4">
+                                    <div class="col-lg-6">
+                                        <form id="correo-invitacion-form" method="post">
+                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                            <div class="mb-3">
+                                                <label class="form-label" for="subject">Asunto del correo</label>
+                                                <input type="text" id="subject" name="subject" class="form-control" value="<?php echo htmlspecialchars($correoTemplate['subject'] ?? $defaultSubject, ENT_QUOTES, 'UTF-8'); ?>">
+                                                <div class="form-text">Variables: {{municipalidad_nombre}}, {{destinatario_nombre}}, {{evento_titulo}}</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label" for="body-html">HTML del correo</label>
+                                                <textarea id="body-html" name="body_html" class="form-control code-editor" rows="18"><?php echo htmlspecialchars($correoTemplate['body_html'] ?? $defaultBody, ENT_QUOTES, 'UTF-8'); ?></textarea>
+                                                <div class="form-text">Variables disponibles: {{municipalidad_nombre}}, {{municipalidad_logo}}, {{destinatario_nombre}}, {{destinatario_cargo}}, {{evento_titulo}}, {{evento_descripcion}}, {{evento_fecha_inicio}}, {{evento_fecha_fin}}, {{evento_ubicacion}}, {{evento_tipo}}, {{confirmacion_link}}</div>
+                                            </div>
+                                        </form>
+                                        <form id="correo-invitacion-restore-form" method="post">
+                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                            <input type="hidden" name="action" value="restore">
+                                        </form>
                                     </div>
-                                </form>
-
-                                <div class="mt-3">
-                                    <h6 class="text-muted text-uppercase fs-12">Vista previa</h6>
-                                    <div class="border rounded-3 p-3 bg-light">
-                                        <div class="mb-2"><strong>Asunto:</strong> <?php echo htmlspecialchars($subjectPreview, ENT_QUOTES, 'UTF-8'); ?></div>
-                                        <div class="bg-white rounded-3 p-3" style="max-height:480px;overflow:auto;">
-                                            <?php echo $bodyPreview; ?>
+                                    <div class="col-lg-6">
+                                        <h6 class="text-muted text-uppercase fs-12">Vista previa</h6>
+                                        <div class="border rounded-3 p-3 bg-light">
+                                            <div class="mb-2"><strong>Asunto:</strong> <?php echo htmlspecialchars($subjectPreview, ENT_QUOTES, 'UTF-8'); ?></div>
+                                            <div class="bg-white rounded-3 p-3" style="max-height:480px;overflow:auto;">
+                                                <?php echo $bodyPreview; ?>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
