@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
 <?php include('partials/html.php'); ?>
 
 <head>
-    <?php $title = "Correo de notificaciones"; include('partials/title-meta.php'); ?>
+    <?php $title = "Correo de envío"; include('partials/title-meta.php'); ?>
 
     <?php include('partials/head-css.php'); ?>
 </head>
@@ -83,15 +83,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
 
             <div class="container-fluid">
 
-                <?php $subtitle = "Mantenedores"; $title = "Correo de notificaciones"; include('partials/page-title.php'); ?>
+                <?php $subtitle = "Mantenedores"; $title = "Correo de envío"; include('partials/page-title.php'); ?>
 
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
                             <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
                                 <div>
-                                    <h5 class="card-title mb-0">Correo IMAP de notificaciones</h5>
-                                    <p class="text-muted mb-0">Configura la casilla que enviará avisos desde el sistema.</p>
+                                    <h5 class="card-title mb-0">Correo IMAP de envío</h5>
+                                    <p class="text-muted mb-0">Configura la casilla que enviará los avisos desde el sistema.</p>
                                 </div>
                                 <button type="submit" form="correo-notificaciones-form" class="btn btn-primary">Guardar configuración</button>
                             </div>

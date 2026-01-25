@@ -175,6 +175,10 @@ $defaultBody = <<<HTML
 </html>
 HTML;
 
+$renderEmailTemplate = static function (string $template, array $data): string {
+    return strtr($template, $data);
+};
+
 $stmt = db()->prepare('SELECT subject, body_html FROM email_templates WHERE template_key = ? LIMIT 1');
 $stmt->execute([$templateKey]);
 $template = $stmt->fetch() ?: ['subject' => $defaultSubject, 'body_html' => $defaultBody];
@@ -205,11 +209,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
         $template = ['subject' => $subject, 'body_html' => $bodyHtml];
     }
 }
+
+$municipalidad = get_municipalidad();
+$logoPath = $municipalidad['logo_path'] ?? 'assets/images/logo.png';
+$logoUrl = preg_match('/^https?:\/\//', $logoPath) ? $logoPath : base_url() . '/' . ltrim($logoPath, '/');
+$previewData = [
+    '{{municipalidad_nombre}}' => htmlspecialchars($municipalidad['nombre'] ?? 'Municipalidad', ENT_QUOTES, 'UTF-8'),
+    '{{municipalidad_logo}}' => htmlspecialchars($logoUrl, ENT_QUOTES, 'UTF-8'),
+    '{{destinatario_nombre}}' => 'Ana Martínez',
+    '{{evento_titulo}}' => 'Cuenta pública municipal 2024',
+    '{{evento_descripcion}}' => 'Ceremonia oficial de rendición de cuentas y presentación de hitos comunales.',
+    '{{evento_fecha_inicio}}' => '2024-04-10 10:00',
+    '{{evento_fecha_fin}}' => '2024-04-10 12:00',
+    '{{evento_ubicacion}}' => 'Teatro Municipal',
+    '{{evento_tipo}}' => 'Ceremonia institucional',
+    '{{autoridades_lista}}' => '<li>Alcaldesa</li><li>Director de Finanzas</li><li>Directora de Gabinete</li>',
+    '{{validation_link}}' => 'https://municipalidad.cl/validacion/ABC123',
+];
+$subjectPreview = $renderEmailTemplate($template['subject'] ?? $defaultSubject, $previewData);
+$bodyPreview = $renderEmailTemplate($template['body_html'] ?? $defaultBody, $previewData);
 ?>
 <?php include('partials/html.php'); ?>
 
 <head>
-    <?php $title = "Configuración Email"; include('partials/title-meta.php'); ?>
+    <?php $title = "Correo validación externa"; include('partials/title-meta.php'); ?>
 
     <?php include('partials/head-css.php'); ?>
     <style>
@@ -240,15 +263,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
         <div class="content-page">
             <div class="container-fluid">
 
-                <?php $subtitle = "Mantenedores"; $title = "Configuración Email"; include('partials/page-title.php'); ?>
+                <?php $subtitle = "Mantenedores"; $title = "Correo validación externa"; include('partials/page-title.php'); ?>
 
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
                             <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
                                 <div>
-                                    <h5 class="card-title mb-0">Correo de validación de autoridades</h5>
-                                    <p class="text-muted mb-0">Configura el correo HTML que se enviará con el enlace de validación.</p>
+                                    <h5 class="card-title mb-0">Correo de validación externa</h5>
+                                    <p class="text-muted mb-0">Configura el correo HTML que se enviará con el enlace de validación externa.</p>
                                 </div>
                                 <div class="d-flex flex-wrap gap-2">
                                     <button type="submit" form="restore-template-form" class="btn btn-outline-secondary">Restaurar plantilla</button>
@@ -268,7 +291,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                 <?php endif; ?>
 
                                 <div class="row g-4">
-                                    <div class="col-lg-7">
+                                    <div class="col-lg-6">
                                         <form id="template-form" method="post">
                                             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
                                             <input type="hidden" name="action" value="save">
@@ -287,32 +310,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                                             <input type="hidden" name="action" value="restore">
                                         </form>
                                     </div>
-                                    <div class="col-lg-5">
-                                        <div class="card border-0 shadow-sm h-100">
-                                            <div class="card-header bg-transparent">
-                                                <h5 class="card-title mb-0">Variables disponibles</h5>
+                                    <div class="col-lg-6">
+                                        <h6 class="text-muted text-uppercase fs-12">Vista previa</h6>
+                                        <div class="border rounded-3 p-3 bg-light">
+                                            <div class="mb-2"><strong>Asunto:</strong> <?php echo htmlspecialchars($subjectPreview, ENT_QUOTES, 'UTF-8'); ?></div>
+                                            <div class="bg-white rounded-3 p-3" style="max-height:480px;overflow:auto;">
+                                                <?php echo $bodyPreview; ?>
                                             </div>
-                                            <div class="card-body">
-                                                <div class="row g-3">
-                                                    <div class="col-md-6 col-lg-12">
-                                                        <ul class="list-group">
-                                                            <li class="list-group-item"><strong>{{municipalidad_nombre}}</strong> · Nombre de la municipalidad</li>
-                                                            <li class="list-group-item"><strong>{{municipalidad_logo}}</strong> · URL del logo municipal</li>
-                                                            <li class="list-group-item"><strong>{{destinatario_nombre}}</strong> · Nombre del destinatario</li>
-                                                            <li class="list-group-item"><strong>{{evento_titulo}}</strong> · Título del evento</li>
-                                                            <li class="list-group-item"><strong>{{evento_descripcion}}</strong> · Descripción del evento</li>
-                                                            <li class="list-group-item"><strong>{{evento_fecha_inicio}}</strong> · Fecha de inicio</li>
-                                                        </ul>
-                                                    </div>
-                                                    <div class="col-md-6 col-lg-12">
-                                                        <ul class="list-group">
-                                                            <li class="list-group-item"><strong>{{evento_fecha_fin}}</strong> · Fecha de término</li>
-                                                            <li class="list-group-item"><strong>{{evento_ubicacion}}</strong> · Ubicación del evento</li>
-                                                            <li class="list-group-item"><strong>{{evento_tipo}}</strong> · Tipo de evento</li>
-                                                            <li class="list-group-item"><strong>{{autoridades_lista}}</strong> · Lista HTML &lt;li&gt; de autoridades</li>
-                                                            <li class="list-group-item"><strong>{{validation_link}}</strong> · Enlace público de validación</li>
-                                                        </ul>
-                                                    </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <div class="card border-0 shadow-sm">
+                                        <div class="card-header bg-transparent">
+                                            <h5 class="card-title mb-0">Variables disponibles</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <ul class="list-group">
+                                                        <li class="list-group-item"><strong>{{municipalidad_nombre}}</strong> · Nombre de la municipalidad</li>
+                                                        <li class="list-group-item"><strong>{{municipalidad_logo}}</strong> · URL del logo municipal</li>
+                                                        <li class="list-group-item"><strong>{{destinatario_nombre}}</strong> · Nombre del destinatario</li>
+                                                        <li class="list-group-item"><strong>{{evento_titulo}}</strong> · Título del evento</li>
+                                                        <li class="list-group-item"><strong>{{evento_descripcion}}</strong> · Descripción del evento</li>
+                                                        <li class="list-group-item"><strong>{{evento_fecha_inicio}}</strong> · Fecha de inicio</li>
+                                                    </ul>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <ul class="list-group">
+                                                        <li class="list-group-item"><strong>{{evento_fecha_fin}}</strong> · Fecha de término</li>
+                                                        <li class="list-group-item"><strong>{{evento_ubicacion}}</strong> · Ubicación del evento</li>
+                                                        <li class="list-group-item"><strong>{{evento_tipo}}</strong> · Tipo de evento</li>
+                                                        <li class="list-group-item"><strong>{{autoridades_lista}}</strong> · Lista HTML &lt;li&gt; de autoridades</li>
+                                                        <li class="list-group-item"><strong>{{validation_link}}</strong> · Enlace público de validación</li>
+                                                    </ul>
                                                 </div>
                                             </div>
                                         </div>

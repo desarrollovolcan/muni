@@ -165,16 +165,16 @@
                                 <a href="grupos-autoridades.php" class="side-nav-link">Grupos autoridades</a>
                             </li>
                             <li class="side-nav-item">
-                                <a href="notificaciones-correo.php" class="side-nav-link">Correo notificaciones</a>
+                                <a href="notificaciones-correo.php" class="side-nav-link">Correo de envío</a>
                             </li>
                             <li class="side-nav-item">
-                                <a href="invitacion-correo.php" class="side-nav-link">Correo invitaciones</a>
+                                <a href="invitacion-correo.php" class="side-nav-link">Correo invitación</a>
                             </li>
                             <li class="side-nav-item">
-                                <a href="notificaciones-whatsapp.php" class="side-nav-link">WhatsApp notificaciones</a>
+                                <a href="notificaciones-whatsapp.php" class="side-nav-link">WhatsApp envíos</a>
                             </li>
                             <li class="side-nav-item">
-                                <a href="configuracion-email.php" class="side-nav-link">Config. correos</a>
+                                <a href="configuracion-email.php" class="side-nav-link">Correo validación</a>
                             </li>
                         </ul>
                     </div>
