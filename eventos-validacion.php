@@ -9,6 +9,7 @@ $event = null;
 $authorities = [];
 $authoritiesByGroup = [];
 $confirmedAuthorityIds = [];
+$allowedAuthorityIds = [];
 
 if ($token === '') {
     $errors[] = 'El enlace de validación es inválido.';
@@ -62,6 +63,7 @@ if ($request && !$event) {
     $authorities = $stmt->fetchAll();
 
     foreach ($authorities as $authority) {
+        $allowedAuthorityIds[] = (int) $authority['id'];
         $groupId = $authority['grupo_id'] ? (int) $authority['grupo_id'] : 0;
         $groupName = $authority['grupo_nombre'] ?: 'Sin grupo';
         if (!isset($authoritiesByGroup[$groupId])) {
@@ -76,6 +78,10 @@ if ($request && !$event) {
     $stmt = db()->prepare('SELECT authority_id FROM event_authority_confirmations WHERE request_id = ?');
     $stmt->execute([(int) $request['id']]);
     $confirmedAuthorityIds = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+
+    if ($request['estado'] !== 'respondido') {
+        $confirmedAuthorityIds = [];
+    }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ?? null) && $request) {
@@ -86,7 +92,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
         $errors[] = 'No se encontró el evento asociado a la validación.';
     } else {
         $selectedAuthorities = array_map('intval', $_POST['authorities'] ?? []);
+        $allowedAuthorityIds = $allowedAuthorityIds ?: [];
+        $invalidSelections = array_diff($selectedAuthorities, $allowedAuthorityIds);
+        if (!empty($invalidSelections)) {
+            $errors[] = 'La selección incluye autoridades no válidas para este evento.';
+        }
+    }
 
+    if (empty($errors)) {
         $stmt = db()->prepare('DELETE FROM event_authority_confirmations WHERE request_id = ?');
         $stmt->execute([(int) $request['id']]);
 
