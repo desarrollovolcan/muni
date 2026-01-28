@@ -8,6 +8,7 @@ CREATE TABLE `users` (
   `direccion` VARCHAR(200) DEFAULT NULL,
   `username` VARCHAR(60) NOT NULL,
   `rol` VARCHAR(60) DEFAULT NULL,
+  `avatar_path` VARCHAR(255) DEFAULT NULL,
   `unidad_id` INT UNSIGNED DEFAULT NULL,
   `password_hash` VARCHAR(255) NOT NULL,
   `estado` TINYINT(1) NOT NULL DEFAULT 1,
