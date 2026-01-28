@@ -98,39 +98,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_
 
     if (empty($errors)) {
         try {
-            $stmt = db()->prepare('INSERT INTO users (rut, nombre, apellido, correo, telefono, direccion, username, rol, avatar_path, password_hash, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-            $rolNombre = '';
-            if (!empty($rolesSeleccionados)) {
-                $rolNombre = db()->prepare('SELECT nombre FROM roles WHERE id = ?');
-                $rolNombre->execute([$rolesSeleccionados[0]]);
-                $rolNombre = (string) ($rolNombre->fetchColumn() ?: '');
-            }
-            $stmt->execute([
-                $rut,
-                $nombre,
-                $apellido,
-                $correo,
-                $telefono,
-                $direccion !== '' ? $direccion : null,
-                $username,
-                $rolNombre,
-                $avatarPath,
-                password_hash($password, PASSWORD_BCRYPT),
-                $estado,
-            ]);
+            $pdo = db();
+            $existingStmt = $pdo->prepare('SELECT rut, correo, username FROM users WHERE rut = ? OR correo = ? OR username = ? LIMIT 1');
+            $existingStmt->execute([$rut, $correo, $username]);
+            $existing = $existingStmt->fetch();
 
-            $userId = (int) db()->lastInsertId();
-            if ($userId > 0 && !empty($rolesSeleccionados)) {
-                $insertRole = db()->prepare('INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)');
-                foreach ($rolesSeleccionados as $roleId) {
-                    $insertRole->execute([$userId, $roleId]);
+            if ($existing) {
+                if ($existing['rut'] === $rut) {
+                    $errors[] = 'El RUT ya está registrado.';
+                }
+                if ($existing['correo'] === $correo) {
+                    $errors[] = 'El correo ya está registrado.';
+                }
+                if ($existing['username'] === $username) {
+                    $errors[] = 'El username ya está registrado.';
                 }
             }
 
-            redirect('usuarios-crear.php?success=1');
+            if (!empty($rolesSeleccionados)) {
+                $placeholders = implode(',', array_fill(0, count($rolesSeleccionados), '?'));
+                $roleCheckStmt = $pdo->prepare('SELECT id FROM roles WHERE id IN (' . $placeholders . ')');
+                $roleCheckStmt->execute($rolesSeleccionados);
+                $rolesValidos = $roleCheckStmt->fetchAll(PDO::FETCH_COLUMN);
+                if (count($rolesValidos) !== count($rolesSeleccionados)) {
+                    $errors[] = 'Selecciona roles válidos para el usuario.';
+                }
+            }
+
+            if (empty($errors)) {
+                $pdo->beginTransaction();
+
+                $stmt = $pdo->prepare('INSERT INTO users (rut, nombre, apellido, correo, telefono, direccion, username, rol, avatar_path, password_hash, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+                $rolNombre = '';
+                if (!empty($rolesSeleccionados)) {
+                    $rolNombreStmt = $pdo->prepare('SELECT nombre FROM roles WHERE id = ?');
+                    $rolNombreStmt->execute([$rolesSeleccionados[0]]);
+                    $rolNombre = (string) ($rolNombreStmt->fetchColumn() ?: '');
+                }
+                $stmt->execute([
+                    $rut,
+                    $nombre,
+                    $apellido,
+                    $correo,
+                    $telefono,
+                    $direccion !== '' ? $direccion : null,
+                    $username,
+                    $rolNombre,
+                    $avatarPath,
+                    password_hash($password, PASSWORD_BCRYPT),
+                    $estado,
+                ]);
+
+                $userId = (int) $pdo->lastInsertId();
+                if ($userId > 0 && !empty($rolesSeleccionados)) {
+                    $insertRole = $pdo->prepare('INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)');
+                    foreach ($rolesSeleccionados as $roleId) {
+                        $insertRole->execute([$userId, $roleId]);
+                    }
+                }
+
+                $pdo->commit();
+                redirect('usuarios-crear.php?success=1');
+            }
         } catch (Exception $e) {
+            if (isset($pdo) && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
             $errors[] = 'No se pudo crear el usuario. Verifica la base de datos.';
         } catch (Error $e) {
+            if (isset($pdo) && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
             $errors[] = 'No se pudo crear el usuario. Verifica la base de datos.';
         }
     }
