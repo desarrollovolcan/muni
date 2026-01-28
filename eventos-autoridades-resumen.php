@@ -54,7 +54,7 @@ if ($selectedEventId > 0) {
          WHERE r.event_id = ?'
     );
     $stmtConfirmed->execute([$selectedEventId]);
-    $confirmedIds = $stmtConfirmed->fetchAll(PDO::FETCH_COLUMN);
+    $confirmedIds = array_map('intval', $stmtConfirmed->fetchAll(PDO::FETCH_COLUMN));
 
     $stmtAttendance = db()->prepare(
         'SELECT authority_id, status
