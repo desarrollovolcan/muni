@@ -3,9 +3,23 @@ require __DIR__ . '/app/bootstrap.php';
 
 $errors = [];
 $errorMessage = '';
-$roles = db()->query('SELECT id, nombre FROM roles WHERE estado = 1 ORDER BY nombre')->fetchAll();
+$roles = [];
+try {
+    $roles = db()->query('SELECT id, nombre FROM roles WHERE estado = 1 ORDER BY nombre')->fetchAll();
+} catch (Exception $e) {
+    $errorMessage = 'No se pudieron cargar los roles. Verifica la base de datos.';
+} catch (Error $e) {
+    $errorMessage = 'No se pudieron cargar los roles. Verifica la base de datos.';
+}
 $success = $_GET['success'] ?? '';
-$usuarios = db()->query('SELECT id, rut, nombre, apellido, correo, rol, estado, ultimo_acceso, avatar_path FROM users ORDER BY id DESC')->fetchAll();
+$usuarios = [];
+try {
+    $usuarios = db()->query('SELECT id, rut, nombre, apellido, correo, rol, estado, ultimo_acceso, avatar_path FROM users ORDER BY id DESC')->fetchAll();
+} catch (Exception $e) {
+    $errorMessage = $errorMessage !== '' ? $errorMessage : 'No se pudieron cargar los usuarios. Verifica la base de datos.';
+} catch (Error $e) {
+    $errorMessage = $errorMessage !== '' ? $errorMessage : 'No se pudieron cargar los usuarios. Verifica la base de datos.';
+}
 
 function handle_avatar_upload(array $file, array &$errors): ?string
 {
@@ -83,36 +97,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_
     }
 
     if (empty($errors)) {
-        $stmt = db()->prepare('INSERT INTO users (rut, nombre, apellido, correo, telefono, direccion, username, rol, avatar_path, password_hash, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-        $rolNombre = '';
-        if (!empty($rolesSeleccionados)) {
-            $rolNombre = db()->prepare('SELECT nombre FROM roles WHERE id = ?');
-            $rolNombre->execute([$rolesSeleccionados[0]]);
-            $rolNombre = (string) ($rolNombre->fetchColumn() ?: '');
-        }
-        $stmt->execute([
-            $rut,
-            $nombre,
-            $apellido,
-            $correo,
-            $telefono,
-            $direccion !== '' ? $direccion : null,
-            $username,
-            $rolNombre,
-            $avatarPath,
-            password_hash($password, PASSWORD_BCRYPT),
-            $estado,
-        ]);
-
-        $userId = (int) db()->lastInsertId();
-        if ($userId > 0 && !empty($rolesSeleccionados)) {
-            $insertRole = db()->prepare('INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)');
-            foreach ($rolesSeleccionados as $roleId) {
-                $insertRole->execute([$userId, $roleId]);
+        try {
+            $stmt = db()->prepare('INSERT INTO users (rut, nombre, apellido, correo, telefono, direccion, username, rol, avatar_path, password_hash, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+            $rolNombre = '';
+            if (!empty($rolesSeleccionados)) {
+                $rolNombre = db()->prepare('SELECT nombre FROM roles WHERE id = ?');
+                $rolNombre->execute([$rolesSeleccionados[0]]);
+                $rolNombre = (string) ($rolNombre->fetchColumn() ?: '');
             }
-        }
+            $stmt->execute([
+                $rut,
+                $nombre,
+                $apellido,
+                $correo,
+                $telefono,
+                $direccion !== '' ? $direccion : null,
+                $username,
+                $rolNombre,
+                $avatarPath,
+                password_hash($password, PASSWORD_BCRYPT),
+                $estado,
+            ]);
 
-        redirect('usuarios-crear.php?success=1');
+            $userId = (int) db()->lastInsertId();
+            if ($userId > 0 && !empty($rolesSeleccionados)) {
+                $insertRole = db()->prepare('INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)');
+                foreach ($rolesSeleccionados as $roleId) {
+                    $insertRole->execute([$userId, $roleId]);
+                }
+            }
+
+            redirect('usuarios-crear.php?success=1');
+        } catch (Exception $e) {
+            $errors[] = 'No se pudo crear el usuario. Verifica la base de datos.';
+        } catch (Error $e) {
+            $errors[] = 'No se pudo crear el usuario. Verifica la base de datos.';
+        }
     }
 }
 ?>
