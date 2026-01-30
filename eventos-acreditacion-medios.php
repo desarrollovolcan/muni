@@ -236,45 +236,35 @@ function build_pdf_from_jpeg(array $request, array $event, array $municipalidad,
     };
 
     // =========================
-    // Diseño Fiesta (POZO ALMONTE)
+    // Diseño Fiesta (moderno)
     // =========================
-    $padding = 36;
-    $lanyardTop = 140;
-
-    // Tamaño del pase (tarjeta vertical moderna)
     $badgeWidth  = 900;
     $badgeHeight = 1400;
 
-    // Colores (RGB 0..1) aproximados del logo
+    // Colores (RGB 0..1)
     $cBlue   = "0.141 0.435 0.663";  // azul
     $cOrange = "0.973 0.651 0.161";  // naranja
     $cOrange2= "0.949 0.800 0.498";  // naranja suave
-    $cGreen  = "0.396 0.635 0.467";  // verde
     $cSand   = "0.929 0.902 0.847";  // arena
     $cWhite  = "1 1 1";
     $cDark   = "0.10 0.12 0.14";
     $cSub    = "0.45 0.50 0.56";
     $cLine   = "0.90 0.90 0.90";
-    $cShadow = "0.80 0.78 0.73";
 
-    // Card
-    $cardX = 110;
-    $cardY = 220;
-    $cardW = 680;
-    $cardH = 1100;
-
-    $headerH = 200;
-    $accentH = 12;
-    $footerH = 90;
+    // Layout
+    $margin = 60;
+    $headerH = 140;
+    $footerH = 120;
+    $accentW = 70;
 
     // Zona QR (el jpegData se dibuja aquí)
-    $qrBoxX = $cardX + 50;
-    $qrBoxY = $cardY + 140;
-    $qrBoxW = $cardW - 100;
-    $qrBoxH = 260;
+    $qrBoxX = $margin + 60;
+    $qrBoxY = 250;
+    $qrBoxW = $badgeWidth - ($margin * 2) - 120;
+    $qrBoxH = 360;
 
     // Dentro del QR box (margen interno)
-    $qrPad  = 26;
+    $qrPad  = 32;
     $qrX = $qrBoxX + $qrPad;
     $qrY = $qrBoxY + $qrPad;
     $qrW = $qrBoxW - ($qrPad * 2);
@@ -313,112 +303,43 @@ function build_pdf_from_jpeg(array $request, array $event, array $municipalidad,
     $eventDates = strtoupper(($event['fecha_inicio'] ?? '') . ' AL ' . ($event['fecha_fin'] ?? ''));
 
     // Textos
-    $brand1 = $municipalidadName;
-    $brand2 = $eventTitle;
     $title  = "PASE DE ACCESO";
     $sub    = $eventDates !== ' AL ' ? $eventDates : "EVENTO OFICIAL";
-    $foot   = "INVITACIÓN DIGITAL • PRESENTAR EN ENTRADA";
 
     // =========================
-    // Content Stream (fiesta moderno)
+    // Content Stream (moderno)
     // =========================
-    $centerX = $badgeWidth / 2;
-
-    // Lanyard
-    $lanyardW = 70;
-    $lanyardH = $lanyardTop + 110;
-    $lanyardX = $centerX - ($lanyardW / 2);
-    $lanyardY = $badgeHeight - $lanyardH;
-
-    // Slot
-    $slotW = 260;
-    $slotH = 36;
-    $slotX = $centerX - ($slotW / 2);
-    $slotY = $cardY + $cardH + 40;
-
-    // Hole (aprox con 4 Bézier)
-    $circle = function (float $cx, float $cy, float $r): string {
-        $k = 0.552284749831;
-        $c = $r * $k;
-        $x0 = $cx - $r; $y0 = $cy;
-        $x1 = $cx - $r; $y1 = $cy + $c;
-        $x2 = $cx - $c; $y2 = $cy + $r;
-        $x3 = $cx;      $y3 = $cy + $r;
-        $x4 = $cx + $c; $y4 = $cy + $r;
-        $x5 = $cx + $r; $y5 = $cy + $c;
-        $x6 = $cx + $r; $y6 = $cy;
-        $x7 = $cx + $r; $y7 = $cy - $c;
-        $x8 = $cx + $c; $y8 = $cy - $r;
-        $x9 = $cx;      $y9 = $cy - $r;
-        $x10 = $cx - $c; $y10 = $cy - $r;
-        $x11 = $cx - $r; $y11 = $cy - $c;
-
-        return
-            "{$x0} {$y0} m\n" .
-            "{$x1} {$y1} {$x2} {$y2} {$x3} {$y3} c\n" .
-            "{$x4} {$y4} {$x5} {$y5} {$x6} {$y6} c\n" .
-            "{$x7} {$y7} {$x8} {$y8} {$x9} {$y9} c\n" .
-            "{$x10} {$y10} {$x11} {$y11} {$x0} {$y0} c\n";
-    };
-
-    $holeR = 14;
-    $holeX = $centerX;
-    $holeY = $slotY - 40;
-
-    // Fondo con “bandas” estilo fiesta
     $contentStream =
         "q\n{$cSand} rg\n0 0 {$badgeWidth} {$badgeHeight} re\nf\nQ\n" .
-        "q\n{$cOrange2} rg\n0 " . ($badgeHeight-520) . " {$badgeWidth} 520 re\nf\nQ\n" .
-        "q\n{$cOrange} rg\n0 " . ($badgeHeight-420) . " {$badgeWidth} 420 re\nf\nQ\n" .
-        "q\n{$cBlue} rg\n0 " . ($badgeHeight-320) . " {$badgeWidth} 320 re\nf\nQ\n" .
+        "q\n{$cBlue} rg\n0 " . ($badgeHeight - $headerH) . " {$badgeWidth} {$headerH} re\nf\nQ\n" .
+        "q\n{$cOrange} rg\n0 " . ($badgeHeight - $headerH - 16) . " {$badgeWidth} 16 re\nf\nQ\n" .
+        "q\n{$cOrange} rg\n0 0 {$badgeWidth} {$footerH} re\nf\nQ\n" .
+        "q\n{$cOrange2} rg\n0 {$footerH} {$badgeWidth} 12 re\nf\nQ\n" .
+        "q\n{$cOrange2} rg\n0 0 {$accentW} {$badgeHeight} re\nf\nQ\n" .
 
-        // Confetti (rectangulitos simples)
-        "q\n{$cGreen} rg\n60 900 10 10 re f\n120 760 12 12 re f\n200 640 10 10 re f\nQ\n" .
-        "q\n{$cOrange} rg\n700 980 10 10 re f\n760 720 12 12 re f\n680 620 10 10 re f\nQ\n" .
-        "q\n{$cWhite} rg\n140 1040 10 10 re f\n520 860 12 12 re f\n350 700 10 10 re f\nQ\n" .
-
-        // Lanyard
-        "q\n{$cBlue} rg\n{$lanyardX} {$lanyardY} {$lanyardW} {$lanyardH} re\nf\nQ\n" .
-        "q\n{$cOrange} rg\n" . ($lanyardX+12) . " " . ($lanyardY+20) . " " . ($lanyardW-24) . " " . ($lanyardH-40) . " re\nf\nQ\n" .
-
-        // Sombra card
-        "q\n{$cShadow} rg\n" . ($cardX+10) . " " . ($cardY-12) . " {$cardW} {$cardH} re\nf\nQ\n" .
-
-        // Card blanca + borde
-        "q\n{$cWhite} rg\n{$cardX} {$cardY} {$cardW} {$cardH} re\nf\n{$cLine} RG\n2 w\n{$cardX} {$cardY} {$cardW} {$cardH} re\nS\nQ\n" .
-
-        // Header
-        "q\n{$cBlue} rg\n{$cardX} " . ($cardY+$cardH-$headerH) . " {$cardW} {$headerH} re\nf\nQ\n" .
-        "q\n{$cOrange} rg\n{$cardX} " . ($cardY+$cardH-$headerH-$accentH) . " {$cardW} {$accentH} re\nf\nQ\n" .
-
-        // Slot + Hole
-        "q\n0.95 0.95 0.95 rg\n{$slotX} {$slotY} {$slotW} {$slotH} re\nf\n{$cLine} RG\n2 w\n{$slotX} {$slotY} {$slotW} {$slotH} re\nS\nQ\n" .
-        "q\n0.95 0.95 0.95 rg\n" . $circle($holeX, $holeY, $holeR) . "f\n{$cLine} RG\n2 w\n" . $circle($holeX, $holeY, $holeR) . "S\nQ\n" .
+        // Card interior
+        "q\n{$cWhite} rg\n{$margin} {$footerH} " . ($badgeWidth - ($margin * 2)) . " " . ($badgeHeight - $footerH - $headerH - 40) . " re\nf\n{$cLine} RG\n2 w\n{$margin} {$footerH} " . ($badgeWidth - ($margin * 2)) . " " . ($badgeHeight - $footerH - $headerH - 40) . " re\nS\nQ\n" .
 
         // QR box
         "q\n0.96 0.97 0.98 rg\n{$qrBoxX} {$qrBoxY} {$qrBoxW} {$qrBoxH} re\nf\n{$cLine} RG\n2 w\n{$qrBoxX} {$qrBoxY} {$qrBoxW} {$qrBoxH} re\nS\nQ\n" .
 
-        // QR (jpegData) centrado dentro del QR box
+        // QR (jpegData)
         "q\n{$drawW} 0 0 {$drawH} {$drawX} {$drawY} cm\n/Im0 Do\nQ\n" .
 
-        // Footer
-        "q\n{$cOrange} rg\n{$cardX} {$cardY} {$cardW} {$footerH} re\nf\nQ\n" .
+        // Textos encabezado
+        "q\nBT\n/F1 22 Tf\n1 1 1 rg\n" . ($margin + 40) . " " . ($badgeHeight - 80) . " Td\n(" . $esc($municipalidadName) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 12 Tf\n{$cOrange2} rg\n" . ($margin + 40) . " " . ($badgeHeight - 108) . " Td\n(" . $esc($eventTitle) . ") Tj\nET\nQ\n" .
 
-        // Textos (Helvetica)
-        "q\nBT\n/F1 22 Tf\n1 1 1 rg\n" . ($cardX+50) . " " . ($cardY+$cardH-70) . " Td\n(" . $esc($brand1) . ") Tj\nET\nQ\n" .
-        "q\nBT\n/F1 12 Tf\n{$cOrange2} rg\n" . ($cardX+50) . " " . ($cardY+$cardH-96) . " Td\n(" . $esc($brand2) . ") Tj\nET\nQ\n" .
+        // Textos principales
+        "q\nBT\n/F1 26 Tf\n{$cDark} rg\n" . ($margin + 60) . " " . ($badgeHeight - $headerH - 80) . " Td\n(" . $esc($title) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 12 Tf\n{$cSub} rg\n" . ($margin + 60) . " " . ($badgeHeight - $headerH - 110) . " Td\n(" . $esc($sub) . ") Tj\nET\nQ\n" .
 
-        "q\nBT\n/F1 26 Tf\n{$cDark} rg\n" . ($cardX+50) . " " . ($cardY+$cardH-280) . " Td\n(" . $esc($title) . ") Tj\nET\nQ\n" .
-        "q\nBT\n/F1 14 Tf\n{$cSub} rg\n" . ($cardX+50) . " " . ($cardY+$cardH-310) . " Td\n(" . $esc($sub) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 14 Tf\n{$cDark} rg\n" . ($margin + 60) . " " . ($badgeHeight - $headerH - 170) . " Td\n(" . $esc($fullName) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 11 Tf\n{$cSub} rg\n" . ($margin + 60) . " " . ($badgeHeight - $headerH - 200) . " Td\n(" . $esc("MEDIO: {$medio}") . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 11 Tf\n{$cSub} rg\n" . ($margin + 60) . " " . ($badgeHeight - $headerH - 220) . " Td\n(" . $esc("CARGO: {$cargo}") . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 11 Tf\n{$cSub} rg\n" . ($margin + 60) . " " . ($badgeHeight - $headerH - 240) . " Td\n(" . $esc("RUT: {$rut}") . ") Tj\nET\nQ\n" .
 
-        "q\nBT\n/F1 12 Tf\n{$cSub} rg\n" . ($qrBoxX+24) . " " . ($qrBoxY+$qrBoxH-26) . " Td\n(ESCANEA TU QR) Tj\nET\nQ\n" .
-
-        "q\nBT\n/F1 12 Tf\n{$cDark} rg\n" . ($cardX+50) . " " . ($cardY+$cardH-380) . " Td\n(" . $esc($fullName) . ") Tj\nET\nQ\n" .
-        "q\nBT\n/F1 12 Tf\n{$cSub} rg\n" . ($cardX+50) . " " . ($cardY+$cardH-410) . " Td\n(" . $esc("MEDIO: {$medio}") . ") Tj\nET\nQ\n" .
-        "q\nBT\n/F1 12 Tf\n{$cSub} rg\n" . ($cardX+50) . " " . ($cardY+$cardH-435) . " Td\n(" . $esc("CARGO: {$cargo}") . ") Tj\nET\nQ\n" .
-        "q\nBT\n/F1 12 Tf\n{$cSub} rg\n" . ($cardX+50) . " " . ($cardY+$cardH-460) . " Td\n(" . $esc("RUT: {$rut}") . ") Tj\nET\nQ\n" .
-
-        "q\nBT\n/F1 12 Tf\n1 1 1 rg\n" . ($cardX+50) . " " . ($cardY+30) . " Td\n(" . $esc($foot) . ") Tj\nET\nQ\n";
+        "q\nBT\n/F1 12 Tf\n{$cSub} rg\n" . ($qrBoxX + 30) . " " . ($qrBoxY + $qrBoxH - 28) . " Td\n(ESCANEA TU QR) Tj\nET\nQ\n";
 
     $contentObject = $addObject(
         '<< /Length ' . strlen($contentStream) . " >>\nstream\n" . $contentStream . "\nendstream"
