@@ -713,40 +713,28 @@ if ($selectedEventId > 0) {
                                                         <td class="text-muted small"><?php echo $qrToken !== '' ? htmlspecialchars($qrToken, ENT_QUOTES, 'UTF-8') : '-'; ?></td>
                                                         <td><?php echo htmlspecialchars($request['created_at'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td class="text-end">
-                                                            <div class="dropdown">
-                                                                <button class="btn btn-sm btn-soft-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                                    Acciones
-                                                                </button>
-                                                                <ul class="dropdown-menu dropdown-menu-end">
-                                                                    <li>
-                                                                        <form method="post" class="px-3 py-1">
-                                                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                                                            <input type="hidden" name="action" value="approve">
-                                                                            <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
-                                                                            <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
-                                                                            <button type="submit" class="btn btn-sm btn-success w-100">Aprobar</button>
-                                                                        </form>
-                                                                    </li>
-                                                                    <li>
-                                                                        <form method="post" class="px-3 py-1">
-                                                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                                                            <input type="hidden" name="action" value="reject">
-                                                                            <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
-                                                                            <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
-                                                                            <button type="submit" class="btn btn-sm btn-warning w-100">Rechazar</button>
-                                                                        </form>
-                                                                    </li>
-                                                                    <li><hr class="dropdown-divider"></li>
-                                                                    <li>
-                                                                        <form method="post" class="px-3 py-1" onsubmit="return confirm('¿Eliminar esta solicitud? Esta acción no se puede deshacer.');">
-                                                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                                                            <input type="hidden" name="action" value="delete">
-                                                                            <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
-                                                                            <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
-                                                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100">Eliminar</button>
-                                                                        </form>
-                                                                    </li>
-                                                                </ul>
+                                                            <div class="d-flex flex-wrap justify-content-end gap-1">
+                                                                <form method="post">
+                                                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                    <input type="hidden" name="action" value="approve">
+                                                                    <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
+                                                                    <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
+                                                                    <button type="submit" class="btn btn-sm btn-success">Aprobar</button>
+                                                                </form>
+                                                                <form method="post">
+                                                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                    <input type="hidden" name="action" value="reject">
+                                                                    <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
+                                                                    <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
+                                                                    <button type="submit" class="btn btn-sm btn-warning">Rechazar</button>
+                                                                </form>
+                                                                <form method="post" onsubmit="return confirm('¿Eliminar esta solicitud? Esta acción no se puede deshacer.');">
+                                                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                    <input type="hidden" name="action" value="delete">
+                                                                    <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
+                                                                    <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
+                                                                    <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                                                                </form>
                                                             </div>
                                                         </td>
                                                     </tr>
