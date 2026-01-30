@@ -227,7 +227,7 @@ function build_media_badge_image(array $request, array $event, array $municipali
     ];
 }
 
-function build_pdf_from_jpeg(string $jpegData, int $width, int $height): string
+function build_pdf_from_jpeg(array $request, array $event, array $municipalidad, string $jpegData, int $width, int $height): string
 {
     $objects = [];
     $addObject = function (string $content) use (&$objects): int {
@@ -235,25 +235,215 @@ function build_pdf_from_jpeg(string $jpegData, int $width, int $height): string
         return count($objects);
     };
 
+    // =========================
+    // Diseño Fiesta (POZO ALMONTE)
+    // =========================
+    $padding = 36;
+    $lanyardTop = 140;
+
+    // Tamaño del pase (tarjeta vertical moderna)
+    $badgeWidth  = 900;
+    $badgeHeight = 1400;
+
+    // Colores (RGB 0..1) aproximados del logo
+    $cBlue   = "0.141 0.435 0.663";  // azul
+    $cOrange = "0.973 0.651 0.161";  // naranja
+    $cOrange2= "0.949 0.800 0.498";  // naranja suave
+    $cGreen  = "0.396 0.635 0.467";  // verde
+    $cSand   = "0.929 0.902 0.847";  // arena
+    $cWhite  = "1 1 1";
+    $cDark   = "0.10 0.12 0.14";
+    $cSub    = "0.45 0.50 0.56";
+    $cLine   = "0.90 0.90 0.90";
+    $cShadow = "0.80 0.78 0.73";
+
+    // Card
+    $cardX = 110;
+    $cardY = 220;
+    $cardW = 680;
+    $cardH = 1100;
+
+    $headerH = 200;
+    $accentH = 12;
+    $footerH = 90;
+
+    // Zona QR (el jpegData se dibuja aquí)
+    $qrBoxX = $cardX + 50;
+    $qrBoxY = $cardY + 140;
+    $qrBoxW = $cardW - 100;
+    $qrBoxH = 260;
+
+    // Dentro del QR box (margen interno)
+    $qrPad  = 26;
+    $qrX = $qrBoxX + $qrPad;
+    $qrY = $qrBoxY + $qrPad;
+    $qrW = $qrBoxW - ($qrPad * 2);
+    $qrH = $qrBoxH - ($qrPad * 2);
+
+    // Escalado del JPEG (QR) respetando proporción
+    $scaleX = $qrW / $width;
+    $scaleY = $qrH / $height;
+    $scale  = min($scaleX, $scaleY);
+
+    $drawW = $width * $scale;
+    $drawH = $height * $scale;
+    $drawX = $qrX + (($qrW - $drawW) / 2);
+    $drawY = $qrY + (($qrH - $drawH) / 2);
+
+    // Imagen (QR JPEG)
     $imageObject = $addObject(
         '<< /Type /XObject /Subtype /Image /Width ' . $width . ' /Height ' . $height .
         ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' . strlen($jpegData) . ' >>' .
         "\nstream\n" . $jpegData . "\nendstream"
     );
 
-    $contentStream = "q\n{$width} 0 0 {$height} 0 0 cm\n/Im0 Do\nQ";
+    // Fuente estándar PDF
+    $fontObject = $addObject('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
+
+    $esc = function (string $s): string {
+        return str_replace(['\\', '(', ')', "\r"], ['\\\\', '\\(', '\\)', ''], $s);
+    };
+
+    $municipalidadName = strtoupper($municipalidad['nombre'] ?? 'Municipalidad');
+    $eventTitle = strtoupper($event['titulo'] ?? 'EVENTO');
+    $fullName = strtoupper(trim(($request['nombre'] ?? '') . ' ' . ($request['apellidos'] ?? '')));
+    $medio = strtoupper($request['medio'] ?? '-');
+    $rut = strtoupper($request['rut'] ?? '-');
+    $cargo = strtoupper($request['cargo'] ?? '-');
+    $eventDates = strtoupper(($event['fecha_inicio'] ?? '') . ' AL ' . ($event['fecha_fin'] ?? ''));
+
+    // Textos
+    $brand1 = $municipalidadName;
+    $brand2 = $eventTitle;
+    $title  = "PASE DE ACCESO";
+    $sub    = $eventDates !== ' AL ' ? $eventDates : "EVENTO OFICIAL";
+    $foot   = "INVITACIÓN DIGITAL • PRESENTAR EN ENTRADA";
+
+    // =========================
+    // Content Stream (fiesta moderno)
+    // =========================
+    $centerX = $badgeWidth / 2;
+
+    // Lanyard
+    $lanyardW = 70;
+    $lanyardH = $lanyardTop + 110;
+    $lanyardX = $centerX - ($lanyardW / 2);
+    $lanyardY = $badgeHeight - $lanyardH;
+
+    // Slot
+    $slotW = 260;
+    $slotH = 36;
+    $slotX = $centerX - ($slotW / 2);
+    $slotY = $cardY + $cardH + 40;
+
+    // Hole (aprox con 4 Bézier)
+    $circle = function (float $cx, float $cy, float $r): string {
+        $k = 0.552284749831;
+        $c = $r * $k;
+        $x0 = $cx - $r; $y0 = $cy;
+        $x1 = $cx - $r; $y1 = $cy + $c;
+        $x2 = $cx - $c; $y2 = $cy + $r;
+        $x3 = $cx;      $y3 = $cy + $r;
+        $x4 = $cx + $c; $y4 = $cy + $r;
+        $x5 = $cx + $r; $y5 = $cy + $c;
+        $x6 = $cx + $r; $y6 = $cy;
+        $x7 = $cx + $r; $y7 = $cy - $c;
+        $x8 = $cx + $c; $y8 = $cy - $r;
+        $x9 = $cx;      $y9 = $cy - $r;
+        $x10 = $cx - $c; $y10 = $cy - $r;
+        $x11 = $cx - $r; $y11 = $cy - $c;
+
+        return
+            "{$x0} {$y0} m\n" .
+            "{$x1} {$y1} {$x2} {$y2} {$x3} {$y3} c\n" .
+            "{$x4} {$y4} {$x5} {$y5} {$x6} {$y6} c\n" .
+            "{$x7} {$y7} {$x8} {$y8} {$x9} {$y9} c\n" .
+            "{$x10} {$y10} {$x11} {$y11} {$x0} {$y0} c\n";
+    };
+
+    $holeR = 14;
+    $holeX = $centerX;
+    $holeY = $slotY - 40;
+
+    // Fondo con “bandas” estilo fiesta
+    $contentStream =
+        "q\n{$cSand} rg\n0 0 {$badgeWidth} {$badgeHeight} re\nf\nQ\n" .
+        "q\n{$cOrange2} rg\n0 " . ($badgeHeight-520) . " {$badgeWidth} 520 re\nf\nQ\n" .
+        "q\n{$cOrange} rg\n0 " . ($badgeHeight-420) . " {$badgeWidth} 420 re\nf\nQ\n" .
+        "q\n{$cBlue} rg\n0 " . ($badgeHeight-320) . " {$badgeWidth} 320 re\nf\nQ\n" .
+
+        // Confetti (rectangulitos simples)
+        "q\n{$cGreen} rg\n60 900 10 10 re f\n120 760 12 12 re f\n200 640 10 10 re f\nQ\n" .
+        "q\n{$cOrange} rg\n700 980 10 10 re f\n760 720 12 12 re f\n680 620 10 10 re f\nQ\n" .
+        "q\n{$cWhite} rg\n140 1040 10 10 re f\n520 860 12 12 re f\n350 700 10 10 re f\nQ\n" .
+
+        // Lanyard
+        "q\n{$cBlue} rg\n{$lanyardX} {$lanyardY} {$lanyardW} {$lanyardH} re\nf\nQ\n" .
+        "q\n{$cOrange} rg\n" . ($lanyardX+12) . " " . ($lanyardY+20) . " " . ($lanyardW-24) . " " . ($lanyardH-40) . " re\nf\nQ\n" .
+
+        // Sombra card
+        "q\n{$cShadow} rg\n" . ($cardX+10) . " " . ($cardY-12) . " {$cardW} {$cardH} re\nf\nQ\n" .
+
+        // Card blanca + borde
+        "q\n{$cWhite} rg\n{$cardX} {$cardY} {$cardW} {$cardH} re\nf\n{$cLine} RG\n2 w\n{$cardX} {$cardY} {$cardW} {$cardH} re\nS\nQ\n" .
+
+        // Header
+        "q\n{$cBlue} rg\n{$cardX} " . ($cardY+$cardH-$headerH) . " {$cardW} {$headerH} re\nf\nQ\n" .
+        "q\n{$cOrange} rg\n{$cardX} " . ($cardY+$cardH-$headerH-$accentH) . " {$cardW} {$accentH} re\nf\nQ\n" .
+
+        // Slot + Hole
+        "q\n0.95 0.95 0.95 rg\n{$slotX} {$slotY} {$slotW} {$slotH} re\nf\n{$cLine} RG\n2 w\n{$slotX} {$slotY} {$slotW} {$slotH} re\nS\nQ\n" .
+        "q\n0.95 0.95 0.95 rg\n" . $circle($holeX, $holeY, $holeR) . "f\n{$cLine} RG\n2 w\n" . $circle($holeX, $holeY, $holeR) . "S\nQ\n" .
+
+        // QR box
+        "q\n0.96 0.97 0.98 rg\n{$qrBoxX} {$qrBoxY} {$qrBoxW} {$qrBoxH} re\nf\n{$cLine} RG\n2 w\n{$qrBoxX} {$qrBoxY} {$qrBoxW} {$qrBoxH} re\nS\nQ\n" .
+
+        // QR (jpegData) centrado dentro del QR box
+        "q\n{$drawW} 0 0 {$drawH} {$drawX} {$drawY} cm\n/Im0 Do\nQ\n" .
+
+        // Footer
+        "q\n{$cOrange} rg\n{$cardX} {$cardY} {$cardW} {$footerH} re\nf\nQ\n" .
+
+        // Textos (Helvetica)
+        "q\nBT\n/F1 22 Tf\n1 1 1 rg\n" . ($cardX+50) . " " . ($cardY+$cardH-70) . " Td\n(" . $esc($brand1) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 12 Tf\n{$cOrange2} rg\n" . ($cardX+50) . " " . ($cardY+$cardH-96) . " Td\n(" . $esc($brand2) . ") Tj\nET\nQ\n" .
+
+        "q\nBT\n/F1 26 Tf\n{$cDark} rg\n" . ($cardX+50) . " " . ($cardY+$cardH-280) . " Td\n(" . $esc($title) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 14 Tf\n{$cSub} rg\n" . ($cardX+50) . " " . ($cardY+$cardH-310) . " Td\n(" . $esc($sub) . ") Tj\nET\nQ\n" .
+
+        "q\nBT\n/F1 12 Tf\n{$cSub} rg\n" . ($qrBoxX+24) . " " . ($qrBoxY+$qrBoxH-26) . " Td\n(ESCANEA TU QR) Tj\nET\nQ\n" .
+
+        "q\nBT\n/F1 12 Tf\n{$cDark} rg\n" . ($cardX+50) . " " . ($cardY+$cardH-380) . " Td\n(" . $esc($fullName) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 12 Tf\n{$cSub} rg\n" . ($cardX+50) . " " . ($cardY+$cardH-410) . " Td\n(" . $esc("MEDIO: {$medio}") . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 12 Tf\n{$cSub} rg\n" . ($cardX+50) . " " . ($cardY+$cardH-435) . " Td\n(" . $esc("CARGO: {$cargo}") . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 12 Tf\n{$cSub} rg\n" . ($cardX+50) . " " . ($cardY+$cardH-460) . " Td\n(" . $esc("RUT: {$rut}") . ") Tj\nET\nQ\n" .
+
+        "q\nBT\n/F1 12 Tf\n1 1 1 rg\n" . ($cardX+50) . " " . ($cardY+30) . " Td\n(" . $esc($foot) . ") Tj\nET\nQ\n";
+
     $contentObject = $addObject(
         '<< /Length ' . strlen($contentStream) . " >>\nstream\n" . $contentStream . "\nendstream"
     );
 
+    // Pages placeholder
+    $pagesObject = $addObject('<< /Type /Pages /Kids [] /Count 0 >>');
+
     $pageObject = $addObject(
-        '<< /Type /Page /Parent 4 0 R /Resources << /XObject << /Im0 ' . $imageObject .
-        ' 0 R >> >> /MediaBox [0 0 ' . $width . ' ' . $height . '] /Contents ' . $contentObject . ' 0 R >>'
+        '<< /Type /Page ' .
+        '/Parent ' . $pagesObject . ' 0 R ' .
+        '/Resources << ' .
+            '/XObject << /Im0 ' . $imageObject . ' 0 R >> ' .
+            '/Font << /F1 ' . $fontObject . ' 0 R >> ' .
+        '>> ' .
+        '/MediaBox [0 0 ' . $badgeWidth . ' ' . $badgeHeight . '] ' .
+        '/Contents ' . $contentObject . ' 0 R >>'
     );
 
-    $pagesObject = $addObject('<< /Type /Pages /Kids [' . $pageObject . ' 0 R] /Count 1 >>');
+    // Update pages
+    $objects[$pagesObject - 1] = '<< /Type /Pages /Kids [' . $pageObject . ' 0 R] /Count 1 >>';
+
     $catalogObject = $addObject('<< /Type /Catalog /Pages ' . $pagesObject . ' 0 R >>');
 
+    // Ensamble PDF (igual que tu estructura)
     $pdf = "%PDF-1.3\n";
     $offsets = [0];
 
@@ -266,9 +456,7 @@ function build_pdf_from_jpeg(string $jpegData, int $width, int $height): string
     $pdf .= "xref\n0 " . (count($objects) + 1) . "\n";
     $pdf .= "0000000000 65535 f \n";
     foreach ($offsets as $offsetIndex => $offset) {
-        if ($offsetIndex === 0) {
-            continue;
-        }
+        if ($offsetIndex === 0) continue;
         $pdf .= sprintf("%010d 00000 n \n", $offset);
     }
 
@@ -331,7 +519,7 @@ function send_media_approval_email(array $request, array $event, array $municipa
     if ($badgeImage && $badgeImage['data']) {
         $pdfAttachment = [
             'filename' => 'gafete-acreditacion-' . ($request['id'] ?? 'medio') . '.pdf',
-            'content' => build_pdf_from_jpeg($badgeImage['data'], $badgeImage['width'], $badgeImage['height']),
+            'content' => build_pdf_from_jpeg($request, $event, $municipalidad, $badgeImage['data'], $badgeImage['width'], $badgeImage['height']),
         ];
     }
 

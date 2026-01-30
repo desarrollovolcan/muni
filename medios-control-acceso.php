@@ -231,6 +231,11 @@ if ($selectedEventId > 0) {
                     </div>
 
                     <div class="col-lg-7">
+                        <div class="d-flex justify-content-end mb-2">
+                            <a class="btn btn-sm btn-outline-primary" href="medios-control-acceso.php?event_id=<?php echo (int) $selectedEventId; ?>">
+                                <i class="ti ti-refresh"></i> Actualizar
+                            </a>
+                        </div>
                         <div class="card gm-section mb-3">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <div>
