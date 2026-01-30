@@ -124,6 +124,303 @@ function build_media_email_headers(?string $fromEmail, ?string $fromName): strin
     return $headers;
 }
 
+function build_media_badge_image(array $request, array $event, array $municipalidad, string $qrUrl): ?array
+{
+    if (!extension_loaded('gd')) {
+        return null;
+    }
+
+    $width = 600;
+    $height = 900;
+    $image = imagecreatetruecolor($width, $height);
+    if (!$image) {
+        return null;
+    }
+
+    imagealphablending($image, true);
+    imagesavealpha($image, true);
+
+    $white = imagecolorallocate($image, 255, 255, 255);
+    $primary = imagecolorallocate($image, 4, 78, 140);
+    $secondary = imagecolorallocate($image, 1, 57, 102);
+    $light = imagecolorallocate($image, 241, 245, 249);
+    $dark = imagecolorallocate($image, 31, 41, 55);
+    $gray = imagecolorallocate($image, 107, 114, 128);
+
+    imagefilledrectangle($image, 0, 0, $width, $height, $white);
+    imagefilledrectangle($image, 0, 0, $width, 220, $primary);
+    imagefilledellipse($image, (int) ($width * 0.85), 230, 420, 280, $secondary);
+    imagefilledellipse($image, (int) ($width * 0.1), 260, 380, 260, $primary);
+    imagefilledrectangle($image, 0, 220, $width, 260, $primary);
+    imagefilledellipse($image, (int) ($width * 0.85), $height - 150, 520, 320, $secondary);
+    imagefilledellipse($image, (int) ($width * 0.1), $height - 110, 420, 260, $primary);
+    imagefilledrectangle($image, 0, $height - 200, $width, $height, $primary);
+
+    $municipalidadName = strtoupper($municipalidad['nombre'] ?? 'Municipalidad');
+    $eventTitle = $event['titulo'] ?? 'Evento';
+    $fullName = trim(($request['nombre'] ?? '') . ' ' . ($request['apellidos'] ?? ''));
+
+    $logoPath = $municipalidad['logo_path'] ?? 'assets/images/logo.png';
+    $logoFile = __DIR__ . '/' . ltrim($logoPath, '/');
+    $logoImage = null;
+    if (is_file($logoFile)) {
+        $extension = strtolower(pathinfo($logoFile, PATHINFO_EXTENSION));
+        if (in_array($extension, ['png', 'gif'], true)) {
+            $logoImage = @imagecreatefrompng($logoFile);
+        } elseif (in_array($extension, ['jpg', 'jpeg'], true)) {
+            $logoImage = @imagecreatefromjpeg($logoFile);
+        }
+    }
+
+    if ($logoImage) {
+        $logoWidth = 120;
+        $logoHeight = (int) ($logoWidth * imagesy($logoImage) / imagesx($logoImage));
+        imagecopyresampled($image, $logoImage, 30, 30, 0, 0, $logoWidth, $logoHeight, imagesx($logoImage), imagesy($logoImage));
+    }
+
+    imagestring($image, 5, 180, 40, $municipalidadName, $white);
+    imagestring($image, 4, 180, 80, $eventTitle, $white);
+
+    imagestring($image, 5, 40, 270, 'ACREDITACION MEDIOS', $dark);
+    imagestring($image, 5, 40, 310, $fullName, $dark);
+    imagestring($image, 4, 40, 350, 'Cargo: ' . ($request['cargo'] ?? '-'), $gray);
+    imagestring($image, 4, 40, 380, 'Medio: ' . ($request['medio'] ?? '-'), $gray);
+    imagestring($image, 4, 40, 410, 'RUT: ' . ($request['rut'] ?? '-'), $gray);
+
+    $qrData = @file_get_contents($qrUrl);
+    if ($qrData) {
+        $qrImage = @imagecreatefromstring($qrData);
+        if ($qrImage) {
+            $qrSize = 280;
+            $qrX = (int) (($width - $qrSize) / 2);
+            $qrY = 470;
+            imagecopyresampled($image, $qrImage, $qrX, $qrY, 0, 0, $qrSize, $qrSize, imagesx($qrImage), imagesy($qrImage));
+            imagedestroy($qrImage);
+        }
+    }
+
+    imagestring($image, 3, 40, 770, 'Token QR: ' . ($request['qr_token'] ?? '-'), $light);
+    imagestring($image, 3, 40, 795, 'Valido para el evento en fechas oficiales.', $light);
+
+    if ($logoImage) {
+        $smallLogoWidth = 90;
+        $smallLogoHeight = (int) ($smallLogoWidth * imagesy($logoImage) / imagesx($logoImage));
+        $logoX = $width - $smallLogoWidth - 30;
+        $logoY = $height - $smallLogoHeight - 30;
+        imagecopyresampled($image, $logoImage, $logoX, $logoY, 0, 0, $smallLogoWidth, $smallLogoHeight, imagesx($logoImage), imagesy($logoImage));
+        imagedestroy($logoImage);
+    }
+
+    ob_start();
+    imagejpeg($image, null, 90);
+    $jpegData = ob_get_clean();
+    imagedestroy($image);
+
+    if (!$jpegData) {
+        return null;
+    }
+
+    return [
+        'data' => $jpegData,
+        'width' => $width,
+        'height' => $height,
+    ];
+}
+
+function build_pdf_from_jpeg(array $request, array $event, array $municipalidad, string $jpegData, int $width, int $height): string
+{
+    $objects = [];
+    $addObject = function (string $content) use (&$objects): int {
+        $objects[] = $content;
+        return count($objects);
+    };
+
+    // =========================
+    // Diseño Fiesta (moderno)
+    // =========================
+    $badgeWidth  = 900;
+    $badgeHeight = 1400;
+
+    // Colores (RGB 0..1)
+    $cBlue   = "0.141 0.435 0.663";  // azul
+    $cOrange = "0.973 0.651 0.161";  // naranja
+    $cOrange2= "0.949 0.800 0.498";  // naranja suave
+    $cSand   = "0.929 0.902 0.847";  // arena
+    $cWhite  = "1 1 1";
+    $cDark   = "0.10 0.12 0.14";
+    $cSub    = "0.45 0.50 0.56";
+    $cLine   = "0.90 0.90 0.90";
+
+    // Layout
+    $margin = 60;
+    $headerH = 140;
+    $footerH = 120;
+    $accentW = 70;
+
+    // Zona QR (el jpegData se dibuja aquí)
+    $qrBoxX = $margin + 60;
+    $qrBoxY = 250;
+    $qrBoxW = $badgeWidth - ($margin * 2) - 120;
+    $qrBoxH = 360;
+
+    // Dentro del QR box (margen interno)
+    $qrPad  = 32;
+    $qrX = $qrBoxX + $qrPad;
+    $qrY = $qrBoxY + $qrPad;
+    $qrW = $qrBoxW - ($qrPad * 2);
+    $qrH = $qrBoxH - ($qrPad * 2);
+
+    // Escalado del JPEG (QR) respetando proporción
+    $scaleX = $qrW / $width;
+    $scaleY = $qrH / $height;
+    $scale  = min($scaleX, $scaleY);
+
+    $drawW = $width * $scale;
+    $drawH = $height * $scale;
+    $drawX = $qrX + (($qrW - $drawW) / 2);
+    $drawY = $qrY + (($qrH - $drawH) / 2);
+
+    // Imagen (QR JPEG)
+    $imageObject = $addObject(
+        '<< /Type /XObject /Subtype /Image /Width ' . $width . ' /Height ' . $height .
+        ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' . strlen($jpegData) . ' >>' .
+        "\nstream\n" . $jpegData . "\nendstream"
+    );
+
+    // Fuente estándar PDF
+    $fontObject = $addObject('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
+
+    $esc = function (string $s): string {
+        return str_replace(['\\', '(', ')', "\r"], ['\\\\', '\\(', '\\)', ''], $s);
+    };
+
+    $municipalidadName = strtoupper($municipalidad['nombre'] ?? 'Municipalidad');
+    $eventTitle = strtoupper($event['titulo'] ?? 'EVENTO');
+    $fullName = strtoupper(trim(($request['nombre'] ?? '') . ' ' . ($request['apellidos'] ?? '')));
+    $medio = strtoupper($request['medio'] ?? '-');
+    $rut = strtoupper($request['rut'] ?? '-');
+    $cargo = strtoupper($request['cargo'] ?? '-');
+    $eventDates = strtoupper(($event['fecha_inicio'] ?? '') . ' AL ' . ($event['fecha_fin'] ?? ''));
+
+    // Textos
+    $title  = "PASE DE ACCESO";
+    $sub    = $eventDates !== ' AL ' ? $eventDates : "EVENTO OFICIAL";
+
+    // =========================
+    // Content Stream (moderno)
+    // =========================
+    $contentStream =
+        "q\n{$cSand} rg\n0 0 {$badgeWidth} {$badgeHeight} re\nf\nQ\n" .
+        "q\n{$cBlue} rg\n0 " . ($badgeHeight - $headerH) . " {$badgeWidth} {$headerH} re\nf\nQ\n" .
+        "q\n{$cOrange} rg\n0 " . ($badgeHeight - $headerH - 16) . " {$badgeWidth} 16 re\nf\nQ\n" .
+        "q\n{$cOrange} rg\n0 0 {$badgeWidth} {$footerH} re\nf\nQ\n" .
+        "q\n{$cOrange2} rg\n0 {$footerH} {$badgeWidth} 12 re\nf\nQ\n" .
+        "q\n{$cOrange2} rg\n0 0 {$accentW} {$badgeHeight} re\nf\nQ\n" .
+
+        // Card interior
+        "q\n{$cWhite} rg\n{$margin} {$footerH} " . ($badgeWidth - ($margin * 2)) . " " . ($badgeHeight - $footerH - $headerH - 40) . " re\nf\n{$cLine} RG\n2 w\n{$margin} {$footerH} " . ($badgeWidth - ($margin * 2)) . " " . ($badgeHeight - $footerH - $headerH - 40) . " re\nS\nQ\n" .
+
+        // QR box
+        "q\n0.96 0.97 0.98 rg\n{$qrBoxX} {$qrBoxY} {$qrBoxW} {$qrBoxH} re\nf\n{$cLine} RG\n2 w\n{$qrBoxX} {$qrBoxY} {$qrBoxW} {$qrBoxH} re\nS\nQ\n" .
+
+        // QR (jpegData)
+        "q\n{$drawW} 0 0 {$drawH} {$drawX} {$drawY} cm\n/Im0 Do\nQ\n" .
+
+        // Textos encabezado
+        "q\nBT\n/F1 22 Tf\n1 1 1 rg\n" . ($margin + 40) . " " . ($badgeHeight - 80) . " Td\n(" . $esc($municipalidadName) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 12 Tf\n{$cOrange2} rg\n" . ($margin + 40) . " " . ($badgeHeight - 108) . " Td\n(" . $esc($eventTitle) . ") Tj\nET\nQ\n" .
+
+        // Textos principales
+        "q\nBT\n/F1 26 Tf\n{$cDark} rg\n" . ($margin + 60) . " " . ($badgeHeight - $headerH - 80) . " Td\n(" . $esc($title) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 12 Tf\n{$cSub} rg\n" . ($margin + 60) . " " . ($badgeHeight - $headerH - 110) . " Td\n(" . $esc($sub) . ") Tj\nET\nQ\n" .
+
+        "q\nBT\n/F1 14 Tf\n{$cDark} rg\n" . ($margin + 60) . " " . ($badgeHeight - $headerH - 170) . " Td\n(" . $esc($fullName) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 11 Tf\n{$cSub} rg\n" . ($margin + 60) . " " . ($badgeHeight - $headerH - 200) . " Td\n(" . $esc("MEDIO: {$medio}") . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 11 Tf\n{$cSub} rg\n" . ($margin + 60) . " " . ($badgeHeight - $headerH - 220) . " Td\n(" . $esc("CARGO: {$cargo}") . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 11 Tf\n{$cSub} rg\n" . ($margin + 60) . " " . ($badgeHeight - $headerH - 240) . " Td\n(" . $esc("RUT: {$rut}") . ") Tj\nET\nQ\n" .
+
+        "q\nBT\n/F1 12 Tf\n{$cSub} rg\n" . ($qrBoxX + 30) . " " . ($qrBoxY + $qrBoxH - 28) . " Td\n(ESCANEA TU QR) Tj\nET\nQ\n";
+
+    $contentObject = $addObject(
+        '<< /Length ' . strlen($contentStream) . " >>\nstream\n" . $contentStream . "\nendstream"
+    );
+
+    // Pages placeholder
+    $pagesObject = $addObject('<< /Type /Pages /Kids [] /Count 0 >>');
+
+    $pageObject = $addObject(
+        '<< /Type /Page ' .
+        '/Parent ' . $pagesObject . ' 0 R ' .
+        '/Resources << ' .
+            '/XObject << /Im0 ' . $imageObject . ' 0 R >> ' .
+            '/Font << /F1 ' . $fontObject . ' 0 R >> ' .
+        '>> ' .
+        '/MediaBox [0 0 ' . $badgeWidth . ' ' . $badgeHeight . '] ' .
+        '/Contents ' . $contentObject . ' 0 R >>'
+    );
+
+    // Update pages
+    $objects[$pagesObject - 1] = '<< /Type /Pages /Kids [' . $pageObject . ' 0 R] /Count 1 >>';
+
+    $catalogObject = $addObject('<< /Type /Catalog /Pages ' . $pagesObject . ' 0 R >>');
+
+    // Ensamble PDF (igual que tu estructura)
+    $pdf = "%PDF-1.3\n";
+    $offsets = [0];
+
+    foreach ($objects as $index => $object) {
+        $offsets[$index + 1] = strlen($pdf);
+        $pdf .= ($index + 1) . " 0 obj\n" . $object . "\nendobj\n";
+    }
+
+    $xrefPosition = strlen($pdf);
+    $pdf .= "xref\n0 " . (count($objects) + 1) . "\n";
+    $pdf .= "0000000000 65535 f \n";
+    foreach ($offsets as $offsetIndex => $offset) {
+        if ($offsetIndex === 0) continue;
+        $pdf .= sprintf("%010d 00000 n \n", $offset);
+    }
+
+    $pdf .= "trailer\n<< /Size " . (count($objects) + 1) . " /Root " . $catalogObject . " 0 R >>\n";
+    $pdf .= "startxref\n" . $xrefPosition . "\n%%EOF";
+
+    return $pdf;
+}
+
+function build_media_email_with_attachment(string $bodyHtml, ?string $fromEmail, ?string $fromName, ?array $pdfAttachment): array
+{
+    if (!$pdfAttachment) {
+        return [
+            'headers' => build_media_email_headers($fromEmail, $fromName),
+            'body' => $bodyHtml,
+        ];
+    }
+
+    $boundary = 'media_mixed_' . bin2hex(random_bytes(8));
+    $headers = "MIME-Version: 1.0\r\n";
+    $headers .= "Content-Type: multipart/mixed; boundary=\"{$boundary}\"\r\n";
+    if ($fromEmail) {
+        $headers .= 'From: ' . ($fromName ? $fromName . ' <' . $fromEmail . '>' : $fromEmail) . "\r\n";
+    }
+
+    $body = "--{$boundary}\r\n";
+    $body .= "Content-Type: text/html; charset=UTF-8\r\n";
+    $body .= "Content-Transfer-Encoding: 8bit\r\n\r\n";
+    $body .= $bodyHtml . "\r\n";
+
+    $body .= "--{$boundary}\r\n";
+    $body .= "Content-Type: application/pdf; name=\"{$pdfAttachment['filename']}\"\r\n";
+    $body .= "Content-Transfer-Encoding: base64\r\n";
+    $body .= "Content-Disposition: attachment; filename=\"{$pdfAttachment['filename']}\"\r\n\r\n";
+    $body .= chunk_split(base64_encode($pdfAttachment['content'])) . "\r\n";
+    $body .= "--{$boundary}--";
+
+    return [
+        'headers' => $headers,
+        'body' => $body,
+    ];
+}
+
 function send_media_approval_email(array $request, array $event, array $municipalidad, ?string $fromEmail, ?string $fromName): bool
 {
     $subject = 'Acreditación aprobada - ' . ($event['titulo'] ?? 'Evento');
@@ -137,7 +434,15 @@ function send_media_approval_email(array $request, array $event, array $municipa
     $ciudad = htmlspecialchars($request['ciudad'] ?? '', ENT_QUOTES, 'UTF-8');
     $rut = htmlspecialchars($request['rut'] ?? '', ENT_QUOTES, 'UTF-8');
     $cargo = htmlspecialchars($request['cargo'] ?? '', ENT_QUOTES, 'UTF-8');
-    $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' . rawurlencode($qrToken);
+    $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=' . rawurlencode($qrToken);
+    $badgeImage = build_media_badge_image($request, $event, $municipalidad, $qrUrl);
+    $pdfAttachment = null;
+    if ($badgeImage && $badgeImage['data']) {
+        $pdfAttachment = [
+            'filename' => 'gafete-acreditacion-' . ($request['id'] ?? 'medio') . '.pdf',
+            'content' => build_pdf_from_jpeg($request, $event, $municipalidad, $badgeImage['data'], $badgeImage['width'], $badgeImage['height']),
+        ];
+    }
 
     $bodyHtml = <<<HTML
 <!DOCTYPE html>
@@ -150,32 +455,51 @@ function send_media_approval_email(array $request, array $event, array $municipa
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f6fb;padding:24px 0;">
     <tr>
       <td align="center">
-        <table width="620" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e6ebf2;">
+        <table width="640" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #e6ebf2;">
           <tr>
             <td style="padding:24px;">
-              <h2 style="margin:0 0 12px 0;">Acreditación aprobada</h2>
-              <p style="margin:0 0 10px 0;">Estimado/a <strong>{$recipientName}</strong>,</p>
-              <p style="margin:0 0 12px 0;">Nos complace informar que su solicitud de acreditación ha sido aprobada para el evento <strong>{$eventTitle}</strong>.</p>
-              <p style="margin:0 0 12px 0;">Fecha del evento: {$eventDates}</p>
-              <table width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;background:#f8fafc;border:1px solid #e6ebf2;border-radius:10px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
                 <tr>
-                  <td style="padding:12px 16px;">
-                    <strong>Datos registrados</strong><br>
-                    Medio: {$medio}<br>
-                    Tipo de medio: {$tipoMedio}<br>
-                    Ciudad: {$ciudad}<br>
-                    Nombre: {$recipientName}<br>
-                    RUT: {$rut}<br>
-                    Cargo: {$cargo}
+                  <td>
+                    <h2 style="margin:0;">Acreditación aprobada</h2>
+                    <p style="margin:6px 0 0 0;color:#6a7880;">{$municipalidadName}</p>
                   </td>
                 </tr>
               </table>
-              <p style="margin:0 0 12px 0;">Adjuntamos su código QR personal para el control de acceso.</p>
-              <p style="margin:0 0 16px 0;">
-                <img src="{$qrUrl}" alt="QR acreditación" width="180" height="180" style="display:block;border:1px solid #e6ebf2;border-radius:8px;">
-              </p>
-              <p style="margin:0 0 6px 0;font-size:12px;color:#6a7880;">Token QR: {$qrToken}</p>
-              <p style="margin:0;">Atentamente,<br>{$municipalidadName}</p>
+              <p style="margin:0 0 10px 0;">Estimado/a <strong>{$recipientName}</strong>,</p>
+              <p style="margin:0 0 12px 0;">Nos complace informar que su solicitud fue aprobada para el evento <strong>{$eventTitle}</strong>.</p>
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;background:#f8fafc;border:1px solid #e6ebf2;border-radius:12px;">
+                <tr>
+                  <td style="padding:16px 20px;">
+                    <strong style="display:block;margin-bottom:10px;">Datos de la acreditación</strong>
+                    <table width="100%" cellpadding="0" cellspacing="0" style="font-size:14px;color:#1f2b3a;">
+                      <tr><td style="padding:4px 0;width:35%;">Medio</td><td style="padding:4px 0;">{$medio}</td></tr>
+                      <tr><td style="padding:4px 0;">Tipo</td><td style="padding:4px 0;">{$tipoMedio}</td></tr>
+                      <tr><td style="padding:4px 0;">Ciudad</td><td style="padding:4px 0;">{$ciudad}</td></tr>
+                      <tr><td style="padding:4px 0;">Nombre</td><td style="padding:4px 0;">{$recipientName}</td></tr>
+                      <tr><td style="padding:4px 0;">RUT</td><td style="padding:4px 0;">{$rut}</td></tr>
+                      <tr><td style="padding:4px 0;">Cargo</td><td style="padding:4px 0;">{$cargo}</td></tr>
+                      <tr><td style="padding:4px 0;">Fechas</td><td style="padding:4px 0;">{$eventDates}</td></tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin:10px 0;">
+                <tr>
+                  <td style="padding:0 0 12px 0;">
+                    <strong>QR de acceso</strong>
+                    <p style="margin:6px 0 0 0;font-size:13px;color:#6a7880;">Presenta este QR al ingresar y salir del evento.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <img src="{$qrUrl}" alt="QR acreditación" width="200" height="200" style="display:block;border:1px solid #e6ebf2;border-radius:12px;">
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:0 0 12px 0;font-size:12px;color:#6a7880;">Token QR: {$qrToken}</p>
+              <p style="margin:0;">Adjuntamos una tarjeta en PDF para impresión (formato gafete).</p>
+              <p style="margin:16px 0 0 0;">Atentamente,<br>{$municipalidadName}</p>
             </td>
           </tr>
         </table>
@@ -186,8 +510,8 @@ function send_media_approval_email(array $request, array $event, array $municipa
 </html>
 HTML;
 
-    $headers = build_media_email_headers($fromEmail, $fromName);
-    return mail($request['correo'], $subject, $bodyHtml, $headers);
+    $mailPayload = build_media_email_with_attachment($bodyHtml, $fromEmail, $fromName, $pdfAttachment);
+    return mail($request['correo'], $subject, $mailPayload['body'], $mailPayload['headers']);
 }
 
 function send_media_rejection_email(array $request, array $event, array $municipalidad, ?string $fromEmail, ?string $fromName): bool
@@ -437,7 +761,6 @@ if ($selectedEventId > 0) {
                                                 <tr>
                                                     <th>Medio</th>
                                                     <th>Tipo</th>
-                                                    <th>Ciudad</th>
                                                     <th>Nombre</th>
                                                     <th>Apellidos</th>
                                                     <th>RUT</th>
@@ -445,9 +768,8 @@ if ($selectedEventId > 0) {
                                                     <th>Celular</th>
                                                     <th>Cargo</th>
                                                     <th>Estado</th>
-                                                    <th>QR</th>
                                                     <th>Fecha envío</th>
-                                                    <th>Acciones</th>
+                                                    <th class="text-end">Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -455,7 +777,6 @@ if ($selectedEventId > 0) {
                                                     <?php
                                                     $estado = $request['estado'] ?? MEDIA_STATUS_PENDING;
                                                     $badgeClass = media_status_badge($estado);
-                                                    $qrToken = $request['qr_token'] ?? '';
                                                     ?>
                                                     <tr>
                                                         <td><?php echo htmlspecialchars($request['medio'], ENT_QUOTES, 'UTF-8'); ?></td>
@@ -470,7 +791,6 @@ if ($selectedEventId > 0) {
                                                             echo htmlspecialchars($tipoDisplay, ENT_QUOTES, 'UTF-8');
                                                             ?>
                                                         </td>
-                                                        <td><?php echo htmlspecialchars($request['ciudad'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td><?php echo htmlspecialchars($request['nombre'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td><?php echo htmlspecialchars($request['apellidos'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td><?php echo htmlspecialchars($request['rut'], ENT_QUOTES, 'UTF-8'); ?></td>
@@ -482,31 +802,42 @@ if ($selectedEventId > 0) {
                                                                 <?php echo htmlspecialchars(ucfirst($estado), ENT_QUOTES, 'UTF-8'); ?>
                                                             </span>
                                                         </td>
-                                                        <td class="text-muted small"><?php echo $qrToken !== '' ? htmlspecialchars($qrToken, ENT_QUOTES, 'UTF-8') : '-'; ?></td>
                                                         <td><?php echo htmlspecialchars($request['created_at'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                                        <td>
-                                                            <div class="d-flex flex-wrap gap-1">
-                                                                <form method="post" class="d-inline">
-                                                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                                                    <input type="hidden" name="action" value="approve">
-                                                                    <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
-                                                                    <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
-                                                                    <button type="submit" class="btn btn-sm btn-success">Aprobar</button>
-                                                                </form>
-                                                                <form method="post" class="d-inline">
-                                                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                                                    <input type="hidden" name="action" value="reject">
-                                                                    <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
-                                                                    <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
-                                                                    <button type="submit" class="btn btn-sm btn-warning">Rechazar</button>
-                                                                </form>
-                                                                <form method="post" class="d-inline" onsubmit="return confirm('¿Eliminar esta solicitud? Esta acción no se puede deshacer.');">
-                                                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                                                    <input type="hidden" name="action" value="delete">
-                                                                    <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
-                                                                    <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
-                                                                    <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
-                                                                </form>
+                                                        <td class="text-end">
+                                                            <div class="dropdown">
+                                                                <button class="btn btn-sm btn-soft-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                    Acciones
+                                                                </button>
+                                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                                    <li>
+                                                                        <form method="post" class="px-3 py-1">
+                                                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                            <input type="hidden" name="action" value="approve">
+                                                                            <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
+                                                                            <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
+                                                                            <button type="submit" class="btn btn-sm btn-success w-100">Aprobar</button>
+                                                                        </form>
+                                                                    </li>
+                                                                    <li>
+                                                                        <form method="post" class="px-3 py-1">
+                                                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                            <input type="hidden" name="action" value="reject">
+                                                                            <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
+                                                                            <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
+                                                                            <button type="submit" class="btn btn-sm btn-warning w-100">Rechazar</button>
+                                                                        </form>
+                                                                    </li>
+                                                                    <li><hr class="dropdown-divider"></li>
+                                                                    <li>
+                                                                        <form method="post" class="px-3 py-1" onsubmit="return confirm('¿Eliminar esta solicitud? Esta acción no se puede deshacer.');">
+                                                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                            <input type="hidden" name="action" value="delete">
+                                                                            <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
+                                                                            <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
+                                                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100">Eliminar</button>
+                                                                        </form>
+                                                                    </li>
+                                                                </ul>
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -523,7 +854,7 @@ if ($selectedEventId > 0) {
         </div>
     </div>
 
-    <?php include('partials/vendor.php'); ?>
+    <?php include('partials/footer-scripts.php'); ?>
     <?php include('partials/footer.php'); ?>
 </body>
 </html>
