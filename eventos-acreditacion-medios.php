@@ -523,7 +523,7 @@ if ($selectedEventId > 0) {
         </div>
     </div>
 
-    <?php include('partials/vendor.php'); ?>
+    <?php include('partials/footer-scripts.php'); ?>
     <?php include('partials/footer.php'); ?>
 </body>
 </html>
