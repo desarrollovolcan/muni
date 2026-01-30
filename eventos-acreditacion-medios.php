@@ -665,7 +665,6 @@ if ($selectedEventId > 0) {
                                                 <tr>
                                                     <th>Medio</th>
                                                     <th>Tipo</th>
-                                                    <th>Ciudad</th>
                                                     <th>Nombre</th>
                                                     <th>Apellidos</th>
                                                     <th>RUT</th>
@@ -673,7 +672,6 @@ if ($selectedEventId > 0) {
                                                     <th>Celular</th>
                                                     <th>Cargo</th>
                                                     <th>Estado</th>
-                                                    <th>QR</th>
                                                     <th>Fecha envío</th>
                                                     <th class="text-end">Acciones</th>
                                                 </tr>
@@ -683,7 +681,6 @@ if ($selectedEventId > 0) {
                                                     <?php
                                                     $estado = $request['estado'] ?? MEDIA_STATUS_PENDING;
                                                     $badgeClass = media_status_badge($estado);
-                                                    $qrToken = $request['qr_token'] ?? '';
                                                     ?>
                                                     <tr>
                                                         <td><?php echo htmlspecialchars($request['medio'], ENT_QUOTES, 'UTF-8'); ?></td>
@@ -698,7 +695,6 @@ if ($selectedEventId > 0) {
                                                             echo htmlspecialchars($tipoDisplay, ENT_QUOTES, 'UTF-8');
                                                             ?>
                                                         </td>
-                                                        <td><?php echo htmlspecialchars($request['ciudad'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td><?php echo htmlspecialchars($request['nombre'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td><?php echo htmlspecialchars($request['apellidos'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td><?php echo htmlspecialchars($request['rut'], ENT_QUOTES, 'UTF-8'); ?></td>
@@ -710,31 +706,42 @@ if ($selectedEventId > 0) {
                                                                 <?php echo htmlspecialchars(ucfirst($estado), ENT_QUOTES, 'UTF-8'); ?>
                                                             </span>
                                                         </td>
-                                                        <td class="text-muted small"><?php echo $qrToken !== '' ? htmlspecialchars($qrToken, ENT_QUOTES, 'UTF-8') : '-'; ?></td>
                                                         <td><?php echo htmlspecialchars($request['created_at'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td class="text-end">
-                                                            <div class="d-flex flex-wrap justify-content-end gap-1">
-                                                                <form method="post">
-                                                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                                                    <input type="hidden" name="action" value="approve">
-                                                                    <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
-                                                                    <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
-                                                                    <button type="submit" class="btn btn-sm btn-success">Aprobar</button>
-                                                                </form>
-                                                                <form method="post">
-                                                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                                                    <input type="hidden" name="action" value="reject">
-                                                                    <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
-                                                                    <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
-                                                                    <button type="submit" class="btn btn-sm btn-warning">Rechazar</button>
-                                                                </form>
-                                                                <form method="post" onsubmit="return confirm('¿Eliminar esta solicitud? Esta acción no se puede deshacer.');">
-                                                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                                                    <input type="hidden" name="action" value="delete">
-                                                                    <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
-                                                                    <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
-                                                                    <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
-                                                                </form>
+                                                            <div class="dropdown">
+                                                                <button class="btn btn-sm btn-soft-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                    Acciones
+                                                                </button>
+                                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                                    <li>
+                                                                        <form method="post" class="px-3 py-1">
+                                                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                            <input type="hidden" name="action" value="approve">
+                                                                            <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
+                                                                            <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
+                                                                            <button type="submit" class="btn btn-sm btn-success w-100">Aprobar</button>
+                                                                        </form>
+                                                                    </li>
+                                                                    <li>
+                                                                        <form method="post" class="px-3 py-1">
+                                                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                            <input type="hidden" name="action" value="reject">
+                                                                            <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
+                                                                            <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
+                                                                            <button type="submit" class="btn btn-sm btn-warning w-100">Rechazar</button>
+                                                                        </form>
+                                                                    </li>
+                                                                    <li><hr class="dropdown-divider"></li>
+                                                                    <li>
+                                                                        <form method="post" class="px-3 py-1" onsubmit="return confirm('¿Eliminar esta solicitud? Esta acción no se puede deshacer.');">
+                                                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                            <input type="hidden" name="action" value="delete">
+                                                                            <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
+                                                                            <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
+                                                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100">Eliminar</button>
+                                                                        </form>
+                                                                    </li>
+                                                                </ul>
                                                             </div>
                                                         </td>
                                                     </tr>
