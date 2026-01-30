@@ -27,6 +27,7 @@ if (!isset($_SESSION['user'])) {
         'logout.php',
         'confirmar-asistencia.php',
         'eventos-validacion.php',
+        'medios-acreditacion.php',
     ];
 
     if (!in_array($currentScript, $publicScripts, true) && strncmp($currentScript, 'auth-', 5) !== 0) {

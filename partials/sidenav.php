@@ -64,6 +64,9 @@
                                 <a href="eventos-autoridades-nueva.php" class="side-nav-link">Autoridades evento</a>
                             </li>
                             <li class="side-nav-item">
+                                <a href="eventos-acreditacion-medios.php" class="side-nav-link">Acreditación medios</a>
+                            </li>
+                            <li class="side-nav-item">
                                 <a href="eventos-autoridades-resumen.php" class="side-nav-link">Resumen eventos</a>
                             </li>
                             <li class="side-nav-item">
