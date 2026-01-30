@@ -192,6 +192,38 @@ CREATE TABLE `event_authority_confirmations` (
   CONSTRAINT `event_authority_confirmations_authority_id_fk` FOREIGN KEY (`authority_id`) REFERENCES `authorities` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `event_media_accreditation_links` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `event_id` INT UNSIGNED NOT NULL,
+  `token` VARCHAR(64) NOT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `event_media_accreditation_links_event_unique` (`event_id`),
+  UNIQUE KEY `event_media_accreditation_links_token_unique` (`token`),
+  CONSTRAINT `event_media_accreditation_links_event_fk` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `media_accreditation_requests` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `event_id` INT UNSIGNED NOT NULL,
+  `medio` VARCHAR(200) NOT NULL,
+  `tipo_medio` VARCHAR(80) NOT NULL,
+  `tipo_medio_otro` VARCHAR(120) DEFAULT NULL,
+  `ciudad` VARCHAR(120) DEFAULT NULL,
+  `nombre` VARCHAR(120) NOT NULL,
+  `apellidos` VARCHAR(160) NOT NULL,
+  `rut` VARCHAR(30) NOT NULL,
+  `correo` VARCHAR(180) NOT NULL,
+  `celular` VARCHAR(40) DEFAULT NULL,
+  `cargo` VARCHAR(120) DEFAULT NULL,
+  `correo_enviado` TINYINT(1) NOT NULL DEFAULT 0,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `sent_at` TIMESTAMP NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `media_accreditation_requests_event_idx` (`event_id`),
+  CONSTRAINT `media_accreditation_requests_event_fk` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `authority_attachments` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `authority_id` INT UNSIGNED NOT NULL,
