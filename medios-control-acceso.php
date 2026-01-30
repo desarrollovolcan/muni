@@ -6,6 +6,8 @@ $notice = null;
 $selectedEventId = isset($_GET['event_id']) ? (int) $_GET['event_id'] : 0;
 $events = db()->query('SELECT id, titulo, fecha_inicio, fecha_fin FROM events WHERE habilitado = 1 ORDER BY fecha_inicio DESC')->fetchAll();
 $insideMedia = [];
+$outsideMedia = [];
+$cooldownSeconds = 15;
 
 try {
     db()->exec(
@@ -102,20 +104,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
             $action = $inside ? 'salida' : 'ingreso';
             $userId = isset($_SESSION['user']['id']) ? (int) $_SESSION['user']['id'] : null;
 
-            $stmtLog = db()->prepare(
-                'INSERT INTO media_accreditation_access_logs (event_id, request_id, accion, scanned_by)
-                 VALUES (?, ?, ?, ?)'
+            $stmtLastLog = db()->prepare(
+                'SELECT accion, scanned_at FROM media_accreditation_access_logs WHERE request_id = ? ORDER BY scanned_at DESC LIMIT 1'
             );
-            $stmtLog->execute([$selectedEventId, (int) $request['id'], $action, $userId]);
+            $stmtLastLog->execute([(int) $request['id']]);
+            $lastLog = $stmtLastLog->fetch();
 
-            $stmtUpdate = db()->prepare(
-                'UPDATE media_accreditation_requests SET inside_estado = ?, last_scan_at = NOW() WHERE id = ?'
-            );
-            $stmtUpdate->execute([$inside ? 0 : 1, (int) $request['id']]);
+            $lastScanAt = $request['last_scan_at'] ?? null;
+            $lastScanTime = $lastScanAt ? strtotime($lastScanAt) : null;
+            $secondsSinceLastScan = $lastScanTime ? (time() - $lastScanTime) : null;
 
-            $notice = $inside
-                ? 'Salida registrada para ' . $request['medio'] . '.'
-                : 'Ingreso registrado para ' . $request['medio'] . '.';
+            if ($lastLog && ($lastLog['accion'] ?? '') === $action) {
+                $errors[] = 'No es posible registrar dos ' . $action . ' seguidos para este medio.';
+            } elseif ($secondsSinceLastScan !== null && $secondsSinceLastScan < $cooldownSeconds) {
+                $errors[] = 'Espera unos segundos antes de volver a escanear este QR.';
+            } else {
+                $stmtLog = db()->prepare(
+                    'INSERT INTO media_accreditation_access_logs (event_id, request_id, accion, scanned_by)
+                     VALUES (?, ?, ?, ?)'
+                );
+                $stmtLog->execute([$selectedEventId, (int) $request['id'], $action, $userId]);
+
+                $stmtUpdate = db()->prepare(
+                    'UPDATE media_accreditation_requests SET inside_estado = ?, last_scan_at = NOW() WHERE id = ?'
+                );
+                $stmtUpdate->execute([$inside ? 0 : 1, (int) $request['id']]);
+
+                $notice = $inside
+                    ? 'Salida registrada para ' . $request['medio'] . '.'
+                    : 'Ingreso registrado para ' . $request['medio'] . '.';
+            }
         }
     }
 }
@@ -128,6 +146,14 @@ if ($selectedEventId > 0) {
     );
     $stmtInside->execute([$selectedEventId]);
     $insideMedia = $stmtInside->fetchAll();
+
+    $stmtOutside = db()->prepare(
+        'SELECT * FROM media_accreditation_requests
+         WHERE event_id = ? AND estado = "aprobado" AND inside_estado = 0
+         ORDER BY medio'
+    );
+    $stmtOutside->execute([$selectedEventId]);
+    $outsideMedia = $stmtOutside->fetchAll();
 }
 ?>
 <?php include('partials/html.php'); ?>
@@ -147,7 +173,7 @@ if ($selectedEventId > 0) {
                 <?php $subtitle = 'Medios de comunicación'; $title = 'Control de acceso'; include('partials/page-title.php'); ?>
 
                 <?php if (!empty($errors)) : ?>
-                    <div class="alert alert-danger">
+                    <div class="alert alert-danger" id="scan-error" data-scan-error="<?php echo htmlspecialchars($errors[0] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                         <?php foreach ($errors as $error) : ?>
                             <div><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
                         <?php endforeach; ?>
@@ -187,12 +213,30 @@ if ($selectedEventId > 0) {
                                     </div>
                                     <button type="submit" class="btn btn-primary w-100">Registrar</button>
                                 </form>
+                                <hr class="my-4">
+                                <div>
+                                    <h6 class="mb-2">Escaneo desde celular</h6>
+                                    <p class="text-muted small mb-3">Activa la cámara para leer el QR y completar el campo automáticamente.</p>
+                                    <div class="d-flex flex-wrap gap-2 mb-2">
+                                        <button type="button" class="btn btn-outline-primary btn-sm" id="start-scan">Iniciar escaneo</button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" id="stop-scan" disabled>Detener</button>
+                                    </div>
+                                    <div class="ratio ratio-4x3 bg-light border rounded">
+                                        <video id="qr-video" autoplay muted playsinline style="object-fit: cover;"></video>
+                                    </div>
+                                    <p id="scan-status" class="text-muted small mt-2 mb-0">Cámara detenida.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="col-lg-7">
-                        <div class="card gm-section">
+                        <div class="d-flex justify-content-end mb-2">
+                            <a class="btn btn-sm btn-outline-primary" href="medios-control-acceso.php?event_id=<?php echo (int) $selectedEventId; ?>">
+                                <i class="ti ti-refresh"></i> Actualizar
+                            </a>
+                        </div>
+                        <div class="card gm-section mb-3">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <div>
                                     <h5 class="card-title mb-1">Medios dentro del evento</h5>
@@ -237,13 +281,201 @@ if ($selectedEventId > 0) {
                                 <?php endif; ?>
                             </div>
                         </div>
+
+                        <div class="card gm-section">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="card-title mb-1">Medios fuera del evento</h5>
+                                    <p class="text-muted mb-0">Medios acreditados que aún no han ingresado o ya salieron.</p>
+                                </div>
+                                <?php if ($selectedEventId) : ?>
+                                    <span class="badge text-bg-secondary">Total: <?php echo count($outsideMedia); ?></span>
+                                <?php endif; ?>
+                            </div>
+                            <div class="card-body">
+                                <?php if (!$selectedEventId) : ?>
+                                    <div class="text-muted">Selecciona un evento para ver los accesos.</div>
+                                <?php elseif (empty($outsideMedia)) : ?>
+                                    <div class="text-muted">No hay medios fuera del evento en este momento.</div>
+                                <?php else : ?>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped align-middle">
+                                            <thead>
+                                                <tr>
+                                                    <th>Medio</th>
+                                                    <th>Tipo</th>
+                                                    <th>Nombre</th>
+                                                    <th>RUT</th>
+                                                    <th>Correo</th>
+                                                    <th>Último escaneo</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php foreach ($outsideMedia as $media) : ?>
+                                                    <tr>
+                                                        <td><?php echo htmlspecialchars($media['medio'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td><?php echo htmlspecialchars($media['tipo_medio'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td><?php echo htmlspecialchars(trim(($media['nombre'] ?? '') . ' ' . ($media['apellidos'] ?? '')), ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td><?php echo htmlspecialchars($media['rut'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td><?php echo htmlspecialchars($media['correo'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td><?php echo htmlspecialchars($media['last_scan_at'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <?php include('partials/vendor.php'); ?>
+    <script>
+        const videoElement = document.getElementById('qr-video');
+        const startButton = document.getElementById('start-scan');
+        const stopButton = document.getElementById('stop-scan');
+        const statusLabel = document.getElementById('scan-status');
+        const qrInput = document.getElementById('qr-token');
+        const eventSelect = document.getElementById('event-id');
+        let currentStream = null;
+        let scanning = false;
+        let detector = null;
+        let submitted = false;
+
+        function updateStatus(message) {
+            statusLabel.textContent = message;
+        }
+
+        function playErrorTone() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                oscillator.type = 'sine';
+                oscillator.frequency.value = 440;
+                gainNode.gain.value = 0.1;
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                oscillator.start();
+                setTimeout(() => {
+                    oscillator.stop();
+                    audioContext.close();
+                }, 200);
+            } catch (error) {
+                // Ignore audio errors.
+            }
+        }
+
+        async function startCamera() {
+            if (!navigator.mediaDevices?.getUserMedia) {
+                updateStatus('El navegador no permite acceder a la cámara.');
+                return;
+            }
+            const constraints = { video: { facingMode: { exact: 'environment' } } };
+
+            if (currentStream) {
+                currentStream.getTracks().forEach((track) => track.stop());
+            }
+            currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+            videoElement.srcObject = currentStream;
+            await videoElement.play();
+        }
+
+        async function stopCamera() {
+            if (currentStream) {
+                currentStream.getTracks().forEach((track) => track.stop());
+                currentStream = null;
+            }
+            scanning = false;
+            stopButton.disabled = true;
+            startButton.disabled = false;
+            updateStatus('Cámara detenida.');
+        }
+
+        async function scanLoop() {
+            if (!scanning || !detector) {
+                return;
+            }
+            try {
+                const barcodes = await detector.detect(videoElement);
+                if (barcodes.length > 0) {
+                    const code = barcodes[0].rawValue;
+                    if (code && !submitted) {
+                        qrInput.value = code;
+                        updateStatus('QR leído. Enviando registro...');
+                        if (!eventSelect.value) {
+                            updateStatus('Selecciona un evento antes de registrar.');
+                            playErrorTone();
+                            return;
+                        }
+                        submitted = true;
+                        qrInput.form?.submit();
+                        return;
+                    }
+                }
+            } catch (error) {
+                updateStatus('No se pudo leer el QR. Intenta nuevamente.');
+            }
+            requestAnimationFrame(scanLoop);
+        }
+
+        startButton?.addEventListener('click', async () => {
+            if (!('BarcodeDetector' in window)) {
+                updateStatus('Tu navegador no soporta lectura automática de QR.');
+                return;
+            }
+            detector = detector || new BarcodeDetector({ formats: ['qr_code'] });
+            startButton.disabled = true;
+            stopButton.disabled = false;
+            scanning = true;
+            submitted = false;
+            try {
+                await startCamera();
+                updateStatus('Cámara activa. Apunta al QR.');
+                requestAnimationFrame(scanLoop);
+            } catch (error) {
+                updateStatus('No se pudo iniciar la cámara.');
+                startButton.disabled = false;
+                stopButton.disabled = true;
+            }
+        });
+
+        stopButton?.addEventListener('click', () => {
+            stopCamera();
+        });
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const errorAlert = document.getElementById('scan-error');
+            if (errorAlert) {
+                const message = errorAlert.dataset.scanError || 'El medio no está registrado o aprobado.';
+                updateStatus(message);
+                playErrorTone();
+            }
+            if (!('BarcodeDetector' in window)) {
+                updateStatus('Tu navegador no soporta lectura automática de QR.');
+                return;
+            }
+            detector = detector || new BarcodeDetector({ formats: ['qr_code'] });
+            startButton.disabled = true;
+            stopButton.disabled = false;
+            scanning = true;
+            submitted = false;
+            try {
+                await startCamera();
+                updateStatus('Cámara activa. Apunta al QR.');
+                requestAnimationFrame(scanLoop);
+            } catch (error) {
+                updateStatus('No se pudo iniciar la cámara. Pulsa "Iniciar escaneo".');
+                startButton.disabled = false;
+                stopButton.disabled = true;
+            }
+        });
+    </script>
+
+    <?php include('partials/footer-scripts.php'); ?>
     <?php include('partials/footer.php'); ?>
 </body>
 </html>
