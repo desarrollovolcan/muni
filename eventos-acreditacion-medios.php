@@ -137,26 +137,55 @@ function build_media_badge_image(array $request, array $event, array $municipali
         return null;
     }
 
+    imagealphablending($image, true);
+    imagesavealpha($image, true);
+
     $white = imagecolorallocate($image, 255, 255, 255);
-    $primary = imagecolorallocate($image, 37, 99, 235);
+    $primary = imagecolorallocate($image, 4, 78, 140);
+    $secondary = imagecolorallocate($image, 1, 57, 102);
+    $light = imagecolorallocate($image, 241, 245, 249);
     $dark = imagecolorallocate($image, 31, 41, 55);
-    $gray = imagecolorallocate($image, 75, 85, 99);
+    $gray = imagecolorallocate($image, 107, 114, 128);
 
     imagefilledrectangle($image, 0, 0, $width, $height, $white);
-    imagefilledrectangle($image, 0, 0, $width, 140, $primary);
+    imagefilledrectangle($image, 0, 0, $width, 220, $primary);
+    imagefilledellipse($image, (int) ($width * 0.85), 230, 420, 280, $secondary);
+    imagefilledellipse($image, (int) ($width * 0.1), 260, 380, 260, $primary);
+    imagefilledrectangle($image, 0, 220, $width, 260, $primary);
+    imagefilledellipse($image, (int) ($width * 0.85), $height - 150, 520, 320, $secondary);
+    imagefilledellipse($image, (int) ($width * 0.1), $height - 110, 420, 260, $primary);
+    imagefilledrectangle($image, 0, $height - 200, $width, $height, $primary);
 
     $municipalidadName = strtoupper($municipalidad['nombre'] ?? 'Municipalidad');
     $eventTitle = $event['titulo'] ?? 'Evento';
     $fullName = trim(($request['nombre'] ?? '') . ' ' . ($request['apellidos'] ?? ''));
 
-    imagestring($image, 5, 30, 40, $municipalidadName, $white);
-    imagestring($image, 5, 30, 80, $eventTitle, $white);
+    $logoPath = $municipalidad['logo_path'] ?? 'assets/images/logo.png';
+    $logoFile = __DIR__ . '/' . ltrim($logoPath, '/');
+    $logoImage = null;
+    if (is_file($logoFile)) {
+        $extension = strtolower(pathinfo($logoFile, PATHINFO_EXTENSION));
+        if (in_array($extension, ['png', 'gif'], true)) {
+            $logoImage = @imagecreatefrompng($logoFile);
+        } elseif (in_array($extension, ['jpg', 'jpeg'], true)) {
+            $logoImage = @imagecreatefromjpeg($logoFile);
+        }
+    }
 
-    imagestring($image, 5, 30, 180, 'ACREDITACION MEDIOS', $dark);
-    imagestring($image, 5, 30, 220, $fullName, $dark);
-    imagestring($image, 4, 30, 260, 'Medio: ' . ($request['medio'] ?? '-'), $gray);
-    imagestring($image, 4, 30, 290, 'Cargo: ' . ($request['cargo'] ?? '-'), $gray);
-    imagestring($image, 4, 30, 320, 'RUT: ' . ($request['rut'] ?? '-'), $gray);
+    if ($logoImage) {
+        $logoWidth = 120;
+        $logoHeight = (int) ($logoWidth * imagesy($logoImage) / imagesx($logoImage));
+        imagecopyresampled($image, $logoImage, 30, 30, 0, 0, $logoWidth, $logoHeight, imagesx($logoImage), imagesy($logoImage));
+    }
+
+    imagestring($image, 5, 180, 40, $municipalidadName, $white);
+    imagestring($image, 4, 180, 80, $eventTitle, $white);
+
+    imagestring($image, 5, 40, 270, 'ACREDITACION MEDIOS', $dark);
+    imagestring($image, 5, 40, 310, $fullName, $dark);
+    imagestring($image, 4, 40, 350, 'Cargo: ' . ($request['cargo'] ?? '-'), $gray);
+    imagestring($image, 4, 40, 380, 'Medio: ' . ($request['medio'] ?? '-'), $gray);
+    imagestring($image, 4, 40, 410, 'RUT: ' . ($request['rut'] ?? '-'), $gray);
 
     $qrData = @file_get_contents($qrUrl);
     if ($qrData) {
@@ -164,14 +193,23 @@ function build_media_badge_image(array $request, array $event, array $municipali
         if ($qrImage) {
             $qrSize = 280;
             $qrX = (int) (($width - $qrSize) / 2);
-            $qrY = 380;
+            $qrY = 470;
             imagecopyresampled($image, $qrImage, $qrX, $qrY, 0, 0, $qrSize, $qrSize, imagesx($qrImage), imagesy($qrImage));
             imagedestroy($qrImage);
         }
     }
 
-    imagestring($image, 3, 30, 700, 'Token QR: ' . ($request['qr_token'] ?? '-'), $gray);
-    imagestring($image, 3, 30, 730, 'Valido para el evento en fechas oficiales.', $gray);
+    imagestring($image, 3, 40, 770, 'Token QR: ' . ($request['qr_token'] ?? '-'), $light);
+    imagestring($image, 3, 40, 795, 'Valido para el evento en fechas oficiales.', $light);
+
+    if ($logoImage) {
+        $smallLogoWidth = 90;
+        $smallLogoHeight = (int) ($smallLogoWidth * imagesy($logoImage) / imagesx($logoImage));
+        $logoX = $width - $smallLogoWidth - 30;
+        $logoY = $height - $smallLogoHeight - 30;
+        imagecopyresampled($image, $logoImage, $logoX, $logoY, 0, 0, $smallLogoWidth, $smallLogoHeight, imagesx($logoImage), imagesy($logoImage));
+        imagedestroy($logoImage);
+    }
 
     ob_start();
     imagejpeg($image, null, 90);
@@ -637,7 +675,7 @@ if ($selectedEventId > 0) {
                                                     <th>Estado</th>
                                                     <th>QR</th>
                                                     <th>Fecha envío</th>
-                                                    <th class="media-actions-cell">Acciones</th>
+                                                    <th class="text-end">Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -674,29 +712,41 @@ if ($selectedEventId > 0) {
                                                         </td>
                                                         <td class="text-muted small"><?php echo $qrToken !== '' ? htmlspecialchars($qrToken, ENT_QUOTES, 'UTF-8') : '-'; ?></td>
                                                         <td><?php echo htmlspecialchars($request['created_at'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                                        <td class="media-actions-cell">
-                                                            <div class="d-flex flex-wrap gap-1">
-                                                                <form method="post" class="d-inline">
-                                                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                                                    <input type="hidden" name="action" value="approve">
-                                                                    <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
-                                                                    <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
-                                                                    <button type="submit" class="btn btn-sm btn-success">Aprobar</button>
-                                                                </form>
-                                                                <form method="post" class="d-inline">
-                                                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                                                    <input type="hidden" name="action" value="reject">
-                                                                    <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
-                                                                    <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
-                                                                    <button type="submit" class="btn btn-sm btn-warning">Rechazar</button>
-                                                                </form>
-                                                                <form method="post" class="d-inline" onsubmit="return confirm('¿Eliminar esta solicitud? Esta acción no se puede deshacer.');">
-                                                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                                                    <input type="hidden" name="action" value="delete">
-                                                                    <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
-                                                                    <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
-                                                                    <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
-                                                                </form>
+                                                        <td class="text-end">
+                                                            <div class="dropdown">
+                                                                <button class="btn btn-sm btn-soft-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                    Acciones
+                                                                </button>
+                                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                                    <li>
+                                                                        <form method="post" class="px-3 py-1">
+                                                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                            <input type="hidden" name="action" value="approve">
+                                                                            <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
+                                                                            <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
+                                                                            <button type="submit" class="btn btn-sm btn-success w-100">Aprobar</button>
+                                                                        </form>
+                                                                    </li>
+                                                                    <li>
+                                                                        <form method="post" class="px-3 py-1">
+                                                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                            <input type="hidden" name="action" value="reject">
+                                                                            <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
+                                                                            <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
+                                                                            <button type="submit" class="btn btn-sm btn-warning w-100">Rechazar</button>
+                                                                        </form>
+                                                                    </li>
+                                                                    <li><hr class="dropdown-divider"></li>
+                                                                    <li>
+                                                                        <form method="post" class="px-3 py-1" onsubmit="return confirm('¿Eliminar esta solicitud? Esta acción no se puede deshacer.');">
+                                                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                            <input type="hidden" name="action" value="delete">
+                                                                            <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
+                                                                            <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
+                                                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100">Eliminar</button>
+                                                                        </form>
+                                                                    </li>
+                                                                </ul>
                                                             </div>
                                                         </td>
                                                     </tr>
