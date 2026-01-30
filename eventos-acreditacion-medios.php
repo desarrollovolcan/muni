@@ -739,6 +739,19 @@ if ($selectedEventId > 0) {
     <?php $title = 'Acreditación de medios'; include('partials/title-meta.php'); ?>
 
     <?php include('partials/head-css.php'); ?>
+    <style>
+        .media-actions-cell {
+            position: sticky;
+            right: 0;
+            background: var(--bs-body-bg);
+            min-width: 220px;
+            box-shadow: -8px 0 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .media-actions-cell .btn {
+            white-space: nowrap;
+        }
+    </style>
 </head>
 
 <body>
