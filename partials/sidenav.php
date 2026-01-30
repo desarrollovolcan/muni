@@ -74,6 +74,26 @@
                 </li>
             <?php endif; ?>
 
+            <?php if (has_permission('eventos', 'view')) : ?>
+                <li class="side-nav-item">
+                    <a href="#modulo-medios" class="side-nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="modulo-medios">
+                        <span class="menu-icon"><i data-lucide="megaphone"></i></span>
+                        <span class="menu-text">Medios de comunicación</span>
+                        <span class="menu-arrow"></span>
+                    </a>
+                    <div class="collapse" id="modulo-medios">
+                        <ul class="side-nav sub-menu">
+                            <li class="side-nav-item">
+                                <a href="eventos-acreditacion-medios.php" class="side-nav-link">Solicitudes de medios</a>
+                            </li>
+                            <li class="side-nav-item">
+                                <a href="medios-control-acceso.php" class="side-nav-link">Control de acceso</a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+            <?php endif; ?>
+
             <?php if (has_permission('autoridades', 'view')) : ?>
                 <li class="side-nav-item">
                     <a href="#modulo-autoridades" class="side-nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="modulo-autoridades">
