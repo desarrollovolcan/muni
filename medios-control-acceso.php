@@ -173,7 +173,7 @@ if ($selectedEventId > 0) {
                 <?php $subtitle = 'Medios de comunicación'; $title = 'Control de acceso'; include('partials/page-title.php'); ?>
 
                 <?php if (!empty($errors)) : ?>
-                    <div class="alert alert-danger">
+                    <div class="alert alert-danger" id="scan-error" data-scan-error="<?php echo htmlspecialchars($errors[0] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                         <?php foreach ($errors as $error) : ?>
                             <div><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
                         <?php endforeach; ?>
@@ -220,7 +220,6 @@ if ($selectedEventId > 0) {
                                     <div class="d-flex flex-wrap gap-2 mb-2">
                                         <button type="button" class="btn btn-outline-primary btn-sm" id="start-scan">Iniciar escaneo</button>
                                         <button type="button" class="btn btn-outline-secondary btn-sm" id="stop-scan" disabled>Detener</button>
-                                        <select id="camera-select" class="form-select form-select-sm w-auto"></select>
                                     </div>
                                     <div class="ratio ratio-4x3 bg-light border rounded">
                                         <video id="qr-video" autoplay muted playsinline style="object-fit: cover;"></video>
@@ -333,35 +332,35 @@ if ($selectedEventId > 0) {
         const videoElement = document.getElementById('qr-video');
         const startButton = document.getElementById('start-scan');
         const stopButton = document.getElementById('stop-scan');
-        const cameraSelect = document.getElementById('camera-select');
         const statusLabel = document.getElementById('scan-status');
         const qrInput = document.getElementById('qr-token');
         const eventSelect = document.getElementById('event-id');
         let currentStream = null;
         let scanning = false;
         let detector = null;
+        let submitted = false;
 
         function updateStatus(message) {
             statusLabel.textContent = message;
         }
 
-        async function listCameras() {
-            if (!navigator.mediaDevices?.enumerateDevices) {
-                return;
-            }
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            const cameras = devices.filter((device) => device.kind === 'videoinput');
-            cameraSelect.innerHTML = '';
-            cameras.forEach((camera, index) => {
-                const option = document.createElement('option');
-                option.value = camera.deviceId;
-                option.textContent = camera.label || `Cámara ${index + 1}`;
-                cameraSelect.appendChild(option);
-            });
-            if (cameras.length === 0) {
-                const option = document.createElement('option');
-                option.textContent = 'Sin cámaras disponibles';
-                cameraSelect.appendChild(option);
+        function playErrorTone() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                oscillator.type = 'sine';
+                oscillator.frequency.value = 440;
+                gainNode.gain.value = 0.1;
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                oscillator.start();
+                setTimeout(() => {
+                    oscillator.stop();
+                    audioContext.close();
+                }, 200);
+            } catch (error) {
+                // Ignore audio errors.
             }
         }
 
@@ -370,11 +369,7 @@ if ($selectedEventId > 0) {
                 updateStatus('El navegador no permite acceder a la cámara.');
                 return;
             }
-            await listCameras();
-            const deviceId = cameraSelect.value;
-            const constraints = deviceId
-                ? { video: { deviceId: { exact: deviceId } } }
-                : { video: { facingMode: { ideal: 'environment' } } };
+            const constraints = { video: { facingMode: { exact: 'environment' } } };
 
             if (currentStream) {
                 currentStream.getTracks().forEach((track) => track.stop());
@@ -403,16 +398,15 @@ if ($selectedEventId > 0) {
                 const barcodes = await detector.detect(videoElement);
                 if (barcodes.length > 0) {
                     const code = barcodes[0].rawValue;
-                    if (code) {
+                    if (code && !submitted) {
                         qrInput.value = code;
                         updateStatus('QR leído. Enviando registro...');
-                        scanning = false;
-                        stopButton.disabled = true;
-                        startButton.disabled = false;
                         if (!eventSelect.value) {
                             updateStatus('Selecciona un evento antes de registrar.');
+                            playErrorTone();
                             return;
                         }
+                        submitted = true;
                         qrInput.form?.submit();
                         return;
                     }
@@ -432,6 +426,7 @@ if ($selectedEventId > 0) {
             startButton.disabled = true;
             stopButton.disabled = false;
             scanning = true;
+            submitted = false;
             try {
                 await startCamera();
                 updateStatus('Cámara activa. Apunta al QR.');
@@ -447,10 +442,30 @@ if ($selectedEventId > 0) {
             stopCamera();
         });
 
-        cameraSelect?.addEventListener('change', async () => {
-            if (scanning) {
+        document.addEventListener('DOMContentLoaded', async () => {
+            const errorAlert = document.getElementById('scan-error');
+            if (errorAlert) {
+                const message = errorAlert.dataset.scanError || 'El medio no está registrado o aprobado.';
+                updateStatus(message);
+                playErrorTone();
+            }
+            if (!('BarcodeDetector' in window)) {
+                updateStatus('Tu navegador no soporta lectura automática de QR.');
+                return;
+            }
+            detector = detector || new BarcodeDetector({ formats: ['qr_code'] });
+            startButton.disabled = true;
+            stopButton.disabled = false;
+            scanning = true;
+            submitted = false;
+            try {
                 await startCamera();
-                updateStatus('Cámara cambiada.');
+                updateStatus('Cámara activa. Apunta al QR.');
+                requestAnimationFrame(scanLoop);
+            } catch (error) {
+                updateStatus('No se pudo iniciar la cámara. Pulsa "Iniciar escaneo".');
+                startButton.disabled = false;
+                stopButton.disabled = true;
             }
         });
     </script>
