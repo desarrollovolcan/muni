@@ -8,6 +8,9 @@ $selectedEvent = null;
 $requests = [];
 $publicLink = null;
 $shareLinks = [];
+const MEDIA_STATUS_PENDING = 'pendiente';
+const MEDIA_STATUS_APPROVED = 'aprobado';
+const MEDIA_STATUS_REJECTED = 'rechazado';
 
 try {
     db()->exec(
@@ -41,10 +44,17 @@ try {
             correo VARCHAR(180) NOT NULL,
             celular VARCHAR(40) DEFAULT NULL,
             cargo VARCHAR(120) DEFAULT NULL,
+            estado ENUM("pendiente", "aprobado", "rechazado") NOT NULL DEFAULT "pendiente",
+            qr_token VARCHAR(64) DEFAULT NULL,
             correo_enviado TINYINT(1) NOT NULL DEFAULT 0,
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            aprobado_at TIMESTAMP NULL DEFAULT NULL,
+            rechazado_at TIMESTAMP NULL DEFAULT NULL,
+            last_scan_at TIMESTAMP NULL DEFAULT NULL,
+            inside_estado TINYINT(1) NOT NULL DEFAULT 0,
             sent_at TIMESTAMP NULL DEFAULT NULL,
             PRIMARY KEY (id),
+            UNIQUE KEY media_accreditation_requests_qr_unique (qr_token),
             KEY media_accreditation_requests_event_idx (event_id),
             CONSTRAINT media_accreditation_requests_event_fk FOREIGN KEY (event_id) REFERENCES events (id) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
@@ -53,7 +63,238 @@ try {
 } catch (Error $e) {
 }
 
+try {
+    db()->exec(
+        'CREATE TABLE IF NOT EXISTS media_accreditation_access_logs (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+            event_id INT UNSIGNED NOT NULL,
+            request_id INT UNSIGNED NOT NULL,
+            accion ENUM("ingreso", "salida") NOT NULL,
+            scanned_by INT UNSIGNED DEFAULT NULL,
+            scanned_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY media_accreditation_access_logs_event_idx (event_id),
+            KEY media_accreditation_access_logs_request_idx (request_id),
+            CONSTRAINT media_accreditation_access_logs_event_fk FOREIGN KEY (event_id) REFERENCES events (id) ON DELETE CASCADE,
+            CONSTRAINT media_accreditation_access_logs_request_fk FOREIGN KEY (request_id) REFERENCES media_accreditation_requests (id) ON DELETE CASCADE,
+            CONSTRAINT media_accreditation_access_logs_scanned_by_fk FOREIGN KEY (scanned_by) REFERENCES users (id) ON DELETE SET NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+    );
+} catch (Exception $e) {
+} catch (Error $e) {
+}
+
+$migrationStatements = [
+    'ALTER TABLE media_accreditation_requests ADD COLUMN estado ENUM("pendiente", "aprobado", "rechazado") NOT NULL DEFAULT "pendiente"',
+    'ALTER TABLE media_accreditation_requests ADD COLUMN qr_token VARCHAR(64) DEFAULT NULL',
+    'ALTER TABLE media_accreditation_requests ADD COLUMN aprobado_at TIMESTAMP NULL DEFAULT NULL',
+    'ALTER TABLE media_accreditation_requests ADD COLUMN rechazado_at TIMESTAMP NULL DEFAULT NULL',
+    'ALTER TABLE media_accreditation_requests ADD COLUMN last_scan_at TIMESTAMP NULL DEFAULT NULL',
+    'ALTER TABLE media_accreditation_requests ADD COLUMN inside_estado TINYINT(1) NOT NULL DEFAULT 0',
+    'ALTER TABLE media_accreditation_requests ADD UNIQUE KEY media_accreditation_requests_qr_unique (qr_token)',
+];
+
+foreach ($migrationStatements as $statement) {
+    try {
+        db()->exec($statement);
+    } catch (Exception $e) {
+    } catch (Error $e) {
+    }
+}
+
+function media_status_badge(string $status): string
+{
+    switch ($status) {
+        case MEDIA_STATUS_APPROVED:
+            return 'success';
+        case MEDIA_STATUS_REJECTED:
+            return 'danger';
+        default:
+            return 'warning';
+    }
+}
+
+function build_media_email_headers(?string $fromEmail, ?string $fromName): string
+{
+    $headers = "MIME-Version: 1.0\r\n";
+    $headers .= "Content-type:text/html;charset=UTF-8\r\n";
+    if ($fromEmail) {
+        $headers .= 'From: ' . ($fromName ? $fromName . ' <' . $fromEmail . '>' : $fromEmail) . "\r\n";
+    }
+    return $headers;
+}
+
+function send_media_approval_email(array $request, array $event, array $municipalidad, ?string $fromEmail, ?string $fromName): bool
+{
+    $subject = 'Acreditación aprobada - ' . ($event['titulo'] ?? 'Evento');
+    $recipientName = htmlspecialchars(trim(($request['nombre'] ?? '') . ' ' . ($request['apellidos'] ?? '')), ENT_QUOTES, 'UTF-8');
+    $eventTitle = htmlspecialchars($event['titulo'] ?? 'Evento', ENT_QUOTES, 'UTF-8');
+    $eventDates = htmlspecialchars(($event['fecha_inicio'] ?? '') . ' al ' . ($event['fecha_fin'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $municipalidadName = htmlspecialchars($municipalidad['nombre'] ?? 'Municipalidad', ENT_QUOTES, 'UTF-8');
+    $qrToken = htmlspecialchars($request['qr_token'] ?? '', ENT_QUOTES, 'UTF-8');
+    $medio = htmlspecialchars($request['medio'] ?? '', ENT_QUOTES, 'UTF-8');
+    $tipoMedio = htmlspecialchars($request['tipo_medio'] ?? '', ENT_QUOTES, 'UTF-8');
+    $ciudad = htmlspecialchars($request['ciudad'] ?? '', ENT_QUOTES, 'UTF-8');
+    $rut = htmlspecialchars($request['rut'] ?? '', ENT_QUOTES, 'UTF-8');
+    $cargo = htmlspecialchars($request['cargo'] ?? '', ENT_QUOTES, 'UTF-8');
+    $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' . rawurlencode($qrToken);
+
+    $bodyHtml = <<<HTML
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Acreditación aprobada</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f6fb;font-family:Arial,sans-serif;color:#1f2b3a;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f6fb;padding:24px 0;">
+    <tr>
+      <td align="center">
+        <table width="620" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e6ebf2;">
+          <tr>
+            <td style="padding:24px;">
+              <h2 style="margin:0 0 12px 0;">Acreditación aprobada</h2>
+              <p style="margin:0 0 10px 0;">Estimado/a <strong>{$recipientName}</strong>,</p>
+              <p style="margin:0 0 12px 0;">Nos complace informar que su solicitud de acreditación ha sido aprobada para el evento <strong>{$eventTitle}</strong>.</p>
+              <p style="margin:0 0 12px 0;">Fecha del evento: {$eventDates}</p>
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;background:#f8fafc;border:1px solid #e6ebf2;border-radius:10px;">
+                <tr>
+                  <td style="padding:12px 16px;">
+                    <strong>Datos registrados</strong><br>
+                    Medio: {$medio}<br>
+                    Tipo de medio: {$tipoMedio}<br>
+                    Ciudad: {$ciudad}<br>
+                    Nombre: {$recipientName}<br>
+                    RUT: {$rut}<br>
+                    Cargo: {$cargo}
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:0 0 12px 0;">Adjuntamos su código QR personal para el control de acceso.</p>
+              <p style="margin:0 0 16px 0;">
+                <img src="{$qrUrl}" alt="QR acreditación" width="180" height="180" style="display:block;border:1px solid #e6ebf2;border-radius:8px;">
+              </p>
+              <p style="margin:0 0 6px 0;font-size:12px;color:#6a7880;">Token QR: {$qrToken}</p>
+              <p style="margin:0;">Atentamente,<br>{$municipalidadName}</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+HTML;
+
+    $headers = build_media_email_headers($fromEmail, $fromName);
+    return mail($request['correo'], $subject, $bodyHtml, $headers);
+}
+
+function send_media_rejection_email(array $request, array $event, array $municipalidad, ?string $fromEmail, ?string $fromName): bool
+{
+    $subject = 'Resultado solicitud de acreditación - ' . ($event['titulo'] ?? 'Evento');
+    $recipientName = htmlspecialchars(trim(($request['nombre'] ?? '') . ' ' . ($request['apellidos'] ?? '')), ENT_QUOTES, 'UTF-8');
+    $eventTitle = htmlspecialchars($event['titulo'] ?? 'Evento', ENT_QUOTES, 'UTF-8');
+    $municipalidadName = htmlspecialchars($municipalidad['nombre'] ?? 'Municipalidad', ENT_QUOTES, 'UTF-8');
+
+    $bodyHtml = <<<HTML
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Solicitud de acreditación</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f6fb;font-family:Arial,sans-serif;color:#1f2b3a;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f6fb;padding:24px 0;">
+    <tr>
+      <td align="center">
+        <table width="620" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e6ebf2;">
+          <tr>
+            <td style="padding:24px;">
+              <h2 style="margin:0 0 12px 0;">Resultado solicitud de acreditación</h2>
+              <p style="margin:0 0 10px 0;">Estimado/a <strong>{$recipientName}</strong>,</p>
+              <p style="margin:0 0 12px 0;">Agradecemos su interés en cubrir el evento <strong>{$eventTitle}</strong>. Tras revisar las solicitudes recibidas, lamentamos informar que en esta oportunidad no podremos aprobar su acreditación.</p>
+              <p style="margin:0 0 12px 0;">Esperamos contar con su participación en futuras actividades y le agradecemos su comprensión.</p>
+              <p style="margin:0;">Atentamente,<br>{$municipalidadName}</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+HTML;
+
+    $headers = build_media_email_headers($fromEmail, $fromName);
+    return mail($request['correo'], $subject, $bodyHtml, $headers);
+}
+
 $events = db()->query('SELECT id, titulo, fecha_inicio, fecha_fin, tipo, ubicacion FROM events WHERE habilitado = 1 ORDER BY fecha_inicio DESC')->fetchAll();
+$municipalidad = get_municipalidad();
+$correoConfig = db()->query('SELECT * FROM notificacion_correos LIMIT 1')->fetch();
+$fromEmail = $correoConfig['from_correo'] ?? $correoConfig['correo_imap'] ?? null;
+$fromName = $correoConfig['from_nombre'] ?? ($municipalidad['nombre'] ?? 'Municipalidad');
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ?? null)) {
+    $action = $_POST['action'] ?? '';
+    $requestId = isset($_POST['request_id']) ? (int) $_POST['request_id'] : 0;
+    $eventId = isset($_POST['event_id']) ? (int) $_POST['event_id'] : 0;
+
+    if ($requestId <= 0 || $eventId <= 0) {
+        $errors[] = 'No se pudo identificar la solicitud seleccionada.';
+    } else {
+        $stmtRequest = db()->prepare('SELECT * FROM media_accreditation_requests WHERE id = ? AND event_id = ?');
+        $stmtRequest->execute([$requestId, $eventId]);
+        $requestData = $stmtRequest->fetch();
+
+        $stmtEvent = db()->prepare('SELECT * FROM events WHERE id = ?');
+        $stmtEvent->execute([$eventId]);
+        $eventData = $stmtEvent->fetch();
+
+        if (!$requestData || !$eventData) {
+            $errors[] = 'No se encontró la solicitud o el evento.';
+        } else {
+            if ($action === 'approve') {
+                if (empty($requestData['qr_token'])) {
+                    $requestData['qr_token'] = bin2hex(random_bytes(16));
+                }
+
+                $stmtUpdate = db()->prepare(
+                    'UPDATE media_accreditation_requests
+                     SET estado = ?, qr_token = ?, aprobado_at = NOW(), rechazado_at = NULL, inside_estado = 0
+                     WHERE id = ?'
+                );
+                $stmtUpdate->execute([MEDIA_STATUS_APPROVED, $requestData['qr_token'], $requestId]);
+
+                $mailSent = send_media_approval_email($requestData, $eventData, $municipalidad, $fromEmail, $fromName);
+                $notice = $mailSent
+                    ? 'La solicitud fue aprobada y el correo fue enviado.'
+                    : 'La solicitud fue aprobada, pero no se pudo enviar el correo.';
+            } elseif ($action === 'reject') {
+                $stmtUpdate = db()->prepare(
+                    'UPDATE media_accreditation_requests
+                     SET estado = ?, rechazado_at = NOW(), inside_estado = 0
+                     WHERE id = ?'
+                );
+                $stmtUpdate->execute([MEDIA_STATUS_REJECTED, $requestId]);
+
+                $mailSent = send_media_rejection_email($requestData, $eventData, $municipalidad, $fromEmail, $fromName);
+                $notice = $mailSent
+                    ? 'La solicitud fue rechazada y el correo fue enviado.'
+                    : 'La solicitud fue rechazada, pero no se pudo enviar el correo.';
+            } elseif ($action === 'delete') {
+                $stmtDelete = db()->prepare('DELETE FROM media_accreditation_requests WHERE id = ?');
+                $stmtDelete->execute([$requestId]);
+                $notice = 'La solicitud fue eliminada.';
+            } else {
+                $errors[] = 'Acción no reconocida.';
+            }
+
+            $selectedEventId = $eventId;
+        }
+    }
+}
 
 if ($selectedEventId > 0) {
     $stmt = db()->prepare('SELECT * FROM events WHERE id = ?');
@@ -203,11 +444,19 @@ if ($selectedEventId > 0) {
                                                     <th>Correo</th>
                                                     <th>Celular</th>
                                                     <th>Cargo</th>
+                                                    <th>Estado</th>
+                                                    <th>QR</th>
                                                     <th>Fecha envío</th>
+                                                    <th>Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <?php foreach ($requests as $request) : ?>
+                                                    <?php
+                                                    $estado = $request['estado'] ?? MEDIA_STATUS_PENDING;
+                                                    $badgeClass = media_status_badge($estado);
+                                                    $qrToken = $request['qr_token'] ?? '';
+                                                    ?>
                                                     <tr>
                                                         <td><?php echo htmlspecialchars($request['medio'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td>
@@ -228,7 +477,38 @@ if ($selectedEventId > 0) {
                                                         <td><?php echo htmlspecialchars($request['correo'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td><?php echo htmlspecialchars($request['celular'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td><?php echo htmlspecialchars($request['cargo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td>
+                                                            <span class="badge text-bg-<?php echo $badgeClass; ?>">
+                                                                <?php echo htmlspecialchars(ucfirst($estado), ENT_QUOTES, 'UTF-8'); ?>
+                                                            </span>
+                                                        </td>
+                                                        <td class="text-muted small"><?php echo $qrToken !== '' ? htmlspecialchars($qrToken, ENT_QUOTES, 'UTF-8') : '-'; ?></td>
                                                         <td><?php echo htmlspecialchars($request['created_at'], ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td>
+                                                            <div class="d-flex flex-wrap gap-1">
+                                                                <form method="post" class="d-inline">
+                                                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                    <input type="hidden" name="action" value="approve">
+                                                                    <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
+                                                                    <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
+                                                                    <button type="submit" class="btn btn-sm btn-success">Aprobar</button>
+                                                                </form>
+                                                                <form method="post" class="d-inline">
+                                                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                    <input type="hidden" name="action" value="reject">
+                                                                    <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
+                                                                    <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
+                                                                    <button type="submit" class="btn btn-sm btn-warning">Rechazar</button>
+                                                                </form>
+                                                                <form method="post" class="d-inline" onsubmit="return confirm('¿Eliminar esta solicitud? Esta acción no se puede deshacer.');">
+                                                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                    <input type="hidden" name="action" value="delete">
+                                                                    <input type="hidden" name="event_id" value="<?php echo (int) $selectedEventId; ?>">
+                                                                    <input type="hidden" name="request_id" value="<?php echo (int) $request['id']; ?>">
+                                                                    <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                                                                </form>
+                                                            </div>
+                                                        </td>
                                                     </tr>
                                                 <?php endforeach; ?>
                                             </tbody>

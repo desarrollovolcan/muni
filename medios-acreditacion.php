@@ -53,16 +53,41 @@ try {
             correo VARCHAR(180) NOT NULL,
             celular VARCHAR(40) DEFAULT NULL,
             cargo VARCHAR(120) DEFAULT NULL,
+            estado ENUM("pendiente", "aprobado", "rechazado") NOT NULL DEFAULT "pendiente",
+            qr_token VARCHAR(64) DEFAULT NULL,
             correo_enviado TINYINT(1) NOT NULL DEFAULT 0,
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            aprobado_at TIMESTAMP NULL DEFAULT NULL,
+            rechazado_at TIMESTAMP NULL DEFAULT NULL,
+            last_scan_at TIMESTAMP NULL DEFAULT NULL,
+            inside_estado TINYINT(1) NOT NULL DEFAULT 0,
             sent_at TIMESTAMP NULL DEFAULT NULL,
             PRIMARY KEY (id),
+            UNIQUE KEY media_accreditation_requests_qr_unique (qr_token),
             KEY media_accreditation_requests_event_idx (event_id),
             CONSTRAINT media_accreditation_requests_event_fk FOREIGN KEY (event_id) REFERENCES events (id) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
     );
 } catch (Exception $e) {
 } catch (Error $e) {
+}
+
+$migrationStatements = [
+    'ALTER TABLE media_accreditation_requests ADD COLUMN estado ENUM("pendiente", "aprobado", "rechazado") NOT NULL DEFAULT "pendiente"',
+    'ALTER TABLE media_accreditation_requests ADD COLUMN qr_token VARCHAR(64) DEFAULT NULL',
+    'ALTER TABLE media_accreditation_requests ADD COLUMN aprobado_at TIMESTAMP NULL DEFAULT NULL',
+    'ALTER TABLE media_accreditation_requests ADD COLUMN rechazado_at TIMESTAMP NULL DEFAULT NULL',
+    'ALTER TABLE media_accreditation_requests ADD COLUMN last_scan_at TIMESTAMP NULL DEFAULT NULL',
+    'ALTER TABLE media_accreditation_requests ADD COLUMN inside_estado TINYINT(1) NOT NULL DEFAULT 0',
+    'ALTER TABLE media_accreditation_requests ADD UNIQUE KEY media_accreditation_requests_qr_unique (qr_token)',
+];
+
+foreach ($migrationStatements as $statement) {
+    try {
+        db()->exec($statement);
+    } catch (Exception $e) {
+    } catch (Error $e) {
+    }
 }
 
 if ($token === '') {

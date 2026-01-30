@@ -216,12 +216,34 @@ CREATE TABLE `media_accreditation_requests` (
   `correo` VARCHAR(180) NOT NULL,
   `celular` VARCHAR(40) DEFAULT NULL,
   `cargo` VARCHAR(120) DEFAULT NULL,
+  `estado` ENUM('pendiente', 'aprobado', 'rechazado') NOT NULL DEFAULT 'pendiente',
+  `qr_token` VARCHAR(64) DEFAULT NULL,
   `correo_enviado` TINYINT(1) NOT NULL DEFAULT 0,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `aprobado_at` TIMESTAMP NULL DEFAULT NULL,
+  `rechazado_at` TIMESTAMP NULL DEFAULT NULL,
+  `last_scan_at` TIMESTAMP NULL DEFAULT NULL,
+  `inside_estado` TINYINT(1) NOT NULL DEFAULT 0,
   `sent_at` TIMESTAMP NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `media_accreditation_requests_qr_unique` (`qr_token`),
   KEY `media_accreditation_requests_event_idx` (`event_id`),
   CONSTRAINT `media_accreditation_requests_event_fk` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `media_accreditation_access_logs` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `event_id` INT UNSIGNED NOT NULL,
+  `request_id` INT UNSIGNED NOT NULL,
+  `accion` ENUM('ingreso', 'salida') NOT NULL,
+  `scanned_by` INT UNSIGNED DEFAULT NULL,
+  `scanned_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `media_accreditation_access_logs_event_idx` (`event_id`),
+  KEY `media_accreditation_access_logs_request_idx` (`request_id`),
+  CONSTRAINT `media_accreditation_access_logs_event_fk` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `media_accreditation_access_logs_request_fk` FOREIGN KEY (`request_id`) REFERENCES `media_accreditation_requests` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `media_accreditation_access_logs_scanned_by_fk` FOREIGN KEY (`scanned_by`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `authority_attachments` (
