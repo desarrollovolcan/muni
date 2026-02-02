@@ -370,18 +370,36 @@ if ($selectedEventId > 0) {
         }
 
         async function startCamera() {
-            if (!navigator.mediaDevices?.getUserMedia) {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 updateStatus('El navegador no permite acceder a la cámara.');
-                return;
+                return false;
             }
-            const constraints = { video: { facingMode: { exact: 'environment' } } };
-
             if (currentStream) {
                 currentStream.getTracks().forEach((track) => track.stop());
             }
-            currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+            var constraintAttempts = [
+                { video: { facingMode: { exact: 'environment' } } },
+                { video: { facingMode: { ideal: 'environment' } } },
+                { video: true },
+            ];
+            var lastError = null;
+            for (var i = 0; i < constraintAttempts.length; i += 1) {
+                try {
+                    currentStream = await navigator.mediaDevices.getUserMedia(constraintAttempts[i]);
+                    break;
+                } catch (error) {
+                    lastError = error;
+                }
+            }
+            if (!currentStream) {
+                if (lastError) {
+                    updateStatus('No se pudo iniciar la cámara.');
+                }
+                return false;
+            }
             videoElement.srcObject = currentStream;
             await videoElement.play();
+            return true;
         }
 
         async function stopCamera() {
