@@ -374,9 +374,12 @@ if ($selectedEventId > 0) {
                 updateStatus('El navegador no permite acceder a la cámara.');
                 return false;
             }
+            const constraints = { video: { facingMode: { exact: 'environment' } } };
+
             if (currentStream) {
                 currentStream.getTracks().forEach((track) => track.stop());
             }
+<<<<<<< HEAD
             var constraintAttempts = [
                 { video: { facingMode: { exact: 'environment' } } },
                 { video: { facingMode: { ideal: 'environment' } } },
@@ -397,6 +400,9 @@ if ($selectedEventId > 0) {
                 }
                 return false;
             }
+=======
+            currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+>>>>>>> parent of 0218618 (Improve camera fallback for QR scanning)
             videoElement.srcObject = currentStream;
             await videoElement.play();
             return true;
