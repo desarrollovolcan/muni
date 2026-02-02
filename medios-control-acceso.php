@@ -186,14 +186,6 @@ if ($selectedEventId > 0) {
             <div class="container-fluid">
                 <?php $subtitle = 'Medios de comunicación'; $title = 'Control de acceso'; include('partials/page-title.php'); ?>
 
-                <?php if (!empty($errors)) : ?>
-                    <div class="alert alert-danger" id="scan-error" data-scan-error="<?php echo htmlspecialchars($errors[0] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
-                        <?php foreach ($errors as $error) : ?>
-                            <div><?php echo htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></div>
-                        <?php endforeach; ?>
-                    </div>
-                <?php endif; ?>
-
                 <?php if ($notice) : ?>
                     <div class="alert alert-success">
                         <?php echo htmlspecialchars($notice, ENT_QUOTES, 'UTF-8'); ?>
@@ -215,8 +207,8 @@ if ($selectedEventId > 0) {
                 >
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title">Registro de acceso</h5>
+                            <div class="modal-header" id="scan-result-header">
+                                <h5 class="modal-title" id="scan-result-title">Registro de acceso</h5>
                             </div>
                             <div class="modal-body">
                                 <p class="mb-3" id="scan-result-status"></p>
@@ -235,16 +227,40 @@ if ($selectedEventId > 0) {
                     </div>
                 </div>
 
+                <div
+                    class="modal fade"
+                    id="scan-error-modal"
+                    tabindex="-1"
+                    aria-hidden="true"
+                    data-has-error="<?php echo !empty($errors) ? '1' : '0'; ?>"
+                    data-error-message="<?php echo htmlspecialchars($errors[0] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                >
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border border-danger">
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title">QR no válido</h5>
+                            </div>
+                            <div class="modal-body">
+                                <p class="mb-0" id="scan-error-message"></p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger" id="scan-error-accept">Aceptar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="row">
                     <div class="col-lg-5">
                         <div class="card gm-section">
                             <div class="card-header">
-                                <h5 class="card-title mb-1">Registrar ingreso/salida</h5>
+                                <h5 class="card-title mb-1">Escaneo de QR</h5>
                                 <p class="text-muted mb-0">Escanea el QR del medio para registrar la entrada o salida.</p>
                             </div>
                             <div class="card-body">
                                 <form method="post">
                                     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                    <input type="hidden" id="qr-token" name="qr_token">
                                     <div class="mb-3">
                                         <label class="form-label" for="event-id">Evento</label>
                                         <select id="event-id" name="event_id" class="form-select" required>
@@ -256,15 +272,8 @@ if ($selectedEventId > 0) {
                                             <?php endforeach; ?>
                                         </select>
                                     </div>
-                                    <div class="mb-3">
-                                        <label class="form-label" for="qr-token">QR del medio</label>
-                                        <input type="text" id="qr-token" name="qr_token" class="form-control" placeholder="Escanea o pega el código QR" required>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary w-100">Registrar</button>
-                                </form>
-                                <hr class="my-4">
-                                <div>
-                                    <h6 class="mb-2">Escaneo desde celular</h6>
+                                    <div>
+                                        <h6 class="mb-2">Escaneo desde celular</h6>
                                     <p class="text-muted small mb-3">Activa la cámara para leer el QR y completar el campo automáticamente.</p>
                                     <div class="d-flex flex-wrap gap-2 mb-2">
                                         <button type="button" class="btn btn-outline-primary btn-sm" id="start-scan">Iniciar escaneo</button>
@@ -274,7 +283,8 @@ if ($selectedEventId > 0) {
                                         <video id="qr-video" autoplay muted playsinline style="object-fit: cover;"></video>
                                     </div>
                                     <p id="scan-status" class="text-muted small mt-2 mb-0">Cámara detenida.</p>
-                                </div>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -392,6 +402,8 @@ if ($selectedEventId > 0) {
         const eventSelect = document.getElementById('event-id');
         const scanResultModal = document.getElementById('scan-result-modal');
         const scanModalAccept = document.getElementById('scan-modal-accept');
+        const scanErrorModal = document.getElementById('scan-error-modal');
+        const scanErrorAccept = document.getElementById('scan-error-accept');
         let currentStream = null;
         let scanning = false;
         let detector = null;
@@ -399,7 +411,8 @@ if ($selectedEventId > 0) {
         let lastDetectedAt = 0;
         let lastDetectedValue = '';
         const scanThrottleMs = 800;
-        let modalInstance = null;
+        let resultModalInstance = null;
+        let errorModalInstance = null;
 
         function updateStatus(message) {
             statusLabel.textContent = message;
@@ -497,17 +510,30 @@ if ($selectedEventId > 0) {
             if (statusElement) {
                 statusElement.textContent = `${statusMessage} ${statusText}`;
             }
+            const resultHeader = document.getElementById('scan-result-header');
+            const resultTitle = document.getElementById('scan-result-title');
+            if (resultHeader) {
+                resultHeader.classList.remove('bg-primary', 'bg-success', 'text-white');
+                if (accion === 'ingreso') {
+                    resultHeader.classList.add('bg-primary', 'text-white');
+                } else {
+                    resultHeader.classList.add('bg-success', 'text-white');
+                }
+            }
+            if (resultTitle) {
+                resultTitle.textContent = `${displayAction} registrada`;
+            }
             setModalField('scan-result-medio', scanResultModal.dataset.medio);
             setModalField('scan-result-tipo', scanResultModal.dataset.tipo);
             setModalField('scan-result-nombre', scanResultModal.dataset.nombre);
             setModalField('scan-result-rut', scanResultModal.dataset.rut);
             setModalField('scan-result-correo', scanResultModal.dataset.correo);
             if (window.bootstrap && window.bootstrap.Modal) {
-                modalInstance = modalInstance || new window.bootstrap.Modal(scanResultModal, {
+                resultModalInstance = resultModalInstance || new window.bootstrap.Modal(scanResultModal, {
                     backdrop: 'static',
                     keyboard: false,
                 });
-                modalInstance.show();
+                resultModalInstance.show();
             } else {
                 scanResultModal.classList.add('show');
                 scanResultModal.style.display = 'block';
@@ -520,14 +546,51 @@ if ($selectedEventId > 0) {
             if (!scanResultModal) {
                 return;
             }
-            if (modalInstance) {
-                modalInstance.hide();
+            if (resultModalInstance) {
+                resultModalInstance.hide();
             } else {
                 scanResultModal.classList.remove('show');
                 scanResultModal.style.display = 'none';
                 scanResultModal.setAttribute('aria-hidden', 'true');
             }
             scanResultModal.dataset.hasResult = '0';
+        }
+
+        function showScanErrorModal() {
+            if (!scanErrorModal || scanErrorModal.dataset.hasError !== '1') {
+                return false;
+            }
+            const errorMessage = scanErrorModal.dataset.errorMessage || 'El QR no es válido para este evento.';
+            const errorElement = document.getElementById('scan-error-message');
+            if (errorElement) {
+                errorElement.textContent = errorMessage;
+            }
+            if (window.bootstrap && window.bootstrap.Modal) {
+                errorModalInstance = errorModalInstance || new window.bootstrap.Modal(scanErrorModal, {
+                    backdrop: 'static',
+                    keyboard: false,
+                });
+                errorModalInstance.show();
+            } else {
+                scanErrorModal.classList.add('show');
+                scanErrorModal.style.display = 'block';
+                scanErrorModal.removeAttribute('aria-hidden');
+            }
+            return true;
+        }
+
+        function hideScanErrorModal() {
+            if (!scanErrorModal) {
+                return;
+            }
+            if (errorModalInstance) {
+                errorModalInstance.hide();
+            } else {
+                scanErrorModal.classList.remove('show');
+                scanErrorModal.style.display = 'none';
+                scanErrorModal.setAttribute('aria-hidden', 'true');
+            }
+            scanErrorModal.dataset.hasError = '0';
         }
 
         const canvasElement = document.createElement('canvas');
@@ -637,12 +700,6 @@ if ($selectedEventId > 0) {
         });
 
         document.addEventListener('DOMContentLoaded', () => {
-            const errorAlert = document.getElementById('scan-error');
-            if (errorAlert) {
-                const message = errorAlert.dataset.scanError || 'El medio no está registrado o aprobado.';
-                updateStatus(message);
-                playErrorTone();
-            }
             updateDetectorSupport();
             if (!isScannerSupported()) {
                 updateStatus('Tu navegador no soporta lectura automática de QR.');
@@ -653,6 +710,15 @@ if ($selectedEventId > 0) {
             detector = detector || (useBarcodeDetector ? new BarcodeDetector({ formats: ['qr_code'] }) : true);
             scanning = false;
             submitted = false;
+            const hasErrorModal = showScanErrorModal();
+            if (hasErrorModal) {
+                updateStatus('QR no válido. Confirma para continuar.');
+                playErrorTone();
+                startButton.disabled = true;
+                stopButton.disabled = true;
+                ensureCameraReady();
+                return;
+            }
             const hasModal = showScanResultModal();
             if (hasModal) {
                 updateStatus('Registro completado. Confirma para continuar.');
@@ -669,6 +735,12 @@ if ($selectedEventId > 0) {
 
         scanModalAccept?.addEventListener('click', async () => {
             hideScanResultModal();
+            updateStatus('Listo para escanear otro medio.');
+            await beginScan();
+        });
+
+        scanErrorAccept?.addEventListener('click', async () => {
+            hideScanErrorModal();
             updateStatus('Listo para escanear otro medio.');
             await beginScan();
         });
