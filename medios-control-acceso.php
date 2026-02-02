@@ -374,12 +374,26 @@ if ($selectedEventId > 0) {
                 updateStatus('El navegador no permite acceder a la cámara.');
                 return;
             }
-            const constraints = { video: { facingMode: { exact: 'environment' } } };
-
             if (currentStream) {
                 currentStream.getTracks().forEach((track) => track.stop());
             }
-            currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+            const constraintAttempts = [
+                { video: { facingMode: { exact: 'environment' } } },
+                { video: { facingMode: { ideal: 'environment' } } },
+                { video: true },
+            ];
+            let lastError = null;
+            for (const constraints of constraintAttempts) {
+                try {
+                    currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+                    break;
+                } catch (error) {
+                    lastError = error;
+                }
+            }
+            if (!currentStream) {
+                throw lastError || new Error('Camera unavailable');
+            }
             videoElement.srcObject = currentStream;
             await videoElement.play();
         }
