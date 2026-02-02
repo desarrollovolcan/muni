@@ -465,7 +465,7 @@ if ($selectedEventId > 0) {
             stopCamera();
         });
 
-        document.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', () => {
             const errorAlert = document.getElementById('scan-error');
             if (errorAlert) {
                 const message = errorAlert.dataset.scanError || 'El medio no está registrado o aprobado.';
@@ -474,22 +474,16 @@ if ($selectedEventId > 0) {
             }
             if (!('BarcodeDetector' in window)) {
                 updateStatus('Tu navegador no soporta lectura automática de QR.');
+                startButton.disabled = true;
+                stopButton.disabled = true;
                 return;
             }
             detector = detector || new BarcodeDetector({ formats: ['qr_code'] });
-            startButton.disabled = true;
-            stopButton.disabled = false;
-            scanning = true;
+            scanning = false;
             submitted = false;
-            try {
-                await startCamera();
-                updateStatus('Cámara activa. Apunta al QR.');
-                requestAnimationFrame(scanLoop);
-            } catch (error) {
-                updateStatus('No se pudo iniciar la cámara. Pulsa "Iniciar escaneo".');
-                startButton.disabled = false;
-                stopButton.disabled = true;
-            }
+            startButton.disabled = false;
+            stopButton.disabled = true;
+            updateStatus('Listo para escanear. Pulsa "Iniciar escaneo".');
         });
     </script>
 
