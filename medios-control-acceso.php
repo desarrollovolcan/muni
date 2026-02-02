@@ -370,18 +370,36 @@ if ($selectedEventId > 0) {
         }
 
         async function startCamera() {
-            if (!navigator.mediaDevices?.getUserMedia) {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 updateStatus('El navegador no permite acceder a la cámara.');
-                return;
+                return false;
             }
-            const constraints = { video: { facingMode: { exact: 'environment' } } };
-
             if (currentStream) {
                 currentStream.getTracks().forEach((track) => track.stop());
             }
-            currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+            var constraintAttempts = [
+                { video: { facingMode: { exact: 'environment' } } },
+                { video: { facingMode: { ideal: 'environment' } } },
+                { video: true },
+            ];
+            var lastError = null;
+            for (var i = 0; i < constraintAttempts.length; i += 1) {
+                try {
+                    currentStream = await navigator.mediaDevices.getUserMedia(constraintAttempts[i]);
+                    break;
+                } catch (error) {
+                    lastError = error;
+                }
+            }
+            if (!currentStream) {
+                if (lastError) {
+                    updateStatus('No se pudo iniciar la cámara.');
+                }
+                return false;
+            }
             videoElement.srcObject = currentStream;
             await videoElement.play();
+            return true;
         }
 
         async function stopCamera() {
@@ -447,7 +465,7 @@ if ($selectedEventId > 0) {
             stopCamera();
         });
 
-        document.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', () => {
             const errorAlert = document.getElementById('scan-error');
             if (errorAlert) {
                 const message = errorAlert.dataset.scanError || 'El medio no está registrado o aprobado.';
@@ -456,22 +474,16 @@ if ($selectedEventId > 0) {
             }
             if (!('BarcodeDetector' in window)) {
                 updateStatus('Tu navegador no soporta lectura automática de QR.');
+                startButton.disabled = true;
+                stopButton.disabled = true;
                 return;
             }
             detector = detector || new BarcodeDetector({ formats: ['qr_code'] });
-            startButton.disabled = true;
-            stopButton.disabled = false;
-            scanning = true;
+            scanning = false;
             submitted = false;
-            try {
-                await startCamera();
-                updateStatus('Cámara activa. Apunta al QR.');
-                requestAnimationFrame(scanLoop);
-            } catch (error) {
-                updateStatus('No se pudo iniciar la cámara. Pulsa "Iniciar escaneo".');
-                startButton.disabled = false;
-                stopButton.disabled = true;
-            }
+            startButton.disabled = false;
+            stopButton.disabled = true;
+            updateStatus('Listo para escanear. Pulsa "Iniciar escaneo".');
         });
     </script>
 
