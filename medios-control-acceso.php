@@ -393,7 +393,7 @@ if ($selectedEventId > 0) {
             }
             if (!currentStream) {
                 if (lastError) {
-                    throw lastError;
+                    updateStatus('No se pudo iniciar la cámara.');
                 }
                 return false;
             }
