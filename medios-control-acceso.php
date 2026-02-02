@@ -333,6 +333,7 @@ if ($selectedEventId > 0) {
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
     <script>
         const videoElement = document.getElementById('qr-video');
         const startButton = document.getElementById('start-scan');
@@ -374,19 +375,16 @@ if ($selectedEventId > 0) {
                 updateStatus('El navegador no permite acceder a la cámara.');
                 return false;
             }
-            const constraints = { video: { facingMode: { exact: 'environment' } } };
-
             if (currentStream) {
                 currentStream.getTracks().forEach((track) => track.stop());
             }
-<<<<<<< HEAD
-            var constraintAttempts = [
-                { video: { facingMode: { exact: 'environment' } } },
-                { video: { facingMode: { ideal: 'environment' } } },
-                { video: true },
+            const constraintAttempts = [
+                { video: { facingMode: { ideal: 'environment' } }, audio: false },
+                { video: { facingMode: 'environment' }, audio: false },
+                { video: true, audio: false },
             ];
-            var lastError = null;
-            for (var i = 0; i < constraintAttempts.length; i += 1) {
+            let lastError = null;
+            for (let i = 0; i < constraintAttempts.length; i += 1) {
                 try {
                     currentStream = await navigator.mediaDevices.getUserMedia(constraintAttempts[i]);
                     break;
@@ -400,9 +398,6 @@ if ($selectedEventId > 0) {
                 }
                 return false;
             }
-=======
-            currentStream = await navigator.mediaDevices.getUserMedia(constraints);
->>>>>>> parent of 0218618 (Improve camera fallback for QR scanning)
             videoElement.srcObject = currentStream;
             await videoElement.play();
             return true;
@@ -419,26 +414,62 @@ if ($selectedEventId > 0) {
             updateStatus('Cámara detenida.');
         }
 
+        const canvasElement = document.createElement('canvas');
+        const canvasContext = canvasElement.getContext('2d');
+        let useBarcodeDetector = false;
+        let useJsQr = false;
+
+        function isScannerSupported() {
+            return useBarcodeDetector || useJsQr;
+        }
+
+        function updateDetectorSupport() {
+            useBarcodeDetector = 'BarcodeDetector' in window;
+            useJsQr = !!window.jsQR;
+        }
+
+        function decodeWithJsQr() {
+            if (!canvasContext || videoElement.readyState < 2) {
+                return null;
+            }
+            const width = videoElement.videoWidth;
+            const height = videoElement.videoHeight;
+            if (!width || !height) {
+                return null;
+            }
+            canvasElement.width = width;
+            canvasElement.height = height;
+            canvasContext.drawImage(videoElement, 0, 0, width, height);
+            const imageData = canvasContext.getImageData(0, 0, width, height);
+            const code = window.jsQR?.(imageData.data, width, height, { inversionAttempts: 'dontInvert' });
+            return code?.data || null;
+        }
+
         async function scanLoop() {
             if (!scanning || !detector) {
                 return;
             }
             try {
-                const barcodes = await detector.detect(videoElement);
-                if (barcodes.length > 0) {
-                    const code = barcodes[0].rawValue;
-                    if (code && !submitted) {
-                        qrInput.value = code;
-                        updateStatus('QR leído. Enviando registro...');
-                        if (!eventSelect.value) {
-                            updateStatus('Selecciona un evento antes de registrar.');
-                            playErrorTone();
-                            return;
-                        }
-                        submitted = true;
-                        qrInput.form?.submit();
+                let code = null;
+                if (useBarcodeDetector) {
+                    const barcodes = await detector.detect(videoElement);
+                    if (barcodes.length > 0) {
+                        code = barcodes[0].rawValue;
+                    }
+                } else if (useJsQr) {
+                    code = decodeWithJsQr();
+                }
+                if (code && !submitted) {
+                    qrInput.value = code;
+                    updateStatus('QR leído. Enviando registro...');
+                    if (!eventSelect.value) {
+                        updateStatus('Selecciona un evento antes de registrar.');
+                        playErrorTone();
                         return;
                     }
+                    submitted = true;
+                    qrInput.form?.submit();
+                    return;
                 }
             } catch (error) {
                 updateStatus('No se pudo leer el QR. Intenta nuevamente.');
@@ -447,17 +478,23 @@ if ($selectedEventId > 0) {
         }
 
         startButton?.addEventListener('click', async () => {
-            if (!('BarcodeDetector' in window)) {
+            updateDetectorSupport();
+            if (!isScannerSupported()) {
                 updateStatus('Tu navegador no soporta lectura automática de QR.');
                 return;
             }
-            detector = detector || new BarcodeDetector({ formats: ['qr_code'] });
+            detector = detector || (useBarcodeDetector ? new BarcodeDetector({ formats: ['qr_code'] }) : true);
             startButton.disabled = true;
             stopButton.disabled = false;
             scanning = true;
             submitted = false;
             try {
-                await startCamera();
+                const started = await startCamera();
+                if (!started) {
+                    startButton.disabled = false;
+                    stopButton.disabled = true;
+                    return;
+                }
                 updateStatus('Cámara activa. Apunta al QR.');
                 requestAnimationFrame(scanLoop);
             } catch (error) {
@@ -478,13 +515,14 @@ if ($selectedEventId > 0) {
                 updateStatus(message);
                 playErrorTone();
             }
-            if (!('BarcodeDetector' in window)) {
+            updateDetectorSupport();
+            if (!isScannerSupported()) {
                 updateStatus('Tu navegador no soporta lectura automática de QR.');
                 startButton.disabled = true;
                 stopButton.disabled = true;
                 return;
             }
-            detector = detector || new BarcodeDetector({ formats: ['qr_code'] });
+            detector = detector || (useBarcodeDetector ? new BarcodeDetector({ formats: ['qr_code'] }) : true);
             scanning = false;
             submitted = false;
             startButton.disabled = false;
