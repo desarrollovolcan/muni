@@ -3,6 +3,7 @@ require __DIR__ . '/app/bootstrap.php';
 
 $errors = [];
 $notice = null;
+$lastScanResult = null;
 $selectedEventId = isset($_GET['event_id']) ? (int) $_GET['event_id'] : 0;
 $events = db()->query('SELECT id, titulo, fecha_inicio, fecha_fin FROM events WHERE habilitado = 1 ORDER BY fecha_inicio DESC')->fetchAll();
 $insideMedia = [];
@@ -138,6 +139,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                 $notice = $inside
                     ? 'Salida registrada para ' . $request['medio'] . '.'
                     : 'Ingreso registrado para ' . $request['medio'] . '.';
+                $lastScanResult = [
+                    'accion' => $action,
+                    'medio' => $request['medio'] ?? '',
+                    'tipo_medio' => $request['tipo_medio'] ?? '',
+                    'nombre' => trim(($request['nombre'] ?? '') . ' ' . ($request['apellidos'] ?? '')),
+                    'rut' => $request['rut'] ?? '',
+                    'correo' => $request['correo'] ?? '',
+                ];
             }
         }
     }
@@ -190,6 +199,41 @@ if ($selectedEventId > 0) {
                         <?php echo htmlspecialchars($notice, ENT_QUOTES, 'UTF-8'); ?>
                     </div>
                 <?php endif; ?>
+
+                <div
+                    class="modal fade"
+                    id="scan-result-modal"
+                    tabindex="-1"
+                    aria-hidden="true"
+                    data-has-result="<?php echo $lastScanResult ? '1' : '0'; ?>"
+                    data-accion="<?php echo htmlspecialchars($lastScanResult['accion'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                    data-medio="<?php echo htmlspecialchars($lastScanResult['medio'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                    data-tipo="<?php echo htmlspecialchars($lastScanResult['tipo_medio'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                    data-nombre="<?php echo htmlspecialchars($lastScanResult['nombre'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                    data-rut="<?php echo htmlspecialchars($lastScanResult['rut'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                    data-correo="<?php echo htmlspecialchars($lastScanResult['correo'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                >
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Registro de acceso</h5>
+                            </div>
+                            <div class="modal-body">
+                                <p class="mb-3" id="scan-result-status"></p>
+                                <ul class="list-unstyled mb-0">
+                                    <li><strong>Medio:</strong> <span id="scan-result-medio"></span></li>
+                                    <li><strong>Tipo:</strong> <span id="scan-result-tipo"></span></li>
+                                    <li><strong>Nombre:</strong> <span id="scan-result-nombre"></span></li>
+                                    <li><strong>RUT:</strong> <span id="scan-result-rut"></span></li>
+                                    <li><strong>Correo:</strong> <span id="scan-result-correo"></span></li>
+                                </ul>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" id="scan-modal-accept">Aceptar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="row">
                     <div class="col-lg-5">
@@ -346,6 +390,8 @@ if ($selectedEventId > 0) {
         const statusLabel = document.getElementById('scan-status');
         const qrInput = document.getElementById('qr-token');
         const eventSelect = document.getElementById('event-id');
+        const scanResultModal = document.getElementById('scan-result-modal');
+        const scanModalAccept = document.getElementById('scan-modal-accept');
         let currentStream = null;
         let scanning = false;
         let detector = null;
@@ -353,6 +399,7 @@ if ($selectedEventId > 0) {
         let lastDetectedAt = 0;
         let lastDetectedValue = '';
         const scanThrottleMs = 800;
+        let modalInstance = null;
 
         function updateStatus(message) {
             statusLabel.textContent = message;
@@ -420,6 +467,67 @@ if ($selectedEventId > 0) {
             stopButton.disabled = true;
             startButton.disabled = false;
             updateStatus('Cámara detenida.');
+        }
+
+        async function ensureCameraReady() {
+            if (currentStream) {
+                return true;
+            }
+            return startCamera();
+        }
+
+        function setModalField(id, value) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = value || '-';
+            }
+        }
+
+        function showScanResultModal() {
+            if (!scanResultModal || scanResultModal.dataset.hasResult !== '1') {
+                return false;
+            }
+            const accion = scanResultModal.dataset.accion || '';
+            const statusText = accion === 'ingreso'
+                ? 'Se registró el ingreso del medio.'
+                : 'Se registró la salida del medio.';
+            const displayAction = accion === 'ingreso' ? 'Ingreso' : 'Salida';
+            const statusMessage = `${displayAction} registrada correctamente.`;
+            const statusElement = document.getElementById('scan-result-status');
+            if (statusElement) {
+                statusElement.textContent = `${statusMessage} ${statusText}`;
+            }
+            setModalField('scan-result-medio', scanResultModal.dataset.medio);
+            setModalField('scan-result-tipo', scanResultModal.dataset.tipo);
+            setModalField('scan-result-nombre', scanResultModal.dataset.nombre);
+            setModalField('scan-result-rut', scanResultModal.dataset.rut);
+            setModalField('scan-result-correo', scanResultModal.dataset.correo);
+            if (window.bootstrap && window.bootstrap.Modal) {
+                modalInstance = modalInstance || new window.bootstrap.Modal(scanResultModal, {
+                    backdrop: 'static',
+                    keyboard: false,
+                });
+                modalInstance.show();
+            } else {
+                scanResultModal.classList.add('show');
+                scanResultModal.style.display = 'block';
+                scanResultModal.removeAttribute('aria-hidden');
+            }
+            return true;
+        }
+
+        function hideScanResultModal() {
+            if (!scanResultModal) {
+                return;
+            }
+            if (modalInstance) {
+                modalInstance.hide();
+            } else {
+                scanResultModal.classList.remove('show');
+                scanResultModal.style.display = 'none';
+                scanResultModal.setAttribute('aria-hidden', 'true');
+            }
+            scanResultModal.dataset.hasResult = '0';
         }
 
         const canvasElement = document.createElement('canvas');
@@ -545,10 +653,24 @@ if ($selectedEventId > 0) {
             detector = detector || (useBarcodeDetector ? new BarcodeDetector({ formats: ['qr_code'] }) : true);
             scanning = false;
             submitted = false;
+            const hasModal = showScanResultModal();
+            if (hasModal) {
+                updateStatus('Registro completado. Confirma para continuar.');
+                startButton.disabled = true;
+                stopButton.disabled = true;
+                ensureCameraReady();
+                return;
+            }
             startButton.disabled = false;
             stopButton.disabled = true;
             updateStatus('Cámara lista. Iniciando escaneo automáticamente.');
             beginScan();
+        });
+
+        scanModalAccept?.addEventListener('click', async () => {
+            hideScanResultModal();
+            updateStatus('Listo para escanear otro medio.');
+            await beginScan();
         });
     </script>
 
