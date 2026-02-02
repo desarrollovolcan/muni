@@ -7,7 +7,8 @@ $selectedEventId = isset($_GET['event_id']) ? (int) $_GET['event_id'] : 0;
 $events = db()->query('SELECT id, titulo, fecha_inicio, fecha_fin FROM events WHERE habilitado = 1 ORDER BY fecha_inicio DESC')->fetchAll();
 $insideMedia = [];
 $outsideMedia = [];
-$cooldownSeconds = 15;
+$cooldownSeconds = 2;
+$sameActionCooldownSeconds = 300;
 
 try {
     db()->exec(
@@ -113,12 +114,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
             $lastScanAt = $request['last_scan_at'] ?? null;
             $lastScanTime = $lastScanAt ? strtotime($lastScanAt) : null;
             $secondsSinceLastScan = $lastScanTime ? (time() - $lastScanTime) : null;
+            $lastActionAt = $lastLog['scanned_at'] ?? null;
+            $lastActionTime = $lastActionAt ? strtotime($lastActionAt) : null;
+            $secondsSinceLastAction = $lastActionTime ? (time() - $lastActionTime) : null;
 
-            if ($lastLog && ($lastLog['accion'] ?? '') === $action) {
-                $errors[] = 'No es posible registrar dos ' . $action . ' seguidos para este medio.';
-            } elseif ($secondsSinceLastScan !== null && $secondsSinceLastScan < $cooldownSeconds) {
+            if ($secondsSinceLastScan !== null && $secondsSinceLastScan < $cooldownSeconds) {
                 $errors[] = 'Espera unos segundos antes de volver a escanear este QR.';
+            } elseif ($lastLog && ($lastLog['accion'] ?? '') === $action && $secondsSinceLastAction !== null && $secondsSinceLastAction < $sameActionCooldownSeconds) {
+                $errors[] = 'Para registrar otro ' . $action . ', espera al menos 5 minutos.';
             } else {
+                $newInsideEstado = $action === 'ingreso' ? 1 : 0;
                 $stmtLog = db()->prepare(
                     'INSERT INTO media_accreditation_access_logs (event_id, request_id, accion, scanned_by)
                      VALUES (?, ?, ?, ?)'
@@ -128,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
                 $stmtUpdate = db()->prepare(
                     'UPDATE media_accreditation_requests SET inside_estado = ?, last_scan_at = NOW() WHERE id = ?'
                 );
-                $stmtUpdate->execute([$inside ? 0 : 1, (int) $request['id']]);
+                $stmtUpdate->execute([$newInsideEstado, (int) $request['id']]);
 
                 $notice = $inside
                     ? 'Salida registrada para ' . $request['medio'] . '.'
@@ -345,6 +350,9 @@ if ($selectedEventId > 0) {
         let scanning = false;
         let detector = null;
         let submitted = false;
+        let lastDetectedAt = 0;
+        let lastDetectedValue = '';
+        const scanThrottleMs = 800;
 
         function updateStatus(message) {
             statusLabel.textContent = message;
@@ -460,11 +468,19 @@ if ($selectedEventId > 0) {
                     code = decodeWithJsQr();
                 }
                 if (code && !submitted) {
+                    const now = Date.now();
+                    if (code === lastDetectedValue && now - lastDetectedAt < scanThrottleMs) {
+                        requestAnimationFrame(scanLoop);
+                        return;
+                    }
+                    lastDetectedValue = code;
+                    lastDetectedAt = now;
                     qrInput.value = code;
                     updateStatus('QR leído. Enviando registro...');
                     if (!eventSelect.value) {
                         updateStatus('Selecciona un evento antes de registrar.');
                         playErrorTone();
+                        requestAnimationFrame(scanLoop);
                         return;
                     }
                     submitted = true;
@@ -477,7 +493,7 @@ if ($selectedEventId > 0) {
             requestAnimationFrame(scanLoop);
         }
 
-        startButton?.addEventListener('click', async () => {
+        async function beginScan() {
             updateDetectorSupport();
             if (!isScannerSupported()) {
                 updateStatus('Tu navegador no soporta lectura automática de QR.');
@@ -502,6 +518,10 @@ if ($selectedEventId > 0) {
                 startButton.disabled = false;
                 stopButton.disabled = true;
             }
+        }
+
+        startButton?.addEventListener('click', async () => {
+            await beginScan();
         });
 
         stopButton?.addEventListener('click', () => {
@@ -527,7 +547,8 @@ if ($selectedEventId > 0) {
             submitted = false;
             startButton.disabled = false;
             stopButton.disabled = true;
-            updateStatus('Listo para escanear. Pulsa "Iniciar escaneo".');
+            updateStatus('Cámara lista. Iniciando escaneo automáticamente.');
+            beginScan();
         });
     </script>
 
