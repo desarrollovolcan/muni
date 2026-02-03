@@ -18,10 +18,12 @@ try {
             id INT UNSIGNED NOT NULL AUTO_INCREMENT,
             event_id INT UNSIGNED NOT NULL,
             token VARCHAR(64) NOT NULL,
+            short_code VARCHAR(12) DEFAULT NULL,
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
             UNIQUE KEY event_media_accreditation_links_event_unique (event_id),
             UNIQUE KEY event_media_accreditation_links_token_unique (token),
+            UNIQUE KEY event_media_accreditation_links_short_unique (short_code),
             CONSTRAINT event_media_accreditation_links_event_fk FOREIGN KEY (event_id) REFERENCES events (id) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
     );
@@ -92,6 +94,8 @@ $migrationStatements = [
     'ALTER TABLE media_accreditation_requests ADD COLUMN last_scan_at TIMESTAMP NULL DEFAULT NULL',
     'ALTER TABLE media_accreditation_requests ADD COLUMN inside_estado TINYINT(1) NOT NULL DEFAULT 0',
     'ALTER TABLE media_accreditation_requests ADD UNIQUE KEY media_accreditation_requests_qr_unique (qr_token)',
+    'ALTER TABLE event_media_accreditation_links ADD COLUMN short_code VARCHAR(12) DEFAULT NULL',
+    'ALTER TABLE event_media_accreditation_links ADD UNIQUE KEY event_media_accreditation_links_short_unique (short_code)',
 ];
 
 foreach ($migrationStatements as $statement) {
@@ -225,6 +229,17 @@ function build_media_badge_image(array $request, array $event, array $municipali
         'width' => $width,
         'height' => $height,
     ];
+}
+
+function generate_media_short_code(int $length = 6): string
+{
+    $alphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+    $maxIndex = strlen($alphabet) - 1;
+    $code = '';
+    for ($i = 0; $i < $length; $i += 1) {
+        $code .= $alphabet[random_int(0, $maxIndex)];
+    }
+    return $code;
 }
 
 function build_pdf_from_jpeg(array $request, array $event, array $municipalidad, string $jpegData, int $width, int $height): string
@@ -628,18 +643,39 @@ if ($selectedEventId > 0) {
     if (!$selectedEvent) {
         $errors[] = 'El evento seleccionado no existe.';
     } else {
-        $stmt = db()->prepare('SELECT token FROM event_media_accreditation_links WHERE event_id = ? LIMIT 1');
+        $stmt = db()->prepare('SELECT token, short_code FROM event_media_accreditation_links WHERE event_id = ? LIMIT 1');
         $stmt->execute([$selectedEventId]);
-        $linkToken = $stmt->fetchColumn();
+        $linkRow = $stmt->fetch();
+        $linkToken = $linkRow['token'] ?? null;
+        $shortCode = $linkRow['short_code'] ?? null;
 
         if (!$linkToken) {
             $linkToken = bin2hex(random_bytes(16));
-            $stmtInsert = db()->prepare('INSERT INTO event_media_accreditation_links (event_id, token) VALUES (?, ?)');
-            $stmtInsert->execute([$selectedEventId, $linkToken]);
+            $shortCode = null;
+            $stmtInsert = db()->prepare('INSERT INTO event_media_accreditation_links (event_id, token, short_code) VALUES (?, ?, ?)');
+            $stmtInsert->execute([$selectedEventId, $linkToken, $shortCode]);
+        }
+
+        if (!$shortCode) {
+            $attempts = 0;
+            do {
+                $shortCode = generate_media_short_code();
+                $stmtCheck = db()->prepare('SELECT id FROM event_media_accreditation_links WHERE short_code = ? LIMIT 1');
+                $stmtCheck->execute([$shortCode]);
+                $exists = (bool) $stmtCheck->fetchColumn();
+                $attempts += 1;
+            } while ($exists && $attempts < 5);
+
+            if (!$exists) {
+                $stmtUpdateCode = db()->prepare('UPDATE event_media_accreditation_links SET short_code = ? WHERE event_id = ?');
+                $stmtUpdateCode->execute([$shortCode, $selectedEventId]);
+            }
         }
 
         $publicLink = base_url() . '/medios-acreditacion.php?token=' . urlencode($linkToken);
-        $shareMessage = 'Solicitud de acreditación para ' . ($selectedEvent['titulo'] ?? 'evento') . ".\nCompleta el formulario aquí: " . $publicLink;
+        $shortPublicLink = $shortCode ? base_url() . '/m.php?c=' . urlencode($shortCode) : null;
+        $shareLink = $shortPublicLink ?: $publicLink;
+        $shareMessage = 'Solicitud de acreditación para ' . ($selectedEvent['titulo'] ?? 'evento') . ".\nCompleta el formulario aquí: " . $shareLink;
         $shareLinks = [
             'email' => 'mailto:?subject=' . rawurlencode('Solicitud acreditación ' . ($selectedEvent['titulo'] ?? 'evento'))
                 . '&body=' . rawurlencode($shareMessage),
@@ -728,6 +764,12 @@ if ($selectedEventId > 0) {
                                             </div>
                                             <span class="badge text-bg-primary">Activo</span>
                                         </div>
+                                        <?php if ($shortPublicLink) : ?>
+                                            <div class="input-group mb-2">
+                                                <input type="text" class="form-control" id="short-public-link" value="<?php echo htmlspecialchars($shortPublicLink, ENT_QUOTES, 'UTF-8'); ?>" readonly>
+                                                <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('short-public-link').value)">Copiar corto</button>
+                                            </div>
+                                        <?php endif; ?>
                                         <div class="input-group mb-3">
                                             <input type="text" class="form-control" id="public-link" value="<?php echo htmlspecialchars($publicLink, ENT_QUOTES, 'UTF-8'); ?>" readonly>
                                             <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('public-link').value)">Copiar</button>
