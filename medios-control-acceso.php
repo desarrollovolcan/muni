@@ -176,6 +176,15 @@ if ($selectedEventId > 0) {
     <?php $title = 'Control de acceso medios'; include('partials/title-meta.php'); ?>
 
     <?php include('partials/head-css.php'); ?>
+    <style>
+        .gm-access-table .table {
+            white-space: nowrap;
+        }
+        .gm-access-table th,
+        .gm-access-table td {
+            vertical-align: middle;
+        }
+    </style>
 </head>
 
 <body>
@@ -258,7 +267,7 @@ if ($selectedEventId > 0) {
                                 <p class="text-muted mb-0">Escanea el QR del medio para registrar la entrada o salida.</p>
                             </div>
                             <div class="card-body">
-                                <form method="post">
+                                <form method="post" id="scan-form">
                                     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
                                     <input type="hidden" id="qr-token" name="qr_token">
                                     <div class="mb-3">
@@ -274,15 +283,15 @@ if ($selectedEventId > 0) {
                                     </div>
                                     <div>
                                         <h6 class="mb-2">Escaneo desde celular</h6>
-                                    <p class="text-muted small mb-3">Activa la cámara para leer el QR y completar el campo automáticamente.</p>
-                                    <div class="d-flex flex-wrap gap-2 mb-2">
-                                        <button type="button" class="btn btn-outline-primary btn-sm" id="start-scan">Iniciar escaneo</button>
-                                        <button type="button" class="btn btn-outline-secondary btn-sm" id="stop-scan" disabled>Detener</button>
-                                    </div>
-                                    <div class="ratio ratio-4x3 bg-light border rounded">
-                                        <video id="qr-video" autoplay muted playsinline style="object-fit: cover;"></video>
-                                    </div>
-                                    <p id="scan-status" class="text-muted small mt-2 mb-0">Cámara detenida.</p>
+                                        <p class="text-muted small mb-3">Activa la cámara para leer el QR y completar el campo automáticamente.</p>
+                                        <div class="d-flex flex-wrap gap-2 mb-2">
+                                            <button type="button" class="btn btn-outline-primary btn-sm" id="start-scan">Iniciar escaneo</button>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm" id="stop-scan" disabled>Detener</button>
+                                        </div>
+                                        <div class="ratio ratio-4x3 bg-light border rounded">
+                                            <video id="qr-video" autoplay muted playsinline style="object-fit: cover;"></video>
+                                        </div>
+                                        <p id="scan-status" class="text-muted small mt-2 mb-0">Cámara detenida.</p>
                                     </div>
                                 </form>
                             </div>
@@ -311,27 +320,35 @@ if ($selectedEventId > 0) {
                                 <?php elseif (empty($insideMedia)) : ?>
                                     <div class="text-muted">No hay medios dentro del evento en este momento.</div>
                                 <?php else : ?>
-                                    <div class="table-responsive">
-                                        <table class="table table-striped align-middle">
+                                    <div class="table-responsive gm-access-table">
+                                        <table class="table table-striped table-sm">
                                             <thead>
                                                 <tr>
                                                     <th>Medio</th>
                                                     <th>Tipo</th>
+                                                    <th>Tipo otro</th>
+                                                    <th>Ciudad</th>
                                                     <th>Nombre</th>
                                                     <th>RUT</th>
                                                     <th>Correo</th>
+                                                    <th>Celular</th>
+                                                    <th>Cargo</th>
                                                     <th>Último escaneo</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <?php foreach ($insideMedia as $media) : ?>
                                                     <tr>
-                                                        <td><?php echo htmlspecialchars($media['medio'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
-                                                        <td><?php echo htmlspecialchars($media['tipo_medio'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
-                                                        <td><?php echo htmlspecialchars(trim(($media['nombre'] ?? '') . ' ' . ($media['apellidos'] ?? '')), ENT_QUOTES, 'UTF-8'); ?></td>
-                                                        <td><?php echo htmlspecialchars($media['rut'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
-                                                        <td><?php echo htmlspecialchars($media['correo'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
-                                                        <td><?php echo htmlspecialchars($media['last_scan_at'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td class="text-nowrap"><?php echo htmlspecialchars($media['medio'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td class="text-nowrap"><?php echo htmlspecialchars($media['tipo_medio'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td class="text-nowrap"><?php echo htmlspecialchars($media['tipo_medio_otro'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td class="text-nowrap"><?php echo htmlspecialchars($media['ciudad'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td class="text-nowrap"><?php echo htmlspecialchars(trim(($media['nombre'] ?? '') . ' ' . ($media['apellidos'] ?? '')), ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td class="text-nowrap"><?php echo htmlspecialchars($media['rut'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td class="text-nowrap"><?php echo htmlspecialchars($media['correo'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td class="text-nowrap"><?php echo htmlspecialchars($media['celular'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td class="text-nowrap"><?php echo htmlspecialchars($media['cargo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td class="text-nowrap"><?php echo htmlspecialchars($media['last_scan_at'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
                                                     </tr>
                                                 <?php endforeach; ?>
                                             </tbody>
@@ -357,27 +374,35 @@ if ($selectedEventId > 0) {
                                 <?php elseif (empty($outsideMedia)) : ?>
                                     <div class="text-muted">No hay medios fuera del evento en este momento.</div>
                                 <?php else : ?>
-                                    <div class="table-responsive">
-                                        <table class="table table-striped align-middle">
+                                    <div class="table-responsive gm-access-table">
+                                        <table class="table table-striped table-sm">
                                             <thead>
                                                 <tr>
                                                     <th>Medio</th>
                                                     <th>Tipo</th>
+                                                    <th>Tipo otro</th>
+                                                    <th>Ciudad</th>
                                                     <th>Nombre</th>
                                                     <th>RUT</th>
                                                     <th>Correo</th>
+                                                    <th>Celular</th>
+                                                    <th>Cargo</th>
                                                     <th>Último escaneo</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <?php foreach ($outsideMedia as $media) : ?>
                                                     <tr>
-                                                        <td><?php echo htmlspecialchars($media['medio'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
-                                                        <td><?php echo htmlspecialchars($media['tipo_medio'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
-                                                        <td><?php echo htmlspecialchars(trim(($media['nombre'] ?? '') . ' ' . ($media['apellidos'] ?? '')), ENT_QUOTES, 'UTF-8'); ?></td>
-                                                        <td><?php echo htmlspecialchars($media['rut'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
-                                                        <td><?php echo htmlspecialchars($media['correo'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
-                                                        <td><?php echo htmlspecialchars($media['last_scan_at'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td class="text-nowrap"><?php echo htmlspecialchars($media['medio'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td class="text-nowrap"><?php echo htmlspecialchars($media['tipo_medio'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td class="text-nowrap"><?php echo htmlspecialchars($media['tipo_medio_otro'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td class="text-nowrap"><?php echo htmlspecialchars($media['ciudad'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td class="text-nowrap"><?php echo htmlspecialchars(trim(($media['nombre'] ?? '') . ' ' . ($media['apellidos'] ?? '')), ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td class="text-nowrap"><?php echo htmlspecialchars($media['rut'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td class="text-nowrap"><?php echo htmlspecialchars($media['correo'] ?? '', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td class="text-nowrap"><?php echo htmlspecialchars($media['celular'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td class="text-nowrap"><?php echo htmlspecialchars($media['cargo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td class="text-nowrap"><?php echo htmlspecialchars($media['last_scan_at'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
                                                     </tr>
                                                 <?php endforeach; ?>
                                             </tbody>
@@ -697,6 +722,14 @@ if ($selectedEventId > 0) {
 
         stopButton?.addEventListener('click', () => {
             stopCamera();
+        });
+
+        eventSelect?.addEventListener('change', () => {
+            const selectedValue = eventSelect.value;
+            if (!selectedValue) {
+                return;
+            }
+            window.location.href = `medios-control-acceso.php?event_id=${encodeURIComponent(selectedValue)}`;
         });
 
         document.addEventListener('DOMContentLoaded', () => {
