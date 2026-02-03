@@ -207,6 +207,27 @@ $secondaryRgb = hex_to_rgb($secondaryColor) ?? [74, 129, 212];
         background-color: #ffffff;
     }
 
+    @media (max-width: 992px) {
+        .wrapper .table-responsive {
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .wrapper .table {
+            white-space: nowrap;
+        }
+
+        .wrapper .list-group {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .wrapper .list-group-item {
+            white-space: nowrap;
+        }
+    }
+
     .wrapper .list-group-item {
         border-color: #e2e8f0;
         padding: 0.7rem 0.9rem;
