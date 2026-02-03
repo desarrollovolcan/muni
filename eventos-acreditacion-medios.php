@@ -134,8 +134,8 @@ function build_media_badge_image(array $request, array $event, array $municipali
         return null;
     }
 
-    $width = 600;
-    $height = 900;
+    $width = 400;
+    $height = 400;
     $image = imagecreatetruecolor($width, $height);
     if (!$image) {
         return null;
@@ -145,74 +145,18 @@ function build_media_badge_image(array $request, array $event, array $municipali
     imagesavealpha($image, true);
 
     $white = imagecolorallocate($image, 255, 255, 255);
-    $primary = imagecolorallocate($image, 4, 78, 140);
-    $secondary = imagecolorallocate($image, 1, 57, 102);
-    $light = imagecolorallocate($image, 241, 245, 249);
-    $dark = imagecolorallocate($image, 31, 41, 55);
-    $gray = imagecolorallocate($image, 107, 114, 128);
-
     imagefilledrectangle($image, 0, 0, $width, $height, $white);
-    imagefilledrectangle($image, 0, 0, $width, 220, $primary);
-    imagefilledellipse($image, (int) ($width * 0.85), 230, 420, 280, $secondary);
-    imagefilledellipse($image, (int) ($width * 0.1), 260, 380, 260, $primary);
-    imagefilledrectangle($image, 0, 220, $width, 260, $primary);
-    imagefilledellipse($image, (int) ($width * 0.85), $height - 150, 520, 320, $secondary);
-    imagefilledellipse($image, (int) ($width * 0.1), $height - 110, 420, 260, $primary);
-    imagefilledrectangle($image, 0, $height - 200, $width, $height, $primary);
-
-    $municipalidadName = strtoupper($municipalidad['nombre'] ?? 'Municipalidad');
-    $eventTitle = $event['titulo'] ?? 'Evento';
-    $fullName = trim(($request['nombre'] ?? '') . ' ' . ($request['apellidos'] ?? ''));
-
-    $logoPath = $municipalidad['logo_path'] ?? 'assets/images/logo.png';
-    $logoFile = __DIR__ . '/' . ltrim($logoPath, '/');
-    $logoImage = null;
-    if (is_file($logoFile)) {
-        $extension = strtolower(pathinfo($logoFile, PATHINFO_EXTENSION));
-        if (in_array($extension, ['png', 'gif'], true)) {
-            $logoImage = @imagecreatefrompng($logoFile);
-        } elseif (in_array($extension, ['jpg', 'jpeg'], true)) {
-            $logoImage = @imagecreatefromjpeg($logoFile);
-        }
-    }
-
-    if ($logoImage) {
-        $logoWidth = 120;
-        $logoHeight = (int) ($logoWidth * imagesy($logoImage) / imagesx($logoImage));
-        imagecopyresampled($image, $logoImage, 30, 30, 0, 0, $logoWidth, $logoHeight, imagesx($logoImage), imagesy($logoImage));
-    }
-
-    imagestring($image, 5, 180, 40, $municipalidadName, $white);
-    imagestring($image, 4, 180, 80, $eventTitle, $white);
-
-    imagestring($image, 5, 40, 270, 'ACREDITACION MEDIOS', $dark);
-    imagestring($image, 5, 40, 310, $fullName, $dark);
-    imagestring($image, 4, 40, 350, 'Cargo: ' . ($request['cargo'] ?? '-'), $gray);
-    imagestring($image, 4, 40, 380, 'Medio: ' . ($request['medio'] ?? '-'), $gray);
-    imagestring($image, 4, 40, 410, 'RUT: ' . ($request['rut'] ?? '-'), $gray);
 
     $qrData = @file_get_contents($qrUrl);
     if ($qrData) {
         $qrImage = @imagecreatefromstring($qrData);
         if ($qrImage) {
-            $qrSize = 280;
+            $qrSize = 320;
             $qrX = (int) (($width - $qrSize) / 2);
-            $qrY = 470;
+            $qrY = (int) (($height - $qrSize) / 2);
             imagecopyresampled($image, $qrImage, $qrX, $qrY, 0, 0, $qrSize, $qrSize, imagesx($qrImage), imagesy($qrImage));
             imagedestroy($qrImage);
         }
-    }
-
-    imagestring($image, 3, 40, 770, 'Token QR: ' . ($request['qr_token'] ?? '-'), $light);
-    imagestring($image, 3, 40, 795, 'Valido para el evento en fechas oficiales.', $light);
-
-    if ($logoImage) {
-        $smallLogoWidth = 90;
-        $smallLogoHeight = (int) ($smallLogoWidth * imagesy($logoImage) / imagesx($logoImage));
-        $logoX = $width - $smallLogoWidth - 30;
-        $logoY = $height - $smallLogoHeight - 30;
-        imagecopyresampled($image, $logoImage, $logoX, $logoY, 0, 0, $smallLogoWidth, $smallLogoHeight, imagesx($logoImage), imagesy($logoImage));
-        imagedestroy($logoImage);
     }
 
     ob_start();
@@ -253,29 +197,30 @@ function build_pdf_from_jpeg(array $request, array $event, array $municipalidad,
     // =========================
     // Diseño minimalista (gafete)
     // =========================
-    $badgeWidth  = 900;
-    $badgeHeight = 1400;
+    $badgeWidth  = 312;
+    $badgeHeight = 227;
 
     // Colores (RGB 0..1)
-    $cBlue   = "0.110 0.345 0.639";  // azul institucional
-    $cSky    = "0.906 0.945 0.992";  // azul claro
-    $cSlate  = "0.27 0.32 0.38";     // gris medio
+    $cBlue   = "0.102 0.290 0.553";  // azul institucional
+    $cSky    = "0.922 0.961 0.992";  // azul claro
+    $cOrange = "0.969 0.561 0.149";  // naranjo
+    $cSlate  = "0.30 0.34 0.39";     // gris medio
     $cMuted  = "0.55 0.58 0.62";     // gris suave
-    $cLine   = "0.88 0.90 0.93";
+    $cLine   = "0.86 0.89 0.93";
     $cWhite  = "1 1 1";
     $cDark   = "0.12 0.13 0.15";
 
     // Layout
-    $margin = 70;
-    $headerH = 170;
-    $footerH = 130;
-    $accentW = 14;
+    $margin = 16;
+    $headerH = 36;
+    $footerH = 20;
+    $accentW = 6;
 
     // Zona QR (el jpegData se dibuja aquí)
-    $qrBoxX = $margin + 40;
-    $qrBoxY = 350;
-    $qrBoxW = $badgeWidth - ($margin * 2) - 80;
-    $qrBoxH = 420;
+    $qrBoxW = 110;
+    $qrBoxH = 110;
+    $qrBoxX = $badgeWidth - $margin - $qrBoxW;
+    $qrBoxY = 64;
 
     // Dentro del QR box (margen interno)
     $qrPad  = 32;
@@ -332,37 +277,37 @@ function build_pdf_from_jpeg(array $request, array $event, array $municipalidad,
     // =========================
     $contentStream =
         "q\n{$cWhite} rg\n0 0 {$badgeWidth} {$badgeHeight} re\nf\nQ\n" .
-        "q\n{$cSky} rg\n0 " . ($badgeHeight - $headerH) . " {$badgeWidth} {$headerH} re\nf\nQ\n" .
-        "q\n{$cBlue} rg\n0 " . ($badgeHeight - $headerH) . " {$accentW} {$headerH} re\nf\nQ\n" .
-        "q\n{$cLine} RG\n1 w\n{$margin} {$footerH} " . ($badgeWidth - ($margin * 2)) . " " . ($badgeHeight - $footerH - $headerH - 30) . " re\nS\nQ\n" .
-
-        // Card interior
-        "q\n{$cWhite} rg\n" . ($margin + 10) . " " . ($footerH + 10) . " " . ($badgeWidth - ($margin * 2) - 20) . " " . ($badgeHeight - $footerH - $headerH - 50) . " re\nf\nQ\n" .
+        "q\n{$cBlue} rg\n0 " . ($badgeHeight - $headerH) . " {$badgeWidth} {$headerH} re\nf\nQ\n" .
+        "q\n{$cOrange} rg\n0 " . ($badgeHeight - $headerH - 4) . " {$badgeWidth} 4 re\nf\nQ\n" .
+        "q\n{$cOrange} rg\n0 0 {$badgeWidth} {$footerH} re\nf\nQ\n" .
+        "q\n{$cSky} rg\n0 {$footerH} {$badgeWidth} " . ($badgeHeight - $headerH - $footerH) . " re\nf\nQ\n" .
+        "q\n{$cBlue} rg\n0 0 {$accentW} {$badgeHeight} re\nf\nQ\n" .
+        "q\n{$cLine} RG\n0.8 w\n{$margin} {$footerH + 6} " . ($badgeWidth - ($margin * 2)) . " " . ($badgeHeight - $footerH - $headerH - 16) . " re\nS\nQ\n" .
 
         // QR box
-        "q\n0.97 0.98 0.99 rg\n{$qrBoxX} {$qrBoxY} {$qrBoxW} {$qrBoxH} re\nf\n{$cLine} RG\n1 w\n{$qrBoxX} {$qrBoxY} {$qrBoxW} {$qrBoxH} re\nS\nQ\n" .
+        "q\n{$cWhite} rg\n{$qrBoxX} {$qrBoxY} {$qrBoxW} {$qrBoxH} re\nf\n{$cLine} RG\n1 w\n{$qrBoxX} {$qrBoxY} {$qrBoxW} {$qrBoxH} re\nS\nQ\n" .
 
         // QR (jpegData)
         "q\n{$drawW} 0 0 {$drawH} {$drawX} {$drawY} cm\n/Im0 Do\nQ\n" .
 
         // Textos encabezado
-        "q\nBT\n/F1 22 Tf\n{$cDark} rg\n" . ($margin + 40) . " " . ($badgeHeight - 72) . " Td\n(" . $esc($municipalidadName) . ") Tj\nET\nQ\n" .
-        "q\nBT\n/F1 12 Tf\n{$cSlate} rg\n" . ($margin + 40) . " " . ($badgeHeight - 98) . " Td\n(" . $esc($eventTitle) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 11 Tf\n{$cWhite} rg\n" . ($margin + 10) . " " . ($badgeHeight - 22) . " Td\n(" . $esc($municipalidadName) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 7 Tf\n{$cSky} rg\n" . ($margin + 10) . " " . ($badgeHeight - 32) . " Td\n(" . $esc($eventTitle) . ") Tj\nET\nQ\n" .
 
         // Textos principales
-        "q\nBT\n/F1 26 Tf\n{$cDark} rg\n" . ($margin + 60) . " " . ($badgeHeight - $headerH - 70) . " Td\n(" . $esc($title) . ") Tj\nET\nQ\n" .
-        "q\nBT\n/F1 12 Tf\n{$cMuted} rg\n" . ($margin + 60) . " " . ($badgeHeight - $headerH - 98) . " Td\n(" . $esc($sub) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 12 Tf\n{$cDark} rg\n" . ($margin + 10) . " " . ($badgeHeight - $headerH - 20) . " Td\n(" . $esc($title) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 7.5 Tf\n{$cMuted} rg\n" . ($margin + 10) . " " . ($badgeHeight - $headerH - 32) . " Td\n(" . $esc($sub) . ") Tj\nET\nQ\n" .
 
-        "q\nBT\n/F1 16 Tf\n{$cDark} rg\n" . ($margin + 60) . " " . ($badgeHeight - $headerH - 155) . " Td\n(" . $esc($fullName) . ") Tj\nET\nQ\n" .
-        "q\nBT\n/F1 11 Tf\n{$cMuted} rg\n" . ($margin + 60) . " " . ($badgeHeight - $headerH - 182) . " Td\n(" . $esc("MEDIO") . ") Tj\nET\nQ\n" .
-        "q\nBT\n/F1 13 Tf\n{$cDark} rg\n" . ($margin + 60) . " " . ($badgeHeight - $headerH - 202) . " Td\n(" . $esc($medio) . ") Tj\nET\nQ\n" .
-        "q\nBT\n/F1 11 Tf\n{$cMuted} rg\n" . ($margin + 60) . " " . ($badgeHeight - $headerH - 230) . " Td\n(" . $esc("CARGO") . ") Tj\nET\nQ\n" .
-        "q\nBT\n/F1 12 Tf\n{$cDark} rg\n" . ($margin + 60) . " " . ($badgeHeight - $headerH - 250) . " Td\n(" . $esc($cargo) . ") Tj\nET\nQ\n" .
-        "q\nBT\n/F1 11 Tf\n{$cMuted} rg\n" . ($margin + 60) . " " . ($badgeHeight - $headerH - 278) . " Td\n(" . $esc("RUT") . ") Tj\nET\nQ\n" .
-        "q\nBT\n/F1 12 Tf\n{$cDark} rg\n" . ($margin + 60) . " " . ($badgeHeight - $headerH - 298) . " Td\n(" . $esc($rut) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 11 Tf\n{$cDark} rg\n" . ($margin + 10) . " " . ($badgeHeight - $headerH - 52) . " Td\n(" . $esc($fullName) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 7 Tf\n{$cMuted} rg\n" . ($margin + 10) . " " . ($badgeHeight - $headerH - 64) . " Td\n(" . $esc("MEDIO") . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 9 Tf\n{$cDark} rg\n" . ($margin + 10) . " " . ($badgeHeight - $headerH - 76) . " Td\n(" . $esc($medio) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 7 Tf\n{$cMuted} rg\n" . ($margin + 10) . " " . ($badgeHeight - $headerH - 92) . " Td\n(" . $esc("CARGO") . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 8.5 Tf\n{$cDark} rg\n" . ($margin + 10) . " " . ($badgeHeight - $headerH - 104) . " Td\n(" . $esc($cargo) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 7 Tf\n{$cMuted} rg\n" . ($margin + 10) . " " . ($badgeHeight - $headerH - 120) . " Td\n(" . $esc("RUT") . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 8.5 Tf\n{$cDark} rg\n" . ($margin + 10) . " " . ($badgeHeight - $headerH - 132) . " Td\n(" . $esc($rut) . ") Tj\nET\nQ\n" .
 
-        "q\nBT\n/F1 11 Tf\n{$cSlate} rg\n" . ($qrBoxX + 24) . " " . ($qrBoxY + $qrBoxH - 28) . " Td\n(ESCANEA TU QR PARA VALIDACION) Tj\nET\nQ\n" .
-        "q\nBT\n/F1 10 Tf\n{$cMuted} rg\n" . ($margin + 60) . " " . ($footerH - 50) . " Td\n(" . $esc("Este gafete es personal e intransferible.") . ") Tj\nET\nQ\n";
+        "q\nBT\n/F1 7 Tf\n{$cSlate} rg\n" . ($qrBoxX + 6) . " " . ($qrBoxY + $qrBoxH + 10) . " Td\n(ESCANEA TU QR) Tj\nET\nQ\n" .
+        "q\nBT\n/F1 7 Tf\n{$cWhite} rg\n" . ($margin + 10) . " " . ($footerH - 12) . " Td\n(" . $esc("GAFETE PERSONAL E INTRANSFERIBLE") . ") Tj\nET\nQ\n";
 
     $contentObject = $addObject(
         '<< /Length ' . strlen($contentStream) . " >>\nstream\n" . $contentStream . "\nendstream"
