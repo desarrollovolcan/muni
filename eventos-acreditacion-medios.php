@@ -305,7 +305,14 @@ function build_pdf_from_jpeg(array $request, array $event, array $municipalidad,
     $fontObject = $addObject('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
 
     $esc = function (string $s): string {
-        return str_replace(['\\', '(', ')', "\r"], ['\\\\', '\\(', '\\)', ''], $s);
+        $value = $s;
+        if (function_exists('iconv')) {
+            $converted = iconv('UTF-8', 'Windows-1252//TRANSLIT', $value);
+            if ($converted !== false) {
+                $value = $converted;
+            }
+        }
+        return str_replace(['\\', '(', ')', "\r"], ['\\\\', '\\(', '\\)', ''], $value);
     };
 
     $municipalidadName = strtoupper($municipalidad['nombre'] ?? 'Municipalidad');
@@ -317,7 +324,7 @@ function build_pdf_from_jpeg(array $request, array $event, array $municipalidad,
     $eventDates = strtoupper(($event['fecha_inicio'] ?? '') . ' AL ' . ($event['fecha_fin'] ?? ''));
 
     // Textos
-    $title  = "ACREDITACION DE MEDIOS";
+    $title  = "ACREDITACIÓN DE MEDIOS";
     $sub    = $eventDates !== ' AL ' ? $eventDates : "EVENTO OFICIAL";
 
     // =========================
