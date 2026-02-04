@@ -236,7 +236,7 @@ function build_media_logo_image(array $municipalidad): ?array
     ];
 }
 
-function generate_media_short_code(int $length = 6): string
+function generate_media_short_code(int $length = 4): string
 {
     $alphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
     $maxIndex = strlen($alphabet) - 1;
