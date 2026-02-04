@@ -215,11 +215,11 @@ function build_pdf_from_jpeg(array $request, array $event, array $municipalidad,
     $headerH = 58;
     $footerH = 18;
     $accentW = 4;
-    $bodyTop = $badgeHeight - $headerH - 10;
-    $qrBoxW = 106;
-    $qrBoxH = 106;
+    $bodyTop = $badgeHeight - $headerH - 12;
+    $qrBoxW = 96;
+    $qrBoxH = 96;
     $qrBoxX = (int) (($badgeWidth - $qrBoxW) / 2);
-    $qrBoxY = 92;
+    $qrBoxY = 44;
 
     // Dentro del QR box (margen interno)
     $qrPad  = 10;
@@ -297,23 +297,17 @@ function build_pdf_from_jpeg(array $request, array $event, array $municipalidad,
 
         // Textos principales
         "q\nBT\n/F1 11 Tf\n{$cDark} rg\n" . ($margin + 8) . " " . ($bodyTop) . " Td\n(" . $esc($title) . ") Tj\nET\nQ\n" .
-        "q\nBT\n/F1 7.4 Tf\n{$cMuted} rg\n" . ($margin + 8) . " " . ($bodyTop - 14) . " Td\n(" . $esc($sub) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 7.2 Tf\n{$cMuted} rg\n" . ($margin + 8) . " " . ($bodyTop - 14) . " Td\n(" . $esc($sub) . ") Tj\nET\nQ\n" .
 
-        "q\nBT\n/F1 11 Tf\n{$cDark} rg\n" . ($margin + 8) . " " . ($bodyTop - 34) . " Td\n(" . $esc($fullName) . ") Tj\nET\nQ\n" .
-        "q\nBT\n/F1 7.2 Tf\n{$cMuted} rg\n" . ($margin + 8) . " " . ($bodyTop - 48) . " Td\n(" . $esc("MEDIO") . ") Tj\nET\nQ\n" .
-        "q\nBT\n/F1 9.2 Tf\n{$cDark} rg\n" . ($margin + 8) . " " . ($bodyTop - 60) . " Td\n(" . $esc($medio) . ") Tj\nET\nQ\n" .
-        "q\nBT\n/F1 7.2 Tf\n{$cMuted} rg\n" . ($margin + 8) . " " . ($bodyTop - 76) . " Td\n(" . $esc("CARGO") . ") Tj\nET\nQ\n" .
-        "q\nBT\n/F1 9 Tf\n{$cDark} rg\n" . ($margin + 8) . " " . ($bodyTop - 88) . " Td\n(" . $esc($cargo) . ") Tj\nET\nQ\n" .
-        "q\nBT\n/F1 7.2 Tf\n{$cMuted} rg\n" . ($margin + 8) . " " . ($bodyTop - 104) . " Td\n(" . $esc("RUT") . ") Tj\nET\nQ\n" .
-        "q\nBT\n/F1 9 Tf\n{$cDark} rg\n" . ($margin + 8) . " " . ($bodyTop - 116) . " Td\n(" . $esc($rut) . ") Tj\nET\nQ\n" .
-
-        // Etiqueta QR
-        "q\nBT\n/F1 7 Tf\n{$cSlate} rg\n" . ($qrBoxX + 18) . " " . ($qrBoxY + $qrBoxH + 8) . " Td\n(ESCANEA TU QR) Tj\nET\nQ\n" .
+        "q\nBT\n/F1 11 Tf\n{$cDark} rg\n" . ($margin + 8) . " " . ($bodyTop - 32) . " Td\n(" . $esc($fullName) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 8.6 Tf\n{$cDark} rg\n" . ($margin + 8) . " " . ($bodyTop - 48) . " Td\n(" . $esc("MEDIO: {$medio}") . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 8.6 Tf\n{$cDark} rg\n" . ($margin + 8) . " " . ($bodyTop - 62) . " Td\n(" . $esc("CARGO: {$cargo}") . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 8.6 Tf\n{$cDark} rg\n" . ($margin + 8) . " " . ($bodyTop - 76) . " Td\n(" . $esc("RUT: {$rut}") . ") Tj\nET\nQ\n" .
 
         // ID box
         "q\n{$cOrange} rg\n" . ($margin + 10) . " " . ($footerH + 6) . " " . ($badgeWidth - ($margin * 2) - 20) . " 18 re\nf\nQ\n" .
-        "q\nBT\n/F1 7 Tf\n{$cDark} rg\n" . ($margin + 20) . " " . ($footerH + 17) . " Td\n(ID ACREDITACION) Tj\nET\nQ\n" .
-        "q\nBT\n/F1 9.4 Tf\n{$cDark} rg\n" . ($margin + 20) . " " . ($footerH + 8) . " Td\n(" . $esc($badgeId) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 7 Tf\n{$cDark} rg\n" . ($margin + 18) . " " . ($footerH + 17) . " Td\n(ID ACREDITACION) Tj\nET\nQ\n" .
+        "q\nBT\n/F1 9.4 Tf\n{$cDark} rg\n" . ($margin + 18) . " " . ($footerH + 8) . " Td\n(" . $esc($badgeId) . ") Tj\nET\nQ\n" .
 
         "q\nBT\n/F1 7 Tf\n{$cWhite} rg\n" . ($margin + 8) . " " . ($footerH - 12) . " Td\n(" . $esc("GAFETE PERSONAL E INTRANSFERIBLE") . ") Tj\nET\nQ\n";
 
