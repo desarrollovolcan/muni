@@ -249,7 +249,7 @@ HTML;
                         <p class="mb-2"><strong>Postulación Individual:</strong> Las solicitudes son una por persona. Cada persona debe completar su propia solicitud de acuerdo con la asignación que el medio determine.</p>
                         <p class="mb-2"><strong>Cupos limitados:</strong> El envío de la solicitud no garantiza la aprobación, debido a la alta demanda, respetando también la línea editorial de la Ilustre Municipalidad.</p>
                         <p class="mb-2 text-uppercase fw-semibold">Se notificará a través de correo electrónico quienes serán parte de la cobertura de este festival.</p>
-                        <p class="mb-0 text-uppercase fw-semibold">Las credenciales se entregarán la primera noche.</p>
+                        <p class="mb-0 text-uppercase fw-semibold">En el correo de aprobación se enviará la credencial para imprimir. Es responsabilidad del medio portar la credencial visible (gafete colgante) durante el evento.</p>
                     </div>
                 </div>
 

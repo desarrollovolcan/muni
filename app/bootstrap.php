@@ -29,6 +29,8 @@ if (!isset($_SESSION['user'])) {
         'eventos-validacion.php',
         'medios-acreditacion.php',
         'medios-acreditacion-imprimir.php',
+        'eventos-acreditacion-medios.php',
+        'm.php',
     ];
 
     if (!in_array($currentScript, $publicScripts, true) && strncmp($currentScript, 'auth-', 5) !== 0) {
