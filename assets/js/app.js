@@ -16,6 +16,7 @@ class App {
         this.initPreloader();
         this.initPortletCard();
         this.initMultiDropdown();
+        this.initDropdownAutoFlip();
         this.initFormValidation();
         this.initCounter();
         this.initCodePreview();
@@ -216,6 +217,31 @@ class App {
                     }
                 });
             });
+        });
+    }
+
+    initDropdownAutoFlip() {
+        document.addEventListener('show.bs.dropdown', event => {
+            const dropdown = event.target;
+            const toggle = dropdown.querySelector('[data-bs-toggle="dropdown"]');
+            const menu = dropdown.querySelector('.dropdown-menu');
+
+            if (!toggle || !menu) return;
+
+            dropdown.classList.remove('dropup');
+
+            const menuHeight = menu.scrollHeight;
+            const toggleRect = toggle.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - toggleRect.bottom;
+            const spaceAbove = toggleRect.top;
+
+            if (spaceBelow < menuHeight && spaceAbove >= menuHeight) {
+                dropdown.classList.add('dropup');
+            }
+        });
+
+        document.addEventListener('hidden.bs.dropdown', event => {
+            event.target.classList.remove('dropup');
         });
     }
 
