@@ -203,9 +203,17 @@ function group_badge_class(?int $groupId, array $palette): string
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="d-flex flex-wrap gap-2">
+                                    <div class="d-flex flex-wrap gap-2 align-items-center">
                                         <button type="submit" class="btn btn-primary">Guardar autoridad</button>
                                         <a href="autoridades-lista.php" class="btn btn-outline-secondary">Volver</a>
+                                        <?php if ($autoridad) : ?>
+                                            <form method="post" class="ms-auto" onsubmit="return confirm('¿Seguro que deseas eliminar esta autoridad?');">
+                                                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                <input type="hidden" name="action" value="delete">
+                                                <input type="hidden" name="id" value="<?php echo (int) $autoridad['id']; ?>">
+                                                <button type="submit" class="btn btn-outline-danger">Eliminar</button>
+                                            </form>
+                                        <?php endif; ?>
                                     </div>
                                 </form>
                             </div>
