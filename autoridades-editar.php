@@ -203,9 +203,17 @@ function group_badge_class(?int $groupId, array $palette): string
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="d-flex flex-wrap gap-2">
+                                    <div class="d-flex flex-wrap gap-2 align-items-center">
                                         <button type="submit" class="btn btn-primary">Guardar autoridad</button>
                                         <a href="autoridades-lista.php" class="btn btn-outline-secondary">Volver</a>
+                                        <?php if ($autoridad) : ?>
+                                            <form method="post" class="ms-auto" onsubmit="return confirm('¿Seguro que deseas eliminar esta autoridad?');">
+                                                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                <input type="hidden" name="action" value="delete">
+                                                <input type="hidden" name="id" value="<?php echo (int) $autoridad['id']; ?>">
+                                                <button type="submit" class="btn btn-outline-danger">Eliminar</button>
+                                            </form>
+                                        <?php endif; ?>
                                     </div>
                                 </form>
                             </div>
@@ -256,7 +264,24 @@ function group_badge_class(?int $groupId, array $palette): string
                                                         <td><?php echo htmlspecialchars($autoridadItem['fecha_inicio'], ENT_QUOTES, 'UTF-8'); ?> - <?php echo htmlspecialchars($autoridadItem['fecha_fin'] ?? 'Vigente', ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td><?php echo htmlspecialchars($autoridadItem['correo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td class="text-end">
-                                                            <a class="btn btn-sm btn-outline-primary" href="autoridades-editar.php?id=<?php echo (int) $autoridadItem['id']; ?>">Editar</a>
+                                                            <div class="dropdown">
+                                                                <button class="btn btn-sm btn-soft-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                                    Acciones
+                                                                </button>
+                                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                                    <li><a class="dropdown-item" href="autoridades-detalle.php?id=<?php echo (int) $autoridadItem['id']; ?>">Ver</a></li>
+                                                                    <li><a class="dropdown-item" href="autoridades-editar.php?id=<?php echo (int) $autoridadItem['id']; ?>">Editar</a></li>
+                                                                    <li><hr class="dropdown-divider"></li>
+                                                                    <li>
+                                                                        <form method="post" class="px-3 py-1" data-confirm="¿Estás seguro de eliminar esta autoridad?">
+                                                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                                                                            <input type="hidden" name="action" value="delete">
+                                                                            <input type="hidden" name="id" value="<?php echo (int) $autoridadItem['id']; ?>">
+                                                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100">Eliminar</button>
+                                                                        </form>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 <?php endforeach; ?>
