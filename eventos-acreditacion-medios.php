@@ -175,6 +175,67 @@ function build_media_badge_image(array $request, array $event, array $municipali
     ];
 }
 
+function build_media_logo_image(array $municipalidad): ?array
+{
+    if (!extension_loaded('gd')) {
+        return null;
+    }
+
+    $logoPath = $municipalidad['logo_path'] ?? 'assets/images/logo.png';
+    $logoFile = __DIR__ . '/' . ltrim($logoPath, '/');
+    if (!is_file($logoFile)) {
+        return null;
+    }
+
+    $extension = strtolower(pathinfo($logoFile, PATHINFO_EXTENSION));
+    $logoImage = null;
+    if (in_array($extension, ['png', 'gif'], true)) {
+        $logoImage = @imagecreatefrompng($logoFile);
+    } elseif (in_array($extension, ['jpg', 'jpeg'], true)) {
+        $logoImage = @imagecreatefromjpeg($logoFile);
+    }
+
+    if (!$logoImage) {
+        return null;
+    }
+
+    $targetW = 320;
+    $targetH = 140;
+    $canvas = imagecreatetruecolor($targetW, $targetH);
+    if (!$canvas) {
+        imagedestroy($logoImage);
+        return null;
+    }
+
+    $white = imagecolorallocate($canvas, 255, 255, 255);
+    imagefilledrectangle($canvas, 0, 0, $targetW, $targetH, $white);
+
+    $srcW = imagesx($logoImage);
+    $srcH = imagesy($logoImage);
+    $scale = min($targetW / $srcW, $targetH / $srcH);
+    $drawW = (int) ($srcW * $scale);
+    $drawH = (int) ($srcH * $scale);
+    $drawX = (int) (($targetW - $drawW) / 2);
+    $drawY = (int) (($targetH - $drawH) / 2);
+    imagecopyresampled($canvas, $logoImage, $drawX, $drawY, 0, 0, $drawW, $drawH, $srcW, $srcH);
+    imagedestroy($logoImage);
+
+    ob_start();
+    imagejpeg($canvas, null, 90);
+    $jpegData = ob_get_clean();
+    imagedestroy($canvas);
+
+    if (!$jpegData) {
+        return null;
+    }
+
+    return [
+        'data' => $jpegData,
+        'width' => $targetW,
+        'height' => $targetH,
+    ];
+}
+
 function generate_media_short_code(int $length = 6): string
 {
     $alphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
@@ -212,14 +273,14 @@ function build_pdf_from_jpeg(array $request, array $event, array $municipalidad,
 
     // Layout (11x6 cm)
     $margin = 12;
-    $headerH = 58;
+    $headerH = 64;
     $footerH = 18;
     $accentW = 4;
-    $bodyTop = $badgeHeight - $headerH - 12;
+    $bodyTop = $badgeHeight - $headerH - 14;
     $qrBoxW = 96;
     $qrBoxH = 96;
     $qrBoxX = (int) (($badgeWidth - $qrBoxW) / 2);
-    $qrBoxY = 44;
+    $qrBoxY = 60;
 
     // Dentro del QR box (margen interno)
     $qrPad  = 10;
@@ -247,6 +308,21 @@ function build_pdf_from_jpeg(array $request, array $event, array $municipalidad,
 
     // Fuente estándar PDF
     $fontObject = $addObject('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
+    $logoAttachment = build_media_logo_image($municipalidad);
+    $logoObject = null;
+    $logoDraw = '';
+    if ($logoAttachment) {
+        $logoObject = $addObject(
+            '<< /Type /XObject /Subtype /Image /Width ' . $logoAttachment['width'] . ' /Height ' . $logoAttachment['height'] .
+            ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' . strlen($logoAttachment['data']) . ' >>' .
+            "\nstream\n" . $logoAttachment['data'] . "\nendstream"
+        );
+        $logoW = 52;
+        $logoH = 20;
+        $logoX = $margin + 6;
+        $logoY = $badgeHeight - $headerH + 26;
+        $logoDraw = "q\n{$logoW} 0 0 {$logoH} {$logoX} {$logoY} cm\n/Im1 Do\nQ\n";
+    }
 
     $esc = function (string $s): string {
         $value = $s;
@@ -288,28 +364,31 @@ function build_pdf_from_jpeg(array $request, array $event, array $municipalidad,
         "q\n{$cWhite} rg\n{$qrBoxX} {$qrBoxY} {$qrBoxW} {$qrBoxH} re\nf\n{$cLine} RG\n1 w\n{$qrBoxX} {$qrBoxY} {$qrBoxW} {$qrBoxH} re\nS\nQ\n" .
         "q\n0.98 0.93 0.88 rg\n{$qrBoxX} " . ($qrBoxY + $qrBoxH) . " {$qrBoxW} 16 re\nf\nQ\n" .
 
+        // Logo
+        $logoDraw .
+
         // QR (jpegData)
         "q\n{$drawW} 0 0 {$drawH} {$drawX} {$drawY} cm\n/Im0 Do\nQ\n" .
 
         // Textos encabezado
-        "q\nBT\n/F1 10 Tf\n{$cWhite} rg\n" . ($margin + 8) . " " . ($badgeHeight - 22) . " Td\n(" . $esc($municipalidadName) . ") Tj\nET\nQ\n" .
-        "q\nBT\n/F1 7 Tf\n{$cSky} rg\n" . ($margin + 8) . " " . ($badgeHeight - 36) . " Td\n(" . $esc($eventTitle) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 9.5 Tf\n{$cWhite} rg\n" . ($margin + 64) . " " . ($badgeHeight - 26) . " Td\n(" . $esc($municipalidadName) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 6.8 Tf\n{$cSky} rg\n" . ($margin + 64) . " " . ($badgeHeight - 38) . " Td\n(" . $esc($eventTitle) . ") Tj\nET\nQ\n" .
 
         // Textos principales
-        "q\nBT\n/F1 11 Tf\n{$cDark} rg\n" . ($margin + 8) . " " . ($bodyTop) . " Td\n(" . $esc($title) . ") Tj\nET\nQ\n" .
-        "q\nBT\n/F1 7.2 Tf\n{$cMuted} rg\n" . ($margin + 8) . " " . ($bodyTop - 14) . " Td\n(" . $esc($sub) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 10.5 Tf\n{$cDark} rg\n" . ($margin + 8) . " " . ($bodyTop) . " Td\n(" . $esc($title) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 7 Tf\n{$cMuted} rg\n" . ($margin + 8) . " " . ($bodyTop - 14) . " Td\n(" . $esc($sub) . ") Tj\nET\nQ\n" .
 
-        "q\nBT\n/F1 11 Tf\n{$cDark} rg\n" . ($margin + 8) . " " . ($bodyTop - 32) . " Td\n(" . $esc($fullName) . ") Tj\nET\nQ\n" .
-        "q\nBT\n/F1 8.6 Tf\n{$cDark} rg\n" . ($margin + 8) . " " . ($bodyTop - 48) . " Td\n(" . $esc("MEDIO: {$medio}") . ") Tj\nET\nQ\n" .
-        "q\nBT\n/F1 8.6 Tf\n{$cDark} rg\n" . ($margin + 8) . " " . ($bodyTop - 62) . " Td\n(" . $esc("CARGO: {$cargo}") . ") Tj\nET\nQ\n" .
-        "q\nBT\n/F1 8.6 Tf\n{$cDark} rg\n" . ($margin + 8) . " " . ($bodyTop - 76) . " Td\n(" . $esc("RUT: {$rut}") . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 10.8 Tf\n{$cDark} rg\n" . ($margin + 8) . " " . ($bodyTop - 30) . " Td\n(" . $esc($fullName) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 8.2 Tf\n{$cDark} rg\n" . ($margin + 8) . " " . ($bodyTop - 46) . " Td\n(" . $esc("MEDIO: {$medio}") . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 8.2 Tf\n{$cDark} rg\n" . ($margin + 8) . " " . ($bodyTop - 60) . " Td\n(" . $esc("CARGO: {$cargo}") . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 8.2 Tf\n{$cDark} rg\n" . ($margin + 8) . " " . ($bodyTop - 74) . " Td\n(" . $esc("RUT: {$rut}") . ") Tj\nET\nQ\n" .
 
         // ID box
         "q\n{$cOrange} rg\n" . ($margin + 10) . " " . ($footerH + 6) . " " . ($badgeWidth - ($margin * 2) - 20) . " 18 re\nf\nQ\n" .
-        "q\nBT\n/F1 7 Tf\n{$cDark} rg\n" . ($margin + 18) . " " . ($footerH + 17) . " Td\n(ID ACREDITACION) Tj\nET\nQ\n" .
-        "q\nBT\n/F1 9.4 Tf\n{$cDark} rg\n" . ($margin + 18) . " " . ($footerH + 8) . " Td\n(" . $esc($badgeId) . ") Tj\nET\nQ\n" .
+        "q\nBT\n/F1 6.8 Tf\n{$cDark} rg\n" . ($margin + 18) . " " . ($footerH + 17) . " Td\n(ID ACREDITACION) Tj\nET\nQ\n" .
+        "q\nBT\n/F1 9.2 Tf\n{$cDark} rg\n" . ($margin + 18) . " " . ($footerH + 8) . " Td\n(" . $esc($badgeId) . ") Tj\nET\nQ\n" .
 
-        "q\nBT\n/F1 7 Tf\n{$cWhite} rg\n" . ($margin + 8) . " " . ($footerH - 12) . " Td\n(" . $esc("GAFETE PERSONAL E INTRANSFERIBLE") . ") Tj\nET\nQ\n";
+        "q\nBT\n/F1 6.8 Tf\n{$cWhite} rg\n" . ($margin + 8) . " " . ($footerH - 12) . " Td\n(" . $esc("GAFETE PERSONAL E INTRANSFERIBLE") . ") Tj\nET\nQ\n";
 
     $contentObject = $addObject(
         '<< /Length ' . strlen($contentStream) . " >>\nstream\n" . $contentStream . "\nendstream"
@@ -322,7 +401,7 @@ function build_pdf_from_jpeg(array $request, array $event, array $municipalidad,
         '<< /Type /Page ' .
         '/Parent ' . $pagesObject . ' 0 R ' .
         '/Resources << ' .
-            '/XObject << /Im0 ' . $imageObject . ' 0 R >> ' .
+            '/XObject << /Im0 ' . $imageObject . ' 0 R' . ($logoObject ? ' /Im1 ' . $logoObject . ' 0 R' : '') . ' >> ' .
             '/Font << /F1 ' . $fontObject . ' 0 R >> ' .
         '>> ' .
         '/MediaBox [0 0 ' . $badgeWidth . ' ' . $badgeHeight . '] ' .
