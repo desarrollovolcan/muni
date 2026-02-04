@@ -484,6 +484,7 @@ function send_media_approval_email(array $request, array $event, array $municipa
     $rut = htmlspecialchars($request['rut'] ?? '', ENT_QUOTES, 'UTF-8');
     $cargo = htmlspecialchars($request['cargo'] ?? '', ENT_QUOTES, 'UTF-8');
     $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=' . rawurlencode($qrToken);
+    $printLink = base_url() . '/medios-acreditacion-imprimir.php?token=' . urlencode($qrToken);
     $badgeImage = build_media_badge_image($request, $event, $municipalidad, $qrUrl);
     $pdfAttachment = null;
     if ($badgeImage && $badgeImage['data']) {
@@ -548,6 +549,11 @@ function send_media_approval_email(array $request, array $event, array $municipa
               </table>
               <p style="margin:0 0 12px 0;font-size:12px;color:#6a7880;">Token QR: {$qrToken}</p>
               <p style="margin:0;">Adjuntamos una tarjeta en PDF para impresión (formato gafete).</p>
+              <div style="margin:16px 0 0 0;">
+                <a href="{$printLink}" style="display:inline-block;background:#0b5ed7;color:#ffffff;text-decoration:none;padding:10px 18px;border-radius:999px;font-weight:700;font-size:14px;">
+                  Imprime tu credencial
+                </a>
+              </div>
               <p style="margin:16px 0 0 0;">Atentamente,<br>{$municipalidadName}</p>
             </td>
           </tr>
