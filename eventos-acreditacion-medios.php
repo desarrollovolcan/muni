@@ -855,7 +855,7 @@ if ($selectedEventId > 0) {
                                                     <th>Cargo</th>
                                                     <th>Estado</th>
                                                     <th>Fecha envío</th>
-                                                    <th class="text-end">Acciones</th>
+                                                    <th class="text-end media-actions-cell">Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
