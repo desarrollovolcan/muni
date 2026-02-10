@@ -730,29 +730,14 @@ if ($selectedEventId > 0) {
     <style>
         .media-requests-table {
             overflow-x: auto;
-            overflow-y: visible;
-            padding-right: 0.5rem;
         }
 
         .media-requests-table .table {
-            min-width: 1200px;
+            min-width: 1050px;
         }
 
         .media-actions-cell {
-            position: sticky;
-            right: 0;
-            background: var(--bs-body-bg);
-            min-width: 220px;
-            box-shadow: -8px 0 12px rgba(0, 0, 0, 0.05);
-            z-index: 2;
-        }
-
-        .media-requests-table thead .media-actions-cell {
-            background: var(--bs-tertiary-bg);
-            z-index: 3;
-        }
-
-        .media-actions-cell .btn {
+            min-width: 170px;
             white-space: nowrap;
         }
     </style>
@@ -865,7 +850,6 @@ if ($selectedEventId > 0) {
                                                     <th>Tipo</th>
                                                     <th>Nombre</th>
                                                     <th>Apellidos</th>
-                                                    <th>RUT</th>
                                                     <th>Correo</th>
                                                     <th>Celular</th>
                                                     <th>Cargo</th>
@@ -895,7 +879,6 @@ if ($selectedEventId > 0) {
                                                         </td>
                                                         <td><?php echo htmlspecialchars($request['nombre'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td><?php echo htmlspecialchars($request['apellidos'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                                        <td><?php echo htmlspecialchars($request['rut'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td><?php echo htmlspecialchars($request['correo'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td><?php echo htmlspecialchars($request['celular'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td><?php echo htmlspecialchars($request['cargo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
