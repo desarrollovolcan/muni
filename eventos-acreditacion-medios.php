@@ -728,15 +728,16 @@ if ($selectedEventId > 0) {
 
     <?php include('partials/head-css.php'); ?>
     <style>
-        .media-actions-cell {
-            position: sticky;
-            right: 0;
-            background: var(--bs-body-bg);
-            min-width: 220px;
-            box-shadow: -8px 0 12px rgba(0, 0, 0, 0.05);
+        .media-requests-table {
+            overflow-x: auto;
         }
 
-        .media-actions-cell .btn {
+        .media-requests-table .table {
+            min-width: 1050px;
+        }
+
+        .media-actions-cell {
+            min-width: 170px;
             white-space: nowrap;
         }
     </style>
@@ -841,7 +842,7 @@ if ($selectedEventId > 0) {
                                 <?php elseif (empty($requests)) : ?>
                                     <div class="text-muted">Aún no hay solicitudes registradas para este evento.</div>
                                 <?php else : ?>
-                                    <div class="table-responsive">
+                                    <div class="table-responsive media-requests-table">
                                         <table class="table table-striped align-middle">
                                             <thead>
                                                 <tr>
@@ -849,7 +850,6 @@ if ($selectedEventId > 0) {
                                                     <th>Tipo</th>
                                                     <th>Nombre</th>
                                                     <th>Apellidos</th>
-                                                    <th>RUT</th>
                                                     <th>Correo</th>
                                                     <th>Celular</th>
                                                     <th>Cargo</th>
@@ -879,7 +879,6 @@ if ($selectedEventId > 0) {
                                                         </td>
                                                         <td><?php echo htmlspecialchars($request['nombre'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td><?php echo htmlspecialchars($request['apellidos'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                                        <td><?php echo htmlspecialchars($request['rut'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td><?php echo htmlspecialchars($request['correo'], ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td><?php echo htmlspecialchars($request['celular'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
                                                         <td><?php echo htmlspecialchars($request['cargo'] ?? '-', ENT_QUOTES, 'UTF-8'); ?></td>
@@ -889,7 +888,7 @@ if ($selectedEventId > 0) {
                                                             </span>
                                                         </td>
                                                         <td><?php echo htmlspecialchars($request['created_at'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                                        <td class="text-end">
+                                                        <td class="text-end media-actions-cell">
                                                             <div class="dropdown">
                                                                 <button class="btn btn-sm btn-soft-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                                                     Acciones
