@@ -728,12 +728,28 @@ if ($selectedEventId > 0) {
 
     <?php include('partials/head-css.php'); ?>
     <style>
+        .media-requests-table {
+            overflow-x: auto;
+            overflow-y: visible;
+            padding-right: 0.5rem;
+        }
+
+        .media-requests-table .table {
+            min-width: 1200px;
+        }
+
         .media-actions-cell {
             position: sticky;
             right: 0;
             background: var(--bs-body-bg);
             min-width: 220px;
             box-shadow: -8px 0 12px rgba(0, 0, 0, 0.05);
+            z-index: 2;
+        }
+
+        .media-requests-table thead .media-actions-cell {
+            background: var(--bs-tertiary-bg);
+            z-index: 3;
         }
 
         .media-actions-cell .btn {
@@ -841,7 +857,7 @@ if ($selectedEventId > 0) {
                                 <?php elseif (empty($requests)) : ?>
                                     <div class="text-muted">Aún no hay solicitudes registradas para este evento.</div>
                                 <?php else : ?>
-                                    <div class="table-responsive">
+                                    <div class="table-responsive media-requests-table">
                                         <table class="table table-striped align-middle">
                                             <thead>
                                                 <tr>
@@ -855,7 +871,7 @@ if ($selectedEventId > 0) {
                                                     <th>Cargo</th>
                                                     <th>Estado</th>
                                                     <th>Fecha envío</th>
-                                                    <th class="text-end">Acciones</th>
+                                                    <th class="text-end media-actions-cell">Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -889,7 +905,7 @@ if ($selectedEventId > 0) {
                                                             </span>
                                                         </td>
                                                         <td><?php echo htmlspecialchars($request['created_at'], ENT_QUOTES, 'UTF-8'); ?></td>
-                                                        <td class="text-end">
+                                                        <td class="text-end media-actions-cell">
                                                             <div class="dropdown">
                                                                 <button class="btn btn-sm btn-soft-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                                                     Acciones
