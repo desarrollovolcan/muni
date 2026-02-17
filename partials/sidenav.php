@@ -87,7 +87,13 @@
                     <div class="collapse" id="modulo-medios">
                         <ul class="side-nav sub-menu">
                             <li class="side-nav-item">
-                                <a href="medios-correo-masivo.php" class="side-nav-link">Mensaje importante y envío</a>
+                                <a href="eventos-acreditacion-medios.php" class="side-nav-link">Solicitudes de medios</a>
+                            </li>
+                            <li class="side-nav-item">
+                                <a href="medios-control-acceso.php" class="side-nav-link">Control de acceso</a>
+                            </li>
+                            <li class="side-nav-item">
+                                <a href="medios-correo-masivo.php" class="side-nav-link">Correos masivos</a>
                             </li>
                         </ul>
                     </div>
@@ -185,7 +191,7 @@
                                 <a href="grupos-autoridades.php" class="side-nav-link">Grupos autoridades</a>
                             </li>
                             <li class="side-nav-item">
-                                <a href="notificaciones-correo.php" class="side-nav-link">Correo de envío</a>
+                                <a href="notificaciones-correo.php" class="side-nav-link">Configuración correos masivos</a>
                             </li>
                             <li class="side-nav-item">
                                 <a href="invitacion-correo.php" class="side-nav-link">Correo invitación</a>
