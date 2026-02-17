@@ -92,6 +92,9 @@
                             <li class="side-nav-item">
                                 <a href="medios-control-acceso.php" class="side-nav-link">Control de acceso</a>
                             </li>
+                            <li class="side-nav-item">
+                                <a href="medios-correo-masivo.php" class="side-nav-link">Correo masivo</a>
+                            </li>
                         </ul>
                     </div>
                 </li>
