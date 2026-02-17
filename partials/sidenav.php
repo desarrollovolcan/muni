@@ -81,7 +81,7 @@
                 <li class="side-nav-item">
                     <a href="#modulo-medios" class="side-nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="modulo-medios">
                         <span class="menu-icon"><i data-lucide="megaphone"></i></span>
-                        <span class="menu-text">Medios de comunicación</span>
+                        <span class="menu-text">Comunicación</span>
                         <span class="menu-arrow"></span>
                     </a>
                     <div class="collapse" id="modulo-medios">
