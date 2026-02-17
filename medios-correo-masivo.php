@@ -139,6 +139,10 @@ $events = [];
 $selectedEventId = isset($_GET['event_id']) ? (int) $_GET['event_id'] : 0;
 $selectedEvent = null;
 $recipients = [];
+$messageInput = trim((string) ($_POST['mensaje_importante'] ?? ''));
+$contactNameInput = trim((string) ($_POST['contacto_nombre'] ?? ''));
+$contactEmailInput = trim((string) ($_POST['contacto_correo'] ?? ''));
+$contactPhoneInput = trim((string) ($_POST['contacto_telefono'] ?? ''));
 
 try {
     $events = db()->query(
@@ -160,39 +164,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verify_csrf($_POST['csrf_token'] ?? null)) {
         $errors[] = 'La sesión expiró, vuelve a intentarlo.';
     } else {
-        $action = $_POST['action'] ?? 'save_template';
+        $action = $_POST['action'] ?? 'send_massive';
 
-        if ($action === 'restore_template') {
-            $stmtRestore = db()->prepare('DELETE FROM email_templates WHERE template_key = ?');
-            $stmtRestore->execute([$templateKey]);
-            $template = ['subject' => $defaultSubject, 'body_html' => $defaultBody];
-            $notice = 'Plantilla restaurada correctamente.';
-        } elseif ($action === 'save_template') {
-            $subject = trim($_POST['subject'] ?? '');
-            $bodyHtml = trim($_POST['body_html'] ?? '');
-
-            if ($subject === '' || $bodyHtml === '') {
-                $errors[] = 'Completa el asunto y el cuerpo del correo.';
-            } else {
-                $stmtSave = db()->prepare(
-                    'INSERT INTO email_templates (template_key, subject, body_html)
-                     VALUES (?, ?, ?)
-                     ON DUPLICATE KEY UPDATE subject = VALUES(subject), body_html = VALUES(body_html)'
-                );
-                $stmtSave->execute([$templateKey, $subject, $bodyHtml]);
-                $template = ['subject' => $subject, 'body_html' => $bodyHtml];
-                $notice = 'Plantilla guardada correctamente.';
-            }
-        } elseif ($action === 'send_massive') {
+        if ($action === 'send_massive') {
             $selectedEventId = (int) ($_POST['event_id'] ?? 0);
-            $rawMessage = trim($_POST['mensaje_importante'] ?? '');
+            $rawMessage = $messageInput;
             $selectedRecipients = array_map('intval', $_POST['recipient_ids'] ?? []);
+            $contactName = $contactNameInput;
+            $contactEmail = $contactEmailInput;
+            $contactPhone = $contactPhoneInput;
 
             if ($selectedEventId <= 0) {
                 $errors[] = 'Selecciona un evento.';
             }
             if ($rawMessage === '') {
                 $errors[] = 'Ingresa un mensaje importante para enviar.';
+            }
+            if ($contactName === '') {
+                $errors[] = 'Ingresa el nombre de contacto de coordinación.';
+            }
+            if ($contactEmail === '' || !filter_var($contactEmail, FILTER_VALIDATE_EMAIL)) {
+                $errors[] = 'Ingresa un correo válido para contacto de coordinación.';
+            }
+            if ($contactPhone === '') {
+                $errors[] = 'Ingresa el teléfono de contacto de coordinación.';
             }
             if (empty($selectedRecipients)) {
                 $errors[] = 'Selecciona al menos un medio de comunicación.';
@@ -253,9 +248,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 'evento_ubicacion' => htmlspecialchars($event['ubicacion'] ?? '', ENT_QUOTES, 'UTF-8'),
                                 'evento_tipo' => htmlspecialchars($event['tipo_nombre'] ?? 'General', ENT_QUOTES, 'UTF-8'),
                                 'mensaje_importante' => nl2br(htmlspecialchars($rawMessage, ENT_QUOTES, 'UTF-8')),
-                                'contacto_nombre' => htmlspecialchars($event['encargado_nombre'] ?? ($municipalidad['nombre'] ?? 'Municipalidad'), ENT_QUOTES, 'UTF-8'),
-                                'contacto_correo' => htmlspecialchars($event['encargado_email'] ?? ($municipalidad['correo'] ?? ''), ENT_QUOTES, 'UTF-8'),
-                                'contacto_telefono' => htmlspecialchars($event['encargado_telefono'] ?? ($municipalidad['telefono'] ?? ''), ENT_QUOTES, 'UTF-8'),
+                                'contacto_nombre' => htmlspecialchars($contactName, ENT_QUOTES, 'UTF-8'),
+                                'contacto_correo' => htmlspecialchars($contactEmail, ENT_QUOTES, 'UTF-8'),
+                                'contacto_telefono' => htmlspecialchars($contactPhone, ENT_QUOTES, 'UTF-8'),
                             ];
 
                             $subject = $renderTemplate($template['subject'] ?? $defaultSubject, $payload);
@@ -281,7 +276,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($selectedEventId > 0) {
-    $stmtEvent = db()->prepare('SELECT id, titulo FROM events WHERE id = ? LIMIT 1');
+    $stmtEvent = db()->prepare('SELECT id, titulo, encargado_nombre, encargado_email, encargado_telefono FROM events WHERE id = ? LIMIT 1');
     $stmtEvent->execute([$selectedEventId]);
     $selectedEvent = $stmtEvent->fetch() ?: null;
 
@@ -312,8 +307,6 @@ $previewData = [
     'contacto_telefono' => '+56 9 1234 5678',
 ];
 
-$subjectPreview = $renderTemplate($template['subject'] ?? $defaultSubject, $previewData);
-$bodyPreview = $renderTemplate($template['body_html'] ?? $defaultBody, $previewData);
 ?>
 
 <?php include('partials/html.php'); ?>
@@ -329,20 +322,13 @@ $bodyPreview = $renderTemplate($template['body_html'] ?? $defaultBody, $previewD
 
         <div class="content-page">
             <div class="container-fluid">
-                <?php $subtitle = 'Medios de comunicación'; $title = 'Correo masivo'; include('partials/page-title.php'); ?>
+                <?php $subtitle = 'Comunicación'; $title = 'Correo masivo'; include('partials/page-title.php'); ?>
 
                 <div class="row">
                     <div class="col-12">
                         <div class="card gm-section">
-                            <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
-                                <div>
-                                    <h5 class="card-title mb-0">Correo masivo para medios</h5>
-                                    <p class="text-muted mb-0">Configura el HTML, revisa vista previa y envía comunicados por evento.</p>
-                                </div>
-                                <div class="d-flex flex-wrap gap-2">
-                                    <button type="submit" form="restore-template-form" class="btn btn-outline-secondary">Restaurar plantilla</button>
-                                    <button type="submit" form="template-form" class="btn btn-primary">Guardar plantilla</button>
-                                </div>
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Mensaje importante</h5>
                             </div>
                             <div class="card-body">
                                 <?php if (!empty($errors)) : ?>
@@ -357,68 +343,7 @@ $bodyPreview = $renderTemplate($template['body_html'] ?? $defaultBody, $previewD
                                     <div class="alert alert-success"><?php echo htmlspecialchars($notice, ENT_QUOTES, 'UTF-8'); ?></div>
                                 <?php endif; ?>
 
-                                <div class="row g-4">
-                                    <div class="col-lg-6">
-                                        <form id="template-form" method="post">
-                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                            <input type="hidden" name="action" value="save_template">
-                                            <div class="mb-3">
-                                                <label class="form-label" for="email-subject">Asunto del correo</label>
-                                                <input type="text" id="email-subject" name="subject" class="form-control" value="<?php echo htmlspecialchars($template['subject'], ENT_QUOTES, 'UTF-8'); ?>">
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label" for="email-body">Cuerpo HTML</label>
-                                                <textarea id="email-body" name="body_html" class="form-control code-editor" rows="16"><?php echo htmlspecialchars($template['body_html'], ENT_QUOTES, 'UTF-8'); ?></textarea>
-                                                <div class="form-text">Puedes usar HTML completo con estilos en línea.</div>
-                                            </div>
-                                        </form>
-                                        <form id="restore-template-form" method="post">
-                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                            <input type="hidden" name="action" value="restore_template">
-                                        </form>
-                                    </div>
-                                    <div class="col-lg-6">
-                                        <h6 class="text-muted text-uppercase fs-12">Vista previa</h6>
-                                        <div class="border rounded-3 p-3 bg-light">
-                                            <div class="mb-2"><strong>Asunto:</strong> <?php echo htmlspecialchars($subjectPreview, ENT_QUOTES, 'UTF-8'); ?></div>
-                                            <div class="bg-white rounded-3 p-3" style="max-height:480px;overflow:auto;">
-                                                <?php echo $bodyPreview; ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mt-3">
-                                    <div class="card border-0 shadow-sm">
-                                        <div class="card-header bg-transparent">
-                                            <h5 class="card-title mb-0">Variables disponibles</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row g-3">
-                                                <div class="col-md-6">
-                                                    <ul class="list-group">
-                                                        <li class="list-group-item"><strong>{{municipalidad_nombre}}</strong> · Nombre municipalidad</li>
-                                                        <li class="list-group-item"><strong>{{municipalidad_logo}}</strong> · URL logo municipal</li>
-                                                        <li class="list-group-item"><strong>{{destinatario_nombre}}</strong> · Nombre del periodista</li>
-                                                        <li class="list-group-item"><strong>{{destinatario_correo}}</strong> · Correo del destinatario</li>
-                                                        <li class="list-group-item"><strong>{{medio_nombre}}</strong> · Nombre del medio</li>
-                                                        <li class="list-group-item"><strong>{{evento_titulo}}</strong> · Título del evento</li>
-                                                    </ul>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <ul class="list-group">
-                                                        <li class="list-group-item"><strong>{{evento_fecha_inicio}}</strong> · Fecha inicio</li>
-                                                        <li class="list-group-item"><strong>{{evento_fecha_fin}}</strong> · Fecha término</li>
-                                                        <li class="list-group-item"><strong>{{evento_ubicacion}}</strong> · Ubicación</li>
-                                                        <li class="list-group-item"><strong>{{evento_tipo}}</strong> · Tipo evento</li>
-                                                        <li class="list-group-item"><strong>{{mensaje_importante}}</strong> · Mensaje principal</li>
-                                                        <li class="list-group-item"><strong>{{contacto_nombre}}</strong>, <strong>{{contacto_correo}}</strong>, <strong>{{contacto_telefono}}</strong> · Contacto</li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <p class="text-muted mb-0">En esta sección puedes redactar el mensaje importante y gestionar su envío masivo a los medios acreditados.</p>
                             </div>
                         </div>
                     </div>
@@ -450,7 +375,19 @@ $bodyPreview = $renderTemplate($template['body_html'] ?? $defaultBody, $previewD
                                         </div>
                                         <div class="col-lg-8">
                                             <label class="form-label" for="mensaje-importante">Mensaje importante</label>
-                                            <textarea id="mensaje-importante" name="mensaje_importante" class="form-control" rows="3" placeholder="Escribe aquí la información que deseas comunicar."><?php echo htmlspecialchars($_POST['mensaje_importante'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+                                            <textarea id="mensaje-importante" name="mensaje_importante" class="form-control" rows="3" placeholder="Escribe aquí la información que deseas comunicar."><?php echo htmlspecialchars($messageInput, ENT_QUOTES, 'UTF-8'); ?></textarea>
+                                        </div>
+                                        <div class="col-lg-4">
+                                            <label class="form-label" for="contacto-nombre">Contacto de coordinación (nombre)</label>
+                                            <input type="text" id="contacto-nombre" name="contacto_nombre" class="form-control" value="<?php echo htmlspecialchars($contactNameInput !== '' ? $contactNameInput : ($selectedEvent['encargado_nombre'] ?? ($municipalidad['nombre'] ?? '')), ENT_QUOTES, 'UTF-8'); ?>" placeholder="Nombre y cargo">
+                                        </div>
+                                        <div class="col-lg-4">
+                                            <label class="form-label" for="contacto-correo">Contacto de coordinación (correo)</label>
+                                            <input type="email" id="contacto-correo" name="contacto_correo" class="form-control" value="<?php echo htmlspecialchars($contactEmailInput !== '' ? $contactEmailInput : ($selectedEvent['encargado_email'] ?? ($municipalidad['correo'] ?? '')), ENT_QUOTES, 'UTF-8'); ?>" placeholder="correo@municipalidad.cl">
+                                        </div>
+                                        <div class="col-lg-4">
+                                            <label class="form-label" for="contacto-telefono">Contacto de coordinación (teléfono)</label>
+                                            <input type="text" id="contacto-telefono" name="contacto_telefono" class="form-control" value="<?php echo htmlspecialchars($contactPhoneInput !== '' ? $contactPhoneInput : ($selectedEvent['encargado_telefono'] ?? ($municipalidad['telefono'] ?? '')), ENT_QUOTES, 'UTF-8'); ?>" placeholder="+56 9 ...">
                                         </div>
                                     </div>
 

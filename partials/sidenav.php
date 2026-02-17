@@ -81,19 +81,13 @@
                 <li class="side-nav-item">
                     <a href="#modulo-medios" class="side-nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="modulo-medios">
                         <span class="menu-icon"><i data-lucide="megaphone"></i></span>
-                        <span class="menu-text">Medios de comunicación</span>
+                        <span class="menu-text">Comunicación</span>
                         <span class="menu-arrow"></span>
                     </a>
                     <div class="collapse" id="modulo-medios">
                         <ul class="side-nav sub-menu">
                             <li class="side-nav-item">
-                                <a href="eventos-acreditacion-medios.php" class="side-nav-link">Solicitudes de medios</a>
-                            </li>
-                            <li class="side-nav-item">
-                                <a href="medios-control-acceso.php" class="side-nav-link">Control de acceso</a>
-                            </li>
-                            <li class="side-nav-item">
-                                <a href="medios-correo-masivo.php" class="side-nav-link">Correo masivo</a>
+                                <a href="medios-correo-masivo.php" class="side-nav-link">Mensaje importante y envío</a>
                             </li>
                         </ul>
                     </div>
