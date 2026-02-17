@@ -21,6 +21,37 @@ try {
 } catch (Error $e) {
 }
 
+try {
+    db()->exec(
+        'CREATE TABLE IF NOT EXISTS media_mass_email_logs (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            batch_id VARCHAR(40) NOT NULL,
+            event_id INT UNSIGNED NOT NULL,
+            media_request_id INT UNSIGNED DEFAULT NULL,
+            recipient_name VARCHAR(200) NOT NULL,
+            recipient_email VARCHAR(180) NOT NULL,
+            media_name VARCHAR(200) DEFAULT NULL,
+            subject VARCHAR(255) NOT NULL,
+            mensaje_importante MEDIUMTEXT NOT NULL,
+            contacto_nombre VARCHAR(180) NOT NULL,
+            contacto_correo VARCHAR(180) NOT NULL,
+            contacto_telefono VARCHAR(80) NOT NULL,
+            sent_status ENUM("enviado", "fallido") NOT NULL,
+            error_message VARCHAR(255) DEFAULT NULL,
+            sent_by_user_id INT UNSIGNED DEFAULT NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY media_mass_email_logs_batch_idx (batch_id),
+            KEY media_mass_email_logs_event_idx (event_id),
+            KEY media_mass_email_logs_status_idx (sent_status),
+            CONSTRAINT media_mass_email_logs_event_fk FOREIGN KEY (event_id) REFERENCES events (id) ON DELETE CASCADE,
+            CONSTRAINT media_mass_email_logs_media_request_fk FOREIGN KEY (media_request_id) REFERENCES media_accreditation_requests (id) ON DELETE SET NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+    );
+} catch (Exception $e) {
+} catch (Error $e) {
+}
+
 $defaultSubject = 'Información importante para medios: {{evento_titulo}}';
 $defaultBody = <<<HTML
 <!DOCTYPE html>
@@ -139,6 +170,11 @@ $events = [];
 $selectedEventId = isset($_GET['event_id']) ? (int) $_GET['event_id'] : 0;
 $selectedEvent = null;
 $recipients = [];
+$messageInput = trim((string) ($_POST['mensaje_importante'] ?? ''));
+$contactNameInput = trim((string) ($_POST['contacto_nombre'] ?? ''));
+$contactEmailInput = trim((string) ($_POST['contacto_correo'] ?? ''));
+$contactPhoneInput = trim((string) ($_POST['contacto_telefono'] ?? ''));
+$historyRows = [];
 
 try {
     $events = db()->query(
@@ -160,39 +196,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verify_csrf($_POST['csrf_token'] ?? null)) {
         $errors[] = 'La sesión expiró, vuelve a intentarlo.';
     } else {
-        $action = $_POST['action'] ?? 'save_template';
+        $action = $_POST['action'] ?? 'send_massive';
 
-        if ($action === 'restore_template') {
-            $stmtRestore = db()->prepare('DELETE FROM email_templates WHERE template_key = ?');
-            $stmtRestore->execute([$templateKey]);
-            $template = ['subject' => $defaultSubject, 'body_html' => $defaultBody];
-            $notice = 'Plantilla restaurada correctamente.';
-        } elseif ($action === 'save_template') {
-            $subject = trim($_POST['subject'] ?? '');
-            $bodyHtml = trim($_POST['body_html'] ?? '');
-
-            if ($subject === '' || $bodyHtml === '') {
-                $errors[] = 'Completa el asunto y el cuerpo del correo.';
-            } else {
-                $stmtSave = db()->prepare(
-                    'INSERT INTO email_templates (template_key, subject, body_html)
-                     VALUES (?, ?, ?)
-                     ON DUPLICATE KEY UPDATE subject = VALUES(subject), body_html = VALUES(body_html)'
-                );
-                $stmtSave->execute([$templateKey, $subject, $bodyHtml]);
-                $template = ['subject' => $subject, 'body_html' => $bodyHtml];
-                $notice = 'Plantilla guardada correctamente.';
-            }
-        } elseif ($action === 'send_massive') {
+        if ($action === 'send_massive') {
             $selectedEventId = (int) ($_POST['event_id'] ?? 0);
-            $rawMessage = trim($_POST['mensaje_importante'] ?? '');
+            $rawMessage = $messageInput;
             $selectedRecipients = array_map('intval', $_POST['recipient_ids'] ?? []);
+            $contactName = $contactNameInput;
+            $contactEmail = $contactEmailInput;
+            $contactPhone = $contactPhoneInput;
 
             if ($selectedEventId <= 0) {
                 $errors[] = 'Selecciona un evento.';
             }
             if ($rawMessage === '') {
                 $errors[] = 'Ingresa un mensaje importante para enviar.';
+            }
+            if ($contactName === '') {
+                $errors[] = 'Ingresa el nombre de contacto de coordinación.';
+            }
+            if ($contactEmail === '' || !filter_var($contactEmail, FILTER_VALIDATE_EMAIL)) {
+                $errors[] = 'Ingresa un correo válido para contacto de coordinación.';
+            }
+            if ($contactPhone === '') {
+                $errors[] = 'Ingresa el teléfono de contacto de coordinación.';
             }
             if (empty($selectedRecipients)) {
                 $errors[] = 'Selecciona al menos un medio de comunicación.';
@@ -201,9 +228,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (empty($errors)) {
                 $stmtEvent = db()->prepare(
                     'SELECT e.id, e.titulo, e.fecha_inicio, e.fecha_fin, e.ubicacion,
-                            et.nombre AS tipo_nombre, e.encargado_nombre, e.encargado_email, e.encargado_telefono
+                            e.tipo AS tipo_nombre,
+                            u.nombre AS encargado_nombre, u.apellido AS encargado_apellido,
+                            u.correo AS encargado_email, u.telefono AS encargado_telefono
                      FROM events e
-                     LEFT JOIN event_types et ON et.id = e.tipo_id
+                     LEFT JOIN users u ON u.id = e.encargado_id
                      WHERE e.id = ? LIMIT 1'
                 );
                 $stmtEvent->execute([$selectedEventId]);
@@ -239,6 +268,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         $sentCount = 0;
                         $failCount = 0;
+                        $batchId = date('YmdHis') . '-' . bin2hex(random_bytes(4));
+                        $sentByUserId = isset($_SESSION['user']['id']) ? (int) $_SESSION['user']['id'] : null;
+                        $stmtLog = db()->prepare(
+                            'INSERT INTO media_mass_email_logs (
+                                batch_id, event_id, media_request_id, recipient_name, recipient_email, media_name,
+                                subject, mensaje_importante, contacto_nombre, contacto_correo, contacto_telefono,
+                                sent_status, error_message, sent_by_user_id
+                             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+                        );
                         foreach ($rows as $row) {
                             $recipientName = trim(($row['nombre'] ?? '') . ' ' . ($row['apellidos'] ?? ''));
                             $payload = [
@@ -253,18 +291,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 'evento_ubicacion' => htmlspecialchars($event['ubicacion'] ?? '', ENT_QUOTES, 'UTF-8'),
                                 'evento_tipo' => htmlspecialchars($event['tipo_nombre'] ?? 'General', ENT_QUOTES, 'UTF-8'),
                                 'mensaje_importante' => nl2br(htmlspecialchars($rawMessage, ENT_QUOTES, 'UTF-8')),
-                                'contacto_nombre' => htmlspecialchars($event['encargado_nombre'] ?? ($municipalidad['nombre'] ?? 'Municipalidad'), ENT_QUOTES, 'UTF-8'),
-                                'contacto_correo' => htmlspecialchars($event['encargado_email'] ?? ($municipalidad['correo'] ?? ''), ENT_QUOTES, 'UTF-8'),
-                                'contacto_telefono' => htmlspecialchars($event['encargado_telefono'] ?? ($municipalidad['telefono'] ?? ''), ENT_QUOTES, 'UTF-8'),
+                                'contacto_nombre' => htmlspecialchars($contactName !== '' ? $contactName : trim((string) (($event['encargado_nombre'] ?? '') . ' ' . ($event['encargado_apellido'] ?? ''))), ENT_QUOTES, 'UTF-8'),
+                                'contacto_correo' => htmlspecialchars($contactEmail, ENT_QUOTES, 'UTF-8'),
+                                'contacto_telefono' => htmlspecialchars($contactPhone, ENT_QUOTES, 'UTF-8'),
                             ];
 
                             $subject = $renderTemplate($template['subject'] ?? $defaultSubject, $payload);
                             $body = $renderTemplate($template['body_html'] ?? $defaultBody, $payload);
 
-                            if (@mail((string) $row['correo'], $subject, $body, $headers)) {
+                            $sentOk = @mail((string) $row['correo'], $subject, $body, $headers);
+                            if ($sentOk) {
                                 $sentCount += 1;
                             } else {
                                 $failCount += 1;
+                            }
+
+                            try {
+                                $stmtLog->execute([
+                                    $batchId,
+                                    $selectedEventId,
+                                    isset($row['id']) ? (int) $row['id'] : null,
+                                    $recipientName !== '' ? $recipientName : 'Equipo de prensa',
+                                    (string) ($row['correo'] ?? ''),
+                                    (string) ($row['medio'] ?? ''),
+                                    $subject,
+                                    $rawMessage,
+                                    $contactName,
+                                    $contactEmail,
+                                    $contactPhone,
+                                    $sentOk ? 'enviado' : 'fallido',
+                                    $sentOk ? null : 'mail() retornó false',
+                                    $sentByUserId,
+                                ]);
+                            } catch (Exception $e) {
+                            } catch (Error $e) {
                             }
                         }
 
@@ -281,7 +341,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($selectedEventId > 0) {
-    $stmtEvent = db()->prepare('SELECT id, titulo FROM events WHERE id = ? LIMIT 1');
+    $stmtEvent = db()->prepare(
+        'SELECT e.id, e.titulo,
+                u.nombre AS encargado_nombre, u.apellido AS encargado_apellido,
+                u.correo AS encargado_email, u.telefono AS encargado_telefono
+         FROM events e
+         LEFT JOIN users u ON u.id = e.encargado_id
+         WHERE e.id = ? LIMIT 1'
+    );
     $stmtEvent->execute([$selectedEventId]);
     $selectedEvent = $stmtEvent->fetch() ?: null;
 
@@ -294,6 +361,29 @@ if ($selectedEventId > 0) {
     $stmtRecipients->execute([$selectedEventId]);
     $recipients = $stmtRecipients->fetchAll();
 }
+
+
+try {
+    $stmtHistory = db()->query(
+        'SELECT l.id, l.batch_id, l.recipient_name, l.recipient_email, l.media_name, l.subject,
+                l.sent_status, l.error_message, l.created_at, l.contacto_nombre, l.contacto_correo, l.contacto_telefono,
+                e.titulo AS event_titulo
+         FROM media_mass_email_logs l
+         LEFT JOIN events e ON e.id = l.event_id
+         ORDER BY l.id DESC
+         LIMIT 100'
+    );
+    $historyRows = $stmtHistory->fetchAll();
+} catch (Exception $e) {
+    $historyRows = [];
+} catch (Error $e) {
+    $historyRows = [];
+}
+
+$selectedEventContactName = trim((string) (($selectedEvent['encargado_nombre'] ?? '') . ' ' . ($selectedEvent['encargado_apellido'] ?? '')));
+$defaultContactName = $contactNameInput !== '' ? $contactNameInput : ($selectedEventContactName !== '' ? $selectedEventContactName : ($municipalidad['nombre'] ?? ''));
+$defaultContactEmail = $contactEmailInput !== '' ? $contactEmailInput : ($selectedEvent['encargado_email'] ?? ($municipalidad['correo'] ?? ''));
+$defaultContactPhone = $contactPhoneInput !== '' ? $contactPhoneInput : ($selectedEvent['encargado_telefono'] ?? ($municipalidad['telefono'] ?? ''));
 
 $previewData = [
     'municipalidad_nombre' => htmlspecialchars($municipalidad['nombre'] ?? 'Municipalidad', ENT_QUOTES, 'UTF-8'),
@@ -312,8 +402,6 @@ $previewData = [
     'contacto_telefono' => '+56 9 1234 5678',
 ];
 
-$subjectPreview = $renderTemplate($template['subject'] ?? $defaultSubject, $previewData);
-$bodyPreview = $renderTemplate($template['body_html'] ?? $defaultBody, $previewData);
 ?>
 
 <?php include('partials/html.php'); ?>
@@ -329,20 +417,13 @@ $bodyPreview = $renderTemplate($template['body_html'] ?? $defaultBody, $previewD
 
         <div class="content-page">
             <div class="container-fluid">
-                <?php $subtitle = 'Medios de comunicación'; $title = 'Correo masivo'; include('partials/page-title.php'); ?>
+                <?php $subtitle = 'Comunicación'; $title = 'Correo masivo'; include('partials/page-title.php'); ?>
 
                 <div class="row">
                     <div class="col-12">
                         <div class="card gm-section">
-                            <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
-                                <div>
-                                    <h5 class="card-title mb-0">Correo masivo para medios</h5>
-                                    <p class="text-muted mb-0">Configura el HTML, revisa vista previa y envía comunicados por evento.</p>
-                                </div>
-                                <div class="d-flex flex-wrap gap-2">
-                                    <button type="submit" form="restore-template-form" class="btn btn-outline-secondary">Restaurar plantilla</button>
-                                    <button type="submit" form="template-form" class="btn btn-primary">Guardar plantilla</button>
-                                </div>
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Mensaje importante</h5>
                             </div>
                             <div class="card-body">
                                 <?php if (!empty($errors)) : ?>
@@ -357,68 +438,7 @@ $bodyPreview = $renderTemplate($template['body_html'] ?? $defaultBody, $previewD
                                     <div class="alert alert-success"><?php echo htmlspecialchars($notice, ENT_QUOTES, 'UTF-8'); ?></div>
                                 <?php endif; ?>
 
-                                <div class="row g-4">
-                                    <div class="col-lg-6">
-                                        <form id="template-form" method="post">
-                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                            <input type="hidden" name="action" value="save_template">
-                                            <div class="mb-3">
-                                                <label class="form-label" for="email-subject">Asunto del correo</label>
-                                                <input type="text" id="email-subject" name="subject" class="form-control" value="<?php echo htmlspecialchars($template['subject'], ENT_QUOTES, 'UTF-8'); ?>">
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label" for="email-body">Cuerpo HTML</label>
-                                                <textarea id="email-body" name="body_html" class="form-control code-editor" rows="16"><?php echo htmlspecialchars($template['body_html'], ENT_QUOTES, 'UTF-8'); ?></textarea>
-                                                <div class="form-text">Puedes usar HTML completo con estilos en línea.</div>
-                                            </div>
-                                        </form>
-                                        <form id="restore-template-form" method="post">
-                                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                                            <input type="hidden" name="action" value="restore_template">
-                                        </form>
-                                    </div>
-                                    <div class="col-lg-6">
-                                        <h6 class="text-muted text-uppercase fs-12">Vista previa</h6>
-                                        <div class="border rounded-3 p-3 bg-light">
-                                            <div class="mb-2"><strong>Asunto:</strong> <?php echo htmlspecialchars($subjectPreview, ENT_QUOTES, 'UTF-8'); ?></div>
-                                            <div class="bg-white rounded-3 p-3" style="max-height:480px;overflow:auto;">
-                                                <?php echo $bodyPreview; ?>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mt-3">
-                                    <div class="card border-0 shadow-sm">
-                                        <div class="card-header bg-transparent">
-                                            <h5 class="card-title mb-0">Variables disponibles</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row g-3">
-                                                <div class="col-md-6">
-                                                    <ul class="list-group">
-                                                        <li class="list-group-item"><strong>{{municipalidad_nombre}}</strong> · Nombre municipalidad</li>
-                                                        <li class="list-group-item"><strong>{{municipalidad_logo}}</strong> · URL logo municipal</li>
-                                                        <li class="list-group-item"><strong>{{destinatario_nombre}}</strong> · Nombre del periodista</li>
-                                                        <li class="list-group-item"><strong>{{destinatario_correo}}</strong> · Correo del destinatario</li>
-                                                        <li class="list-group-item"><strong>{{medio_nombre}}</strong> · Nombre del medio</li>
-                                                        <li class="list-group-item"><strong>{{evento_titulo}}</strong> · Título del evento</li>
-                                                    </ul>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <ul class="list-group">
-                                                        <li class="list-group-item"><strong>{{evento_fecha_inicio}}</strong> · Fecha inicio</li>
-                                                        <li class="list-group-item"><strong>{{evento_fecha_fin}}</strong> · Fecha término</li>
-                                                        <li class="list-group-item"><strong>{{evento_ubicacion}}</strong> · Ubicación</li>
-                                                        <li class="list-group-item"><strong>{{evento_tipo}}</strong> · Tipo evento</li>
-                                                        <li class="list-group-item"><strong>{{mensaje_importante}}</strong> · Mensaje principal</li>
-                                                        <li class="list-group-item"><strong>{{contacto_nombre}}</strong>, <strong>{{contacto_correo}}</strong>, <strong>{{contacto_telefono}}</strong> · Contacto</li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <p class="text-muted mb-0">En esta sección puedes redactar el mensaje importante y gestionar su envío masivo a los medios acreditados.</p>
                             </div>
                         </div>
                     </div>
@@ -450,7 +470,19 @@ $bodyPreview = $renderTemplate($template['body_html'] ?? $defaultBody, $previewD
                                         </div>
                                         <div class="col-lg-8">
                                             <label class="form-label" for="mensaje-importante">Mensaje importante</label>
-                                            <textarea id="mensaje-importante" name="mensaje_importante" class="form-control" rows="3" placeholder="Escribe aquí la información que deseas comunicar."><?php echo htmlspecialchars($_POST['mensaje_importante'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+                                            <textarea id="mensaje-importante" name="mensaje_importante" class="form-control" rows="3" placeholder="Escribe aquí la información que deseas comunicar."><?php echo htmlspecialchars($messageInput, ENT_QUOTES, 'UTF-8'); ?></textarea>
+                                        </div>
+                                        <div class="col-lg-4">
+                                            <label class="form-label" for="contacto-nombre">Contacto de coordinación (nombre)</label>
+                                            <input type="text" id="contacto-nombre" name="contacto_nombre" class="form-control" value="<?php echo htmlspecialchars((string) $defaultContactName, ENT_QUOTES, 'UTF-8'); ?>" placeholder="Nombre y cargo">
+                                        </div>
+                                        <div class="col-lg-4">
+                                            <label class="form-label" for="contacto-correo">Contacto de coordinación (correo)</label>
+                                            <input type="email" id="contacto-correo" name="contacto_correo" class="form-control" value="<?php echo htmlspecialchars((string) $defaultContactEmail, ENT_QUOTES, 'UTF-8'); ?>" placeholder="correo@municipalidad.cl">
+                                        </div>
+                                        <div class="col-lg-4">
+                                            <label class="form-label" for="contacto-telefono">Contacto de coordinación (teléfono)</label>
+                                            <input type="text" id="contacto-telefono" name="contacto_telefono" class="form-control" value="<?php echo htmlspecialchars((string) $defaultContactPhone, ENT_QUOTES, 'UTF-8'); ?>" placeholder="+56 9 ...">
                                         </div>
                                     </div>
 
@@ -491,6 +523,66 @@ $bodyPreview = $renderTemplate($template['body_html'] ?? $defaultBody, $previewD
                                         <button type="submit" class="btn btn-primary" <?php echo $selectedEventId > 0 ? '' : 'disabled'; ?>>Enviar correo masivo</button>
                                     </div>
                                 </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-2">
+                    <div class="col-12">
+                        <div class="card gm-section">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Registro de correos masivos enviados</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive" style="max-height:360px;overflow:auto;">
+                                    <table class="table table-sm table-hover align-middle mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Fecha</th>
+                                                <th>Lote</th>
+                                                <th>Evento</th>
+                                                <th>Destinatario</th>
+                                                <th>Medio</th>
+                                                <th>Estado</th>
+                                                <th>Contacto coordinación</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php if (empty($historyRows)) : ?>
+                                                <tr>
+                                                    <td colspan="7" class="text-center text-muted py-3">No hay envíos registrados.</td>
+                                                </tr>
+                                            <?php else : ?>
+                                                <?php foreach ($historyRows as $history) : ?>
+                                                    <tr>
+                                                        <td><?php echo htmlspecialchars((string) ($history['created_at'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td><code><?php echo htmlspecialchars((string) ($history['batch_id'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></code></td>
+                                                        <td><?php echo htmlspecialchars((string) ($history['event_titulo'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td>
+                                                            <div><?php echo htmlspecialchars((string) ($history['recipient_name'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?></div>
+                                                            <small class="text-muted"><?php echo htmlspecialchars((string) ($history['recipient_email'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?></small>
+                                                        </td>
+                                                        <td><?php echo htmlspecialchars((string) ($history['media_name'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td>
+                                                            <?php $ok = ($history['sent_status'] ?? '') === 'enviado'; ?>
+                                                            <span class="badge bg-<?php echo $ok ? 'success' : 'danger'; ?>-subtle text-<?php echo $ok ? 'success' : 'danger'; ?>">
+                                                                <?php echo htmlspecialchars((string) ($history['sent_status'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?>
+                                                            </span>
+                                                            <?php if (!$ok && !empty($history['error_message'])) : ?>
+                                                                <div><small class="text-danger"><?php echo htmlspecialchars((string) $history['error_message'], ENT_QUOTES, 'UTF-8'); ?></small></div>
+                                                            <?php endif; ?>
+                                                        </td>
+                                                        <td>
+                                                            <div><?php echo htmlspecialchars((string) ($history['contacto_nombre'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?></div>
+                                                            <small class="text-muted"><?php echo htmlspecialchars((string) ($history['contacto_correo'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?> · <?php echo htmlspecialchars((string) ($history['contacto_telefono'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?></small>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
