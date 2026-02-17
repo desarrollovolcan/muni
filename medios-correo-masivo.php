@@ -228,9 +228,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (empty($errors)) {
                 $stmtEvent = db()->prepare(
                     'SELECT e.id, e.titulo, e.fecha_inicio, e.fecha_fin, e.ubicacion,
-                            et.nombre AS tipo_nombre, e.encargado_nombre, e.encargado_email, e.encargado_telefono
+                            e.tipo AS tipo_nombre,
+                            u.nombre AS encargado_nombre, u.apellido AS encargado_apellido,
+                            u.correo AS encargado_email, u.telefono AS encargado_telefono
                      FROM events e
-                     LEFT JOIN event_types et ON et.id = e.tipo_id
+                     LEFT JOIN users u ON u.id = e.encargado_id
                      WHERE e.id = ? LIMIT 1'
                 );
                 $stmtEvent->execute([$selectedEventId]);
@@ -289,7 +291,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 'evento_ubicacion' => htmlspecialchars($event['ubicacion'] ?? '', ENT_QUOTES, 'UTF-8'),
                                 'evento_tipo' => htmlspecialchars($event['tipo_nombre'] ?? 'General', ENT_QUOTES, 'UTF-8'),
                                 'mensaje_importante' => nl2br(htmlspecialchars($rawMessage, ENT_QUOTES, 'UTF-8')),
-                                'contacto_nombre' => htmlspecialchars($contactName, ENT_QUOTES, 'UTF-8'),
+                                'contacto_nombre' => htmlspecialchars($contactName !== '' ? $contactName : trim((string) (($event['encargado_nombre'] ?? '') . ' ' . ($event['encargado_apellido'] ?? ''))), ENT_QUOTES, 'UTF-8'),
                                 'contacto_correo' => htmlspecialchars($contactEmail, ENT_QUOTES, 'UTF-8'),
                                 'contacto_telefono' => htmlspecialchars($contactPhone, ENT_QUOTES, 'UTF-8'),
                             ];
@@ -339,7 +341,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 if ($selectedEventId > 0) {
-    $stmtEvent = db()->prepare('SELECT id, titulo, encargado_nombre, encargado_email, encargado_telefono FROM events WHERE id = ? LIMIT 1');
+    $stmtEvent = db()->prepare(
+        'SELECT e.id, e.titulo,
+                u.nombre AS encargado_nombre, u.apellido AS encargado_apellido,
+                u.correo AS encargado_email, u.telefono AS encargado_telefono
+         FROM events e
+         LEFT JOIN users u ON u.id = e.encargado_id
+         WHERE e.id = ? LIMIT 1'
+    );
     $stmtEvent->execute([$selectedEventId]);
     $selectedEvent = $stmtEvent->fetch() ?: null;
 
@@ -370,6 +379,11 @@ try {
 } catch (Error $e) {
     $historyRows = [];
 }
+
+$selectedEventContactName = trim((string) (($selectedEvent['encargado_nombre'] ?? '') . ' ' . ($selectedEvent['encargado_apellido'] ?? '')));
+$defaultContactName = $contactNameInput !== '' ? $contactNameInput : ($selectedEventContactName !== '' ? $selectedEventContactName : ($municipalidad['nombre'] ?? ''));
+$defaultContactEmail = $contactEmailInput !== '' ? $contactEmailInput : ($selectedEvent['encargado_email'] ?? ($municipalidad['correo'] ?? ''));
+$defaultContactPhone = $contactPhoneInput !== '' ? $contactPhoneInput : ($selectedEvent['encargado_telefono'] ?? ($municipalidad['telefono'] ?? ''));
 
 $previewData = [
     'municipalidad_nombre' => htmlspecialchars($municipalidad['nombre'] ?? 'Municipalidad', ENT_QUOTES, 'UTF-8'),
@@ -460,15 +474,15 @@ $previewData = [
                                         </div>
                                         <div class="col-lg-4">
                                             <label class="form-label" for="contacto-nombre">Contacto de coordinación (nombre)</label>
-                                            <input type="text" id="contacto-nombre" name="contacto_nombre" class="form-control" value="<?php echo htmlspecialchars($contactNameInput !== '' ? $contactNameInput : ($selectedEvent['encargado_nombre'] ?? ($municipalidad['nombre'] ?? '')), ENT_QUOTES, 'UTF-8'); ?>" placeholder="Nombre y cargo">
+                                            <input type="text" id="contacto-nombre" name="contacto_nombre" class="form-control" value="<?php echo htmlspecialchars((string) $defaultContactName, ENT_QUOTES, 'UTF-8'); ?>" placeholder="Nombre y cargo">
                                         </div>
                                         <div class="col-lg-4">
                                             <label class="form-label" for="contacto-correo">Contacto de coordinación (correo)</label>
-                                            <input type="email" id="contacto-correo" name="contacto_correo" class="form-control" value="<?php echo htmlspecialchars($contactEmailInput !== '' ? $contactEmailInput : ($selectedEvent['encargado_email'] ?? ($municipalidad['correo'] ?? '')), ENT_QUOTES, 'UTF-8'); ?>" placeholder="correo@municipalidad.cl">
+                                            <input type="email" id="contacto-correo" name="contacto_correo" class="form-control" value="<?php echo htmlspecialchars((string) $defaultContactEmail, ENT_QUOTES, 'UTF-8'); ?>" placeholder="correo@municipalidad.cl">
                                         </div>
                                         <div class="col-lg-4">
                                             <label class="form-label" for="contacto-telefono">Contacto de coordinación (teléfono)</label>
-                                            <input type="text" id="contacto-telefono" name="contacto_telefono" class="form-control" value="<?php echo htmlspecialchars($contactPhoneInput !== '' ? $contactPhoneInput : ($selectedEvent['encargado_telefono'] ?? ($municipalidad['telefono'] ?? '')), ENT_QUOTES, 'UTF-8'); ?>" placeholder="+56 9 ...">
+                                            <input type="text" id="contacto-telefono" name="contacto_telefono" class="form-control" value="<?php echo htmlspecialchars((string) $defaultContactPhone, ENT_QUOTES, 'UTF-8'); ?>" placeholder="+56 9 ...">
                                         </div>
                                     </div>
 
