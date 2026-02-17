@@ -21,6 +21,37 @@ try {
 } catch (Error $e) {
 }
 
+try {
+    db()->exec(
+        'CREATE TABLE IF NOT EXISTS media_mass_email_logs (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            batch_id VARCHAR(40) NOT NULL,
+            event_id INT UNSIGNED NOT NULL,
+            media_request_id INT UNSIGNED DEFAULT NULL,
+            recipient_name VARCHAR(200) NOT NULL,
+            recipient_email VARCHAR(180) NOT NULL,
+            media_name VARCHAR(200) DEFAULT NULL,
+            subject VARCHAR(255) NOT NULL,
+            mensaje_importante MEDIUMTEXT NOT NULL,
+            contacto_nombre VARCHAR(180) NOT NULL,
+            contacto_correo VARCHAR(180) NOT NULL,
+            contacto_telefono VARCHAR(80) NOT NULL,
+            sent_status ENUM("enviado", "fallido") NOT NULL,
+            error_message VARCHAR(255) DEFAULT NULL,
+            sent_by_user_id INT UNSIGNED DEFAULT NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY media_mass_email_logs_batch_idx (batch_id),
+            KEY media_mass_email_logs_event_idx (event_id),
+            KEY media_mass_email_logs_status_idx (sent_status),
+            CONSTRAINT media_mass_email_logs_event_fk FOREIGN KEY (event_id) REFERENCES events (id) ON DELETE CASCADE,
+            CONSTRAINT media_mass_email_logs_media_request_fk FOREIGN KEY (media_request_id) REFERENCES media_accreditation_requests (id) ON DELETE SET NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+    );
+} catch (Exception $e) {
+} catch (Error $e) {
+}
+
 $defaultSubject = 'Información importante para medios: {{evento_titulo}}';
 $defaultBody = <<<HTML
 <!DOCTYPE html>
@@ -143,6 +174,7 @@ $messageInput = trim((string) ($_POST['mensaje_importante'] ?? ''));
 $contactNameInput = trim((string) ($_POST['contacto_nombre'] ?? ''));
 $contactEmailInput = trim((string) ($_POST['contacto_correo'] ?? ''));
 $contactPhoneInput = trim((string) ($_POST['contacto_telefono'] ?? ''));
+$historyRows = [];
 
 try {
     $events = db()->query(
@@ -234,6 +266,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         $sentCount = 0;
                         $failCount = 0;
+                        $batchId = date('YmdHis') . '-' . bin2hex(random_bytes(4));
+                        $sentByUserId = isset($_SESSION['user']['id']) ? (int) $_SESSION['user']['id'] : null;
+                        $stmtLog = db()->prepare(
+                            'INSERT INTO media_mass_email_logs (
+                                batch_id, event_id, media_request_id, recipient_name, recipient_email, media_name,
+                                subject, mensaje_importante, contacto_nombre, contacto_correo, contacto_telefono,
+                                sent_status, error_message, sent_by_user_id
+                             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+                        );
                         foreach ($rows as $row) {
                             $recipientName = trim(($row['nombre'] ?? '') . ' ' . ($row['apellidos'] ?? ''));
                             $payload = [
@@ -256,10 +297,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $subject = $renderTemplate($template['subject'] ?? $defaultSubject, $payload);
                             $body = $renderTemplate($template['body_html'] ?? $defaultBody, $payload);
 
-                            if (@mail((string) $row['correo'], $subject, $body, $headers)) {
+                            $sentOk = @mail((string) $row['correo'], $subject, $body, $headers);
+                            if ($sentOk) {
                                 $sentCount += 1;
                             } else {
                                 $failCount += 1;
+                            }
+
+                            try {
+                                $stmtLog->execute([
+                                    $batchId,
+                                    $selectedEventId,
+                                    isset($row['id']) ? (int) $row['id'] : null,
+                                    $recipientName !== '' ? $recipientName : 'Equipo de prensa',
+                                    (string) ($row['correo'] ?? ''),
+                                    (string) ($row['medio'] ?? ''),
+                                    $subject,
+                                    $rawMessage,
+                                    $contactName,
+                                    $contactEmail,
+                                    $contactPhone,
+                                    $sentOk ? 'enviado' : 'fallido',
+                                    $sentOk ? null : 'mail() retornó false',
+                                    $sentByUserId,
+                                ]);
+                            } catch (Exception $e) {
+                            } catch (Error $e) {
                             }
                         }
 
@@ -288,6 +351,24 @@ if ($selectedEventId > 0) {
     );
     $stmtRecipients->execute([$selectedEventId]);
     $recipients = $stmtRecipients->fetchAll();
+}
+
+
+try {
+    $stmtHistory = db()->query(
+        'SELECT l.id, l.batch_id, l.recipient_name, l.recipient_email, l.media_name, l.subject,
+                l.sent_status, l.error_message, l.created_at, l.contacto_nombre, l.contacto_correo, l.contacto_telefono,
+                e.titulo AS event_titulo
+         FROM media_mass_email_logs l
+         LEFT JOIN events e ON e.id = l.event_id
+         ORDER BY l.id DESC
+         LIMIT 100'
+    );
+    $historyRows = $stmtHistory->fetchAll();
+} catch (Exception $e) {
+    $historyRows = [];
+} catch (Error $e) {
+    $historyRows = [];
 }
 
 $previewData = [
@@ -428,6 +509,66 @@ $previewData = [
                                         <button type="submit" class="btn btn-primary" <?php echo $selectedEventId > 0 ? '' : 'disabled'; ?>>Enviar correo masivo</button>
                                     </div>
                                 </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-2">
+                    <div class="col-12">
+                        <div class="card gm-section">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Registro de correos masivos enviados</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive" style="max-height:360px;overflow:auto;">
+                                    <table class="table table-sm table-hover align-middle mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Fecha</th>
+                                                <th>Lote</th>
+                                                <th>Evento</th>
+                                                <th>Destinatario</th>
+                                                <th>Medio</th>
+                                                <th>Estado</th>
+                                                <th>Contacto coordinación</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php if (empty($historyRows)) : ?>
+                                                <tr>
+                                                    <td colspan="7" class="text-center text-muted py-3">No hay envíos registrados.</td>
+                                                </tr>
+                                            <?php else : ?>
+                                                <?php foreach ($historyRows as $history) : ?>
+                                                    <tr>
+                                                        <td><?php echo htmlspecialchars((string) ($history['created_at'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td><code><?php echo htmlspecialchars((string) ($history['batch_id'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></code></td>
+                                                        <td><?php echo htmlspecialchars((string) ($history['event_titulo'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td>
+                                                            <div><?php echo htmlspecialchars((string) ($history['recipient_name'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?></div>
+                                                            <small class="text-muted"><?php echo htmlspecialchars((string) ($history['recipient_email'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?></small>
+                                                        </td>
+                                                        <td><?php echo htmlspecialchars((string) ($history['media_name'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?></td>
+                                                        <td>
+                                                            <?php $ok = ($history['sent_status'] ?? '') === 'enviado'; ?>
+                                                            <span class="badge bg-<?php echo $ok ? 'success' : 'danger'; ?>-subtle text-<?php echo $ok ? 'success' : 'danger'; ?>">
+                                                                <?php echo htmlspecialchars((string) ($history['sent_status'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?>
+                                                            </span>
+                                                            <?php if (!$ok && !empty($history['error_message'])) : ?>
+                                                                <div><small class="text-danger"><?php echo htmlspecialchars((string) $history['error_message'], ENT_QUOTES, 'UTF-8'); ?></small></div>
+                                                            <?php endif; ?>
+                                                        </td>
+                                                        <td>
+                                                            <div><?php echo htmlspecialchars((string) ($history['contacto_nombre'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?></div>
+                                                            <small class="text-muted"><?php echo htmlspecialchars((string) ($history['contacto_correo'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?> · <?php echo htmlspecialchars((string) ($history['contacto_telefono'] ?? '-'), ENT_QUOTES, 'UTF-8'); ?></small>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
