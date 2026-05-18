@@ -99,6 +99,12 @@ try {
 } catch (Error $e) {
 }
 
+try {
+    db()->exec('ALTER TABLE authorities ADD COLUMN cargo VARCHAR(120) NULL AFTER nombre');
+} catch (Exception $e) {
+} catch (Error $e) {
+}
+
 if (isset($_GET['action']) && $_GET['action'] === 'download-template') {
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     header('Content-Disposition: attachment; filename="plantilla-autoridades.xlsx"');
@@ -113,21 +119,23 @@ if (isset($_GET['action']) && $_GET['action'] === 'download-template') {
   <sheetData>
     <row r="1">
       <c r="A1" t="inlineStr"><is><t>nombre</t></is></c>
-      <c r="B1" t="inlineStr"><is><t>grupo</t></is></c>
-      <c r="C1" t="inlineStr"><is><t>correo</t></is></c>
-      <c r="D1" t="inlineStr"><is><t>telefono</t></is></c>
-      <c r="E1" t="inlineStr"><is><t>fecha_inicio</t></is></c>
-      <c r="F1" t="inlineStr"><is><t>fecha_fin</t></is></c>
-      <c r="G1" t="inlineStr"><is><t>estado</t></is></c>
+      <c r="B1" t="inlineStr"><is><t>cargo</t></is></c>
+      <c r="C1" t="inlineStr"><is><t>grupo</t></is></c>
+      <c r="D1" t="inlineStr"><is><t>correo</t></is></c>
+      <c r="E1" t="inlineStr"><is><t>telefono</t></is></c>
+      <c r="F1" t="inlineStr"><is><t>fecha_inicio</t></is></c>
+      <c r="G1" t="inlineStr"><is><t>fecha_fin</t></is></c>
+      <c r="H1" t="inlineStr"><is><t>estado</t></is></c>
     </row>
     <row r="2">
       <c r="A2" t="inlineStr"><is><t>Juan Perez</t></is></c>
-      <c r="B2" t="inlineStr"><is><t>Concejo Municipal</t></is></c>
-      <c r="C2" t="inlineStr"><is><t>juan.perez@municipalidad.cl</t></is></c>
-      <c r="D2" t="inlineStr"><is><t>+56 9 1234 5678</t></is></c>
-      <c r="E2" t="inlineStr"><is><t>2024-01-01</t></is></c>
-      <c r="F2" t="inlineStr"><is><t></t></is></c>
-      <c r="G2" t="inlineStr"><is><t>1</t></is></c>
+      <c r="B2" t="inlineStr"><is><t>Concejal</t></is></c>
+      <c r="C2" t="inlineStr"><is><t>Concejo Municipal</t></is></c>
+      <c r="D2" t="inlineStr"><is><t>juan.perez@municipalidad.cl</t></is></c>
+      <c r="E2" t="inlineStr"><is><t>+56 9 1234 5678</t></is></c>
+      <c r="F2" t="inlineStr"><is><t>2024-01-01</t></is></c>
+      <c r="G2" t="inlineStr"><is><t></t></is></c>
+      <c r="H2" t="inlineStr"><is><t>1</t></is></c>
     </row>
   </sheetData>
 </worksheet>
@@ -182,7 +190,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             if (empty($rows)) {
                 $bulkErrors[] = 'El archivo está vacío o no tiene una hoja válida.';
             } else {
-                $expected = ['nombre', 'grupo', 'correo', 'telefono', 'fecha_inicio', 'fecha_fin', 'estado'];
+                $expected = ['nombre', 'cargo', 'grupo', 'correo', 'telefono', 'fecha_inicio', 'fecha_fin', 'estado'];
                 $header = array_map('trim', $rows[0]);
                 $normalizedHeader = array_map('strtolower', $header);
                 $columnMap = [];
@@ -206,6 +214,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         $rowNumber = $i + 1;
                         $row = $rows[$i];
                         $nombre = trim((string) ($row[$columnMap['nombre']] ?? ''));
+                        $cargo = trim((string) ($row[$columnMap['cargo']] ?? ''));
                         $grupo = trim((string) ($row[$columnMap['grupo']] ?? ''));
                         $correo = trim((string) ($row[$columnMap['correo']] ?? ''));
                         $telefono = trim((string) ($row[$columnMap['telefono']] ?? ''));
@@ -213,7 +222,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         $fechaFin = trim((string) ($row[$columnMap['fecha_fin']] ?? ''));
                         $estadoRaw = trim((string) ($row[$columnMap['estado']] ?? ''));
 
-                        if ($nombre === '' && $fechaInicio === '' && $correo === '' && $telefono === '' && $fechaFin === '' && $estadoRaw === '') {
+                        if ($nombre === '' && $fechaInicio === '' && $cargo === '' && $correo === '' && $telefono === '' && $fechaFin === '' && $estadoRaw === '') {
                             continue;
                         }
                         if ($nombre === '' || $fechaInicio === '') {
@@ -252,6 +261,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         $estado = in_array(strtolower($estadoRaw), ['0', 'deshabilitado', 'inactivo'], true) ? 0 : 1;
                         $validRows[] = [
                             $nombre,
+                            $cargo !== '' ? $cargo : null,
                             $tipo,
                             $correo !== '' ? $correo : null,
                             $telefono !== '' ? $telefono : null,
@@ -265,8 +275,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                         $bulkErrors[] = 'Corrige los errores en el archivo antes de cargar.';
                     } elseif (!empty($validRows)) {
                         $stmtInsert = db()->prepare(
-                            'INSERT INTO authorities (nombre, tipo, correo, telefono, fecha_inicio, fecha_fin, estado, group_id)
-                             VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+                            'INSERT INTO authorities (nombre, cargo, tipo, correo, telefono, fecha_inicio, fecha_fin, estado, group_id)
+                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
                         );
                         foreach ($validRows as $data) {
                             $stmtInsert->execute($data);
@@ -358,7 +368,7 @@ function group_badge_class(?int $groupId, array $palette): string
                                     <div class="col-md-8">
                                         <label class="form-label" for="autoridades-excel">Archivo Excel (.xlsx)</label>
                                         <input type="file" id="autoridades-excel" name="autoridades_excel" class="form-control" accept=".xlsx">
-                                        <div class="form-text">Columnas requeridas: nombre, grupo, correo, telefono, fecha_inicio, fecha_fin, estado.</div>
+                                        <div class="form-text">Columnas requeridas: nombre, cargo, grupo, correo, telefono, fecha_inicio, fecha_fin, estado.</div>
                                     </div>
                                     <div class="col-md-4 d-flex gap-2">
                                         <button type="submit" class="btn btn-primary">Subir masivamente</button>
