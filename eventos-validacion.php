@@ -50,6 +50,7 @@ if ($request && !$event) {
     $stmt = db()->prepare(
         'SELECT a.id,
                 a.nombre,
+                a.cargo,
                 a.tipo,
                 g.id AS grupo_id,
                 g.nombre AS grupo_nombre
@@ -202,7 +203,7 @@ $municipalidad = get_municipalidad();
                                                         <input class="form-check-input" type="checkbox" id="auth-<?php echo (int) $authority['id']; ?>" name="authorities[]" value="<?php echo (int) $authority['id']; ?>" <?php echo $checked ? 'checked' : ''; ?>>
                                                         <label class="form-check-label" for="auth-<?php echo (int) $authority['id']; ?>">
                                                             <?php echo htmlspecialchars($authority['nombre'], ENT_QUOTES, 'UTF-8'); ?>
-                                                            <span class="text-muted">· <?php echo htmlspecialchars($authority['tipo'], ENT_QUOTES, 'UTF-8'); ?></span>
+                                                            <span class="text-muted">· <?php echo htmlspecialchars($authority['cargo'] ?: 'Sin cargo', ENT_QUOTES, 'UTF-8'); ?></span>
                                                         </label>
                                                     </div>
                                                 </div>
