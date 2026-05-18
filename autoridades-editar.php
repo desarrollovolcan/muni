@@ -21,6 +21,12 @@ try {
 } catch (Error $e) {
 }
 
+try {
+    db()->exec('ALTER TABLE authorities ADD COLUMN cargo VARCHAR(120) NULL AFTER nombre');
+} catch (Exception $e) {
+} catch (Error $e) {
+}
+
 $groups = db()->query('SELECT id, nombre FROM authority_groups ORDER BY nombre')->fetchAll();
 $groupOptions = [];
 foreach ($groups as $group) {
@@ -48,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_csrf($_POST['csrf_token'] ?? null)) {
     $nombre = trim($_POST['nombre'] ?? '');
+    $cargo = trim($_POST['cargo'] ?? '');
     $correo = trim($_POST['correo'] ?? '');
     $telefono = trim($_POST['telefono'] ?? '');
     $fechaInicio = $_POST['fecha_inicio'] ?? '';
@@ -62,9 +69,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_
 
     if (empty($errors)) {
         if ($id > 0) {
-            $stmt = db()->prepare('UPDATE authorities SET nombre = ?, tipo = ?, correo = ?, telefono = ?, fecha_inicio = ?, fecha_fin = ?, estado = ?, group_id = ? WHERE id = ?');
+            $stmt = db()->prepare('UPDATE authorities SET nombre = ?, cargo = ?, tipo = ?, correo = ?, telefono = ?, fecha_inicio = ?, fecha_fin = ?, estado = ?, group_id = ? WHERE id = ?');
             $stmt->execute([
                 $nombre,
+                $cargo !== '' ? $cargo : null,
                 $tipo,
                 $correo !== '' ? $correo : null,
                 $telefono !== '' ? $telefono : null,
@@ -76,9 +84,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_
             ]);
             redirect('autoridades-editar.php?id=' . $id . '&success=1');
         } else {
-            $stmt = db()->prepare('INSERT INTO authorities (nombre, tipo, correo, telefono, fecha_inicio, fecha_fin, estado, group_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+            $stmt = db()->prepare('INSERT INTO authorities (nombre, cargo, tipo, correo, telefono, fecha_inicio, fecha_fin, estado, group_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
             $stmt->execute([
                 $nombre,
+                $cargo !== '' ? $cargo : null,
                 $tipo,
                 $correo !== '' ? $correo : null,
                 $telefono !== '' ? $telefono : null,
@@ -166,6 +175,10 @@ function group_badge_class(?int $groupId, array $palette): string
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label" for="autoridad-nombre">Nombre completo</label>
                                             <input type="text" id="autoridad-nombre" name="nombre" class="form-control" value="<?php echo htmlspecialchars($autoridad['nombre'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label" for="autoridad-cargo">Cargo</label>
+                                            <input type="text" id="autoridad-cargo" name="cargo" class="form-control" value="<?php echo htmlspecialchars($autoridad['cargo'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                                         </div>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label" for="autoridad-correo">Correo</label>
