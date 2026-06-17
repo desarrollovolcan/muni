@@ -62,7 +62,11 @@ function build_validation_detail_email(array $municipalidad, array $event, array
 
 function send_validation_detail_email(array $municipalidad, array $event, array $request, array $selectedAuthorities, string $token): bool
 {
-    $to = 'erwin.2785@gmail.com';
+    $to = implode(', ', [
+        'erwin.2785@gmail.com',
+        'comunicaciones@impa.gob.cl',
+        'hans.stevens@adlinks.cl',
+    ]);
     $subject = 'Validación recibida: ' . ($event['titulo'] ?? 'Evento');
     $validationUrl = base_url() . '/eventos-validacion.php?token=' . urlencode($token);
     $body = build_validation_detail_email($municipalidad, $event, $request, $selectedAuthorities, $validationUrl);
@@ -197,7 +201,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
         }));
 
         if (!send_validation_detail_email(get_municipalidad(), $event, $request, $selectedAuthorityDetails, $token)) {
-            $notificationWarning = 'La validación quedó registrada, pero no se pudo enviar el correo de detalle a Erwin.';
+            $notificationWarning = 'La validación quedó registrada, pero no se pudo enviar el correo de detalle a los destinatarios configurados.';
         }
     }
 }
