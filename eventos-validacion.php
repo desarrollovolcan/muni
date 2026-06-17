@@ -10,6 +10,83 @@ $authorities = [];
 $authoritiesByGroup = [];
 $confirmedAuthorityIds = [];
 $allowedAuthorityIds = [];
+$notificationWarning = null;
+
+
+function build_validation_detail_email(array $municipalidad, array $event, array $request, array $selectedAuthorities, string $validationUrl): string
+{
+    $municipalityName = htmlspecialchars($municipalidad['nombre'] ?? 'Municipalidad', ENT_QUOTES, 'UTF-8');
+    $eventTitle = htmlspecialchars($event['titulo'] ?? 'Evento', ENT_QUOTES, 'UTF-8');
+    $eventLocation = htmlspecialchars($event['ubicacion'] ?? '-', ENT_QUOTES, 'UTF-8');
+    $eventType = htmlspecialchars($event['tipo'] ?? '-', ENT_QUOTES, 'UTF-8');
+    $eventStart = htmlspecialchars($event['fecha_inicio'] ?? '-', ENT_QUOTES, 'UTF-8');
+    $eventEnd = htmlspecialchars($event['fecha_fin'] ?? '-', ENT_QUOTES, 'UTF-8');
+    $recipientName = htmlspecialchars($request['destinatario_nombre'] ?? '-', ENT_QUOTES, 'UTF-8');
+    $recipientEmail = htmlspecialchars($request['destinatario_correo'] ?? '-', ENT_QUOTES, 'UTF-8');
+    $respondedAt = htmlspecialchars($request['responded_at'] ?? date('Y-m-d H:i:s'), ENT_QUOTES, 'UTF-8');
+    $validationLink = htmlspecialchars($validationUrl, ENT_QUOTES, 'UTF-8');
+
+    $authorityRows = '';
+    if (empty($selectedAuthorities)) {
+        $authorityRows = '<tr><td colspan="3" style="padding:10px;border:1px solid #e5e7eb;color:#6b7280;">No se seleccionaron autoridades asistentes.</td></tr>';
+    } else {
+        foreach ($selectedAuthorities as $authority) {
+            $authorityRows .= '<tr>'
+                . '<td style="padding:10px;border:1px solid #e5e7eb;">' . htmlspecialchars($authority['nombre'] ?? '-', ENT_QUOTES, 'UTF-8') . '</td>'
+                . '<td style="padding:10px;border:1px solid #e5e7eb;">' . htmlspecialchars($authority['cargo'] ?: 'Sin cargo', ENT_QUOTES, 'UTF-8') . '</td>'
+                . '<td style="padding:10px;border:1px solid #e5e7eb;">' . htmlspecialchars($authority['tipo'] ?? '-', ENT_QUOTES, 'UTF-8') . '</td>'
+                . '</tr>';
+        }
+    }
+
+    return '<!doctype html><html><body style="font-family:Arial,sans-serif;color:#111827;line-height:1.5;">'
+        . '<h2 style="margin:0 0 12px;">Validación de autoridades recibida</h2>'
+        . '<p>Se registró una nueva validación para <strong>' . $eventTitle . '</strong>.</p>'
+        . '<h3>Detalle del evento</h3>'
+        . '<ul>'
+        . '<li><strong>Municipalidad:</strong> ' . $municipalityName . '</li>'
+        . '<li><strong>Tipo:</strong> ' . $eventType . '</li>'
+        . '<li><strong>Ubicación:</strong> ' . $eventLocation . '</li>'
+        . '<li><strong>Inicio:</strong> ' . $eventStart . '</li>'
+        . '<li><strong>Término:</strong> ' . $eventEnd . '</li>'
+        . '<li><strong>Respondido por:</strong> ' . $recipientName . ' (' . $recipientEmail . ')</li>'
+        . '<li><strong>Fecha de respuesta:</strong> ' . $respondedAt . '</li>'
+        . '</ul>'
+        . '<h3>Autoridades confirmadas</h3>'
+        . '<table style="border-collapse:collapse;width:100%;max-width:760px;">'
+        . '<thead><tr style="background:#f3f4f6;"><th style="padding:10px;border:1px solid #e5e7eb;text-align:left;">Nombre</th><th style="padding:10px;border:1px solid #e5e7eb;text-align:left;">Cargo</th><th style="padding:10px;border:1px solid #e5e7eb;text-align:left;">Tipo</th></tr></thead>'
+        . '<tbody>' . $authorityRows . '</tbody></table>'
+        . '<p style="margin-top:18px;"><a href="' . $validationLink . '">Ver enlace de validación</a></p>'
+        . '</body></html>';
+}
+
+function send_validation_detail_email(array $municipalidad, array $event, array $request, array $selectedAuthorities, string $token): bool
+{
+    $to = implode(', ', [
+        'erwin.2785@gmail.com',
+        'comunicaciones@impa.gob.cl',
+        'hans.stevens@adlinks.cl',
+    ]);
+    $subject = 'Validación recibida: ' . ($event['titulo'] ?? 'Evento');
+    $validationUrl = base_url() . '/eventos-validacion.php?token=' . urlencode($token);
+    $body = build_validation_detail_email($municipalidad, $event, $request, $selectedAuthorities, $validationUrl);
+    $headers = "MIME-Version: 1.0\r\n";
+    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+
+    try {
+        $correoConfig = db()->query('SELECT * FROM notificacion_correos LIMIT 1')->fetch();
+        $fromEmail = $correoConfig['from_correo'] ?? $correoConfig['correo_imap'] ?? null;
+        $fromName = $correoConfig['from_nombre'] ?? ($municipalidad['nombre'] ?? 'Municipalidad');
+        if ($fromEmail) {
+            $headers .= 'From: ' . ($fromName ? $fromName . ' <' . $fromEmail . '>' : $fromEmail) . "\r\n";
+        }
+    } catch (Exception $e) {
+    } catch (Error $e) {
+    }
+
+    return mail($to, $subject, $body, $headers);
+}
+
 
 if ($token === '') {
     $errors[] = 'El enlace de validación es inválido.';
@@ -118,6 +195,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && verify_csrf($_POST['csrf_token'] ??
         $success = true;
         $request['estado'] = 'respondido';
         $request['responded_at'] = date('Y-m-d H:i:s');
+
+        $selectedAuthorityDetails = array_values(array_filter($authorities, static function ($authority) use ($selectedAuthorities) {
+            return in_array((int) $authority['id'], $selectedAuthorities, true);
+        }));
+
+        if (!send_validation_detail_email(get_municipalidad(), $event, $request, $selectedAuthorityDetails, $token)) {
+            $notificationWarning = 'La validación quedó registrada, pero no se pudo enviar el correo de detalle a los destinatarios configurados.';
+        }
     }
 }
 
@@ -152,6 +237,12 @@ $municipalidad = get_municipalidad();
                 <?php if ($success) : ?>
                     <div class="alert alert-success">
                         Gracias, la validación quedó registrada correctamente.
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($notificationWarning) : ?>
+                    <div class="alert alert-warning">
+                        <?php echo htmlspecialchars($notificationWarning, ENT_QUOTES, 'UTF-8'); ?>
                     </div>
                 <?php endif; ?>
 
