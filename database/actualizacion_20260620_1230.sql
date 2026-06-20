@@ -1,0 +1,5 @@
+ALTER TABLE `map_projects`
+  ADD COLUMN IF NOT EXISTS `inicio` VARCHAR(80) DEFAULT NULL AFTER `financiamiento`;
+
+ALTER TABLE `map_projects`
+  ADD COLUMN IF NOT EXISTS `fotos` TEXT DEFAULT NULL AFTER `foto`;
