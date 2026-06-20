@@ -129,6 +129,24 @@
                 </a>
             </li>
 
+            <li class="side-nav-item">
+                <a href="#modulo-proyectos-mapa" class="side-nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="modulo-proyectos-mapa">
+                    <span class="menu-icon"><i data-lucide="map-pinned"></i></span>
+                    <span class="menu-text">Mapa proyectos</span>
+                    <span class="menu-arrow"></span>
+                </a>
+                <div class="collapse" id="modulo-proyectos-mapa">
+                    <ul class="side-nav sub-menu">
+                        <li class="side-nav-item">
+                            <a href="mapa-proyectos.php" class="side-nav-link">Ver mapa</a>
+                        </li>
+                        <li class="side-nav-item">
+                            <a href="proyectos-mapa.php" class="side-nav-link">Registrar proyectos</a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+
             <li class="side-nav-title" data-lang="settings-title">Administración</li>
 
             <?php if (has_permission('usuarios', 'view')) : ?>
