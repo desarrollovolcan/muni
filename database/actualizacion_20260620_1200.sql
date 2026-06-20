@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS `map_projects` (
   `sector` VARCHAR(120) DEFAULT NULL,
   `monto` VARCHAR(80) DEFAULT NULL,
   `financiamiento` VARCHAR(160) DEFAULT NULL,
+  `inicio` VARCHAR(80) DEFAULT NULL,
   `entrega` VARCHAR(80) DEFAULT NULL,
   `foto` TEXT DEFAULT NULL,
   `descripcion` TEXT DEFAULT NULL,
