@@ -141,6 +141,9 @@
                             <a href="mapa-proyectos.php" class="side-nav-link">Ver mapa</a>
                         </li>
                         <li class="side-nav-item">
+                            <a href="mapa-proyectos-publico.php" class="side-nav-link" target="_blank" rel="noopener">Vista pública pantalla</a>
+                        </li>
+                        <li class="side-nav-item">
                             <a href="proyectos-mapa.php" class="side-nav-link">Registrar proyectos</a>
                         </li>
                     </ul>
