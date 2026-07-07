@@ -181,6 +181,78 @@ function ensure_event_types(): array
     return $defaults;
 }
 
+function ensure_project_catalogs(): array
+{
+    $defaults = [
+        'statuses' => [
+            ['nombre' => 'En ejecución', 'orden' => 10],
+            ['nombre' => 'Finalizado', 'orden' => 20],
+            ['nombre' => 'Planificación', 'orden' => 30],
+            ['nombre' => 'Licitación', 'orden' => 40],
+            ['nombre' => 'Pausado', 'orden' => 50],
+        ],
+        'stages' => [
+            ['nombre' => 'Diseño', 'orden' => 10],
+            ['nombre' => 'Licitación', 'orden' => 20],
+            ['nombre' => 'Construcción', 'orden' => 30],
+            ['nombre' => 'Recepción', 'orden' => 40],
+            ['nombre' => 'Operación', 'orden' => 50],
+            ['nombre' => 'Convenio', 'orden' => 60],
+        ],
+    ];
+
+    try {
+        db()->exec(
+            'CREATE TABLE IF NOT EXISTS project_statuses (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                nombre VARCHAR(80) NOT NULL,
+                orden INT NOT NULL DEFAULT 0,
+                activo TINYINT(1) NOT NULL DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                UNIQUE KEY project_statuses_nombre_unique (nombre)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+        );
+
+        db()->exec(
+            'CREATE TABLE IF NOT EXISTS project_stages (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                nombre VARCHAR(80) NOT NULL,
+                orden INT NOT NULL DEFAULT 0,
+                activo TINYINT(1) NOT NULL DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                UNIQUE KEY project_stages_nombre_unique (nombre)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+        );
+
+        $statusCount = (int) db()->query('SELECT COUNT(*) FROM project_statuses')->fetchColumn();
+        if ($statusCount === 0) {
+            $stmt = db()->prepare('INSERT INTO project_statuses (nombre, orden, activo) VALUES (?, ?, 1)');
+            foreach ($defaults['statuses'] as $status) {
+                $stmt->execute([$status['nombre'], $status['orden']]);
+            }
+        }
+
+        $stageCount = (int) db()->query('SELECT COUNT(*) FROM project_stages')->fetchColumn();
+        if ($stageCount === 0) {
+            $stmt = db()->prepare('INSERT INTO project_stages (nombre, orden, activo) VALUES (?, ?, 1)');
+            foreach ($defaults['stages'] as $stage) {
+                $stmt->execute([$stage['nombre'], $stage['orden']]);
+            }
+        }
+
+        return [
+            'statuses' => db()->query('SELECT id, nombre, orden, activo FROM project_statuses ORDER BY activo DESC, orden ASC, nombre ASC')->fetchAll(),
+            'stages' => db()->query('SELECT id, nombre, orden, activo FROM project_stages ORDER BY activo DESC, orden ASC, nombre ASC')->fetchAll(),
+        ];
+    } catch (Exception $e) {
+    } catch (Error $e) {
+    }
+
+    return $defaults;
+}
+
 function current_role_id(): ?int
 {
     if (!isset($_SESSION['user']['rol'])) {
