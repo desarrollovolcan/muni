@@ -142,6 +142,9 @@ function upload_project_photos(array $files, array &$errors): array
 }
 
 ensure_map_projects_table();
+$projectCatalogs = ensure_project_catalogs();
+$projectStatuses = array_values(array_filter($projectCatalogs['statuses'], static fn (array $item): bool => (int) ($item['activo'] ?? 1) === 1));
+$projectStages = array_values(array_filter($projectCatalogs['stages'], static fn (array $item): bool => (int) ($item['activo'] ?? 1) === 1));
 
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $project = null;
@@ -217,6 +220,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_
 
     if ($data['nombre'] === '') {
         $errors[] = 'El nombre del proyecto es obligatorio.';
+    }
+
+    $validStatuses = array_column($projectStatuses, 'nombre');
+    $validStages = array_column($projectStages, 'nombre');
+    if ($data['estado'] === '' || !in_array($data['estado'], $validStatuses, true)) {
+        $errors[] = 'Selecciona un estado de proyecto vigente.';
+    }
+    if ($data['etapa'] === '' || !in_array($data['etapa'], $validStages, true)) {
+        $errors[] = 'Selecciona una etapa de proyecto vigente.';
     }
     if ($data['lat'] < -90 || $data['lat'] > 90) {
         $errors[] = 'La latitud debe estar entre -90 y 90.';
@@ -350,7 +362,8 @@ $formValues = [
                                     <div class="col-md-4 mb-3">
                                         <label class="project-label" for="estado">Estado</label>
                                         <select id="estado" name="estado" class="form-select preview-source" data-preview="status">
-                                            <?php foreach (['En ejecución', 'Finalizado', 'Planificación', 'Licitación', 'Pausado'] as $option) : ?>
+                                            <?php foreach ($projectStatuses as $optionItem) : ?>
+                                                <?php $option = (string) $optionItem['nombre']; ?>
                                                 <option value="<?php echo e($option); ?>" <?php echo selected_option((string) $formValues['estado'], $option); ?>><?php echo e($option); ?></option>
                                             <?php endforeach; ?>
                                         </select>
@@ -358,7 +371,8 @@ $formValues = [
                                     <div class="col-md-4 mb-3">
                                         <label class="project-label" for="etapa">Etapa</label>
                                         <select id="etapa" name="etapa" class="form-select preview-source" data-preview="stage">
-                                            <?php foreach (['Diseño', 'Licitación', 'Construcción', 'Recepción', 'Operación', 'Convenio'] as $option) : ?>
+                                            <?php foreach ($projectStages as $optionItem) : ?>
+                                                <?php $option = (string) $optionItem['nombre']; ?>
                                                 <option value="<?php echo e($option); ?>" <?php echo selected_option((string) $formValues['etapa'], $option); ?>><?php echo e($option); ?></option>
                                             <?php endforeach; ?>
                                         </select>

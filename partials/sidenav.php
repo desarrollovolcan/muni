@@ -209,6 +209,12 @@
                                 <a href="eventos-tipos.php" class="side-nav-link">Tipos evento</a>
                             </li>
                             <li class="side-nav-item">
+                                <a href="estados-proyectos.php" class="side-nav-link">Estados proyectos</a>
+                            </li>
+                            <li class="side-nav-item">
+                                <a href="etapas-proyectos.php" class="side-nav-link">Etapas proyectos</a>
+                            </li>
+                            <li class="side-nav-item">
                                 <a href="grupos-autoridades.php" class="side-nav-link">Grupos autoridades</a>
                             </li>
                             <li class="side-nav-item">
