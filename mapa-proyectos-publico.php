@@ -54,15 +54,9 @@ $projectsJson = json_encode($projects, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_S
         .screen-map{height:100vh;position:relative;width:100vw}
         #publicProjectMap{background:#eef4f8;filter:saturate(.82) contrast(.96) brightness(1.01)}
         .map-vignette{background:linear-gradient(90deg,rgba(240,247,252,.82),rgba(240,247,252,.28) 30%,transparent 58%),linear-gradient(180deg,rgba(6,79,131,.08),transparent 34%);inset:0;pointer-events:none;position:absolute;z-index:410}
-        .project-sidebar,.project-detail-drawer,.screen-legend,.civic-header{backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-        .civic-header{align-items:center;background:linear-gradient(135deg,rgba(255,255,255,.94),rgba(246,250,252,.9));border:1px solid rgba(204,219,231,.9);border-top:3px solid var(--primary);border-radius:9px;box-shadow:var(--shadow);display:flex;gap:12px;left:50%;max-width:min(660px,calc(100vw - 650px));min-width:340px;padding:10px 12px;position:absolute;top:18px;transform:translateX(-50%);z-index:590}
-        .civic-seal{align-items:center;background:#fff;border:1px solid var(--line);border-radius:8px;display:flex;height:40px;justify-content:center;min-width:40px;padding:6px}
-        .civic-seal img{max-height:28px;max-width:82px;object-fit:contain}
-        .civic-copy small{color:var(--muted);display:block;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
-        .civic-copy h1{color:#0f2f4a;font-size:15px;font-weight:650;line-height:1.25;margin:2px 0}
-        .civic-copy p{color:var(--muted);font-size:12px;margin:0}
-        .project-sidebar{background:var(--panel);border:1px solid rgba(204,219,231,.92);border-top:3px solid var(--primary);border-radius:9px;box-shadow:var(--shadow);display:flex;flex-direction:column;height:calc(100vh - 36px);left:18px;overflow:hidden;position:absolute;top:18px;width:326px;z-index:620}
-        .sidebar-head{background:rgba(255,255,255,.68);border-bottom:1px solid var(--line);padding:14px}
+        .project-sidebar,.project-detail-drawer,.screen-legend{backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+        .project-sidebar{background:linear-gradient(180deg,rgba(255,255,255,.94),rgba(248,251,253,.9));border:1px solid rgba(204,219,231,.92);border-top:3px solid var(--primary);border-radius:9px;box-shadow:var(--shadow);display:flex;flex-direction:column;height:calc(100vh - 36px);left:18px;overflow:hidden;position:absolute;top:18px;width:326px;z-index:620}
+        .sidebar-head{background:linear-gradient(180deg,rgba(255,255,255,.86),rgba(245,250,253,.78));border-bottom:1px solid #d9e6ef;padding:14px}
         .sidebar-brand{align-items:center;display:flex;gap:10px}
         .sidebar-brand img{height:30px;max-width:106px;object-fit:contain}
         .sidebar-brand h2{color:#0f2f4a;font-size:14px;font-weight:650;line-height:1.25;margin:0}
@@ -78,8 +72,8 @@ $projectsJson = json_encode($projects, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_S
         .project-list-title{align-items:center;color:var(--muted);display:flex;font-size:10px;font-weight:600;justify-content:space-between;margin-top:12px;text-transform:uppercase}
         .public-project-list{display:grid;gap:8px;overflow:auto;padding:9px}
         .public-project-list .empty-message{box-shadow:none;left:auto;position:static;top:auto;transform:none}
-        .public-project-card{background:rgba(255,255,255,.88);border:1px solid #dce7ef;border-left:3px solid transparent;border-radius:9px;box-shadow:none;cursor:pointer;display:grid;grid-template-columns:86px minmax(0,1fr);min-height:96px;overflow:hidden;text-align:left;transition:border-color .18s ease,background .18s ease,box-shadow .18s ease;width:100%}
-        .public-project-card:hover,.public-project-card.active{background:#fff;border-color:#b8cfdf;border-left-color:var(--civic-gold);box-shadow:0 10px 22px rgba(6,79,131,.09)}
+        .public-project-card{background:linear-gradient(135deg,rgba(255,255,255,.96),rgba(248,251,253,.9));border:1px solid #dce7ef;border-left:3px solid transparent;border-radius:9px;box-shadow:none;cursor:pointer;display:grid;grid-template-columns:86px minmax(0,1fr);min-height:96px;overflow:hidden;text-align:left;transition:border-color .18s ease,background .18s ease,box-shadow .18s ease;width:100%}
+        .public-project-card:hover,.public-project-card.active{background:#fff;border-color:#a9c7da;border-left-color:var(--civic-gold);box-shadow:0 12px 26px rgba(6,79,131,.12)}
         .public-project-card .map-slider{height:100%}
         .public-project-card .map-slider img{border-radius:9px 0 0 9px;height:100%!important;margin:0;min-height:96px}
         .public-card-body{align-content:center;display:grid;min-width:0;padding:9px 10px}
@@ -90,25 +84,16 @@ $projectsJson = json_encode($projects, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_S
         .map-slider{display:block;position:relative}.map-slider img{background:#f8fafc;border-radius:9px;height:128px;margin-bottom:0;object-fit:cover;width:100%}.slider-btn{background:rgba(15,23,42,.46);border:0;border-radius:8px;color:#fff;display:grid;font-size:14px;height:22px;place-items:center;position:absolute;top:50%;transform:translateY(-50%);width:22px;z-index:2}.slider-btn.prev{left:7px}.slider-btn.next{right:7px}.slider-dots{bottom:8px;display:flex;gap:4px;justify-content:center;left:0;position:absolute;right:0}.slider-dots i{background:rgba(255,255,255,.72);border-radius:50%;height:5px;width:5px}
         .leaflet-popup-content-wrapper{border-radius:9px;box-shadow:0 12px 26px rgba(15,23,42,.12)}.leaflet-popup-content{margin:12px;min-width:270px}.leaflet-container a.leaflet-popup-close-button{background:#f8fafc;border-radius:8px;color:#64748b;height:24px;line-height:22px;right:8px;top:8px;width:24px}.popup-actions{margin-top:11px}.popup-detail-btn{align-items:center;background:var(--primary);border:0;border-radius:8px;box-shadow:none;color:#fff;cursor:pointer;display:inline-flex;font-size:12px;font-weight:500;justify-content:center;padding:9px 12px;text-decoration:none;width:100%}.popup-detail-btn:hover{background:#053f69}.popup-title{color:#0f2f4a;font-size:13px;font-weight:650;line-height:1.35;margin:9px 0 7px}.popup-meta{color:#64748b;font-size:12px;line-height:1.55}.popup-meta b{color:#475569;font-weight:500}
         .empty-message{background:var(--panel);border:1px solid var(--line);border-radius:9px;box-shadow:var(--shadow);left:calc(50% + 170px);padding:20px;position:absolute;text-align:center;top:50%;transform:translate(-50%,-50%);z-index:630}
-        .project-detail-drawer{background:var(--panel);border:1px solid var(--line);border-radius:9px;box-shadow:var(--shadow);display:flex;flex-direction:column;height:calc(100vh - 36px);max-width:410px;opacity:0;overflow:hidden;position:absolute;right:18px;top:18px;transform:translateX(108%);transition:transform .24s ease,opacity .24s ease;width:min(390px,calc(100vw - 24px));z-index:660}.project-detail-drawer.open{opacity:1;transform:translateX(0)}
+        .project-detail-drawer{background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(248,251,253,.92));border:1px solid var(--line);border-radius:9px;box-shadow:var(--shadow);display:flex;flex-direction:column;height:calc(100vh - 36px);max-width:410px;opacity:0;overflow:hidden;position:absolute;right:18px;top:18px;transform:translateX(108%);transition:transform .24s ease,opacity .24s ease;width:min(390px,calc(100vw - 24px));z-index:660}.project-detail-drawer.open{opacity:1;transform:translateX(0)}
         .detail-head{background:rgba(255,255,255,.72);border-bottom:1px solid var(--line);color:#111827;padding:15px 16px;position:relative}.detail-head-main{align-items:flex-start;display:flex;gap:12px;justify-content:space-between}.detail-kicker{color:var(--muted);display:block;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}.detail-head h2{color:#0f2f4a;font-size:15px;font-weight:650;line-height:1.35;margin:5px 0 0}.detail-close{background:#fff;border:1px solid var(--line);border-radius:8px;color:#64748b;cursor:pointer;font-size:20px;height:32px;line-height:1;width:32px}.detail-body{overflow:auto;padding:14px 15px 18px}.detail-body .map-slider img{height:196px!important}.detail-status-row{align-items:center;display:flex;gap:10px;justify-content:space-between;margin:13px 0}.detail-status-row strong{color:#475569;font-size:12px;font-weight:500}.detail-progress{background:#f1f5f9;border-radius:8px;height:6px;overflow:hidden}.detail-progress span{background:linear-gradient(90deg,var(--accent),var(--primary));display:block;height:100%}.detail-grid{display:grid;gap:8px;grid-template-columns:1fr 1fr;margin-top:13px}.detail-item{background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:none;padding:9px 10px}.detail-item.wide{grid-column:1/-1}.detail-label{color:var(--muted);display:block;font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}.detail-value{color:#334155;display:block;font-size:12px;font-weight:500;margin-top:4px}.detail-description{background:#fff;border:1px solid var(--line);border-radius:8px;color:#64748b;font-size:12px;line-height:1.6;margin-top:12px;padding:12px;white-space:pre-line}.leaflet-control-zoom{border:0!important;box-shadow:var(--shadow)!important}.leaflet-control-zoom a{border:0!important;color:#334155!important}
-        @media(max-width:1180px){.civic-header{display:none}}
         @media(max-width:900px){.project-sidebar{border-radius:0 0 9px 9px;height:44vh;left:0;top:0;width:100%}.public-project-list{grid-auto-flow:column;grid-auto-columns:240px;overflow-x:auto;overflow-y:hidden}.project-detail-drawer{border-radius:9px 9px 0 0;bottom:0;height:62vh;max-width:none;right:12px;top:auto;width:calc(100vw - 24px)}.detail-grid{grid-template-columns:1fr}.screen-legend{bottom:12px;left:12px;right:12px;flex-wrap:wrap}.empty-message{left:50%;top:65%}}
-        @media print{.project-sidebar,.screen-legend,.project-detail-drawer,.civic-header{display:none}}
+        @media print{.project-sidebar,.screen-legend,.project-detail-drawer{display:none}}
     </style>
 </head>
 <body>
     <main class="screen-map">
         <div id="publicProjectMap"></div>
         <div class="map-vignette" aria-hidden="true"></div>
-        <header class="civic-header">
-            <div class="civic-seal"><img src="assets/images/logo.png" alt="Municipalidad"></div>
-            <div class="civic-copy">
-                <small>Municipalidad</small>
-                <h1>Mapa público de inversión y proyectos</h1>
-                <p>Información territorial de iniciativas comunales visibles para la ciudadanía.</p>
-            </div>
-        </header>
         <aside class="project-sidebar" id="projectSidebar">
             <div class="sidebar-head">
                 <div class="sidebar-brand">
@@ -226,7 +211,7 @@ $projectsJson = json_encode($projects, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_S
             markers.set(String(project.id), marker);
         });
         if (bounds.length) {
-            map.fitBounds(bounds, {paddingTopLeft: [376, 80], paddingBottomRight: [90, 90], maxZoom: 15});
+            map.fitBounds(bounds, {paddingTopLeft: [376, 36], paddingBottomRight: [90, 90], maxZoom: 15});
         }
         renderProjectList();
         projectSearch.addEventListener('input', renderProjectList);
