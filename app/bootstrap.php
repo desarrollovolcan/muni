@@ -6,6 +6,9 @@ session_start();
 
 $config = require __DIR__ . '/../config/database.php';
 
+
+canonicalize_xampp_filesystem_url();
+
 if (!isset($_SESSION['user'])) {
     $currentScript = basename($_SERVER['SCRIPT_NAME'] ?? '');
     $publicScripts = [
@@ -35,9 +38,46 @@ if (!isset($_SESSION['user'])) {
     ];
 
     if (!in_array($currentScript, $publicScripts, true) && strncmp($currentScript, 'auth-', 5) !== 0) {
-        header('Location: auth-2-sign-in.php');
-        exit;
+        redirect('auth-2-sign-in.php');
     }
+}
+
+
+function canonicalize_xampp_filesystem_url(): void
+{
+    $requestUri = (string) ($_SERVER['REQUEST_URI'] ?? '');
+    $requestPath = parse_url($requestUri, PHP_URL_PATH);
+
+    if (!is_string($requestPath) || $requestPath === '') {
+        return;
+    }
+
+    $projectRoot = realpath(__DIR__ . '/..');
+    $projectDirectory = basename((string) $projectRoot);
+    $normalizedPath = str_replace('\\', '/', rawurldecode($requestPath));
+    $htdocsMarker = '/htdocs/' . $projectDirectory;
+    $htdocsPosition = strpos($normalizedPath, $htdocsMarker);
+
+    if ($htdocsPosition === false) {
+        return;
+    }
+
+    $suffix = substr($normalizedPath, $htdocsPosition + strlen($htdocsMarker));
+    $canonicalPath = '/' . $projectDirectory . ($suffix !== false ? $suffix : '');
+    if ($canonicalPath === '/' . $projectDirectory || $canonicalPath === '/' . $projectDirectory . '/') {
+        $canonicalPath = '/' . $projectDirectory . '/auth-2-sign-in.php';
+    }
+
+    if ($canonicalPath === $requestPath) {
+        return;
+    }
+
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $query = parse_url($requestUri, PHP_URL_QUERY);
+
+    header('Location: ' . $scheme . '://' . $host . $canonicalPath . (is_string($query) && $query !== '' ? '?' . $query : ''), true, 302);
+    exit;
 }
 
 function db(): PDO
@@ -64,19 +104,88 @@ function db(): PDO
     return $pdo;
 }
 
+
+function normalize_xampp_filesystem_path(string $path): string
+{
+    $projectRoot = realpath(__DIR__ . '/..');
+    $projectDirectory = basename((string) $projectRoot);
+    $normalizedPath = str_replace('\\', '/', rawurldecode($path));
+    $htdocsMarker = '/htdocs/' . $projectDirectory;
+    $htdocsPosition = strpos($normalizedPath, $htdocsMarker);
+
+    if ($htdocsPosition === false) {
+        return $path;
+    }
+
+    $suffix = substr($normalizedPath, $htdocsPosition + strlen($htdocsMarker));
+    $normalizedPath = '/' . $projectDirectory . ($suffix !== false ? $suffix : '');
+
+    return $normalizedPath === '/' . $projectDirectory || $normalizedPath === '/' . $projectDirectory . '/'
+        ? '/' . $projectDirectory . '/auth-2-sign-in.php'
+        : $normalizedPath;
+}
+
 function redirect(string $path): void
 {
-    header('Location: ' . $path);
+    if (preg_match('#^https?://#i', $path) === 1) {
+        $urlPath = parse_url($path, PHP_URL_PATH);
+
+        if (is_string($urlPath)) {
+            $normalizedUrlPath = normalize_xampp_filesystem_path($urlPath);
+            if ($normalizedUrlPath !== $urlPath) {
+                $query = parse_url($path, PHP_URL_QUERY);
+                $path = preg_replace('#^(https?://[^/]+).*$#i', '$1', $path) . $normalizedUrlPath . (is_string($query) && $query !== '' ? '?' . $query : '');
+            }
+        }
+
+        header('Location: ' . $path);
+        exit;
+    }
+
+    if (str_starts_with($path, '/')) {
+        $path = normalize_xampp_filesystem_path($path);
+
+        header('Location: ' . $path);
+        exit;
+    }
+
+    header('Location: ' . base_url() . '/' . ltrim($path, '/'));
     exit;
+}
+
+function app_base_path(): string
+{
+    $documentRoot = realpath((string) ($_SERVER['DOCUMENT_ROOT'] ?? ''));
+    $projectRoot = realpath(__DIR__ . '/..');
+    $projectDirectory = basename((string) $projectRoot);
+
+    foreach (['SCRIPT_NAME', 'PHP_SELF', 'REQUEST_URI'] as $serverKey) {
+        $serverPath = str_replace('\\', '/', (string) ($_SERVER[$serverKey] ?? ''));
+        $htdocsPosition = strpos($serverPath, '/htdocs/' . $projectDirectory);
+
+        if ($htdocsPosition !== false) {
+            return '/' . $projectDirectory;
+        }
+    }
+
+    if ($documentRoot !== false && $projectRoot !== false && str_starts_with($projectRoot, $documentRoot)) {
+        $relativePath = trim(str_replace(DIRECTORY_SEPARATOR, '/', substr($projectRoot, strlen($documentRoot))), '/');
+
+        return $relativePath !== '' ? '/' . $relativePath : '';
+    }
+
+    $scriptName = str_replace('\\', '/', (string) ($_SERVER['SCRIPT_NAME'] ?? ''));
+    $scriptDirectory = rtrim(dirname($scriptName), '/');
+
+    return $scriptDirectory === '/' ? '' : $scriptDirectory;
 }
 
 function base_url(): string
 {
     $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-    $basePath = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
 
-    return $scheme . '://' . $host . ($basePath !== '' ? $basePath : '');
+    return $scheme . '://' . $host . app_base_path();
 }
 
 function ensure_event_validation_token(int $eventId, ?string $currentToken): string
