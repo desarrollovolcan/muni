@@ -6,6 +6,9 @@ session_start();
 
 $config = require __DIR__ . '/../config/database.php';
 
+
+canonicalize_xampp_filesystem_url();
+
 if (!isset($_SESSION['user'])) {
     $currentScript = basename($_SERVER['SCRIPT_NAME'] ?? '');
     $publicScripts = [
@@ -37,6 +40,42 @@ if (!isset($_SESSION['user'])) {
     if (!in_array($currentScript, $publicScripts, true) && strncmp($currentScript, 'auth-', 5) !== 0) {
         redirect('auth-2-sign-in.php');
     }
+}
+
+
+function canonicalize_xampp_filesystem_url(): void
+{
+    $requestUri = (string) ($_SERVER['REQUEST_URI'] ?? '');
+    $requestPath = parse_url($requestUri, PHP_URL_PATH);
+
+    if (!is_string($requestPath) || $requestPath === '') {
+        return;
+    }
+
+    $projectRoot = realpath(__DIR__ . '/..');
+    $projectDirectory = basename((string) $projectRoot);
+    $normalizedPath = str_replace('\\', '/', rawurldecode($requestPath));
+    $htdocsMarker = '/htdocs/' . $projectDirectory;
+    $htdocsPosition = strpos($normalizedPath, $htdocsMarker);
+
+    if ($htdocsPosition === false) {
+        return;
+    }
+
+    $suffix = substr($normalizedPath, $htdocsPosition + strlen($htdocsMarker));
+    $canonicalPath = '/' . $projectDirectory . ($suffix !== false ? $suffix : '');
+    $canonicalPath = $canonicalPath === '/' . $projectDirectory ? $canonicalPath . '/' : $canonicalPath;
+
+    if ($canonicalPath === $requestPath) {
+        return;
+    }
+
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $query = parse_url($requestUri, PHP_URL_QUERY);
+
+    header('Location: ' . $scheme . '://' . $host . $canonicalPath . (is_string($query) && $query !== '' ? '?' . $query : ''), true, 302);
+    exit;
 }
 
 function db(): PDO
