@@ -5,6 +5,12 @@ declare(strict_types=1);
 require __DIR__ . '/app/bootstrap.php';
 
 $requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+$basePath = app_base_path();
+
+if ($requestPath !== null && $basePath !== '' && str_starts_with($requestPath, $basePath)) {
+    $requestPath = substr($requestPath, strlen($basePath));
+}
+
 $targetPath = $requestPath !== null ? ltrim($requestPath, '/') : '';
 
 if ($targetPath !== '' && $targetPath !== 'index.php') {
