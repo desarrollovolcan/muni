@@ -1,6 +1,8 @@
-DirectoryIndex index.php index.html
+DirectoryIndex index.php
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    RewriteBase /muni/
+
     RewriteRule ^$ auth-2-sign-in.php [R=302,L]
 </IfModule>
