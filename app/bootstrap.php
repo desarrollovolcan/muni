@@ -35,7 +35,7 @@ if (!isset($_SESSION['user'])) {
     ];
 
     if (!in_array($currentScript, $publicScripts, true) && strncmp($currentScript, 'auth-', 5) !== 0) {
-        header('Location: auth-2-sign-in.php');
+        header('Location: login.php');
         exit;
     }
 }

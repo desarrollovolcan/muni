@@ -15,4 +15,4 @@ if ($targetPath !== '' && $targetPath !== 'index.php') {
     }
 }
 
-redirect('auth-2-sign-in.php');
+redirect('login.php');
