@@ -13,4 +13,4 @@ if (ini_get('session.use_cookies')) {
 
 session_destroy();
 
-redirect('auth-2-sign-in.php');
+redirect('login.php');
