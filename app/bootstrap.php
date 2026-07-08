@@ -35,8 +35,7 @@ if (!isset($_SESSION['user'])) {
     ];
 
     if (!in_array($currentScript, $publicScripts, true) && strncmp($currentScript, 'auth-', 5) !== 0) {
-        header('Location: auth-2-sign-in.php');
-        exit;
+        redirect('auth-2-sign-in.php');
     }
 }
 
@@ -66,17 +65,38 @@ function db(): PDO
 
 function redirect(string $path): void
 {
-    header('Location: ' . $path);
+    if (preg_match('#^https?://#i', $path) === 1 || str_starts_with($path, '/')) {
+        header('Location: ' . $path);
+        exit;
+    }
+
+    header('Location: ' . base_url() . '/' . ltrim($path, '/'));
     exit;
+}
+
+function app_base_path(): string
+{
+    $documentRoot = realpath((string) ($_SERVER['DOCUMENT_ROOT'] ?? ''));
+    $projectRoot = realpath(__DIR__ . '/..');
+
+    if ($documentRoot !== false && $projectRoot !== false && str_starts_with($projectRoot, $documentRoot)) {
+        $relativePath = trim(str_replace(DIRECTORY_SEPARATOR, '/', substr($projectRoot, strlen($documentRoot))), '/');
+
+        return $relativePath !== '' ? '/' . $relativePath : '';
+    }
+
+    $scriptName = str_replace('\\', '/', (string) ($_SERVER['SCRIPT_NAME'] ?? ''));
+    $scriptDirectory = rtrim(dirname($scriptName), '/');
+
+    return $scriptDirectory === '/' ? '' : $scriptDirectory;
 }
 
 function base_url(): string
 {
     $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-    $basePath = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
 
-    return $scheme . '://' . $host . ($basePath !== '' ? $basePath : '');
+    return $scheme . '://' . $host . app_base_path();
 }
 
 function ensure_event_validation_token(int $eventId, ?string $currentToken): string
