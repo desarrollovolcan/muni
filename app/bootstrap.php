@@ -64,7 +64,9 @@ function canonicalize_xampp_filesystem_url(): void
 
     $suffix = substr($normalizedPath, $htdocsPosition + strlen($htdocsMarker));
     $canonicalPath = '/' . $projectDirectory . ($suffix !== false ? $suffix : '');
-    $canonicalPath = $canonicalPath === '/' . $projectDirectory ? $canonicalPath . '/' : $canonicalPath;
+    if ($canonicalPath === '/' . $projectDirectory || $canonicalPath === '/' . $projectDirectory . '/') {
+        $canonicalPath = '/' . $projectDirectory . '/auth-2-sign-in.php';
+    }
 
     if ($canonicalPath === $requestPath) {
         return;
@@ -102,9 +104,47 @@ function db(): PDO
     return $pdo;
 }
 
+
+function normalize_xampp_filesystem_path(string $path): string
+{
+    $projectRoot = realpath(__DIR__ . '/..');
+    $projectDirectory = basename((string) $projectRoot);
+    $normalizedPath = str_replace('\\', '/', rawurldecode($path));
+    $htdocsMarker = '/htdocs/' . $projectDirectory;
+    $htdocsPosition = strpos($normalizedPath, $htdocsMarker);
+
+    if ($htdocsPosition === false) {
+        return $path;
+    }
+
+    $suffix = substr($normalizedPath, $htdocsPosition + strlen($htdocsMarker));
+    $normalizedPath = '/' . $projectDirectory . ($suffix !== false ? $suffix : '');
+
+    return $normalizedPath === '/' . $projectDirectory || $normalizedPath === '/' . $projectDirectory . '/'
+        ? '/' . $projectDirectory . '/auth-2-sign-in.php'
+        : $normalizedPath;
+}
+
 function redirect(string $path): void
 {
-    if (preg_match('#^https?://#i', $path) === 1 || str_starts_with($path, '/')) {
+    if (preg_match('#^https?://#i', $path) === 1) {
+        $urlPath = parse_url($path, PHP_URL_PATH);
+
+        if (is_string($urlPath)) {
+            $normalizedUrlPath = normalize_xampp_filesystem_path($urlPath);
+            if ($normalizedUrlPath !== $urlPath) {
+                $query = parse_url($path, PHP_URL_QUERY);
+                $path = preg_replace('#^(https?://[^/]+).*$#i', '$1', $path) . $normalizedUrlPath . (is_string($query) && $query !== '' ? '?' . $query : '');
+            }
+        }
+
+        header('Location: ' . $path);
+        exit;
+    }
+
+    if (str_starts_with($path, '/')) {
+        $path = normalize_xampp_filesystem_path($path);
+
         header('Location: ' . $path);
         exit;
     }
