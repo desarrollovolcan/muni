@@ -6,6 +6,16 @@ function front_controller_base_path(): string
 {
     $documentRoot = realpath((string) ($_SERVER['DOCUMENT_ROOT'] ?? ''));
     $projectRoot = realpath(__DIR__);
+    $projectDirectory = basename((string) $projectRoot);
+
+    foreach (['SCRIPT_NAME', 'PHP_SELF', 'REQUEST_URI'] as $serverKey) {
+        $serverPath = str_replace('\\', '/', (string) ($_SERVER[$serverKey] ?? ''));
+        $htdocsPosition = strpos($serverPath, '/htdocs/' . $projectDirectory);
+
+        if ($htdocsPosition !== false) {
+            return '/' . $projectDirectory;
+        }
+    }
 
     if ($documentRoot !== false && $projectRoot !== false && str_starts_with($projectRoot, $documentRoot)) {
         $relativePath = trim(str_replace(DIRECTORY_SEPARATOR, '/', substr($projectRoot, strlen($documentRoot))), '/');
