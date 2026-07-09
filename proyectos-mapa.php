@@ -19,6 +19,7 @@ function ensure_map_projects_table(): void
         avance TINYINT UNSIGNED NOT NULL DEFAULT 0,
         lat DECIMAL(10,7) NOT NULL,
         lng DECIMAL(10,7) NOT NULL,
+        ubicaciones TEXT DEFAULT NULL,
         visible TINYINT(1) NOT NULL DEFAULT 1,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -32,6 +33,11 @@ function ensure_map_projects_table(): void
     $stmt = db()->query("SHOW COLUMNS FROM map_projects LIKE 'fotos'");
     if (!$stmt->fetch()) {
         db()->exec("ALTER TABLE map_projects ADD COLUMN fotos TEXT DEFAULT NULL AFTER foto");
+    }
+
+    $stmt = db()->query("SHOW COLUMNS FROM map_projects LIKE 'ubicaciones'");
+    if (!$stmt->fetch()) {
+        db()->exec("ALTER TABLE map_projects ADD COLUMN ubicaciones TEXT DEFAULT NULL AFTER lng");
     }
 }
 
@@ -74,6 +80,36 @@ function decode_project_photos(?string $json, ?string $mainPhoto = null): array
     }
 
     return array_slice($photos, 0, 4);
+}
+
+function normalize_project_locations($rawLocations, ?float $fallbackLat = null, ?float $fallbackLng = null): array
+{
+    if (is_string($rawLocations)) {
+        $decoded = json_decode($rawLocations, true);
+        $rawLocations = is_array($decoded) ? $decoded : [];
+    }
+
+    $locations = [];
+    if (is_array($rawLocations)) {
+        foreach ($rawLocations as $location) {
+            if (!is_array($location)) {
+                continue;
+            }
+            $lat = isset($location['lat']) ? (float) $location['lat'] : null;
+            $lng = isset($location['lng']) ? (float) $location['lng'] : null;
+            if ($lat === null || $lng === null || $lat < -90 || $lat > 90 || $lng < -180 || $lng > 180) {
+                continue;
+            }
+            $key = number_format($lat, 7, '.', '') . ',' . number_format($lng, 7, '.', '');
+            $locations[$key] = ['lat' => (float) number_format($lat, 7, '.', ''), 'lng' => (float) number_format($lng, 7, '.', '')];
+        }
+    }
+
+    if (!$locations && $fallbackLat !== null && $fallbackLng !== null) {
+        $locations[] = ['lat' => $fallbackLat, 'lng' => $fallbackLng];
+    }
+
+    return array_values($locations);
 }
 
 function upload_single_project_photo(array $file, array &$errors): ?string
@@ -217,6 +253,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_
         'lng' => (float) ($_POST['lng'] ?? 0),
         'visible' => isset($_POST['visible']) ? 1 : 0,
     ];
+    $locations = normalize_project_locations($_POST['ubicaciones'] ?? '[]', $data['lat'], $data['lng']);
+    if ($locations) {
+        $data['lat'] = $locations[0]['lat'];
+        $data['lng'] = $locations[0]['lng'];
+    }
 
     if ($data['nombre'] === '') {
         $errors[] = 'El nombre del proyecto es obligatorio.';
@@ -236,6 +277,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_
     if ($data['lng'] < -180 || $data['lng'] > 180) {
         $errors[] = 'La longitud debe estar entre -180 y 180.';
     }
+    if (!$locations) {
+        $errors[] = 'Agrega al menos un pin de ubicación para el proyecto.';
+    }
 
     if (!$errors) {
         $params = [
@@ -253,23 +297,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action']) && verify_
             $data['avance'],
             $data['lat'],
             $data['lng'],
+            json_encode($locations, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             $data['visible'],
         ];
 
         if ($id > 0) {
             $params[] = $id;
-            $stmt = db()->prepare('UPDATE map_projects SET nombre=?, estado=?, etapa=?, sector=?, monto=?, financiamiento=?, inicio=?, entrega=?, foto=?, fotos=?, descripcion=?, avance=?, lat=?, lng=?, visible=? WHERE id=?');
+            $stmt = db()->prepare('UPDATE map_projects SET nombre=?, estado=?, etapa=?, sector=?, monto=?, financiamiento=?, inicio=?, entrega=?, foto=?, fotos=?, descripcion=?, avance=?, lat=?, lng=?, ubicaciones=?, visible=? WHERE id=?');
             $stmt->execute($params);
             redirect('proyectos-mapa.php?id=' . $id . '&success=1');
         }
 
-        $stmt = db()->prepare('INSERT INTO map_projects (nombre, estado, etapa, sector, monto, financiamiento, inicio, entrega, foto, fotos, descripcion, avance, lat, lng, visible) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        $stmt = db()->prepare('INSERT INTO map_projects (nombre, estado, etapa, sector, monto, financiamiento, inicio, entrega, foto, fotos, descripcion, avance, lat, lng, ubicaciones, visible) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
         $stmt->execute($params);
         redirect('proyectos-mapa.php?id=' . (int) db()->lastInsertId() . '&success=1');
     }
 }
 
 $projects = db()->query('SELECT * FROM map_projects ORDER BY created_at DESC, id DESC')->fetchAll();
+$existingLocations = normalize_project_locations($project['ubicaciones'] ?? null, isset($project['lat']) ? (float) $project['lat'] : null, isset($project['lng']) ? (float) $project['lng'] : null);
+$postedLocations = normalize_project_locations($_POST['ubicaciones'] ?? '[]');
+$formLocations = $postedLocations ?: ($existingLocations ?: [['lat' => -20.2595, 'lng' => -69.7863]]);
 $existingPhotos = decode_project_photos($project['fotos'] ?? null, $project['foto'] ?? null);
 $formValues = [
     'nombre' => $_POST['nombre'] ?? $project['nombre'] ?? '',
@@ -284,8 +332,9 @@ $formValues = [
     'fotos' => $existingPhotos,
     'descripcion' => $_POST['descripcion'] ?? $project['descripcion'] ?? '',
     'avance' => $_POST['avance'] ?? $project['avance'] ?? 0,
-    'lat' => $_POST['lat'] ?? $project['lat'] ?? '-20.2595',
-    'lng' => $_POST['lng'] ?? $project['lng'] ?? '-69.7863',
+    'lat' => $_POST['lat'] ?? $formLocations[0]['lat'] ?? '-20.2595',
+    'lng' => $_POST['lng'] ?? $formLocations[0]['lng'] ?? '-69.7863',
+    'ubicaciones' => $formLocations,
     'visible' => (int) ($_POST['visible'] ?? $project['visible'] ?? 1),
 ];
 ?>
@@ -295,7 +344,7 @@ $formValues = [
     <link href="assets/plugins/leaflet/leaflet.css" rel="stylesheet" type="text/css">
     <?php include('partials/head-css.php'); ?>
     <style>
-        .project-form-shell{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:24px;align-items:start}.project-form-card{border:1px solid #e6edf7;border-radius:14px;box-shadow:0 14px 35px rgba(31,54,86,.06)}.project-form-card .card-body{padding:18px}.project-section{border:1px solid #e6edf7;border-radius:14px;background:#fff;margin-bottom:14px;padding:16px}.project-section-title{align-items:center;color:#3f4756;display:flex;font-size:15px;font-weight:700;gap:8px;margin-bottom:14px}.project-label{color:#8190a7;font-size:10px;font-weight:800;letter-spacing:.1em;margin-bottom:6px;text-transform:uppercase}.project-help{color:#8190a7;font-size:11px;margin-top:6px}.project-upload{align-items:center;background:#f8fbff;border:1px dashed #a9c8f5;border-radius:12px;color:#66758c;cursor:pointer;display:flex;flex-direction:column;gap:7px;justify-content:center;min-height:126px;padding:18px;text-align:center;transition:.18s}.project-upload:hover{background:#f2f7ff;border-color:#6fa5f7}.project-upload i{color:#7d91af}.project-upload strong{font-size:12px;letter-spacing:.08em;text-transform:uppercase}.project-upload span{color:#8190a7;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.project-upload input{display:none}.preview-card{background:#fff;border:1px solid #edf1f7;border-radius:14px;box-shadow:0 20px 50px rgba(31,54,86,.08);padding:12px;position:sticky;top:90px}.preview-header{display:flex;justify-content:space-between;color:#66758c;font-size:12px;font-weight:700;margin:4px 0 14px}.preview-image{align-items:center;background:#f6f9fd;border:1px solid #dae4f1;border-radius:10px;display:flex;height:172px;justify-content:center;margin-bottom:12px;overflow:hidden}.preview-image img{height:100%;object-fit:cover;width:100%}.preview-title{color:#344054;font-size:15px;font-weight:800;margin-bottom:8px}.preview-pill{background:#dff7e8;border-radius:6px;color:#1b8d4b;font-size:10px;font-weight:800;padding:4px 8px}.preview-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}.preview-box{background:#f8fbff;border:1px solid #dfe8f4;border-radius:8px;color:#526174;font-size:12px;min-height:44px;padding:8px}.preview-box.full{grid-column:1/-1}.preview-box small{color:#8190a7;display:block;font-size:10px;margin-bottom:2px}.preview-progress{background:#e8eef7;border-radius:999px;height:7px;margin-top:7px;overflow:hidden}.preview-progress span{background:linear-gradient(90deg,#58d9c7,#2d80ff);display:block;height:100%}.photo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.photo-choice{border:1px solid #dfe8f4;border-radius:10px;padding:8px;background:#f8fbff;font-size:11px}.photo-choice img{width:100%;height:72px;border-radius:8px;object-fit:cover;margin-bottom:6px}.photo-choice input[type=checkbox]{margin-right:4px}.pin-help{background:#eef6ff;border:1px solid #cfe3ff;border-radius:10px;color:#44607d;font-size:12px;padding:10px;margin-bottom:10px}.project-location-pin{background:transparent;border:0}.project-location-pin span{background:#2d80ff;border:4px solid #fff;border-radius:50% 50% 50% 0;box-shadow:0 8px 24px rgba(31,54,86,.35);display:block;height:28px;transform:rotate(-45deg);width:28px}.project-location-pin span:after{background:#fff;border-radius:50%;content:'';height:8px;left:10px;position:absolute;top:10px;width:8px}#locationPicker{height:330px;border-radius:12px}.project-thumb{width:64px;height:48px;object-fit:cover;border-radius:8px;background:#f1f3f7}@media(max-width:1200px){.project-form-shell{grid-template-columns:1fr}.preview-card{position:static}}
+        .project-form-shell{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:24px;align-items:start}.project-form-card{border:1px solid #e6edf7;border-radius:14px;box-shadow:0 14px 35px rgba(31,54,86,.06)}.project-form-card .card-body{padding:18px}.project-section{border:1px solid #e6edf7;border-radius:14px;background:#fff;margin-bottom:14px;padding:16px}.project-section-title{align-items:center;color:#3f4756;display:flex;font-size:15px;font-weight:700;gap:8px;margin-bottom:14px}.project-label{color:#8190a7;font-size:10px;font-weight:800;letter-spacing:.1em;margin-bottom:6px;text-transform:uppercase}.project-help{color:#8190a7;font-size:11px;margin-top:6px}.project-upload{align-items:center;background:#f8fbff;border:1px dashed #a9c8f5;border-radius:12px;color:#66758c;cursor:pointer;display:flex;flex-direction:column;gap:7px;justify-content:center;min-height:126px;padding:18px;text-align:center;transition:.18s}.project-upload:hover{background:#f2f7ff;border-color:#6fa5f7}.project-upload i{color:#7d91af}.project-upload strong{font-size:12px;letter-spacing:.08em;text-transform:uppercase}.project-upload span{color:#8190a7;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.project-upload input{display:none}.preview-card{background:#fff;border:1px solid #edf1f7;border-radius:14px;box-shadow:0 20px 50px rgba(31,54,86,.08);padding:12px;position:sticky;top:90px}.preview-header{display:flex;justify-content:space-between;color:#66758c;font-size:12px;font-weight:700;margin:4px 0 14px}.preview-image{align-items:center;background:#f6f9fd;border:1px solid #dae4f1;border-radius:10px;display:flex;height:172px;justify-content:center;margin-bottom:12px;overflow:hidden}.preview-image img{height:100%;object-fit:cover;width:100%}.preview-title{color:#344054;font-size:15px;font-weight:800;margin-bottom:8px}.preview-pill{background:#dff7e8;border-radius:6px;color:#1b8d4b;font-size:10px;font-weight:800;padding:4px 8px}.preview-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}.preview-box{background:#f8fbff;border:1px solid #dfe8f4;border-radius:8px;color:#526174;font-size:12px;min-height:44px;padding:8px}.preview-box.full{grid-column:1/-1}.preview-box small{color:#8190a7;display:block;font-size:10px;margin-bottom:2px}.preview-progress{background:#e8eef7;border-radius:999px;height:7px;margin-top:7px;overflow:hidden}.preview-progress span{background:linear-gradient(90deg,#58d9c7,#2d80ff);display:block;height:100%}.photo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.photo-choice{border:1px solid #dfe8f4;border-radius:10px;padding:8px;background:#f8fbff;font-size:11px}.photo-choice img{width:100%;height:72px;border-radius:8px;object-fit:cover;margin-bottom:6px}.photo-choice input[type=checkbox]{margin-right:4px}.pin-help{background:#eef6ff;border:1px solid #cfe3ff;border-radius:10px;color:#44607d;font-size:12px;padding:10px;margin-bottom:10px}.pin-toolbar{align-items:center;display:flex;gap:8px;justify-content:space-between;margin-bottom:10px}.pin-count{color:#66758c;font-size:12px;font-weight:700}.project-location-pin{background:transparent;border:0}.project-location-pin span{background:#2d80ff;border:4px solid #fff;border-radius:50% 50% 50% 0;box-shadow:0 8px 24px rgba(31,54,86,.35);display:block;height:30px;position:relative;transform:rotate(-45deg);width:30px}.project-location-pin span:after{background:#fff;border-radius:50%;content:'';height:8px;left:7px;position:absolute;top:7px;width:8px}#locationPicker{height:330px;border-radius:12px}.project-thumb{width:64px;height:48px;object-fit:cover;border-radius:8px;background:#f1f3f7}@media(max-width:1200px){.project-form-shell{grid-template-columns:1fr}.preview-card{position:static}}
     </style>
 </head>
 <body>
@@ -314,6 +363,7 @@ $formValues = [
 
                 <form method="post" enctype="multipart/form-data" class="project-form-shell">
                     <input type="hidden" name="csrf_token" value="<?php echo e(csrf_token()); ?>">
+                    <input type="hidden" id="ubicaciones" name="ubicaciones" value='<?php echo e(json_encode($formValues['ubicaciones'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)); ?>'>
                     
 
                     <div class="project-form-card card">
@@ -435,7 +485,9 @@ $formValues = [
                                         <input id="lng" name="lng" class="form-control" value="<?php echo e((string) $formValues['lng']); ?>" readonly required>
                                     </div>
                                 </div>
-                                <div class="pin-help"><strong>Ubicación:</strong> haz clic en el mapa o arrastra el pin para definir la posición exacta del proyecto. Las coordenadas se completan automáticamente.</div><div id="locationPicker" class="mb-3"></div>
+                                <div class="pin-help"><strong>Ubicaciones:</strong> haz clic en el mapa para agregar todos los pines que necesite el proyecto. Arrastra cualquier pin para ajustar su posición. El primer pin queda como coordenada principal.</div>
+                                <div class="pin-toolbar"><span class="pin-count" id="pinCount">0 pines agregados</span><button class="btn btn-sm btn-outline-danger" type="button" id="clearPins">Quitar pines</button></div>
+                                <div id="locationPicker" class="mb-3"></div>
                                 <div class="d-flex flex-wrap gap-2">
                                     <button type="submit" class="btn btn-primary">Guardar proyecto</button>
                                     <a class="btn btn-outline-secondary" href="mapa-proyectos.php">Ver mapa</a>
@@ -496,7 +548,7 @@ $formValues = [
                                                 </div>
                                             </td>
                                             <td><span class="badge text-bg-info"><?php echo e($item['estado']); ?></span></td>
-                                            <td><?php echo e($item['lat'] . ', ' . $item['lng']); ?></td>
+                                            <td><?php $itemLocations = normalize_project_locations($item['ubicaciones'] ?? null, (float) $item['lat'], (float) $item['lng']); echo e(count($itemLocations) . ' pin(es)'); ?><div class="text-muted small"><?php echo e($item['lat'] . ', ' . $item['lng']); ?></div></td>
                                             <td class="text-end">
                                                 <a class="btn btn-sm btn-soft-primary" href="proyectos-mapa.php?id=<?php echo (int) $item['id']; ?>">Editar</a>
                                                 <form method="post" class="d-inline" data-confirm="¿Eliminar proyecto?">
@@ -523,6 +575,8 @@ $formValues = [
     <script>
         const latInput = document.getElementById('lat');
         const lngInput = document.getElementById('lng');
+        const locationsInput = document.getElementById('ubicaciones');
+        const pinCount = document.getElementById('pinCount');
         const picker = L.map('locationPicker').setView([parseFloat(latInput.value) || -20.2595, parseFloat(lngInput.value) || -69.7863], 14);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; OpenStreetMap'}).addTo(picker);
         const projectPinIcon = L.divIcon({
@@ -532,18 +586,48 @@ $formValues = [
             iconAnchor: [17, 42],
             popupAnchor: [0, -38],
         });
-        const marker = L.marker(picker.getCenter(), {draggable: true, icon: projectPinIcon}).addTo(picker);
-        marker.bindTooltip('Arrastra este pin o haz clic en el mapa', {direction: 'top', offset: [0, -36]});
-        setTimeout(() => picker.invalidateSize(), 150);
+        const locationMarkers = [];
 
-        function setCoords(latlng) {
-            latInput.value = latlng.lat.toFixed(7);
-            lngInput.value = latlng.lng.toFixed(7);
-            marker.setLatLng(latlng);
+        function syncLocations() {
+            const locations = locationMarkers.map(marker => {
+                const latlng = marker.getLatLng();
+                return {lat: Number(latlng.lat.toFixed(7)), lng: Number(latlng.lng.toFixed(7))};
+            });
+            locationsInput.value = JSON.stringify(locations);
+            if (locations[0]) {
+                latInput.value = locations[0].lat.toFixed(7);
+                lngInput.value = locations[0].lng.toFixed(7);
+            }
+            pinCount.textContent = `${locations.length} pin(es) agregado(s)`;
         }
 
-        picker.on('click', event => setCoords(event.latlng));
-        marker.on('dragend', event => setCoords(event.target.getLatLng()));
+        function addLocationPin(latlng, pan = false) {
+            const marker = L.marker(latlng, {draggable: true, icon: projectPinIcon}).addTo(picker);
+            marker.bindTooltip('Arrastra para ajustar. Doble clic para quitar.', {direction: 'top', offset: [0, -36]});
+            marker.on('dragend', syncLocations);
+            marker.on('dblclick', () => {
+                picker.removeLayer(marker);
+                locationMarkers.splice(locationMarkers.indexOf(marker), 1);
+                syncLocations();
+            });
+            locationMarkers.push(marker);
+            syncLocations();
+            if (pan) picker.panTo(marker.getLatLng());
+        }
+
+        let initialLocations = [];
+        try { initialLocations = JSON.parse(locationsInput.value || '[]'); } catch (error) { initialLocations = []; }
+        if (!Array.isArray(initialLocations) || !initialLocations.length) {
+            initialLocations = [{lat: parseFloat(latInput.value) || -20.2595, lng: parseFloat(lngInput.value) || -69.7863}];
+        }
+        initialLocations.forEach(location => addLocationPin([Number(location.lat), Number(location.lng)]));
+        picker.on('click', event => addLocationPin(event.latlng));
+        document.getElementById('clearPins').addEventListener('click', () => {
+            locationMarkers.splice(0).forEach(marker => picker.removeLayer(marker));
+            addLocationPin(picker.getCenter(), true);
+        });
+        if (locationMarkers.length > 1) picker.fitBounds(locationMarkers.map(marker => marker.getLatLng()), {padding: [30, 30], maxZoom: 15});
+        setTimeout(() => picker.invalidateSize(), 150);
 
         const previewMap = {
             name: ['previewName', 'Nombre del proyecto'],

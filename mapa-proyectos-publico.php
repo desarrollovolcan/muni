@@ -19,14 +19,21 @@ function ensure_public_map_projects_table(): void
         avance TINYINT UNSIGNED NOT NULL DEFAULT 0,
         lat DECIMAL(10,7) NOT NULL,
         lng DECIMAL(10,7) NOT NULL,
+        ubicaciones TEXT DEFAULT NULL,
         visible TINYINT(1) NOT NULL DEFAULT 1,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+
+    $stmt = db()->query("SHOW COLUMNS FROM map_projects LIKE 'ubicaciones'");
+    if (!$stmt->fetch()) {
+        db()->exec("ALTER TABLE map_projects ADD COLUMN ubicaciones TEXT DEFAULT NULL AFTER lng");
+    }
 }
 
 ensure_public_map_projects_table();
-$projects = db()->query('SELECT id, nombre, estado, etapa, sector, monto, financiamiento, inicio, entrega, foto, fotos, descripcion, avance, lat, lng FROM map_projects WHERE visible = 1 ORDER BY nombre')->fetchAll();
+$projects = db()->query('SELECT id, nombre, estado, etapa, sector, monto, financiamiento, inicio, entrega, foto, fotos, descripcion, avance, lat, lng, ubicaciones FROM map_projects WHERE visible = 1 ORDER BY nombre')->fetchAll();
 $projectsJson = json_encode($projects, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 ?>
 <!DOCTYPE html>
@@ -161,7 +168,17 @@ $projectsJson = json_encode($projects, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_S
         function escapeHtml(value) { return String(value ?? '').replace(/[&<>\"']/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[character])); }
         function slug(value) { return (value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-'); }
         function markerColor(status) { return {'En ejecución':'#4caf50','Finalizado':'#0f5fa8','Pausado':'#ef5350'}[status] || '#ffa52d'; }
-        function icon(status) { const color = markerColor(status); return L.divIcon({className: '', html: `<span style="display:block;width:28px;height:28px;border-radius:50%;background:${color};border:5px solid #fff;box-shadow:0 8px 18px rgba(15,23,42,.18)"></span>`, iconSize: [28, 28], iconAnchor: [14, 14]}); }
+        function icon(status) { const color = markerColor(status); return L.divIcon({className: '', html: `<span style="display:block;width:28px;height:28px;border-radius:50% 50% 50% 0;background:${color};border:5px solid #fff;box-shadow:0 8px 18px rgba(15,23,42,.18);transform:rotate(-45deg);position:relative"><i style="background:#fff;border-radius:50%;height:7px;left:6px;position:absolute;top:6px;width:7px"></i></span>`, iconSize: [34, 44], iconAnchor: [17, 42], popupAnchor: [0, -38]}); }
+        function getLocations(project) {
+            try {
+                const parsed = JSON.parse(project.ubicaciones || '[]');
+                if (Array.isArray(parsed)) {
+                    const clean = parsed.map(item => [Number(item.lat), Number(item.lng)]).filter(item => Number.isFinite(item[0]) && Number.isFinite(item[1]));
+                    if (clean.length) return clean;
+                }
+            } catch (error) {}
+            return [[Number(project.lat), Number(project.lng)]].filter(item => Number.isFinite(item[0]) && Number.isFinite(item[1]));
+        }
         function getPhotos(project) { try { const parsed = JSON.parse(project.fotos || '[]'); if (Array.isArray(parsed)) { const clean = parsed.filter(photo => typeof photo === 'string' && photo.trim() !== ''); if (clean.length) return clean; } } catch (error) {} return project.foto && String(project.foto).trim() !== '' ? [project.foto] : [fallbackPhoto]; }
         function sliderHtml(project, imageHeight = 150) { const photos = getPhotos(project); const controls = photos.length > 1 ? `<button class="slider-btn prev" data-slider-dir="-1" type="button">‹</button><button class="slider-btn next" data-slider-dir="1" type="button">›</button><span class="slider-dots">${photos.map(() => '<i></i>').join('')}</span>` : ''; return `<span class="map-slider" data-slider-index="0" data-photos="${encodeURIComponent(JSON.stringify(photos))}"><img style="height:${imageHeight}px" src="${photos[0] || fallbackPhoto}" alt="">${controls}</span>`; }
         function popup(project) { return `${sliderHtml(project, 148)}<div class="popup-title">${escapeHtml(project.nombre)}</div><div class="popup-meta"><b>Estado:</b> ${escapeHtml(project.estado)}<br><b>Etapa:</b> ${escapeHtml(project.etapa)}<br><b>Sector:</b> ${escapeHtml(project.sector || '-')}<br><b>Avance:</b> ${Number(project.avance) || 0}%</div><div class="popup-actions"><button class="popup-detail-btn" type="button" data-detail-id="${project.id}">Ver más detalle</button></div>`; }
@@ -197,18 +214,21 @@ $projectsJson = json_encode($projects, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_S
             markers.forEach((marker, id) => {
                 const project = projects.find(item => String(item.id) === String(id));
                 const shouldShow = project && visibleProjects.some(item => String(item.id) === String(id));
-                if (shouldShow && !map.hasLayer(marker)) marker.addTo(map);
-                if (!shouldShow && map.hasLayer(marker)) map.removeLayer(marker);
+                marker.forEach(item => {
+                    if (shouldShow && !map.hasLayer(item)) item.addTo(map);
+                    if (!shouldShow && map.hasLayer(item)) map.removeLayer(item);
+                });
             });
             updateProjectMetrics(visibleProjects);
             if (visibleProjects.length && !document.querySelector('.public-project-card.active')) focus(visibleProjects[0]);
         }
         const bounds = [];
         projects.forEach(project => {
-            const latlng = [Number(project.lat), Number(project.lng)];
-            bounds.push(latlng);
-            const marker = L.marker(latlng, {icon: icon(project.estado)}).addTo(map).bindPopup(popup(project)).on('click', () => focus(project));
-            markers.set(String(project.id), marker);
+            const projectMarkers = getLocations(project).map(latlng => {
+                bounds.push(latlng);
+                return L.marker(latlng, {icon: icon(project.estado)}).addTo(map).bindPopup(popup(project)).on('click', () => focus(project));
+            });
+            markers.set(String(project.id), projectMarkers);
         });
         if (bounds.length) {
             map.fitBounds(bounds, {paddingTopLeft: [376, 36], paddingBottomRight: [90, 90], maxZoom: 15});
@@ -220,10 +240,10 @@ $projectsJson = json_encode($projects, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_S
         function openProjectFromCard(card) {
             const project = projects.find(item => String(item.id) === String(card.dataset.id));
             const marker = markers.get(String(card.dataset.id));
-            if (!project || !marker) return;
+            if (!project || !marker || !marker[0]) return;
             focus(project);
-            map.flyTo(marker.getLatLng(), 16, {duration: .8});
-            marker.openPopup();
+            map.flyTo(marker[0].getLatLng(), 16, {duration: .8});
+            marker[0].openPopup();
             openProjectDetail(project);
         }
 
