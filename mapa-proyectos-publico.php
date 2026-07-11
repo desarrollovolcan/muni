@@ -39,6 +39,7 @@ $activeStatuses = array_values(array_filter($catalogs['statuses'] ?? [], static 
 }));
 $projects = db()->query('SELECT id, nombre, estado, etapa, sector, monto, financiamiento, inicio, entrega, foto, fotos, descripcion, avance, lat, lng, ubicaciones FROM map_projects WHERE visible = 1 ORDER BY nombre')->fetchAll();
 $projectsJson = json_encode($projects, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+$activeStatusesJson = json_encode(array_column($activeStatuses, 'nombre'), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -203,6 +204,7 @@ $projectsJson = json_encode($projects, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_S
     <script src="assets/plugins/leaflet/leaflet.js"></script>
     <script>
         const projects = <?php echo $projectsJson ?: '[]'; ?>;
+        const activeStatuses = <?php echo $activeStatusesJson ?: '[]'; ?>;
         const fallbackPhoto = 'assets/images/logo.png';
         const map = L.map('publicProjectMap', {zoomControl: false}).setView([-20.2595, -69.7863], 13);
         const markers = new Map();
@@ -259,7 +261,7 @@ $projectsJson = json_encode($projects, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_S
             const search = (projectSearch.value || '').trim().toLowerCase();
             const status = projectStatusFilter.value;
             const searchable = [project.nombre, project.estado, project.sector, project.etapa].join(' ').toLowerCase();
-            return (!status || project.estado === status) && (!search || searchable.includes(search));
+            return activeStatuses.includes(project.estado) && (!status || project.estado === status) && (!search || searchable.includes(search));
         }
         function updateProjectMetrics(visibleProjects) {
             document.getElementById('projectCounter').textContent = String(visibleProjects.length);
@@ -313,6 +315,9 @@ $projectsJson = json_encode($projects, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_S
             const marker = markers.get(String(card.dataset.id));
             if (!project || !marker || !marker[0]) return;
             focus(project);
+            if (window.matchMedia('(max-width: 900px)').matches) {
+                document.getElementById('publicProjectMap').scrollIntoView({behavior: 'smooth', block: 'start'});
+            }
             map.flyTo(marker[0].getLatLng(), 16, {duration: .8});
             marker[0].openPopup();
             openProjectDetail(project);
