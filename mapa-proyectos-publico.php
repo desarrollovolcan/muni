@@ -33,6 +33,10 @@ function ensure_public_map_projects_table(): void
 }
 
 ensure_public_map_projects_table();
+$catalogs = ensure_project_catalogs();
+$activeStatuses = array_values(array_filter($catalogs['statuses'] ?? [], static function (array $status): bool {
+    return (int) ($status['activo'] ?? 0) === 1;
+}));
 $projects = db()->query('SELECT id, nombre, estado, etapa, sector, monto, financiamiento, inicio, entrega, foto, fotos, descripcion, avance, lat, lng, ubicaciones FROM map_projects WHERE visible = 1 ORDER BY nombre')->fetchAll();
 $projectsJson = json_encode($projects, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 ?>
@@ -93,7 +97,7 @@ $projectsJson = json_encode($projects, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_S
         .empty-message{background:var(--panel);border:1px solid var(--line);border-radius:9px;box-shadow:var(--shadow);left:calc(50% + 170px);padding:20px;position:absolute;text-align:center;top:50%;transform:translate(-50%,-50%);z-index:630}
         .project-detail-drawer{background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(248,251,253,.92));border:1px solid var(--line);border-radius:9px;box-shadow:var(--shadow);display:flex;flex-direction:column;height:calc(100vh - 36px);max-width:410px;opacity:0;overflow:hidden;position:absolute;right:18px;top:18px;transform:translateX(108%);transition:transform .24s ease,opacity .24s ease;width:min(390px,calc(100vw - 24px));z-index:660}.project-detail-drawer.open{opacity:1;transform:translateX(0)}
         .detail-head{background:rgba(255,255,255,.72);border-bottom:1px solid var(--line);color:#111827;padding:15px 16px;position:relative}.detail-head-main{align-items:flex-start;display:flex;gap:12px;justify-content:space-between}.detail-kicker{color:var(--muted);display:block;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}.detail-head h2{color:#0f2f4a;font-size:15px;font-weight:650;line-height:1.35;margin:5px 0 0}.detail-close{background:#fff;border:1px solid var(--line);border-radius:8px;color:#64748b;cursor:pointer;font-size:20px;height:32px;line-height:1;width:32px}.detail-body{overflow:auto;padding:14px 15px 18px}.detail-body .map-slider img{height:196px!important}.detail-status-row{align-items:center;display:flex;gap:10px;justify-content:space-between;margin:13px 0}.detail-status-row strong{color:#475569;font-size:12px;font-weight:500}.detail-progress{background:#f1f5f9;border-radius:8px;height:6px;overflow:hidden}.detail-progress span{background:linear-gradient(90deg,var(--accent),var(--primary));display:block;height:100%}.detail-grid{display:grid;gap:8px;grid-template-columns:1fr 1fr;margin-top:13px}.detail-item{background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:none;padding:9px 10px}.detail-item.wide{grid-column:1/-1}.detail-label{color:var(--muted);display:block;font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}.detail-value{color:#334155;display:block;font-size:12px;font-weight:500;margin-top:4px}.detail-description{background:#fff;border:1px solid var(--line);border-radius:8px;color:#64748b;font-size:12px;line-height:1.6;margin-top:12px;padding:12px;white-space:pre-line}.leaflet-control-zoom{border:0!important;box-shadow:var(--shadow)!important}.leaflet-control-zoom a{border:0!important;color:#334155!important}
-        @media(max-width:900px){.project-sidebar{border-radius:0 0 9px 9px;height:44vh;left:0;top:0;width:100%}.public-project-list{grid-auto-flow:column;grid-auto-columns:240px;overflow-x:auto;overflow-y:hidden}.project-detail-drawer{border-radius:9px 9px 0 0;bottom:0;height:62vh;max-width:none;right:12px;top:auto;width:calc(100vw - 24px)}.detail-grid{grid-template-columns:1fr}.screen-legend{bottom:12px;left:12px;right:12px;flex-wrap:wrap}.empty-message{left:50%;top:65%}}
+        @media(max-width:900px){html,body{height:100%;overflow:hidden}body{background:#eef4f8}.screen-map{display:grid;grid-template-rows:minmax(300px,43dvh) minmax(0,1fr);height:100vh;height:100dvh;overflow:hidden;width:100%}#publicProjectMap{height:100%;min-height:0;width:100%}.map-vignette{display:none}.project-sidebar{background:#f8fafc;border:0;border-radius:0;box-shadow:none;display:flex;flex-direction:column;height:100%;left:auto;min-height:0;overflow:hidden;position:relative;top:auto;width:100%;z-index:1}.sidebar-head{background:#fff;border-bottom:1px solid #d9e6ef;border-radius:16px 16px 0 0;box-shadow:0 -8px 22px rgba(15,23,42,.10);flex:0 0 auto;margin-top:-14px;padding:12px 14px 10px;position:relative;z-index:2}.sidebar-brand{align-items:flex-start;gap:8px}.sidebar-brand img{height:24px;max-width:86px}.sidebar-brand h2{font-size:14px}.sidebar-brand p{font-size:11px;line-height:1.3;margin-top:2px}.screen-counter{font-size:11px;margin-left:4px;padding:4px 7px}.sidebar-summary{gap:7px;grid-template-columns:repeat(2,minmax(0,1fr));margin-top:9px}.summary-tile{padding:7px 8px}.summary-tile span{font-size:9px}.summary-tile strong{font-size:15px}.sidebar-filters{gap:8px;grid-template-columns:minmax(0,1fr) minmax(132px,40%);margin-top:9px}.sidebar-filters input,.sidebar-filters select{font-size:13px;min-height:40px;padding:9px 10px}.project-list-title{font-size:10px;margin-top:10px}.public-project-list{background:#f8fafc;display:grid;gap:9px;grid-template-columns:1fr;min-height:0;overflow:auto;padding:10px 12px 14px;-webkit-overflow-scrolling:touch}.public-project-card{background:#fff;border-left:4px solid transparent;border-radius:12px;box-shadow:0 7px 18px rgba(15,23,42,.06);grid-template-columns:92px minmax(0,1fr);min-height:98px}.public-project-card .map-slider img{border-radius:9px 0 0 9px;min-height:98px}.public-card-body{padding:9px 11px}.public-card-title{font-size:13px}.leaflet-control-zoom{display:none}.leaflet-popup-content{min-width:min(260px,calc(100vw - 64px))}.screen-legend{display:none}.project-detail-drawer{background:#fff;border:0;border-radius:16px 16px 0 0;bottom:0;box-shadow:0 -16px 34px rgba(15,23,42,.18);height:min(78dvh,600px);max-width:none;position:fixed;right:0;top:auto;width:100%;z-index:900}.detail-head{padding:13px 14px}.detail-body{padding:12px 14px 18px}.detail-grid{grid-template-columns:1fr}.empty-message{box-shadow:none;left:auto;margin:12px;position:static;top:auto;transform:none;width:auto}}@media(max-width:520px){.screen-map{grid-template-rows:minmax(280px,40dvh) minmax(0,1fr)}.sidebar-brand p{display:none}.sidebar-summary{display:none}.sidebar-filters{grid-template-columns:1fr}.public-project-list{padding:9px 10px 12px}.public-project-card{grid-template-columns:84px minmax(0,1fr);min-height:92px}.public-project-card .map-slider img{min-height:92px}.public-card-title{font-size:12px}.tag{font-size:9px}.detail-body .map-slider img{height:170px!important}}
         @media print{.project-sidebar,.screen-legend,.project-detail-drawer{display:none}}
     </style>
 </head>
@@ -118,12 +122,10 @@ $projectsJson = json_encode($projects, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_S
                 <div class="sidebar-filters" aria-label="Filtros de proyectos">
                     <input id="projectSearch" type="search" placeholder="Buscar proyecto o sector" autocomplete="off">
                     <select id="projectStatusFilter">
-                        <option value="">Todos los estados</option>
-                        <option value="En ejecución">En ejecución</option>
-                        <option value="Finalizado">Finalizado</option>
-                        <option value="Planificación">Planificación</option>
-                        <option value="Licitación">Licitación</option>
-                        <option value="Pausado">Pausado</option>
+                        <option value="">Todos los estados activos</option>
+                        <?php foreach ($activeStatuses as $status) : ?>
+                            <option value="<?php echo htmlspecialchars($status['nombre'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($status['nombre'], ENT_QUOTES, 'UTF-8'); ?></option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
                 <div class="project-list-title"><span>Listado público</span><span id="projectListCount">0</span></div>
@@ -230,9 +232,20 @@ $projectsJson = json_encode($projects, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_S
             });
             markers.set(String(project.id), projectMarkers);
         });
-        if (bounds.length) {
-            map.fitBounds(bounds, {paddingTopLeft: [376, 36], paddingBottomRight: [90, 90], maxZoom: 15});
+        function fitMapToProjects() {
+            if (!bounds.length) return;
+            const isMobile = window.matchMedia('(max-width: 900px)').matches;
+            map.fitBounds(bounds, {
+                paddingTopLeft: isMobile ? [24, 28] : [376, 36],
+                paddingBottomRight: isMobile ? [24, 42] : [90, 90],
+                maxZoom: 15
+            });
         }
+        fitMapToProjects();
+        window.addEventListener('resize', () => {
+            map.invalidateSize();
+            fitMapToProjects();
+        });
         renderProjectList();
         projectSearch.addEventListener('input', renderProjectList);
         projectStatusFilter.addEventListener('change', renderProjectList);
