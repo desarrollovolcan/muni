@@ -33,6 +33,10 @@ function ensure_public_map_projects_table(): void
 }
 
 ensure_public_map_projects_table();
+$catalogs = ensure_project_catalogs();
+$activeStatuses = array_values(array_filter($catalogs['statuses'] ?? [], static function (array $status): bool {
+    return (int) ($status['activo'] ?? 0) === 1;
+}));
 $projects = db()->query('SELECT id, nombre, estado, etapa, sector, monto, financiamiento, inicio, entrega, foto, fotos, descripcion, avance, lat, lng, ubicaciones FROM map_projects WHERE visible = 1 ORDER BY nombre')->fetchAll();
 $projectsJson = json_encode($projects, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 ?>
@@ -93,7 +97,7 @@ $projectsJson = json_encode($projects, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_S
         .empty-message{background:var(--panel);border:1px solid var(--line);border-radius:9px;box-shadow:var(--shadow);left:calc(50% + 170px);padding:20px;position:absolute;text-align:center;top:50%;transform:translate(-50%,-50%);z-index:630}
         .project-detail-drawer{background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(248,251,253,.92));border:1px solid var(--line);border-radius:9px;box-shadow:var(--shadow);display:flex;flex-direction:column;height:calc(100vh - 36px);max-width:410px;opacity:0;overflow:hidden;position:absolute;right:18px;top:18px;transform:translateX(108%);transition:transform .24s ease,opacity .24s ease;width:min(390px,calc(100vw - 24px));z-index:660}.project-detail-drawer.open{opacity:1;transform:translateX(0)}
         .detail-head{background:rgba(255,255,255,.72);border-bottom:1px solid var(--line);color:#111827;padding:15px 16px;position:relative}.detail-head-main{align-items:flex-start;display:flex;gap:12px;justify-content:space-between}.detail-kicker{color:var(--muted);display:block;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}.detail-head h2{color:#0f2f4a;font-size:15px;font-weight:650;line-height:1.35;margin:5px 0 0}.detail-close{background:#fff;border:1px solid var(--line);border-radius:8px;color:#64748b;cursor:pointer;font-size:20px;height:32px;line-height:1;width:32px}.detail-body{overflow:auto;padding:14px 15px 18px}.detail-body .map-slider img{height:196px!important}.detail-status-row{align-items:center;display:flex;gap:10px;justify-content:space-between;margin:13px 0}.detail-status-row strong{color:#475569;font-size:12px;font-weight:500}.detail-progress{background:#f1f5f9;border-radius:8px;height:6px;overflow:hidden}.detail-progress span{background:linear-gradient(90deg,var(--accent),var(--primary));display:block;height:100%}.detail-grid{display:grid;gap:8px;grid-template-columns:1fr 1fr;margin-top:13px}.detail-item{background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:none;padding:9px 10px}.detail-item.wide{grid-column:1/-1}.detail-label{color:var(--muted);display:block;font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}.detail-value{color:#334155;display:block;font-size:12px;font-weight:500;margin-top:4px}.detail-description{background:#fff;border:1px solid var(--line);border-radius:8px;color:#64748b;font-size:12px;line-height:1.6;margin-top:12px;padding:12px;white-space:pre-line}.leaflet-control-zoom{border:0!important;box-shadow:var(--shadow)!important}.leaflet-control-zoom a{border:0!important;color:#334155!important}
-        @media(max-width:900px){.project-sidebar{border-radius:0 0 9px 9px;height:44vh;left:0;top:0;width:100%}.public-project-list{grid-auto-flow:column;grid-auto-columns:240px;overflow-x:auto;overflow-y:hidden}.project-detail-drawer{border-radius:9px 9px 0 0;bottom:0;height:62vh;max-width:none;right:12px;top:auto;width:calc(100vw - 24px)}.detail-grid{grid-template-columns:1fr}.screen-legend{bottom:12px;left:12px;right:12px;flex-wrap:wrap}.empty-message{left:50%;top:65%}}
+        @media(max-width:900px){html,body,#publicProjectMap{height:100%;overflow:hidden}body{background:#eef4f8}.screen-map{height:100vh;height:100dvh;overflow:hidden;width:100%}#publicProjectMap{height:100%;width:100%}.map-vignette{display:none}.project-sidebar{background:transparent;border:0;border-radius:0;box-shadow:none;height:auto;inset:0;overflow:visible;pointer-events:none;position:absolute;width:auto;z-index:640}.sidebar-head{background:rgba(255,255,255,.96);border:1px solid rgba(203,213,225,.92);border-radius:18px;box-shadow:0 14px 34px rgba(15,23,42,.16);left:12px;padding:12px;pointer-events:auto;position:absolute;right:12px;top:12px}.sidebar-brand{align-items:flex-start;gap:9px}.sidebar-brand img{height:24px;max-width:84px}.sidebar-brand h2{font-size:14px}.sidebar-brand p{display:none}.screen-counter{font-size:11px;margin-left:auto;padding:4px 8px}.sidebar-summary{display:none}.sidebar-filters{gap:8px;grid-template-columns:minmax(0,1fr) minmax(128px,39%);margin-top:10px}.sidebar-filters input,.sidebar-filters select{border-color:#cbd5e1;font-size:13px;min-height:42px;padding:10px 11px}.project-list-title{color:#475569;font-size:10px;margin-top:9px}.public-project-list{bottom:12px;display:grid;gap:10px;grid-auto-columns:min(82vw,315px);grid-auto-flow:column;left:0;overflow-x:auto;overflow-y:hidden;padding:0 12px 4px;pointer-events:auto;position:absolute;right:0;scroll-padding:12px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}.public-project-list::-webkit-scrollbar{display:none}.public-project-card{background:rgba(255,255,255,.97);border:1px solid rgba(203,213,225,.92);border-left:4px solid transparent;border-radius:16px;box-shadow:0 14px 32px rgba(15,23,42,.18);grid-template-columns:92px minmax(0,1fr);min-height:104px;scroll-snap-align:center}.public-project-card:hover,.public-project-card.active{border-color:#93c5fd;border-left-color:var(--civic-gold);box-shadow:0 16px 36px rgba(6,79,131,.22)}.public-project-card .map-slider img{border-radius:12px 0 0 12px;min-height:104px}.public-card-body{padding:10px 12px}.public-card-title{font-size:13px}.leaflet-control-zoom{display:none}.leaflet-popup-content{min-width:min(260px,calc(100vw - 64px))}.screen-legend{display:none}.project-detail-drawer{background:#fff;border:0;border-radius:18px 18px 0 0;bottom:0;box-shadow:0 -18px 38px rgba(15,23,42,.24);height:min(78dvh,600px);max-width:none;position:fixed;right:0;top:auto;width:100%;z-index:900}.detail-head{padding:13px 14px}.detail-body{padding:12px 14px 18px}.detail-grid{grid-template-columns:1fr}.empty-message{box-shadow:0 12px 28px rgba(15,23,42,.16);left:12px;right:12px;top:52%;transform:translateY(-50%);width:auto}}@media(max-width:520px){.sidebar-head{left:10px;right:10px;top:10px}.sidebar-brand h2{font-size:13px}.sidebar-filters{grid-template-columns:1fr}.project-list-title{display:none}.public-project-list{bottom:10px;grid-auto-columns:86vw;padding:0 10px 4px}.public-project-card{grid-template-columns:84px minmax(0,1fr);min-height:96px}.public-project-card .map-slider img{min-height:96px}.public-card-title{font-size:12px}.tag{font-size:9px}.detail-body .map-slider img{height:170px!important}}
         @media print{.project-sidebar,.screen-legend,.project-detail-drawer{display:none}}
     </style>
 </head>
@@ -118,12 +122,10 @@ $projectsJson = json_encode($projects, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_S
                 <div class="sidebar-filters" aria-label="Filtros de proyectos">
                     <input id="projectSearch" type="search" placeholder="Buscar proyecto o sector" autocomplete="off">
                     <select id="projectStatusFilter">
-                        <option value="">Todos los estados</option>
-                        <option value="En ejecución">En ejecución</option>
-                        <option value="Finalizado">Finalizado</option>
-                        <option value="Planificación">Planificación</option>
-                        <option value="Licitación">Licitación</option>
-                        <option value="Pausado">Pausado</option>
+                        <option value="">Todos los estados activos</option>
+                        <?php foreach ($activeStatuses as $status) : ?>
+                            <option value="<?php echo htmlspecialchars($status['nombre'], ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars($status['nombre'], ENT_QUOTES, 'UTF-8'); ?></option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
                 <div class="project-list-title"><span>Listado público</span><span id="projectListCount">0</span></div>
@@ -183,7 +185,17 @@ $projectsJson = json_encode($projects, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_S
         function sliderHtml(project, imageHeight = 150) { const photos = getPhotos(project); const controls = photos.length > 1 ? `<button class="slider-btn prev" data-slider-dir="-1" type="button">‹</button><button class="slider-btn next" data-slider-dir="1" type="button">›</button><span class="slider-dots">${photos.map(() => '<i></i>').join('')}</span>` : ''; return `<span class="map-slider" data-slider-index="0" data-photos="${encodeURIComponent(JSON.stringify(photos))}"><img style="height:${imageHeight}px" src="${photos[0] || fallbackPhoto}" alt="">${controls}</span>`; }
         function popup(project) { return `${sliderHtml(project, 148)}<div class="popup-title">${escapeHtml(project.nombre)}</div><div class="popup-meta"><b>Estado:</b> ${escapeHtml(project.estado)}<br><b>Etapa:</b> ${escapeHtml(project.etapa)}<br><b>Sector:</b> ${escapeHtml(project.sector || '-')}<br><b>Avance:</b> ${Number(project.avance) || 0}%</div><div class="popup-actions"><button class="popup-detail-btn" type="button" data-detail-id="${project.id}">Ver más detalle</button></div>`; }
         function cardHtml(project) { return `<article class="public-project-card" role="button" tabindex="0" aria-label="Ver ${escapeHtml(project.nombre)}" data-id="${project.id}">${sliderHtml(project, 112)}<div class="public-card-body"><span class="tag ${slug(project.estado)}">${escapeHtml(project.estado)}</span><strong class="public-card-title">${escapeHtml(project.nombre)}</strong></div></article>`; }
-        function focus(project) { document.querySelectorAll('.public-project-card').forEach(card => card.classList.toggle('active', String(card.dataset.id) === String(project.id))); }
+        function focus(project) {
+            let activeCard = null;
+            document.querySelectorAll('.public-project-card').forEach(card => {
+                const isActive = String(card.dataset.id) === String(project.id);
+                card.classList.toggle('active', isActive);
+                if (isActive) activeCard = card;
+            });
+            if (activeCard && window.matchMedia('(max-width: 900px)').matches) {
+                activeCard.scrollIntoView({behavior: 'smooth', block: 'nearest', inline: 'center'});
+            }
+        }
         function detailItem(label, value, wide = false) { return `<div class="detail-item${wide ? ' wide' : ''}"><span class="detail-label">${label}</span><span class="detail-value">${escapeHtml(value || '-')}</span></div>`; }
         function openProjectDetail(project) {
             if (!project) return;
@@ -230,9 +242,20 @@ $projectsJson = json_encode($projects, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_S
             });
             markers.set(String(project.id), projectMarkers);
         });
-        if (bounds.length) {
-            map.fitBounds(bounds, {paddingTopLeft: [376, 36], paddingBottomRight: [90, 90], maxZoom: 15});
+        function fitMapToProjects() {
+            if (!bounds.length) return;
+            const isMobile = window.matchMedia('(max-width: 900px)').matches;
+            map.fitBounds(bounds, {
+                paddingTopLeft: isMobile ? [28, 150] : [376, 36],
+                paddingBottomRight: isMobile ? [28, 140] : [90, 90],
+                maxZoom: 15
+            });
         }
+        fitMapToProjects();
+        window.addEventListener('resize', () => {
+            map.invalidateSize();
+            fitMapToProjects();
+        });
         renderProjectList();
         projectSearch.addEventListener('input', renderProjectList);
         projectStatusFilter.addEventListener('change', renderProjectList);
