@@ -65,8 +65,8 @@ $activeStatusesJson = json_encode(array_column($activeStatuses, 'nombre'), JSON_
         body{background:#f8fafc;color:var(--ink);font-family:Inter,"Segoe UI",Arial,sans-serif;overflow:hidden}
         .screen-map{height:100vh;position:relative;width:100vw}
         #publicProjectMap{background:#eef4f8;filter:none}
+        #publicProjectMap .leaflet-tile,#publicProjectMap .leaflet-layer{filter:none!important;opacity:1!important}
         .map-vignette{display:none;inset:0;pointer-events:none;position:absolute;z-index:410}
-        .project-sidebar,.project-detail-drawer,.screen-legend{backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
         .project-sidebar{background:#fff;border:1px solid #dbe7f1;border-top:5px solid var(--primary);border-radius:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;height:calc(100vh - 36px);left:18px;overflow:hidden;position:absolute;top:18px;width:360px;z-index:620}
         .sidebar-head{background:#fff;border-bottom:1px solid #d9e6ef;padding:16px}
         .sidebar-brand{align-items:center;display:flex;gap:10px}
@@ -153,7 +153,6 @@ $activeStatusesJson = json_encode(array_column($activeStatuses, 'nombre'), JSON_
 <body>
     <main class="screen-map">
         <div id="publicProjectMap"></div>
-        <div class="map-vignette" aria-hidden="true"></div>
         <aside class="project-sidebar" id="projectSidebar">
             <div class="sidebar-head">
                 <div class="sidebar-brand">
